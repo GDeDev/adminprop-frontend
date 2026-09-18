@@ -2,7 +2,9 @@
 
 SaaS multi-tenant de gestión inmobiliaria. Monorepo Turborepo.
 
-Leer primero `CLAUDE.md`, `docs/PRD.md` y `specs/fase-01-arquitectura.md`.
+Frontend de Adminprop. El backend vive en otro repo (`adminprop-backend`).
+
+La documentación del proyecto (PRD, specs, sistema de diseño) vive en `../adminprop-repo-files/`, no en este repo. Leer primero `CLAUDE.md`.
 
 ## Estructura
 
@@ -39,6 +41,6 @@ Para una sola app: `npx turbo run dev --filter=@adminprop/backoffice`.
 
 ## Mocks → backend real
 
-Mientras no exista `apps/api`, las pantallas leen de `@adminprop/mocks` (`withLatency()` simula la red). Cuando un módulo tenga su endpoint, su `queryFn` pasa a usar `apiClient` (`src/lib/api-client.ts`) y el mock correspondiente se borra.
+Mientras la API (`adminprop-backend`) no tenga el endpoint, las pantallas leen de `@adminprop/mocks` (`withLatency()` simula la red). Cuando un módulo tenga su endpoint, su `queryFn` pasa a usar `apiClient` (`src/lib/api-client.ts`) y el mock correspondiente se borra.
 
 Decisiones técnicas del scaffold: `docs/DECISIONES_TECNICAS.md`.
