@@ -1,0 +1,10 @@
+{
+  "extends": "@adminprop/typescript-config/react-library.json",
+  "compilerOptions": {
+    "paths": {
+      "@adminprop/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}
