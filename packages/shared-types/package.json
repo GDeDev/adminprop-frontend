@@ -1,0 +1,19 @@
+{
+  "name": "@adminprop/shared-types",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@adminprop/eslint-config": "*",
+    "@adminprop/typescript-config": "*",
+    "eslint": "^9",
+    "typescript": "^5"
+  }
+}
