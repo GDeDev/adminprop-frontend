@@ -1,0 +1,24 @@
+{
+  "name": "@adminprop/mocks",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Fixtures descartables para maquetar el frontend antes de que exista el backend. Se reemplazan por fetch real módulo a módulo.",
+  "scripts": {
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@adminprop/shared-types": "*"
+  },
+  "devDependencies": {
+    "@adminprop/eslint-config": "*",
+    "@adminprop/typescript-config": "*",
+    "eslint": "^9",
+    "typescript": "^5"
+  }
+}

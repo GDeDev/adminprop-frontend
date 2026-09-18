@@ -1,0 +1,125 @@
+import type { Owner } from "@adminprop/shared-types"
+
+import { OWNER_IDS as O, TENANT_ID } from "./ids"
+
+const ts = {
+  createdAt: "2026-06-10T13:00:00.000Z",
+  updatedAt: "2026-06-10T13:00:00.000Z",
+}
+
+export const owners: Owner[] = [
+  {
+    // 3 propiedades con contrato activo → califica para honorario reducido
+    id: O[0],
+    tenantId: TENANT_ID,
+    firstName: "María",
+    lastName: "Fernández",
+    nationalId: "23456789",
+    phone: "+5491145678901",
+    email: "maria.fernandez@example.com",
+    address: "Av. Santa Fe 3200, 5° B, CABA",
+    bankDetails: {
+      cbu: "0170099220000067891234",
+      alias: "MARIA.FERNANDEZ.CASA",
+      bankName: "BBVA",
+      accountHolder: "María Fernández",
+    },
+    notes: "Prefiere contacto por WhatsApp.",
+    portalUsername: "maria.fernandez@example.com",
+    ...ts,
+  },
+  {
+    id: O[1],
+    tenantId: TENANT_ID,
+    firstName: "Jorge",
+    lastName: "Pereyra",
+    nationalId: "17890123",
+    phone: "+5492214567890",
+    email: "jorge.pereyra@example.com",
+    address: "Calle 50 N° 1020, La Plata",
+    bankDetails: {
+      cbu: "0140123401000012345678",
+      alias: "PEREYRA.JORGE.BPBA",
+      bankName: "Banco Provincia",
+      accountHolder: "Jorge Pereyra",
+    },
+    notes: null,
+    portalUsername: null,
+    ...ts,
+  },
+  {
+    id: O[2],
+    tenantId: TENANT_ID,
+    firstName: "Lucía",
+    lastName: "Gómez",
+    nationalId: "30123456",
+    phone: "+5492215551234",
+    email: "lucia.gomez@example.com",
+    address: "Calle 473 N° 2150, City Bell",
+    bankDetails: {
+      cbu: "0720123420000001234567",
+      alias: "LUCIA.GOMEZ.SANTANDER",
+      bankName: "Santander",
+      accountHolder: "Lucía Gómez",
+    },
+    notes: null,
+    portalUsername: null,
+    ...ts,
+  },
+  {
+    id: O[3],
+    tenantId: TENANT_ID,
+    firstName: "Ricardo",
+    lastName: "Sosa",
+    nationalId: "14567890",
+    phone: "+5491156781234",
+    email: "ricardo.sosa@example.com",
+    address: "Av. Rivadavia 5400, CABA",
+    bankDetails: {
+      cbu: "0110599520000012345671",
+      alias: "SOSA.RICARDO.NACION",
+      bankName: "Banco Nación",
+      accountHolder: "Ricardo Sosa",
+    },
+    notes:
+      "Contrato de su depto en Caballito vence pronto — consultar si renueva.",
+    portalUsername: "ricardo.sosa@example.com",
+    ...ts,
+  },
+  {
+    id: O[4],
+    tenantId: TENANT_ID,
+    firstName: "Ana",
+    lastName: "Martínez",
+    nationalId: "27654321",
+    phone: "+5492214448899",
+    email: "ana.martinez@example.com",
+    address: "Calle 1 N° 540, Tolosa",
+    bankDetails: {
+      cbu: "0290012310000098765432",
+      alias: "ANA.MARTINEZ.CIUDAD",
+      bankName: "Banco Ciudad",
+      accountHolder: "Ana Martínez",
+    },
+    notes: null,
+    portalUsername: null,
+    ...ts,
+  },
+  {
+    // Recién dado de alta: sin propiedades, sin datos bancarios ni email
+    // (no puede generar credenciales de portal ni recibir liquidaciones).
+    id: O[5],
+    tenantId: TENANT_ID,
+    firstName: "Carlos",
+    lastName: "Benítez",
+    nationalId: "20987654",
+    phone: "+5491133334444",
+    email: null,
+    address: "Av. Cabildo 2100, CABA",
+    bankDetails: null,
+    notes: "Falta cargar datos bancarios.",
+    portalUsername: null,
+    createdAt: "2026-09-15T15:30:00.000Z",
+    updatedAt: "2026-09-15T15:30:00.000Z",
+  },
+]
