@@ -1,0 +1,3 @@
+{
+  "extends": "@adminprop/typescript-config/base.json"
+}

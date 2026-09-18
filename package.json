@@ -1,0 +1,28 @@
+{
+  "name": "adminprop",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "turbo run format"
+  },
+  "devDependencies": {
+    "@adminprop/eslint-config": "*",
+    "@adminprop/typescript-config": "*",
+    "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.8.0",
+    "turbo": "^2.11.2",
+    "typescript": "^5"
+  },
+  "packageManager": "npm@10.9.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
