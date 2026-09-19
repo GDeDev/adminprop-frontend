@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # El CI no usa Doppler: el build se corre con `next build` directo y una
+  # URL de API descartable (NEXT_PUBLIC_* no es secreto).
+  NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+  TURBO_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Formato, lint, tipos y tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Formato
+        run: npm run format:check
+
+      - name: Lint
+        run: npx turbo run lint
+
+      - name: Tipos
+        run: npx turbo run typecheck
+
+      - name: Tests
+        run: npx turbo run test
+
+  build:
+    name: Build de las apps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      # Los scripts `build` de las apps corren con `doppler run`; acá se
+      # llama a Next directo con el env del workflow.
+      - name: Backoffice
+        run: npm exec -w @adminprop/backoffice -- next build
+
+      - name: Portal
+        run: npm exec -w @adminprop/portal -- next build
+
+  security:
+    name: Vulnerabilidades en dependencias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: npm audit
+        # Solo alta y crítica, igual que el backend.
+        run: npm audit --audit-level=high

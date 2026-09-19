@@ -1,15 +1,17 @@
-import { Fraunces, Inter } from "next/font/google"
+import { Figtree, Outfit } from "next/font/google"
 
-/** Serif clásica para títulos y precios → utilidad `font-serif` / `font-heading`. */
-export const fontSerif = Fraunces({
+// Fuentes del sistema de diseño (ADMINPROP-UI.md, "Setup").
+
+/** Títulos y montos → utilidad `font-display`. */
+export const display = Outfit({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-outfit",
   display: "swap",
 })
 
-/** Sans-serif geométrica para cuerpo e interfaz → utilidad `font-sans`. */
-export const fontSans = Inter({
+/** Cuerpo e interfaz → utilidad `font-sans` (la default del body). */
+export const sans = Figtree({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-figtree",
   display: "swap",
 })

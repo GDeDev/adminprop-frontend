@@ -9,7 +9,8 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": [".next/**", "!.next/cache/**"],
-      "cache": false
+      "cache": false,
+      "env": ["NEXT_PUBLIC_*"]
     },
     "lint": {
       "dependsOn": ["transit"]
@@ -23,6 +24,11 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "test": {
+      "dependsOn": ["transit"],
+      "outputs": []
     }
-  }
+  },
+  "globalEnv": ["NODE_ENV"]
 }

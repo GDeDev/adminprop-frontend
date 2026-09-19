@@ -46,7 +46,7 @@ export function MockDataCheck() {
               <Card key={item.label}>
                 <CardHeader>
                   <CardDescription>{item.label}</CardDescription>
-                  <CardTitle className="font-serif text-3xl text-accent">
+                  <CardTitle className="font-display text-3xl text-accent tabular-nums">
                     {item.value}
                   </CardTitle>
                 </CardHeader>

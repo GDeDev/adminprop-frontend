@@ -5,7 +5,7 @@
   "private": true,
   "description": "Fixtures descartables para maquetar el frontend antes de que exista el backend. Se reemplazan por fetch real módulo a módulo.",
   "scripts": {
-    "lint": "eslint",
+    "lint": "eslint --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },
   "exports": {

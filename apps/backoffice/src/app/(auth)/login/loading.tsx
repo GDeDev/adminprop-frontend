@@ -1,5 +1,5 @@
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 
 export default function Loading() {
-  return <Skeleton className="h-80 w-full rounded-xl bg-white/10" />
+  return <Skeleton className="h-80 w-full rounded-xl bg-sidebar-border" />
 }

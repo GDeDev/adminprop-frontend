@@ -1,12 +1,8 @@
 import * as React from "react"
 import { cn } from "cn"
+import { Construction } from "lucide-react"
 
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@adminprop/ui/components/card"
+import { EmptyState } from "@adminprop/ui/components/empty-state"
 
 /** Placeholder de pantalla todavía no implementada. */
 function ComingSoon({
@@ -23,12 +19,11 @@ function ComingSoon({
       <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
         {title}
       </h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Próximamente</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-      </Card>
+      <EmptyState
+        icon={Construction}
+        title="Próximamente"
+        description={description}
+      />
     </div>
   )
 }

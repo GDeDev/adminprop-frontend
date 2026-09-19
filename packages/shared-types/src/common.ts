@@ -9,8 +9,8 @@ export type IsoDateTime = string
 
 /**
  * Monto monetario como string decimal (ej. "150333.33").
- * Nunca `number`: toda aritmética pasa por el helper de decimal.js
- * (packages/shared-utils/money.ts, Fase 3).
+ * Nunca `number`: la aritmética la hace solo la API (decimal.js); el
+ * frontend recibe el string y lo formatea para mostrar.
  */
 export type Money = string
 
@@ -34,11 +34,35 @@ export interface Paginated<T> {
   limit: number
 }
 
-/** Shape de error estándar de la API (Fase 1, sección 8). */
-export interface ApiError {
-  statusCode: number
-  error: string
+/** Detalle de un error puntual (por campo, en los de validación). */
+export interface ApiErrorDetail {
   message: string
+  /** Regla que falló (ej. "isEmail"). */
+  code?: string
+  field?: string
+}
+
+/**
+ * Cuerpo de error de la API (adminprop-backend, `buildErrorBody`).
+ * Ramificar por `code` (estable), nunca por `message` (texto para mostrar).
+ */
+export interface ApiError {
+  success: false
+  statusCode: number
+  /** Nombre del status HTTP ("Not Found"). */
+  error: string
+  code: string
+  message: string
+  errors: ApiErrorDetail[]
+  /** Para rastrear el request en los logs de la API. */
+  correlationId: string
   timestamp: IsoDateTime
   path: string
+}
+
+/** Sobre de las respuestas OK de la API. */
+export interface ApiSuccess<T> {
+  success: true
+  message: string | null
+  data: T
 }
