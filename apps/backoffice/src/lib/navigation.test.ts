@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest"
 
-import { isActivePath } from "./navigation"
+import { mobileMoreItems, mobileNavItems, navItems } from "./navigation"
 
-describe("isActivePath", () => {
-  it("marca la sección y sus subrutas", () => {
-    expect(isActivePath("/propiedades", "/propiedades")).toBe(true)
-    expect(isActivePath("/propiedades/123", "/propiedades")).toBe(true)
+describe("navegación del backoffice", () => {
+  it("la barra mobile tiene 4 destinos + 'Más' (máximo 5)", () => {
+    expect(mobileNavItems).toHaveLength(4)
   })
 
-  it("no confunde rutas con el mismo prefijo", () => {
-    expect(isActivePath("/propietarios", "/propiedades")).toBe(false)
-    expect(isActivePath("/propiedadesx", "/propiedades")).toBe(false)
+  it("entre la barra y 'Más' están todas las secciones, sin repetir", () => {
+    const mobile = [...mobileNavItems, ...mobileMoreItems].map((i) => i.href)
+    expect(new Set(mobile).size).toBe(mobile.length)
+    expect(mobile.sort()).toEqual(navItems.map((i) => i.href).sort())
   })
 })
