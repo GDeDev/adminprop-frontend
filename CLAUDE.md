@@ -13,4 +13,8 @@ Lineamientos generales del proyecto (fuente única de verdad, no duplicar acá):
 - Desde la Fase 6 cada fase es un vertical slice: primero el backend, después la parte de acá.
 - **Dinero:** el frontend no calcula montos. La API los manda como string y acá solo se formatean.
 - **Tipos del contrato HTTP:** se generan desde el OpenAPI de la API, no se escriben a mano en paralelo al backend.
-- Sistema de diseño: `../adminprop-repo-files/packages-ui-source/` (se integra en `packages/ui` en la Fase 3).
+- **Sistema de diseño:** integrado en `packages/ui` (Fase 3). Reglas: `../adminprop-repo-files/packages-ui-source/ADMINPROP-UI.md`; resumen de uso en el README, sección "UI".
+  - Tokens: `packages/ui/src/styles/adminprop.css` es copia textual del sistema de diseño; no se edita a mano.
+  - Después de un `shadcn add`, `npm test -w @adminprop/ui` (`design-rules.test.ts`) marca lo que hay que ajustar (`hover:bg-accent` → `hover:bg-muted`, etc.).
+  - Diálogos: `ResponsiveDialog` (Drawer en mobile). Navegación: `AppSidebar` + `BottomNav`. Vacíos: `EmptyState`.
+- **Tests:** Vitest (`npm test`). El pre-commit corre Prettier, ESLint (`--max-warnings=0`) y `vitest related`.
