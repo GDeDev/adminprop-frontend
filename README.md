@@ -14,7 +14,8 @@ apps/
   portal/            Next.js — sitio público (SSG) + portales propietario/inquilino. :3002
 packages/
   ui/                Sistema de diseño: shadcn/ui (new-york) + tokens + componentes propios
-  shared-types/      Tipos TS del dominio (PRD sección 5, en inglés)
+  session/           Sesión: token en memoria, cookie httpOnly (route handlers), refresh silencioso, ProtectedRoute
+  shared-types/      Tipos TS: los del contrato HTTP se generan del OpenAPI (src/generated) + los del dominio
   mocks/             Fixtures DESCARTABLES para maquetar sin backend
   eslint-config/     ESLint compartido
   typescript-config/ tsconfig base
@@ -77,6 +78,17 @@ Reglas completas: `../adminprop-repo-files/packages-ui-source/ADMINPROP-UI.md`
 - **Vitrina:** con el backoffice en dev, `http://localhost:3001/design-system`
   muestra todo el sistema, el modo oscuro y un simulador de color por
   inmobiliaria (no existe en producción).
+
+## Sesión y contrato con la API (Fase 4)
+
+- **Tipos del contrato:** `npm run api:types` los regenera desde `../adminprop-backend/openapi.json` (que la API exporta con `npm run openapi:export`). El resultado, `packages/shared-types/src/generated/api.ts`, se commitea y no se edita a mano. Nombres cortos en `packages/shared-types/src/api.ts`.
+- **Login:** del navegador directo a la API (`/auth/login` o `/auth/portal-login`). Después, `useSession().signIn(result)` guarda la sesión.
+- **Refresh token:** en una cookie httpOnly de cada app (`adminprop_bo_rt`, `adminprop_portal_rt`), que manejan los route handlers de `app/api/session`. El JavaScript de la página no lo ve.
+- **Access token:** sólo en memoria. `apiClient` lo manda y, ante un 401, refresca solo y reintenta; si no puede, lleva al login con `?next=`.
+- **Rutas protegidas:** `src/proxy.ts` corta a quien no tiene la cookie; `SessionGate` / `PortalGate` (`ProtectedRoute`) validan la sesión y el rol.
+- **Portal:** su inmobiliaria sale de `PORTAL_TENANT_SLUG` (Doppler, `dev_portal`; en desarrollo, `demo`).
+
+Detalle y decisiones: `docs/tecnica/fase-04.md` y `docs/DECISIONES_TECNICAS.md` (DT-23 a DT-29).
 
 ## Mocks → backend real
 
