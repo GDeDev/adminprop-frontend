@@ -1,4 +1,4 @@
-import type { Property } from "@adminprop/shared-types"
+import type { Timestamps, Uuid } from "@adminprop/shared-types"
 
 import {
   AMENITY_IDS as A,
@@ -22,7 +22,25 @@ const ts = {
   updatedAt: "2026-09-01T12:00:00.000Z",
 }
 
-export const properties: Property[] = [
+/**
+ * Forma vieja de propiedad, anterior a la API real (Fase 6). La siguen usando
+ * las pantallas que todavía no están conectadas (portal público, Fase 22).
+ */
+export interface MockProperty extends Timestamps {
+  id: Uuid
+  tenantId: Uuid
+  address: string
+  locationId: Uuid | null
+  propertyTypeId: Uuid
+  status: "available" | "rented" | "under_maintenance"
+  ownerId: Uuid | null
+  renterId: Uuid | null
+  amenityIds: Uuid[]
+  notes: string | null
+  photos: string[]
+}
+
+export const properties: MockProperty[] = [
   {
     id: P[0],
     tenantId: TENANT_ID,
