@@ -17,6 +17,13 @@ const badgeVariants = cva(
           "border-border text-foreground [a&]:hover:bg-muted [a&]:hover:text-foreground",
         ghost: "[a&]:hover:bg-muted [a&]:hover:text-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
+        // Estados del dominio (ADMINPROP-UI.md, "Estados del dominio → tokens").
+        // Un estado nuevo se agrega acá, nunca con clases sueltas en el uso.
+        disponible: "bg-success-soft text-success",
+        alquilada: "bg-info-soft text-info",
+        mantenimiento: "bg-warning-soft text-warning",
+        mora: "bg-destructive-soft text-destructive",
+        borrador: "bg-muted text-muted-foreground",
       },
     },
     defaultVariants: {
