@@ -10,7 +10,7 @@
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": [".next/**", "!.next/cache/**"],
       "cache": false,
-      "env": ["NEXT_PUBLIC_*"]
+      "env": ["NEXT_PUBLIC_*", "PORTAL_TENANT_SLUG"]
     },
     "lint": {
       "dependsOn": ["transit"]

@@ -27,8 +27,8 @@ export interface SessionContextValue {
   ensure: () => Promise<void>
   /** Después de un login exitoso contra la API: guarda la sesión. */
   signIn: (result: AuthResult) => Promise<void>
-  /** Cierra la sesión y lleva al login. */
-  signOut: () => Promise<void>
+  /** Cierra la sesión y lleva al login (o a `redirectTo`). */
+  signOut: (redirectTo?: string) => Promise<void>
   /** Para refrescar los datos del usuario después de editarlos. */
   setUser: (user: User) => void
 }
@@ -103,15 +103,18 @@ export function SessionProvider({
     [sessionPath, setStatus]
   )
 
-  const signOut = React.useCallback(async () => {
-    await endSession(sessionPath)
-    onSignOut?.()
-    setUser(null)
-    setStatus("unauthenticated")
-    // Navegación completa a propósito: no queda nada de la sesión anterior en
-    // memoria (cachés, estado de formularios) para el próximo que entre.
-    window.location.assign(loginPath)
-  }, [loginPath, onSignOut, sessionPath, setStatus])
+  const signOut = React.useCallback(
+    async (redirectTo: string = loginPath) => {
+      await endSession(sessionPath)
+      onSignOut?.()
+      setUser(null)
+      setStatus("unauthenticated")
+      // Navegación completa a propósito: no queda nada de la sesión anterior en
+      // memoria (cachés, estado de formularios) para el próximo que entre.
+      window.location.assign(redirectTo)
+    },
+    [loginPath, onSignOut, sessionPath, setStatus]
+  )
 
   const value = React.useMemo<SessionContextValue>(
     () => ({ status, user, ensure, signIn, signOut, setUser }),
