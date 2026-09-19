@@ -22,7 +22,7 @@ function BrandMark({ className }: { className?: string }) {
     <Link
       href="/dashboard"
       className={cn(
-        "font-serif text-xl font-semibold tracking-tight",
+        "font-display text-xl font-semibold tracking-tight",
         className
       )}
     >
@@ -38,11 +38,11 @@ function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-nav-muted transition-colors hover:bg-white/5 hover:text-nav-foreground",
-        active && "bg-white/10 text-nav-foreground"
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-muted transition-colors hover:bg-white/5 hover:text-sidebar-foreground",
+        active && "bg-white/10 text-sidebar-foreground"
       )}
     >
-      <Icon className={cn("size-4", active && "text-nav-active")} />
+      <Icon className={cn("size-4", active && "text-accent")} />
       {item.label}
     </Link>
   )
@@ -55,11 +55,11 @@ function BottomNavLink({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex flex-col items-center justify-center gap-1 text-[0.7rem] font-medium text-nav-muted",
-        active && "text-nav-foreground"
+        "flex flex-col items-center justify-center gap-1 text-[0.7rem] font-medium text-sidebar-muted",
+        active && "text-sidebar-foreground"
       )}
     >
-      <Icon className={cn("size-5", active && "text-nav-active")} />
+      <Icon className={cn("size-5", active && "text-accent")} />
       {item.label}
     </Link>
   )
@@ -74,11 +74,11 @@ function MoreSheet({ pathname }: { pathname: string }) {
     <BottomSheet open={open} onOpenChange={setOpen}>
       <BottomSheetTrigger
         className={cn(
-          "flex flex-col items-center justify-center gap-1 text-[0.7rem] font-medium text-nav-muted",
-          active && "text-nav-foreground"
+          "flex flex-col items-center justify-center gap-1 text-[0.7rem] font-medium text-sidebar-muted",
+          active && "text-sidebar-foreground"
         )}
       >
-        <MoreHorizontal className={cn("size-5", active && "text-nav-active")} />
+        <MoreHorizontal className={cn("size-5", active && "text-accent")} />
         Más
       </BottomSheetTrigger>
       <BottomSheetContent>
@@ -117,7 +117,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-svh md:grid md:grid-cols-[15rem_1fr]">
       {/* Desktop: sidebar */}
-      <aside className="sticky top-0 hidden h-svh flex-col gap-8 bg-nav px-4 py-6 text-nav-foreground md:flex">
+      <aside className="sticky top-0 hidden h-svh flex-col gap-8 bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
         <BrandMark className="px-3" />
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => (
@@ -132,7 +132,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-h-svh min-w-0 flex-col">
         {/* Mobile: barra superior */}
-        <header className="sticky top-0 z-30 flex h-14 items-center bg-nav px-4 pt-[env(safe-area-inset-top)] text-nav-foreground md:hidden">
+        <header className="sticky top-0 z-30 flex h-14 items-center bg-sidebar px-4 pt-[env(safe-area-inset-top)] text-sidebar-foreground md:hidden">
           <BrandMark />
         </header>
 
@@ -144,7 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile: navegación inferior */}
       <nav
         aria-label="Navegación principal"
-        className="fixed inset-x-0 bottom-0 z-40 grid h-16 grid-cols-5 bg-nav pb-[env(safe-area-inset-bottom)] text-nav-foreground md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid h-16 grid-cols-5 bg-sidebar pb-[env(safe-area-inset-bottom)] text-sidebar-foreground md:hidden"
       >
         {navItems
           .filter((item) => item.primaryOnMobile)

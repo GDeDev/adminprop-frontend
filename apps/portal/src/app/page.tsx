@@ -44,7 +44,7 @@ export default function HomePage() {
                       {property.propertyType}
                       {property.neighborhood && ` · ${property.neighborhood}`}
                     </CardDescription>
-                    <CardTitle className="font-serif text-lg">
+                    <CardTitle className="font-display text-lg">
                       {property.address}
                     </CardTitle>
                     {property.amenities.length > 0 && (

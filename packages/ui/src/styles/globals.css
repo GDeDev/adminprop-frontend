@@ -1,21 +1,23 @@
-@import "tailwindcss";
+/*
+ * Punto de entrada de estilos de las dos apps.
+ *
+ * Los tokens viven en ./adminprop.css, copia textual de
+ * adminprop-repo-files/packages-ui-source/globals.css: no se edita acá. Si el
+ * sistema de diseño cambia, se vuelve a copiar el archivo entero.
+ * Este archivo solo agrega lo que necesita el monorepo.
+ */
+@import "./adminprop.css";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "./theme.css";
 
+/* Tailwind escanea las apps y el paquete de UI. */
 @source "../../../../apps/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background font-sans text-foreground antialiased;
-  }
+  /* Outfit para títulos; Figtree (font-sans) para el resto. */
   h1,
   h2,
   h3 {
-    @apply font-heading;
+    @apply font-display;
   }
 }

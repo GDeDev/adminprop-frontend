@@ -73,15 +73,15 @@ export function PortalShell({
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="sticky top-0 z-30 bg-nav pt-[env(safe-area-inset-top)] text-nav-foreground">
+      <header className="sticky top-0 z-30 bg-sidebar pt-[env(safe-area-inset-top)] text-sidebar-foreground">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-6 px-4">
           <Link
             href="/"
-            className="font-serif text-xl font-semibold tracking-tight"
+            className="font-display text-xl font-semibold tracking-tight"
           >
             Adminprop
           </Link>
-          <span className="text-sm text-nav-muted">{areaLabel}</span>
+          <span className="text-sm text-sidebar-muted">{areaLabel}</span>
           <nav className="ml-auto hidden items-center gap-1 md:flex">
             {items.map((item) => {
               const active = isActivePath(pathname, item.href)
@@ -91,8 +91,8 @@ export function PortalShell({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-lg px-3 py-1.5 text-sm font-medium text-nav-muted hover:text-nav-foreground",
-                    active && "bg-white/10 text-nav-foreground"
+                    "rounded-lg px-3 py-1.5 text-sm font-medium text-sidebar-muted hover:text-sidebar-foreground",
+                    active && "bg-white/10 text-sidebar-foreground"
                   )}
                 >
                   {item.label}
@@ -109,7 +109,7 @@ export function PortalShell({
 
       <nav
         aria-label="Navegación del portal"
-        className="fixed inset-x-0 bottom-0 z-40 grid h-16 bg-nav pb-[env(safe-area-inset-bottom)] text-nav-foreground md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid h-16 bg-sidebar pb-[env(safe-area-inset-bottom)] text-sidebar-foreground md:hidden"
         style={{
           gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))`,
         }}
@@ -123,11 +123,11 @@ export function PortalShell({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 text-[0.7rem] font-medium text-nav-muted",
-                active && "text-nav-foreground"
+                "flex flex-col items-center justify-center gap-1 text-[0.7rem] font-medium text-sidebar-muted",
+                active && "text-sidebar-foreground"
               )}
             >
-              <Icon className={cn("size-5", active && "text-nav-active")} />
+              <Icon className={cn("size-5", active && "text-accent")} />
               {item.label}
             </Link>
           )

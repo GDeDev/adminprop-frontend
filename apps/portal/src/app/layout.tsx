@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next"
 import "@adminprop/ui/globals.css"
 import { cn } from "@adminprop/ui/lib/utils"
 
-import { fontSans, fontSerif } from "@/lib/fonts"
+import { display, sans } from "@/lib/fonts"
 
 import { Providers } from "./providers"
 
@@ -26,7 +26,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={cn(fontSans.variable, fontSerif.variable)}>
+    <html lang="es" className={cn(display.variable, sans.variable)}>
       <body>
         <Providers>{children}</Providers>
       </body>
