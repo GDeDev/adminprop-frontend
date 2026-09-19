@@ -8,6 +8,7 @@ export {
   safeNextPath,
   type ApiClientOptions,
 } from "./api-client"
+export { apiErrorCode, apiErrorMessage, apiFieldErrors } from "./api-error"
 export { ProtectedRoute, type ProtectedRouteProps } from "./protected-route"
 export {
   DEFAULT_SESSION_PATH,

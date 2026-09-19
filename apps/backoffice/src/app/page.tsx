@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
 export default function Home() {
-  // TODO(Fase 4): redirigir a /login si no hay sesión.
+  // Sin sesión, el proxy ya mandó al login antes de llegar acá.
   redirect("/dashboard")
 }
