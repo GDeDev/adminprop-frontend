@@ -20,6 +20,19 @@ packages/
   typescript-config/ tsconfig base
 ```
 
+## Variables de entorno
+
+No hay archivos `.env`. Las variables salen de Doppler (proyecto `admin-prop`):
+cada app tiene su config (`dev_backoffice`, `dev_portal`), vinculada por carpeta
+con `doppler setup` dentro de `apps/<app>`. Los scripts `dev`, `build` y `start`
+de cada app ya corren dentro de `doppler run --`.
+
+- `NEXT_PUBLIC_*` sólo para valores no sensibles: terminan en el bundle del navegador.
+- Los secretos reales, sólo en Server Actions o Route Handlers.
+- `build` no se cachea en turbo: las variables entran por Doppler dentro del
+  script y turbo no las ve, así que un cache podría servir un bundle con una
+  `NEXT_PUBLIC_API_URL` vieja.
+
 ## Comandos
 
 ```bash
