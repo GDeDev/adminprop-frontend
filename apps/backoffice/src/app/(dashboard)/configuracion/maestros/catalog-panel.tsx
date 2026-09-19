@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Pencil, Plus, Tag } from "lucide-react"
-import { DynamicIcon, iconNames, type IconName } from "lucide-react/dynamic"
+import { Pencil, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
@@ -13,6 +12,7 @@ import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Switch } from "@adminprop/ui/components/switch"
 
+import { AmenityIcon } from "@/components/amenity-icon"
 import { CATALOGS } from "@/lib/master-data"
 import {
   useCatalog,
@@ -21,22 +21,6 @@ import {
 } from "@/lib/master-data-api"
 
 import { NameDialog } from "./name-dialog"
-
-const KNOWN_ICONS = new Set<string>(iconNames)
-
-/** Ícono de una amenity; uno genérico si no tiene o no existe en lucide. */
-export function AmenityIcon({ name }: { name: string | null }) {
-  if (name && KNOWN_ICONS.has(name)) {
-    return (
-      <DynamicIcon
-        name={name as IconName}
-        aria-hidden
-        className="size-4 text-muted-foreground"
-      />
-    )
-  }
-  return <Tag aria-hidden className="size-4 text-muted-foreground" />
-}
 
 /**
  * Un maestro plano: listado con toggle de activo y alta rápida (spec Fase 5,
