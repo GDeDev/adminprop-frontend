@@ -7,7 +7,7 @@
     "dev": "doppler run -- next dev --port 3001",
     "build": "doppler run -- next build",
     "start": "doppler run -- next start --port 3001",
-    "lint": "eslint",
+    "lint": "eslint --max-warnings=0",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",

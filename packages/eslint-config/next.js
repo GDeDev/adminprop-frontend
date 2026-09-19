@@ -34,6 +34,8 @@ export const nextJsConfig = [
     rules: {
       ...pluginNext.configs.recommended.rules,
       ...pluginNext.configs["core-web-vitals"].rules,
+      // Solo App Router: la regla busca un directorio pages/ que no existe.
+      "@next/next/no-html-link-for-pages": "off",
     },
   },
   {
