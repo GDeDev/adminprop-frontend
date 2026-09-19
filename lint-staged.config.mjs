@@ -8,7 +8,12 @@
 import path from "node:path"
 
 /** Workspaces con Vitest. */
-const TEST_WORKSPACES = ["apps/backoffice", "apps/portal", "packages/ui"]
+const TEST_WORKSPACES = [
+  "apps/backoffice",
+  "apps/portal",
+  "packages/ui",
+  "packages/session",
+]
 
 const quote = (files) => files.map((f) => JSON.stringify(f)).join(" ")
 const rel = (file) => path.relative(process.cwd(), file).replaceAll("\\", "/")
