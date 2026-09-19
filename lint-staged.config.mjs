@@ -18,7 +18,9 @@ export default {
     const commands = [
       `prettier --write ${quote(files)}`,
       // Cada workspace tiene su eslint.config.js: se busca desde el archivo.
-      `eslint --flag v10_config_lookup_from_file --fix --max-warnings=0 ${quote(files)}`,
+      // --no-warn-ignored: un archivo ignorado a propósito (los tipos
+      // generados) no cuenta como warning.
+      `eslint --flag v10_config_lookup_from_file --fix --max-warnings=0 --no-warn-ignored ${quote(files)}`,
     ]
 
     // Tests relacionados: los del workspace tocado y, si el cambio está en

@@ -27,13 +27,6 @@ export interface Timestamps {
   updatedAt: IsoDateTime
 }
 
-export interface Paginated<T> {
-  items: T[]
-  total: number
-  page: number
-  limit: number
-}
-
 /** Detalle de un error puntual (por campo, en los de validación). */
 export interface ApiErrorDetail {
   message: string

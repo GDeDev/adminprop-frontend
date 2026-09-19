@@ -11,7 +11,8 @@
     "test": "turbo run test",
     "prepare": "husky",
     "format:check": "prettier --check .",
-    "format:write": "prettier --write ."
+    "format:write": "prettier --write .",
+    "api:types": "npm run api:types -w @adminprop/shared-types"
   },
   "devDependencies": {
     "@adminprop/eslint-config": "*",
