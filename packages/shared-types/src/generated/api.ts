@@ -870,6 +870,109 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/owners": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar, con búsqueda por nombre o DNI
+     * @description Cada propietario trae sus propiedades y si aplica el honorario reducido. El filtro "con deuda" llega con la Fase 11.
+     */
+    get: operations["OwnersController_list_api/v1"]
+    put?: never
+    /** Alta */
+    post: operations["OwnersController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/owners/check": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Chequear DNI y CBU mientras se completa el formulario
+     * @description El DNI repetido bloquea el alta; el CBU repetido sólo se advierte.
+     */
+    get: operations["OwnersController_check_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/owners/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Ficha completa, con sus propiedades */
+    get: operations["OwnersController_findOne_api/v1"]
+    put?: never
+    post?: never
+    /**
+     * Eliminar (borrado lógico, sólo admin)
+     * @description Con propiedades asignadas no se puede: 409.
+     */
+    delete: operations["OwnersController_remove_api/v1"]
+    options?: never
+    head?: never
+    /** Editar los datos personales */
+    patch: operations["OwnersController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/owners/{id}/bank-account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Cambiar la cuenta bancaria
+     * @description Reemplaza la cuenta entera. Queda en la auditoría como un cambio aparte.
+     */
+    patch: operations["OwnersController_updateBankAccount_api/v1"]
+    trace?: never
+  }
+  "/api/v1/owners/{id}/portal-credentials": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Generar (o regenerar) el acceso al portal
+     * @description Devuelve la contraseña una sola vez. Regenerarla invalida la anterior.
+     */
+    post: operations["OwnersController_issuePortalCredentials_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/examples": {
     parameters: {
       query?: never
@@ -1401,6 +1504,10 @@ export interface components {
       /** @example Palermo Soho */
       name: string
     }
+    OwnerRefDto: {
+      id: string
+      fullName: string
+    }
     LocationRefDto: {
       id: string
       name: string
@@ -1424,6 +1531,7 @@ export interface components {
       /** @enum {string} */
       status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
       ownerId: string | null
+      owner: components["schemas"]["OwnerRefDto"] | null
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
       mainPhotoUrl: string | null
@@ -1451,6 +1559,7 @@ export interface components {
       /** @enum {string} */
       status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
       ownerId: string | null
+      owner: components["schemas"]["OwnerRefDto"] | null
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
       mainPhotoUrl: string | null
@@ -1472,7 +1581,7 @@ export interface components {
       locationId: string
       /** @description Maestro de tipos de propiedad */
       propertyTypeId: string
-      /** @description Propietario (Fase 7). Se puede asignar después. */
+      /** @description Propietario. Se puede asignar después. */
       ownerId?: string | null
       /** @default [] */
       amenityIds: string[]
@@ -1486,7 +1595,7 @@ export interface components {
       locationId?: string
       /** @description Maestro de tipos de propiedad */
       propertyTypeId?: string
-      /** @description Propietario (Fase 7). Se puede asignar después. */
+      /** @description Propietario. Se puede asignar después. */
       ownerId?: string | null
       /** @default [] */
       amenityIds: string[]
@@ -1499,6 +1608,117 @@ export interface components {
        * @enum {string}
        */
       status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
+    }
+    OwnerSummaryDto: {
+      id: string
+      firstName: string
+      lastName: string
+      fullName: string
+      nationalId: string
+      phone: string | null
+      email: string | null
+      /** @description Propiedades a cargo, en cualquier estado */
+      propertyCount: number
+      /** @description Las que cuentan para el honorario reducido. Hasta la Fase 9, las alquiladas. */
+      activePropertyCount: number
+      /** @description Honorario reducido (RN-07), calculado */
+      reducedFee: boolean
+      hasPortalAccess: boolean
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    OwnerDataCheckDto: {
+      nationalIdTakenBy: components["schemas"]["OwnerRefDto"] | null
+      cbuSharedWith: components["schemas"]["OwnerRefDto"][]
+    }
+    BankAccountViewDto: {
+      cbu: string | null
+      alias: string | null
+      bankName: string | null
+      holder: string | null
+    }
+    OwnerPropertyDto: {
+      id: string
+      address: string
+      /** @enum {string} */
+      status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
+      mainPhotoUrl: string | null
+    }
+    OwnerDetailDto: {
+      id: string
+      firstName: string
+      lastName: string
+      fullName: string
+      nationalId: string
+      phone: string | null
+      email: string | null
+      /** @description Propiedades a cargo, en cualquier estado */
+      propertyCount: number
+      /** @description Las que cuentan para el honorario reducido. Hasta la Fase 9, las alquiladas. */
+      activePropertyCount: number
+      /** @description Honorario reducido (RN-07), calculado */
+      reducedFee: boolean
+      hasPortalAccess: boolean
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      address: string | null
+      notes: string | null
+      bankAccount: components["schemas"]["BankAccountViewDto"]
+      properties: components["schemas"]["OwnerPropertyDto"][]
+    }
+    BankAccountDto: {
+      /**
+       * @description 22 dígitos. Se validan los dígitos verificadores.
+       * @example 0110599552000000123456
+       */
+      cbu?: string | null
+      alias?: string | null
+      bankName?: string | null
+      holder?: string | null
+    }
+    CreateOwnerDto: {
+      /** @example Juan */
+      firstName: string
+      /** @example Pérez */
+      lastName: string
+      /**
+       * @description DNI o CUIT. Se aceptan puntos y guiones; se guarda sólo en dígitos.
+       * @example 20123456
+       */
+      nationalId: string
+      phone?: string | null
+      /** @description Hace falta para generarle acceso al portal. */
+      email?: string | null
+      address?: string | null
+      notes?: string | null
+      bankAccount?: components["schemas"]["BankAccountDto"]
+    }
+    UpdateOwnerDto: {
+      /** @example Juan */
+      firstName?: string
+      /** @example Pérez */
+      lastName?: string
+      /**
+       * @description DNI o CUIT. Se aceptan puntos y guiones; se guarda sólo en dígitos.
+       * @example 20123456
+       */
+      nationalId?: string
+      phone?: string | null
+      /** @description Hace falta para generarle acceso al portal. */
+      email?: string | null
+      address?: string | null
+      notes?: string | null
+    }
+    PortalCredentialsDto: {
+      userId: string
+      /** @description Usuario del portal */
+      email: string
+      /** @description Se muestra una sola vez: no se puede recuperar */
+      password: string
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -3965,6 +4185,340 @@ export interface operations {
       }
       /** @description Rol insuficiente */
       403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        /** @description Parte del nombre, del apellido o del DNI */
+        search?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Propietarios de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["OwnerSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateOwnerDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerDetailDto"]
+        }
+      }
+      /** @description DNI o CBU inválido */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay un propietario con ese DNI */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_check_api/v1": {
+    parameters: {
+      query?: {
+        nationalId?: string
+        cbu?: string
+        /** @description En una edición, el propio propietario */
+        excludeId?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerDataCheckDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOwnerDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_updateBankAccount_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BankAccountDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerDetailDto"]
+        }
+      }
+      /** @description CBU inválido */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "OwnersController_issuePortalCredentials_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalCredentialsDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Otro acceso del portal ya usa ese email */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El propietario no tiene email */
+      422: {
         headers: {
           [name: string]: unknown
         }

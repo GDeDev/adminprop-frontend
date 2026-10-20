@@ -260,6 +260,24 @@ Detalle en [`tecnica/fase-03.md`](tecnica/fase-03.md).
 
 ---
 
+## Fase 7 — Propietarios
+
+### DT-38 — Alta y edición en una pantalla, no en wizard
+
+El wizard de propiedades (DT-35) se justifica por las fotos y el borrador. El propietario son pocos campos: una sola pantalla con el formulario, igual de usable en mobile. Sin borrador en localStorage.
+
+### DT-39 — El chequeo en vivo es un aviso, salvo el DNI tomado
+
+`GET /owners/check` se consulta con debounce (300 ms) cuando el DNI tiene entre 7 y 11 dígitos o el CBU 22. Un DNI tomado bloquea el envío y muestra link a esa ficha (es la regla del backend, D-41, anticipada). Un CBU compartido sólo avisa (D-40). En la edición se excluye al propio propietario con `excludeId`.
+
+### DT-40 — La cuenta bancaria sólo se edita desde la ficha
+
+En el alta viaja con el resto (un solo paso). Después, el formulario de edición no la muestra: se cambia desde la ficha con su propio diálogo, que pega a `PATCH /owners/:id/bank-account`. Así el cambio queda como un registro propio en la auditoría (D-40) y el usuario lo hace a propósito, no de paso.
+
+### DT-41 — Selector de propietario con búsqueda contra la API
+
+`OwnerSelect` (Popover + Command con `shouldFilter={false}`) busca por nombre o DNI con el mismo hook del listado, de a 20, con "Ver más". No se cargan todos los propietarios como hacen los maestros (DT-31): una inmobiliaria puede tener cientos. El nombre del elegido se recuerda en el componente; si el valor viene de afuera (edición), la ficha lo pasa como `selectedLabel`.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.

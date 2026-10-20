@@ -1,4 +1,4 @@
-import type { Owner } from "@adminprop/shared-types"
+import type { MockOwner as Owner } from "./owner.type"
 
 import { OWNER_IDS as O, TENANT_ID } from "./ids"
 

@@ -1,35 +1,20 @@
-import type { Timestamps, Uuid } from "./common"
+import type { ApiSchemas } from "./api"
 
-export interface BankDetails {
-  /** CBU de 22 dígitos. */
-  cbu: string
-  alias: string
-  bankName: string
-  accountHolder: string
-}
+/** Propietarios (PRD 5.2, Fase 7), tal como los devuelve la API. */
 
-/** Propietario (PRD 5.2, Fase 7). */
-export interface Owner extends Timestamps {
-  id: Uuid
-  tenantId: Uuid
-  firstName: string
-  lastName: string
-  /** Único por tenant. */
-  nationalId: string
-  phone: string
-  email: string | null
-  address: string
-  bankDetails: BankDetails | null
-  notes: string | null
-  /** Usuario de portal (null si todavía no se generaron credenciales). */
-  portalUsername: string | null
-}
+/** Una fila del listado: cantidad de propiedades y honorario reducido ya calculados. */
+export type OwnerSummary = ApiSchemas["OwnerSummaryDto"]
+/** La ficha: además dirección, notas, cuenta bancaria y sus propiedades. */
+export type OwnerDetail = ApiSchemas["OwnerDetailDto"]
+export type OwnerProperty = ApiSchemas["OwnerPropertyDto"]
+export type OwnerRef = ApiSchemas["OwnerRefDto"]
+export type BankAccount = ApiSchemas["BankAccountViewDto"]
 
-/**
- * Campos derivados que la API expone en GET /owners (calculados, no
- * almacenados — Fase 7, RN-07).
- */
-export interface OwnerSummary extends Owner {
-  activePropertiesCount: number
-  qualifiesForReducedFee: boolean
-}
+export type CreateOwnerRequest = ApiSchemas["CreateOwnerDto"]
+export type UpdateOwnerRequest = ApiSchemas["UpdateOwnerDto"]
+export type BankAccountRequest = ApiSchemas["BankAccountDto"]
+
+/** `GET /owners/check`: quién tiene ese DNI y quién comparte ese CBU. */
+export type OwnerDataCheck = ApiSchemas["OwnerDataCheckDto"]
+/** `POST /owners/:id/portal-credentials`: la contraseña viene una sola vez. */
+export type PortalCredentials = ApiSchemas["PortalCredentialsDto"]
