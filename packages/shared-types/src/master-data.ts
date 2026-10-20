@@ -1,39 +1,24 @@
-import type { Uuid } from "./common"
+import type { ApiSchemas } from "./api"
 
-/** Maestros (PRD 5.8, Fase 5). Globales en el MVP: sin tenantId. */
+/**
+ * Maestros (PRD 5.8, Fase 5), tal como los devuelve la API. Son de cada
+ * inmobiliaria (D-26 del backend): la API filtra por la del usuario.
+ */
 
-export type LocationLevel = "country" | "province" | "city" | "neighborhood"
+/** Un ítem de los maestros planos: tipos de propiedad, de operación, de servicio y amenities. */
+export type CatalogItem = ApiSchemas["CatalogItemDto"]
 
-export interface Location {
-  id: Uuid
-  level: LocationLevel
-  name: string
-  parentId: Uuid | null
-  isActive: boolean
-}
+export type PropertyType = CatalogItem
+export type OperationType = CatalogItem
+export type ServiceType = CatalogItem
+/** `icon`: nombre de ícono de lucide, o null. */
+export type Amenity = CatalogItem
 
-export interface PropertyType {
-  id: Uuid
-  name: string
-  isActive: boolean
-}
+/** Segmento de la URL de cada maestro plano (`/api/v1/<catalog>`). */
+export type CatalogKey =
+  "property-types" | "amenities" | "operation-types" | "service-types"
 
-export interface Amenity {
-  id: Uuid
-  name: string
-  /** Identificador de ícono para la UI (nullable). */
-  icon: string | null
-  isActive: boolean
-}
-
-export interface OperationType {
-  id: Uuid
-  name: string
-  isActive: boolean
-}
-
-export interface ServiceType {
-  id: Uuid
-  name: string
-  isActive: boolean
-}
+export type Location = ApiSchemas["LocationDto"]
+export type LocationLevel = Location["level"]
+/** Un nodo de `GET /locations/tree`. */
+export type LocationNode = ApiSchemas["LocationNodeDto"]

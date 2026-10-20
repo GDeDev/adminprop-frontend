@@ -213,6 +213,30 @@ Detalle en [`tecnica/fase-03.md`](tecnica/fase-03.md).
 
 ---
 
+## Fase 5 — Maestros
+
+> También **sin supervisión**, en una rama encadenada sobre la de la Fase 4.
+
+### DT-30 — `<MasterDataSelect>` vive en el backoffice
+
+- **Decisión:** el selector reutilizable (spec 6) está en `apps/backoffice/src/components/master-data-select.tsx`, no en `packages/ui`. Necesita el cliente HTTP y React Query de la app; `packages/ui` es sólo presentación y no conoce la API.
+- Único (Select) o múltiple (`multiple`, Popover con checkboxes). Ubicaciones con `level` y `parentId`: una cascada son tres selectores encadenados.
+- Pide también los desactivados, pero sólo muestra uno si ya estaba elegido, marcado "(desactivado)" y sin poder volver a elegirlo.
+
+### DT-31 — Maestros cacheados 5 minutos
+
+- Son listas que cambian poco: React Query las cachea 5 minutos, y cualquier alta, edición o (des)activación invalida todo lo de maestros, así los selectores de otras pantallas se enteran.
+
+### DT-32 — Íconos de amenities con `lucide-react/dynamic`
+
+- La API guarda el nombre del ícono de lucide (`waves`, `car`). El front lo muestra con `DynamicIcon`, que carga cada ícono a demanda, en lugar de importar los ~1.500 íconos. Un nombre desconocido muestra uno genérico.
+
+### DT-33 — La pantalla de maestros la ve todo el staff
+
+- Los empleados la ven (son los valores que eligen en las altas); sólo un admin ve los controles para cambiarla, igual que en la API.
+
+---
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
