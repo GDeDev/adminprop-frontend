@@ -296,6 +296,36 @@ La API devuelve `paymentStatus: null` y acepta el filtro sin aplicarlo (D-46). E
 
 El de la Fase 7 era de propietarios. Ahora `components/portal-credentials-dialog.tsx` recibe la persona y la mutación; propietarios e inquilinos lo usan igual. `LoadMore` también pasó a `components/` (propiedades conserva su copia de la Fase 6).
 
+## Fase 9 — Contratos
+
+### DT-46 — Wizard de 5 pasos: el de servicios va en la Fase 10
+
+La spec (5.3) pide 6 pasos, con "servicios heredados de la propiedad" en el quinto. La API no recibe servicios en el alta (D-59: viven en `property_services` desde la Fase 10). El wizard tiene 5 pasos (propiedad, inquilino y garante, condiciones, caución, fechas y PDF) y en el último avisa que los servicios se cargan en la próxima etapa. Cuando exista el endpoint, se agrega el paso sin cambiar los otros.
+
+### DT-47 — El selector de propiedad deja afuera las que ya tienen contrato activo
+
+La spec dice "propiedad (solo `disponible`)". La regla real de la API es "sin contrato activo" (RN-04): una propiedad en mantenimiento sin contrato, o marcada alquilada a mano, puede firmar. `PropertySelect` y `RenterSelect` filtran con `activeContractId === null` sobre lo que devuelve la búsqueda (la API no tiene ese filtro; de a 20 resultados alcanza). El propietario no se elige: sale de la propiedad (D-58) y se muestra sólo lectura; sin propietario no se pasa del paso 1.
+
+### DT-48 — La renovación reutiliza el wizard
+
+`POST /contracts/:id/renew` recibe los mismos campos que el alta (menos la propiedad). En vez de otra pantalla, `ContractForm` acepta `original`: precarga todo, fija la propiedad, pone el alquiler inicial igual al vigente y el inicio al día siguiente del fin, y manda `renew`. Sin borrador en `localStorage` (se parte del contrato, no de cero).
+
+### DT-49 — La vista previa de la rescisión es una query
+
+`useTerminationPreview(id, notifiedAt)` pega a `GET /contracts/:id/termination-preview` cada vez que la fecha está completa (`enabled` sólo con `AAAA-MM-DD`, sin reintentos). El diálogo muestra el desglose (alquiler vigente, meses y días, alquiler futuro, multa) y el botón "Confirmar rescisión" sólo se habilita con una vista previa cargada: el usuario siempre ve el número antes de confirmar (spec 5.4). Un 400 de la API (fecha fuera del contrato) se muestra en el mismo lugar.
+
+### DT-50 — Badges del contrato sobre las variantes existentes
+
+`ACTIVE` vigente → `disponible` (verde), `expiringSoon` → `mantenimiento` (amarillo, "Vence pronto"), `expired` → `mora` (rojo, "Vencido"), `TERMINATED` → `mora` ("Rescindido"), `FINISHED` → `borrador` (gris). "Caución vencida" es un `outline` aparte, al lado del estado. Las condiciones (`expiringSoon`, `expired`, `suretyExpired`) las calcula la API con los días de aviso del tenant; el front no compara fechas para eso. La póliza sí tiene su propio badge en la ficha (`policyExpiryMeta`, 30 días de aviso) porque la API sólo dice si venció.
+
+### DT-51 — Dinero: sólo formato, en un helper
+
+`formatMoney(amount, currency)` usa `Intl.NumberFormat("es-AR", { style: "currency" })` sobre el string de la API y nada más (DT-11). Los montos que escribe el usuario se normalizan como texto (`normalizeAmount`: "480.000,50" → "480000.50") sin convertir a número. El único `Number()` es el que `Intl` necesita para formatear.
+
+### DT-52 — Fechas compartidas en `lib/dates.ts`
+
+`formatDate` salió de `lib/renters.ts` porque contratos la usa en todos lados. Las cuentas de días (badge de póliza, "en N días", inicio de la renovación) se hacen en UTC a partir del string `AAAA-MM-DD`: sin `new Date("2026-03-01")` local, que en Argentina da el día anterior.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
