@@ -29,13 +29,17 @@ import {
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
 
+import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
 import { formatCbu, formatNationalId, portfolioLabel } from "@/lib/owners"
-import { useDeleteOwner, useOwner } from "@/lib/owners-api"
+import {
+  useDeleteOwner,
+  useIssueOwnerPortalCredentials,
+  useOwner,
+} from "@/lib/owners-api"
 
 import { StatusBadge } from "../../propiedades/property-list"
 import { ReducedFeeBadge } from "../owner-list"
 import { BankAccountDialog } from "./bank-account-dialog"
-import { PortalCredentialsDialog } from "./portal-credentials-dialog"
 
 /** Ficha de propietario (spec Fase 7, 5.2). */
 export function OwnerDetailScreen({ id }: { id: string }) {
@@ -240,6 +244,7 @@ function BankAccountSection({ owner }: { owner: OwnerDetail }) {
 function PortalAccessSection({ owner }: { owner: OwnerDetail }) {
   const [open, setOpen] = React.useState(false)
   const [dialogKey, setDialogKey] = React.useState(0)
+  const issue = useIssueOwnerPortalCredentials()
 
   function openDialog() {
     setDialogKey((k) => k + 1)
@@ -270,7 +275,12 @@ function PortalAccessSection({ owner }: { owner: OwnerDetail }) {
       </p>
       <PortalCredentialsDialog
         key={dialogKey}
-        owner={owner}
+        person={owner}
+        portalName="propietarios"
+        issue={{
+          mutateAsync: () => issue.mutateAsync(owner.id),
+          isPending: issue.isPending,
+        }}
         open={open}
         onOpenChange={setOpen}
       />

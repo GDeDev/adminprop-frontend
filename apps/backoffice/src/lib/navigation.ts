@@ -4,6 +4,7 @@ import {
   KeyRound,
   LayoutDashboard,
   Settings,
+  ShieldCheck,
   Users,
   Wallet,
 } from "lucide-react"
@@ -16,6 +17,7 @@ export const navItems: NavItem[] = [
   { href: "/propiedades", label: "Propiedades", icon: Building2 },
   { href: "/propietarios", label: "Propietarios", icon: KeyRound },
   { href: "/inquilinos", label: "Inquilinos", icon: Users },
+  { href: "/garantes", label: "Garantes", icon: ShieldCheck },
   { href: "/contratos", label: "Contratos", icon: FileText },
   { href: "/cobros", label: "Cobros", icon: Wallet },
   { href: "/configuracion", label: "Configuración", icon: Settings },
