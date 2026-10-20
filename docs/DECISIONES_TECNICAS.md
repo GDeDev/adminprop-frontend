@@ -278,6 +278,24 @@ En el alta viaja con el resto (un solo paso). Después, el formulario de edició
 
 `OwnerSelect` (Popover + Command con `shouldFilter={false}`) busca por nombre o DNI con el mismo hook del listado, de a 20, con "Ver más". No se cargan todos los propietarios como hacen los maestros (DT-31): una inmobiliaria puede tener cientos. El nombre del elegido se recuerda en el componente; si el valor viene de afuera (edición), la ficha lo pasa como `selectedLabel`.
 
+## Fase 8 — Inquilinos y garantes
+
+### DT-42 — Garantes con pantalla propia y diálogo de alta reutilizable
+
+La spec pide "pantalla propia" para garantes y "crear nuevo inline" desde el inquilino. Las dos cosas usan el mismo `GuarantorFormDialog`: en `/garantes` como alta/edición, y dentro de `GuarantorSelect` como "Crear un garante nuevo", que al guardar deja elegido al creado. Entrada "Garantes" en el menú (en mobile va al cajón "Más").
+
+### DT-43 — WhatsApp: el número se normaliza en el front
+
+`whatsappLink` deja sólo dígitos y agrega `54 9` si el número no trae código de país (quita el `0` de característica y el `00` internacional). La API guarda el teléfono como se cargó: el formato para WhatsApp es un detalle de presentación y, si cambia la regla, no hay que migrar datos.
+
+### DT-44 — Estado de pago: badge gris y filtro deshabilitado hasta la Fase 11
+
+La API devuelve `paymentStatus: null` y acepta el filtro sin aplicarlo (D-46). El listado muestra "Sin datos" en gris y el selector de estado deshabilitado con la leyenda "pronto", como pide la spec 5.1, en vez de ocultarlo: así la pantalla ya tiene su forma final.
+
+### DT-45 — Diálogo de acceso al portal compartido
+
+El de la Fase 7 era de propietarios. Ahora `components/portal-credentials-dialog.tsx` recibe la persona y la mutación; propietarios e inquilinos lo usan igual. `LoadMore` también pasó a `components/` (propiedades conserva su copia de la Fase 6).
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
