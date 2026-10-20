@@ -1308,6 +1308,139 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/properties/{propertyId}/services": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios de una propiedad
+     * @description Todos los de la propiedad (de la propiedad y de sus contratos), cada uno con su estado calculado. `contractId` deja sólo los de ese contrato.
+     */
+    get: operations["ServicesController_listByProperty_api/v1"]
+    put?: never
+    /**
+     * Alta de un servicio en una propiedad
+     * @description Sin `contractId` es un servicio de la propiedad, que sus contratos heredan. Con vencimiento exige `dueDate`; con aumentos, `increaseFrequency`.
+     */
+    post: operations["ServicesController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/services": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios que aplican a un contrato
+     * @description Los cargados para el contrato (`scope: CONTRACT`) más los de la propiedad sin contrato, que hereda (`scope: PROPERTY`).
+     */
+    get: operations["ServicesController_listByContract_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/services/overdue": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios vencidos de la inmobiliaria (dashboard)
+     * @description Los que tienen vencimiento y la fecha ya pasó, los más atrasados primero, con la propiedad. Filtrable por propiedad.
+     */
+    get: operations["ServicesController_listOverdue_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/services/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Eliminar un servicio (borrado lógico) */
+    delete: operations["ServicesController_remove_api/v1"]
+    options?: never
+    head?: never
+    /**
+     * Editar un servicio
+     * @description Todo menos la propiedad. Vencimiento y aumentos se validan sobre el servicio resultante.
+     */
+    patch: operations["ServicesController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/advance-expenses": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Gastos adelantados de un contrato
+     * @description `settled=true|false` filtra descontados o pendientes. Los totales son del contrato entero, sin importar el filtro.
+     */
+    get: operations["AdvanceExpensesController_list_api/v1"]
+    put?: never
+    /**
+     * Registrar un gasto adelantado, con su comprobante
+     * @description Multipart: `amount`, `description`, `expenseDate`, `currency?` (la del contrato si no viene) y `file` (JPG, PNG, WebP o PDF, hasta 10 MB, obligatorio). El contrato puede estar en cualquier estado.
+     */
+    post: operations["AdvanceExpensesController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/advance-expenses/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Eliminar un gasto pendiente (borrado lógico, sólo admin)
+     * @description Un gasto ya descontado en una liquidación no se elimina (409). El comprobante se borra del storage.
+     */
+    delete: operations["AdvanceExpensesController_remove_api/v1"]
+    options?: never
+    head?: never
+    /**
+     * Editar un gasto pendiente
+     * @description Monto, descripción y fecha. Un gasto ya descontado en una liquidación no se edita (409).
+     */
+    patch: operations["AdvanceExpensesController_update_api/v1"]
+    trace?: never
+  }
   "/api/v1/examples": {
     parameters: {
       query?: never
@@ -2626,6 +2759,226 @@ export interface components {
        * @example 2030-02-28
        */
       endDate: string
+    }
+    ServiceTypeRefDto: {
+      id: string
+      name: string
+      isActive: boolean
+    }
+    PropertyServiceDto: {
+      id: string
+      propertyId: string
+      contractId: string | null
+      serviceType: components["schemas"]["ServiceTypeRefDto"] | null
+      /** @enum {string} */
+      paidBy: "RENTER" | "OWNER"
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      hasDueDate: boolean
+      /** Format: date */
+      dueDate: string | null
+      hasIncrease: boolean
+      /** @enum {string|null} */
+      increaseFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      managedByAgency: boolean
+      notes: string | null
+      /**
+       * @description Calculado al leer: vencido si la fecha de vencimiento ya pasó
+       * @enum {string}
+       */
+      status: "UP_TO_DATE" | "OVERDUE"
+      /** @description Días desde el vencimiento; 0 si está al día */
+      daysOverdue: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    CreateServiceDto: {
+      /** @description Contrato al que pertenece. Sin contrato es un servicio de la propiedad, que sus contratos heredan. */
+      contractId?: string | null
+      /** @description Tipo de servicio del maestro (activo). */
+      serviceTypeId: string
+      /**
+       * @example RENTER
+       * @enum {string}
+       */
+      paidBy: "RENTER" | "OWNER"
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency: "ARS" | "USD"
+      /** @description Si tiene fecha de vencimiento (exige `dueDate`). */
+      hasDueDate: boolean
+      /**
+       * Format: date
+       * @example 2026-11-10
+       */
+      dueDate?: string | null
+      /** @description Si tiene aumentos periódicos (exige `increaseFrequency`). */
+      hasIncrease: boolean
+      /**
+       * @example QUARTERLY
+       * @enum {string|null}
+       */
+      increaseFrequency?: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      /** @description Si la inmobiliaria gestiona el pago, o es sólo informativo (igual puede tener vencimiento). */
+      managedByAgency: boolean
+      notes?: string | null
+    }
+    ContractServiceDto: {
+      id: string
+      propertyId: string
+      contractId: string | null
+      serviceType: components["schemas"]["ServiceTypeRefDto"] | null
+      /** @enum {string} */
+      paidBy: "RENTER" | "OWNER"
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      hasDueDate: boolean
+      /** Format: date */
+      dueDate: string | null
+      hasIncrease: boolean
+      /** @enum {string|null} */
+      increaseFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      managedByAgency: boolean
+      notes: string | null
+      /**
+       * @description Calculado al leer: vencido si la fecha de vencimiento ya pasó
+       * @enum {string}
+       */
+      status: "UP_TO_DATE" | "OVERDUE"
+      /** @description Días desde el vencimiento; 0 si está al día */
+      daysOverdue: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      /**
+       * @description CONTRACT: cargado para este contrato; PROPERTY: heredado de la propiedad
+       * @enum {string}
+       */
+      scope: "CONTRACT" | "PROPERTY"
+    }
+    ServicePropertyRefDto: {
+      id: string
+      address: string
+    }
+    OverdueServiceDto: {
+      id: string
+      propertyId: string
+      contractId: string | null
+      serviceType: components["schemas"]["ServiceTypeRefDto"] | null
+      /** @enum {string} */
+      paidBy: "RENTER" | "OWNER"
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      hasDueDate: boolean
+      /** Format: date */
+      dueDate: string | null
+      hasIncrease: boolean
+      /** @enum {string|null} */
+      increaseFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      managedByAgency: boolean
+      notes: string | null
+      /**
+       * @description Calculado al leer: vencido si la fecha de vencimiento ya pasó
+       * @enum {string}
+       */
+      status: "UP_TO_DATE" | "OVERDUE"
+      /** @description Días desde el vencimiento; 0 si está al día */
+      daysOverdue: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      property: components["schemas"]["ServicePropertyRefDto"]
+    }
+    UpdateServiceDto: {
+      /** @description Contrato al que pertenece. Sin contrato es un servicio de la propiedad, que sus contratos heredan. */
+      contractId?: string | null
+      /** @description Tipo de servicio del maestro (activo). */
+      serviceTypeId?: string
+      /**
+       * @example RENTER
+       * @enum {string}
+       */
+      paidBy?: "RENTER" | "OWNER"
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency?: "ARS" | "USD"
+      /** @description Si tiene fecha de vencimiento (exige `dueDate`). */
+      hasDueDate?: boolean
+      /**
+       * Format: date
+       * @example 2026-11-10
+       */
+      dueDate?: string | null
+      /** @description Si tiene aumentos periódicos (exige `increaseFrequency`). */
+      hasIncrease?: boolean
+      /**
+       * @example QUARTERLY
+       * @enum {string|null}
+       */
+      increaseFrequency?: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      /** @description Si la inmobiliaria gestiona el pago, o es sólo informativo (igual puede tener vencimiento). */
+      managedByAgency?: boolean
+      notes?: string | null
+    }
+    AdvanceExpenseRegisteredByDto: {
+      id: string
+      fullName: string
+    }
+    AdvanceExpenseDto: {
+      id: string
+      contractId: string
+      /** @description Copiado del contrato al registrarlo */
+      renterId: string
+      /** @example 15000.00 */
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      description: string
+      /** Format: date */
+      expenseDate: string
+      /** @description Comprobante (imagen o PDF) */
+      receiptUrl: string
+      /** @description Ya descontado en una liquidación */
+      settled: boolean
+      settlementId: string | null
+      /** Format: date-time */
+      settledAt: string | null
+      registeredBy:
+        components["schemas"]["AdvanceExpenseRegisteredByDto"] | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    AdvanceExpenseListDto: {
+      items: components["schemas"]["AdvanceExpenseDto"][]
+      /**
+       * @description Suma de los pendientes del contrato, sin importar el filtro
+       * @example 15000.00
+       */
+      pendingTotal: string
+      /**
+       * @description Suma de los ya descontados del contrato, sin importar el filtro
+       * @example 0.00
+       */
+      settledTotal: string
+    }
+    UpdateAdvanceExpenseDto: {
+      /** @example 150333.33 */
+      amount?: string
+      /** @example Arreglo de la canilla del baño */
+      description?: string
+      /**
+       * Format: date
+       * @example 2026-10-05
+       */
+      expenseDate?: string
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -6578,6 +6931,481 @@ export interface operations {
         }
       }
       422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_listByProperty_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Sólo los de ese contrato. */
+        contractId?: string
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyServiceDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateServiceDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyServiceDto"]
+        }
+      }
+      /** @description Falta la fecha de vencimiento o la frecuencia de aumento */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Propiedad inexistente, contrato de otra propiedad, o tipo de servicio inexistente o desactivado */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_listByContract_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractServiceDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_listOverdue_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        propertyId?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Servicios vencidos */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["OverdueServiceDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateServiceDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyServiceDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description true: sólo los descontados en una liquidación; false: sólo los pendientes. */
+        settled?: boolean
+      }
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AdvanceExpenseListDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** @example 15000.00 */
+          amount: string
+          description: string
+          /** Format: date */
+          expenseDate: string
+          /** @enum {string} */
+          currency?: "ARS" | "USD"
+          /** Format: binary */
+          file: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AdvanceExpenseDto"]
+        }
+      }
+      /** @description Sin comprobante, comprobante inválido, monto no positivo o fecha inválida */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya descontado en una liquidación */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAdvanceExpenseDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AdvanceExpenseDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya descontado en una liquidación */
+      409: {
         headers: {
           [name: string]: unknown
         }
