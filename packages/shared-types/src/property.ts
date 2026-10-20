@@ -1,22 +1,13 @@
-import type { Timestamps, Uuid } from "./common"
+import type { ApiSchemas } from "./api"
 
-export type PropertyStatus = "available" | "rented" | "under_maintenance"
+/** Propiedades (PRD 5.1, Fase 6), tal como las devuelve la API. */
 
-/** Propiedad (PRD 5.1, Fase 6). */
-export interface Property extends Timestamps {
-  id: Uuid
-  tenantId: Uuid
-  address: string
-  locationId: Uuid | null
-  propertyTypeId: Uuid
-  status: PropertyStatus
-  /** Nullable mientras Fase 6 corre antes/en paralelo a Fase 7. */
-  ownerId: Uuid | null
-  /** Inquilino del contrato activo, si hay. */
-  renterId: Uuid | null
-  amenityIds: Uuid[]
-  /** Notas internas — no se exponen en el portal público. */
-  notes: string | null
-  /** URLs de fotos (Cloudinary). Máximo 20. */
-  photos: string[]
-}
+/** Una fila del listado: tipo y ubicación expandidos, foto principal. */
+export type PropertySummary = ApiSchemas["PropertySummaryDto"]
+/** La ficha: además amenities, notas internas y todas las fotos. */
+export type PropertyDetail = ApiSchemas["PropertyDetailDto"]
+export type PropertyPhoto = PropertyDetail["photos"][number]
+export type PropertyStatus = PropertySummary["status"]
+
+export type CreatePropertyRequest = ApiSchemas["CreatePropertyDto"]
+export type UpdatePropertyRequest = ApiSchemas["UpdatePropertyDto"]

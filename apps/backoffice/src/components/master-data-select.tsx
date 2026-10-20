@@ -207,15 +207,19 @@ function useOptions(props: MasterDataSelectProps) {
     "all",
     !isLocation
   )
+  // Sin nivel ni padre (una cascada esperando el nivel anterior) no se pide
+  // nada: serían todas las ubicaciones.
   const locations = useLocations(
     { level: props.level, parentId: props.parentId, isActive: "all" },
-    isLocation
+    isLocation && (props.level !== undefined || props.parentId !== undefined)
   )
   const query = isLocation ? locations : catalog
   const options: Option[] = query.data ?? []
   return {
     options,
-    isLoading: query.isPending,
+    // isLoading y no isPending: una consulta deshabilitada queda "pending"
+    // para siempre, y el select diría "Cargando…" sin estar cargando nada.
+    isLoading: query.isLoading,
     isError: query.isError,
   }
 }

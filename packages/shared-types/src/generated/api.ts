@@ -779,6 +779,97 @@ export interface paths {
     patch: operations["LocationsController_activate_api/v1"]
     trace?: never
   }
+  "/api/v1/properties": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Listar, con filtros y búsqueda por dirección */
+    get: operations["PropertiesController_list_api/v1"]
+    put?: never
+    /** Alta (queda disponible) */
+    post: operations["PropertiesController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/properties/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Ficha completa */
+    get: operations["PropertiesController_findOne_api/v1"]
+    put?: never
+    post?: never
+    /**
+     * Eliminar (borrado lógico, sólo admin)
+     * @description Con historial de contratos no se puede: 409.
+     */
+    delete: operations["PropertiesController_remove_api/v1"]
+    options?: never
+    head?: never
+    /** Editar (todo menos estado y fotos) */
+    patch: operations["PropertiesController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/properties/{id}/status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Cambiar el estado a mano */
+    patch: operations["PropertiesController_changeStatus_api/v1"]
+    trace?: never
+  }
+  "/api/v1/properties/{id}/photos": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Subir fotos (JPG, PNG o WebP, hasta 20 por propiedad) */
+    post: operations["PropertiesController_addPhotos_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/properties/{id}/photos/{photoId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Borrar una foto */
+    delete: operations["PropertiesController_deletePhoto_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/examples": {
     parameters: {
       query?: never
@@ -1309,6 +1400,105 @@ export interface components {
     RenameLocationDto: {
       /** @example Palermo Soho */
       name: string
+    }
+    LocationRefDto: {
+      id: string
+      name: string
+      isActive: boolean
+      /** @enum {string} */
+      level: "COUNTRY" | "PROVINCE" | "CITY" | "NEIGHBORHOOD"
+      /**
+       * @description De lo específico a lo general, sin el país
+       * @example Tolosa, La Plata, Buenos Aires
+       */
+      path: string
+    }
+    MasterDataRefDto: {
+      id: string
+      name: string
+      isActive: boolean
+    }
+    PropertySummaryDto: {
+      id: string
+      address: string
+      /** @enum {string} */
+      status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
+      ownerId: string | null
+      location: components["schemas"]["LocationRefDto"] | null
+      propertyType: components["schemas"]["MasterDataRefDto"] | null
+      mainPhotoUrl: string | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    AmenityRefDto: {
+      id: string
+      name: string
+      isActive: boolean
+      /** @example waves */
+      icon: string | null
+    }
+    PropertyPhotoDto: {
+      id: string
+      url: string
+      /** @description 0 es la principal */
+      position: number
+    }
+    PropertyDetailDto: {
+      id: string
+      address: string
+      /** @enum {string} */
+      status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
+      ownerId: string | null
+      location: components["schemas"]["LocationRefDto"] | null
+      propertyType: components["schemas"]["MasterDataRefDto"] | null
+      mainPhotoUrl: string | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      locationId: string
+      propertyTypeId: string
+      amenityIds: string[]
+      amenities: components["schemas"]["AmenityRefDto"][]
+      notes: string | null
+      photos: components["schemas"]["PropertyPhotoDto"][]
+    }
+    CreatePropertyDto: {
+      /** @example Av. Corrientes 1234, 5° B */
+      address: string
+      /** @description Localidad o barrio (maestro de ubicaciones) */
+      locationId: string
+      /** @description Maestro de tipos de propiedad */
+      propertyTypeId: string
+      /** @description Propietario (Fase 7). Se puede asignar después. */
+      ownerId?: string | null
+      /** @default [] */
+      amenityIds: string[]
+      /** @description Notas internas. Nunca se muestran en el portal. */
+      notes?: string | null
+    }
+    UpdatePropertyDto: {
+      /** @example Av. Corrientes 1234, 5° B */
+      address?: string
+      /** @description Localidad o barrio (maestro de ubicaciones) */
+      locationId?: string
+      /** @description Maestro de tipos de propiedad */
+      propertyTypeId?: string
+      /** @description Propietario (Fase 7). Se puede asignar después. */
+      ownerId?: string | null
+      /** @default [] */
+      amenityIds: string[]
+      /** @description Notas internas. Nunca se muestran en el portal. */
+      notes?: string | null
+    }
+    ChangePropertyStatusDto: {
+      /**
+       * @example MAINTENANCE
+       * @enum {string}
+       */
+      status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -3447,6 +3637,330 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["LocationDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        status?: "AVAILABLE" | "RENTED" | "MAINTENANCE"
+        ownerId?: string
+        propertyTypeId?: string
+        /** @description Parte de la dirección, sin distinguir mayúsculas */
+        search?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Propiedades de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PropertySummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePropertyDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ubicación, tipo o amenity inexistente o desactivado */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePropertyDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_changeStatus_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangePropertyStatusDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Tiene un contrato activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Transición no permitida */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_addPhotos_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files?: string[]
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyDetailDto"]
+        }
+      }
+      /** @description Pasaría de 20 fotos, o archivo inválido */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertiesController_deletePhoto_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        photoId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyDetailDto"]
         }
       }
       /** @description Rol insuficiente */

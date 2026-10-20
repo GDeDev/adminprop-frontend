@@ -237,6 +237,29 @@ Detalle en [`tecnica/fase-03.md`](tecnica/fase-03.md).
 
 ---
 
+## Fase 6 — Propiedades
+
+> Sin supervisión, rama encadenada sobre la Fase 5.
+
+### DT-34 — Scroll infinito con botón de respaldo
+
+- La spec prefiere scroll infinito en mobile. Se usa `useInfiniteQuery` sobre las páginas de la API y un `IntersectionObserver` al final de la lista; el botón "Cargar más" queda visible para teclado y lectores de pantalla.
+
+### DT-35 — Fotos del alta: se suben después de crear la propiedad
+
+- Las fotos necesitan el id de la propiedad. El wizard crea la propiedad y recién después sube las fotos. Si sólo fallan las fotos, la propiedad queda creada y se avisa que se pueden subir desde la ficha.
+- En la edición no hay paso de fotos: se manejan en la ficha.
+
+### DT-36 — Borrador del alta en `localStorage`
+
+- Sólo en el alta y sólo los datos (no las fotos). Se valida con un esquema permisivo (un borrador está incompleto) y se descarta al guardar o con "Empezar de cero". Si el navegador no deja usar `localStorage` (modo privado), el wizard funciona igual sin borrador.
+
+### DT-37 — Imágenes con `<img>` y no `next/image`
+
+- Las fotos vienen de Cloudinary o del storage local de la API, en otro dominio. `next/image` exige declarar cada dominio remoto en `next.config` y los URLs dependen del entorno. Cloudinary ya optimiza las imágenes.
+
+---
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
