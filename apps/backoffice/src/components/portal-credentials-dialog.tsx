@@ -5,7 +5,7 @@ import { Check, Copy } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
-import type { OwnerDetail, PortalCredentials } from "@adminprop/shared-types"
+import type { PortalCredentials } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import {
@@ -17,31 +17,34 @@ import {
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
 
-import { useIssueOwnerPortalCredentials } from "@/lib/owners-api"
-
 /**
- * Genera (o regenera) el acceso al portal (spec 3.6). La contraseña se ve
- * una sola vez, acá: la API no la guarda ni la vuelve a mostrar (D-42).
+ * Genera (o regenera) el acceso al portal de un propietario o inquilino. La
+ * contraseña se ve una sola vez, acá: la API no la guarda ni la vuelve a
+ * mostrar (D-42). Quien lo usa pasa la mutación que corresponde.
  */
 export function PortalCredentialsDialog({
-  owner,
+  person,
+  portalName,
+  issue,
   open,
   onOpenChange,
 }: {
-  owner: OwnerDetail
+  person: { fullName: string; hasPortalAccess: boolean }
+  /** "propietarios" o "inquilinos", para el texto. */
+  portalName: string
+  issue: { mutateAsync: () => Promise<PortalCredentials>; isPending: boolean }
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const issue = useIssueOwnerPortalCredentials()
   const [credentials, setCredentials] =
     React.useState<PortalCredentials | null>(null)
   const [error, setError] = React.useState<string | null>(null)
-  const regenerating = owner.hasPortalAccess
+  const regenerating = person.hasPortalAccess
 
   async function confirm() {
     setError(null)
     try {
-      setCredentials(await issue.mutateAsync(owner.id))
+      setCredentials(await issue.mutateAsync())
     } catch (cause) {
       setError(apiErrorMessage(cause, "No se pudo generar el acceso."))
     }
@@ -62,8 +65,8 @@ export function PortalCredentialsDialog({
             {credentials
               ? "Pasale estos datos. La contraseña no se vuelve a mostrar: si la pierde, generá otra."
               : regenerating
-                ? `La contraseña anterior de ${owner.fullName} deja de servir y se cierran sus sesiones.`
-                : `${owner.fullName} va a poder entrar al portal de propietarios con su email.`}
+                ? `La contraseña anterior de ${person.fullName} deja de servir y se cierran sus sesiones.`
+                : `${person.fullName} va a poder entrar al portal de ${portalName} con su email.`}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 

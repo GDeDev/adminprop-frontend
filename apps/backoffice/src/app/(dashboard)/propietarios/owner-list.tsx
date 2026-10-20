@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 
+import { LoadMore } from "@/components/load-more"
 import { formatNationalId, portfolioLabel } from "@/lib/owners"
 import { useInfiniteOwners } from "@/lib/owners-api"
 import { useDebouncedValue } from "@/lib/use-debounced-value"
@@ -208,37 +209,5 @@ function OwnerCard({ owner }: { owner: OwnerSummary }) {
         <ReducedFeeBadge owner={owner} />
       </div>
     </Link>
-  )
-}
-
-/** Igual que en propiedades (DT-34): sentinel + botón para teclado. */
-function LoadMore({
-  hasMore,
-  loading,
-  onLoadMore,
-}: {
-  hasMore: boolean
-  loading: boolean
-  onLoadMore: () => void
-}) {
-  const sentinel = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    const node = sentinel.current
-    if (!node || !hasMore || typeof IntersectionObserver === "undefined") return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting && !loading) onLoadMore()
-    })
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [hasMore, loading, onLoadMore])
-
-  if (!hasMore) return null
-  return (
-    <div ref={sentinel} className="flex justify-center">
-      <Button variant="outline" onClick={onLoadMore} disabled={loading}>
-        {loading ? "Cargando…" : "Cargar más"}
-      </Button>
-    </div>
   )
 }
