@@ -46,8 +46,10 @@ import {
   useProperty,
   useUploadPropertyPhotos,
 } from "@/lib/properties-api"
+import { usePropertyServices } from "@/lib/services-api"
 
 import { StatusBadge } from "../property-list"
+import { ServicesSection } from "./services-section"
 
 /** Ficha de propiedad (spec Fase 6, 5.2). */
 export function PropertyDetailScreen({ id }: { id: string }) {
@@ -73,6 +75,7 @@ export function PropertyDetailScreen({ id }: { id: string }) {
 
 function Detail({ property }: { property: PropertyDetail }) {
   const { user } = useSession()
+  const services = usePropertyServices(property.id)
 
   return (
     <div className="flex flex-col gap-6">
@@ -199,6 +202,7 @@ function Detail({ property }: { property: PropertyDetail }) {
             </p>
           )}
         </Section>
+        <ServicesSection propertyId={property.id} query={services} />
         <Placeholder
           icon={Wallet}
           title="Historial de pagos"

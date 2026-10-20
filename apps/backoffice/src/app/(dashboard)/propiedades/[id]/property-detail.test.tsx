@@ -28,6 +28,13 @@ vi.mock("@/lib/properties-api", () => ({
   useDeletePropertyPhoto: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useUploadPropertyPhotos: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
+// La sección de servicios tiene sus propios tests: acá, sin servicios.
+vi.mock("@/lib/services-api", () => ({
+  usePropertyServices: () => ({ isPending: false, isError: false, data: [] }),
+  useCreateService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
 
 function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
   return {
