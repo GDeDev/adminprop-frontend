@@ -69,9 +69,10 @@ export function useInfiniteRenters(filters: RenterFilters) {
   })
 }
 
-export function useRenter(id: string) {
+export function useRenter(id: string, enabled = true) {
   return useQuery({
     queryKey: [...rentersKey, "detail", id],
+    enabled: enabled && id !== "",
     queryFn: () => unwrap<RenterDetail>(apiClient.get(`/renters/${id}`)),
   })
 }

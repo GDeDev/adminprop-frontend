@@ -55,9 +55,10 @@ export function useInfiniteProperties(filters: PropertyFilters) {
   })
 }
 
-export function useProperty(id: string) {
+export function useProperty(id: string, enabled = true) {
   return useQuery({
     queryKey: [...propertiesKey, "detail", id],
+    enabled: enabled && id !== "",
     queryFn: async () => {
       const { data } = await apiClient.get<ApiSuccess<PropertyDetail>>(
         `/properties/${id}`

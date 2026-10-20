@@ -16,6 +16,16 @@ if (typeof Element !== "undefined") {
   Element.prototype.hasPointerCapture ??= () => false
 }
 
+// jsdom tampoco tiene ResizeObserver, que el Switch de Radix usa para medir
+// su pulgar. Un stub inerte alcanza: en los tests no se mide nada.
+if (typeof window !== "undefined" && !window.ResizeObserver) {
+  window.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
+
 // jsdom no implementa matchMedia (lo usan ResponsiveDialog y useMediaQuery de
 // @adminprop/ui). Ninguna media query matchea: viewport mobile.
 if (typeof window !== "undefined" && !window.matchMedia) {
