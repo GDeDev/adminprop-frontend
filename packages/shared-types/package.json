@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "lint": "eslint --max-warnings=0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "api:types": "openapi-typescript ../../../adminprop-backend/openapi.json --output src/generated/api.ts && prettier --write src/generated/api.ts"
   },
   "exports": {
     ".": "./src/index.ts"
@@ -14,6 +15,7 @@
     "@adminprop/eslint-config": "*",
     "@adminprop/typescript-config": "*",
     "eslint": "^9",
+    "openapi-typescript": "^7.13.0",
     "typescript": "^5"
   }
 }

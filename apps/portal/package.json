@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@adminprop/mocks": "*",
+    "@adminprop/session": "*",
     "@adminprop/shared-types": "*",
     "@adminprop/ui": "*",
     "@hookform/resolvers": "^5.9.1",

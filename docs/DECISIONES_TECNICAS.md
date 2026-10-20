@@ -160,6 +160,59 @@ Detalle en [`tecnica/fase-03.md`](tecnica/fase-03.md).
 
 ---
 
+## Fase 4 — Auth y usuarios
+
+> Hecha **sin supervisión**, con autorización de Giuliano: estas decisiones están pendientes de revisión.
+
+### DT-23 — Tipos del contrato generados y commiteados
+
+- **Decisión:** `npm run api:types` corre `openapi-typescript` sobre `../adminprop-backend/openapi.json` y escribe `packages/shared-types/src/generated/api.ts`. El archivo se commitea; ESLint lo ignora.
+- **Por qué:** el CI del frontend no tiene el backend al lado. Commitearlo hace que cada cambio de contrato se vea en el diff. El backend garantiza en su CI que `openapi.json` esté al día.
+- Los roles pasan a los valores de la API (`ADMIN`, `EMPLOYEE`, `OWNER`, `RENTER`). `PortalRole` (`owner` | `renter`) queda como el área del portal en la URL.
+- **Limitación:** las respuestas de un solo objeto del OpenAPI no documentan el sobre `{ success, message, data }`, así que se tipan como `ApiSuccess<T>` a mano (D-24 del backend).
+
+### DT-24 — Paquete `@adminprop/session`
+
+- **Decisión:** todo lo de sesión vive en un paquete compartido, con dos entradas: `/server` (route handlers, cookies) y `/client` (token en memoria, `createApiClient`, `SessionProvider`, `ProtectedRoute`, helpers de errores de la API). Cada app sólo lo configura: prefijo de cookies y rutas de login.
+- **Por qué:** backoffice y portal necesitan exactamente la misma lógica, y es código de seguridad: mejor tenerlo una sola vez y testearlo una sola vez.
+
+### DT-25 — Refresh token en cookie httpOnly vía route handlers; el login va directo a la API
+
+- **Contexto:** la spec pide el access token en memoria y el refresh token en una cookie httpOnly "si es posible".
+- **Decisión:**
+  - El login va **del navegador a la API**.
+  - Con la respuesta, el cliente hace `POST /api/session`, un route handler de la propia app que guarda el refresh token en una cookie httpOnly, `SameSite=Lax` y `Secure` en producción, con la duración del token.
+  - `POST /api/session/refresh` rota contra la API y devuelve sólo el access token.
+  - `DELETE /api/session` revoca en la API y borra la cookie.
+- **Por qué el login no pasa por el servidor de Next:** el rate limit de la API (5 por minuto) es por IP. Si el login pasara por Next, todos los usuarios saldrían con la IP del servidor y compartirían esos 5 intentos. El costo es que el refresh token pasa una vez por el JavaScript de la página, en el momento del login. Después vive sólo en la cookie.
+- **Por qué no una cookie de la API:** front y API van a estar en dominios distintos (Vercel y Render). Una cookie de la API sería de terceros, y Safari las bloquea.
+- **Protecciones:** los route handlers rechazan pedidos con un `Origin` distinto al de la app (evita que un sitio ajeno guarde su propia sesión en el navegador de la víctima). Cada app tiene su prefijo de cookie, porque en localhost las cookies se comparten entre puertos.
+- **Límite conocido:** los refresh salen desde la IP del servidor de Next y cuentan contra el límite global por IP de la API (2000 por hora por defecto). Alcanza para cientos de sesiones activas. Si hace falta más, la API puede exceptuar al servidor de Next o contar por usuario; se ve en la Fase 16.
+
+### DT-26 — Refresh serializado entre pestañas (Web Locks)
+
+- **Contexto:** la API rota el refresh token en cada uso y trata el reuso como robo: revoca todas las sesiones. La cookie es compartida entre pestañas.
+- **Decisión:** el refresh es de un solo vuelo por pestaña (varios 401 esperan el mismo) y uno a la vez entre pestañas, con `navigator.locks`. La segunda pestaña espera y refresca con la cookie ya rotada.
+- **Sin red no se echa a nadie:** si el refresh falla por red o por la API caída, la cookie se conserva y la pantalla muestra "Reintentar". Sólo un rechazo de la API (401/403) cierra la sesión.
+
+### DT-27 — De dónde sale la marca de la inmobiliaria
+
+- **Backoffice:** al iniciar sesión, el route handler pide `GET /tenants/current` con el access token nuevo y guarda nombre, logo y color en otra cookie httpOnly. El layout (server) la lee, así el color está desde el primer render. Cambios de marca se ven en el próximo login.
+- **Portal:** `PORTAL_TENANT_SLUG` (variable de servidor, Doppler `dev_portal`) y `GET /tenants/by-slug/:slug`, público, revalidado cada 5 minutos. En la Fase 22 el slug sale del dominio y nada más cambia. Sin slug, el login del portal avisa que no hay inmobiliaria configurada.
+
+### DT-28 — El proxy mira la cookie; `ProtectedRoute` valida
+
+- `src/proxy.ts` (el `middleware` de Next 16) sólo verifica que exista la cookie, y si no, redirige al login con `?next=`. No llama a la API: corre en cada request.
+- `ProtectedRoute` recupera el access token con el refresh, pide `/auth/me` y chequea el rol: el backoffice deja entrar a `ADMIN` y `EMPLOYEE`; cada área del portal, a su rol. Un `?next=` sólo se sigue si es una ruta de la misma app (sin open redirect) y, en el portal, de la misma área.
+- El proxy no saca del login a quien ya tiene cookie: con una cookie vencida se armaría un loop entre `/login` y la pantalla protegida.
+
+### DT-29 — Pantalla de usuarios en esta fase
+
+- La spec de la Fase 4 sólo pide login y rutas protegidas en el front, pero ninguna fase posterior tiene la pantalla de usuarios, y sin ella un admin sólo podría gestionar empleados desde Swagger.
+- **Decisión:** Configuración → Usuarios (sólo admin): listado filtrable y paginado (tarjetas en mobile, tabla en desktop), alta, edición, desactivar/reactivar y reseteo de contraseña, con las mismas reglas que la API (sobre uno mismo no se ofrece desactivar, resetear ni cambiar el rol).
+
+---
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.

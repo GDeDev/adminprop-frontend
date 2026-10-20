@@ -1,20 +1,27 @@
 import "server-only"
 
+import { cookies } from "next/headers"
+
+import {
+  brandingCookieName,
+  decodeBranding,
+  type StoredBranding,
+} from "@adminprop/session/server"
+
+import { SESSION_COOKIE_PREFIX } from "./session"
+
 /** Lo que cada inmobiliaria personaliza (slots de marca). */
-export interface TenantBranding {
-  name: string
-  logoUrl: string | null
-  /** Hex; pisa `--primary` en el `<html>` (ver `tenantThemeStyle`). */
-  primaryColor: string | null
-}
+export type TenantBranding = StoredBranding
 
 /**
  * Marca de la inmobiliaria del usuario logueado, para el `<html>` y el
- * sidebar. Devuelve null mientras no hay sesión: se usa el tema default.
- *
- * TODO(Fase 4): leer el tenant de la sesión (GET /auth/me o el que exponga la
- * API con name, logoUrl y primaryColor).
+ * sidebar. Sale de la cookie que se guarda al iniciar sesión (con
+ * `GET /tenants/current`), así el color está desde el primer render. Sin
+ * sesión devuelve null y se usa el tema por defecto.
  */
 export async function getTenantBranding(): Promise<TenantBranding | null> {
-  return null
+  const store = await cookies()
+  return decodeBranding(
+    store.get(brandingCookieName(SESSION_COOKIE_PREFIX))?.value
+  )
 }

@@ -1,42 +1,14 @@
-import axios, { type AxiosError } from "axios"
+import { createApiClient, redirectToLogin } from "@adminprop/session/client"
 
-import type { ApiError } from "@adminprop/shared-types"
-
-import { clearAccessToken, getAccessToken } from "./auth-token"
-
-const LOGIN_PATH = "/login"
+import { LOGIN_PATH } from "./session"
 
 /**
- * Cliente HTTP base contra apps/api.
+ * Cliente HTTP contra la API (adminprop-backend). Manda el access token y
+ * refresca la sesión en silencio; si no se puede, lleva al login.
  *
- * Hoy no hay backend: las pantallas consumen @adminprop/mocks. Cuando un
- * módulo tenga su endpoint, su queryFn pasa a usar este cliente.
+ * Las pantallas que todavía no tienen endpoint siguen usando @adminprop/mocks.
  */
-export const apiClient = axios.create({
+export const apiClient = createApiClient({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  timeout: 15_000,
-  withCredentials: true, // refresh token en cookie httpOnly (Fase 4)
+  onUnauthenticated: () => redirectToLogin(LOGIN_PATH),
 })
-
-apiClient.interceptors.request.use((config) => {
-  const token = getAccessToken()
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError<ApiError>) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
-      // TODO(Fase 4): intentar refresh silencioso (POST /auth/refresh) y
-      // reintentar la request original antes de mandar a login.
-      clearAccessToken()
-      if (!window.location.pathname.startsWith(LOGIN_PATH)) {
-        window.location.assign(LOGIN_PATH)
-      }
-    }
-    return Promise.reject(error)
-  }
-)

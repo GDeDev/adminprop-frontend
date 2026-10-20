@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     "@adminprop/ui",
     "@adminprop/shared-types",
     "@adminprop/mocks",
+    "@adminprop/session",
   ],
 }
 

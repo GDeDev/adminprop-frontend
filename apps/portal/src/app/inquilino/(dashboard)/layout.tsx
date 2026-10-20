@@ -1,8 +1,17 @@
+import { PortalGate } from "@/components/portal-gate"
 import { PortalShell } from "@/components/portal-shell"
+import { getTenantBranding } from "@/lib/tenant-branding"
 
-export default function Layout({
+export default async function Layout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // TODO(Fase 4): proteger con sesión de portal (rol "renter") o redirect a login.
-  return <PortalShell role="renter">{children}</PortalShell>
+  const branding = await getTenantBranding()
+
+  return (
+    <PortalGate role="renter">
+      <PortalShell role="renter" tenantName={branding?.name ?? null}>
+        {children}
+      </PortalShell>
+    </PortalGate>
+  )
 }

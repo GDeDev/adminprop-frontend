@@ -1,8 +1,15 @@
 import { AppShell } from "@/components/app-shell"
+import { SessionGate } from "@/components/session-gate"
+import { getTenantBranding } from "@/lib/tenant-branding"
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // TODO(Fase 4): proteger este grupo de rutas (sesión válida o redirect a /login).
-  return <AppShell>{children}</AppShell>
+  const branding = await getTenantBranding()
+
+  return (
+    <SessionGate>
+      <AppShell tenantName={branding?.name ?? null}>{children}</AppShell>
+    </SessionGate>
+  )
 }
