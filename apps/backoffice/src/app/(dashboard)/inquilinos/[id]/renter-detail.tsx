@@ -167,11 +167,25 @@ function Detail({ renter }: { renter: RenterDetail }) {
 
         <PortalAccessSection renter={renter} />
 
-        <Placeholder
-          icon={FileText}
-          title="Contrato activo"
-          text="Los contratos se cargan en una etapa posterior."
-        />
+        <Section title="Contrato activo">
+          {renter.activeContract ? (
+            <Link
+              href={`/contratos/${renter.activeContract.id}`}
+              className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+            >
+              <FileText aria-hidden className="size-4 text-muted-foreground" />
+              Ver contrato
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Sin contrato activo.{" "}
+              <Link href="/contratos/nuevo" className="underline">
+                Nuevo contrato
+              </Link>
+              .
+            </p>
+          )}
+        </Section>
         <Placeholder
           icon={Wallet}
           title="Historial de pagos"

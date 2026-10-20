@@ -12,6 +12,8 @@ function Progress({
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
+      // Sin esto el root no recibe el valor y queda sin aria-valuenow.
+      value={value}
       className={cn(
         "relative h-2 w-full overflow-hidden rounded-full bg-primary/20",
         className

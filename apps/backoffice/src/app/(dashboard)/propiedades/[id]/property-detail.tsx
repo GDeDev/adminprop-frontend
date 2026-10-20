@@ -176,11 +176,29 @@ function Detail({ property }: { property: PropertyDetail }) {
             </p>
           )}
         </Section>
-        <Placeholder
-          icon={FileText}
-          title="Contrato activo"
-          text="Los contratos se cargan en una etapa posterior."
-        />
+        <Section title="Contrato activo">
+          {property.activeContractId ? (
+            <Link
+              href={`/contratos/${property.activeContractId}`}
+              className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+            >
+              <FileText aria-hidden className="size-4 text-muted-foreground" />
+              Ver contrato
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Sin contrato activo.{" "}
+              {property.owner ? (
+                <Link href="/contratos/nuevo" className="underline">
+                  Nuevo contrato
+                </Link>
+              ) : (
+                "Para alquilarla primero hay que asignarle un propietario"
+              )}
+              .
+            </p>
+          )}
+        </Section>
         <Placeholder
           icon={Wallet}
           title="Historial de pagos"
