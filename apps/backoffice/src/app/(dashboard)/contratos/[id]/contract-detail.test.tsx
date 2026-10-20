@@ -109,6 +109,25 @@ vi.mock("@/lib/contracts-api", () => ({
     isPending: false,
   }),
 }))
+// Servicios y gastos tienen sus propios tests: acá, vacíos.
+vi.mock("@/lib/services-api", () => ({
+  useContractServices: () => ({ isPending: false, isError: false, data: [] }),
+  useCreateService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useAdvanceExpenses: () => ({
+    isPending: false,
+    isError: false,
+    data: { items: [], pendingTotal: "0.00", settledTotal: "0.00" },
+  }),
+  useCreateAdvanceExpense: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateAdvanceExpense: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteAdvanceExpense: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
+vi.mock("@adminprop/session/client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@adminprop/session/client")>()),
+  useSession: () => ({ user: { id: "u1", role: "EMPLOYEE" } }),
+}))
 vi.mock("@/components/guarantor-select", () => ({
   GuarantorSelect: (props: { id?: string; value: string | null }) => (
     <input

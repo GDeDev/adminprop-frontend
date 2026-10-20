@@ -13,7 +13,6 @@ import {
   TrendingUp,
   UserRound,
   Wallet,
-  Wrench,
 } from "lucide-react"
 
 import { apiErrorMessage } from "@adminprop/session/client"
@@ -44,8 +43,11 @@ import {
 } from "@/lib/contracts"
 import { useContract } from "@/lib/contracts-api"
 import { formatDate, formatPeriod, todayIso } from "@/lib/dates"
+import { useContractServices } from "@/lib/services-api"
 
 import { ContractBadges } from "../contract-list"
+import { ServicesSection } from "../../propiedades/[id]/services-section"
+import { AdvanceExpensesSection } from "./advance-expenses-section"
 import { DocumentActions } from "./document-upload"
 import { EditContractDialog } from "./edit-contract-dialog"
 import { RentUpdateDialog } from "./rent-update-dialog"
@@ -78,6 +80,7 @@ function Detail({ contract }: { contract: ContractDetail }) {
   const [dialog, setDialog] = React.useState<DialogKind>(null)
   // Cambia en cada apertura: el diálogo se monta de nuevo y arranca limpio.
   const [dialogKey, setDialogKey] = React.useState(0)
+  const services = useContractServices(contract.id)
   const today = todayIso()
   const active = contract.status === "ACTIVE"
   const money = (amount: string) => formatMoney(amount, contract.currency)
@@ -297,15 +300,18 @@ function Detail({ contract }: { contract: ContractDetail }) {
           <RentHistory contract={contract} />
         </Section>
 
+        <ServicesSection
+          propertyId={contract.property?.id ?? null}
+          contractId={contract.id}
+          defaultCurrency={contract.currency}
+          query={services}
+        />
+        <AdvanceExpensesSection contract={contract} />
+
         <Placeholder
           icon={Wallet}
           title="Estado mes a mes"
           text="Qué meses están pagos, pendientes o en mora. Aparece con los cobros."
-        />
-        <Placeholder
-          icon={Wrench}
-          title="Servicios y gastos adelantados"
-          text="Qué servicios paga cada parte y lo que la inmobiliaria adelanta. Llega en la próxima etapa."
         />
       </div>
 
