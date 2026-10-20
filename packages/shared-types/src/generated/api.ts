@@ -982,7 +982,7 @@ export interface paths {
     }
     /**
      * Listar, con búsqueda por nombre o DNI
-     * @description Cada inquilino trae a su garante. Los filtros `paymentStatus` (Fase 11) y `propertyId` (Fase 9) se aceptan y validan desde ya, pero todavía no filtran: no hay cuotas ni contratos contra qué cruzar.
+     * @description Cada inquilino trae a su garante. Los filtros `paymentStatus` (Fase 11) y `propertyId` (D-51) se aceptan y validan desde ya, pero todavía no filtran: no hay cuotas ni contratos contra qué cruzar.
      */
     get: operations["RentersController_list_api/v1"]
     put?: never
@@ -1023,7 +1023,7 @@ export interface paths {
     }
     /**
      * Ficha completa, con el garante expandido
-     * @description `activeContract` (Fase 9) y `payments` (Fase 11) vienen vacíos hasta esas fases.
+     * @description `activeContract` trae el id del contrato activo; `payments` (Fase 11) viene vacío hasta esa fase.
      */
     get: operations["RentersController_findOne_api/v1"]
     put?: never
@@ -1123,6 +1123,189 @@ export interface paths {
     head?: never
     /** Editar */
     patch: operations["GuarantorsController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/indices": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Valores cargados de un índice, del más reciente al más viejo */
+    get: operations["IndicesController_list_api/v1"]
+    put?: never
+    /**
+     * Cargar a mano el valor de un mes (sólo admin)
+     * @description Hasta que la Fase 13 los traiga de la fuente oficial. Un mes ya cargado no se pisa: 409.
+     */
+    post: operations["IndicesController_register_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar, con filtros por estado, propiedad, inquilino, propietario y vencimiento
+     * @description Cada fila trae las partes, el alquiler vigente y las marcas calculadas: por vencer, vencido, póliza vencida.
+     */
+    get: operations["ContractsController_list_api/v1"]
+    put?: never
+    /**
+     * Alta
+     * @description El propietario sale de la propiedad y los honorarios se fijan con su estado en este momento. La propiedad pasa a alquilada.
+     */
+    post: operations["ContractsController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha completa
+     * @description Con el historial del alquiler, la línea de tiempo y la caución. `monthlyStatus` llega con la Fase 11.
+     */
+    get: operations["ContractsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Editar notas, caución o garante
+     * @description Fechas, montos, partes y estado no se editan: cambian por un aumento, una rescisión o una renovación.
+     */
+    patch: operations["ContractsController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/termination-preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Desglose de la multa por rescisión, sin rescindir
+     * @description Mismas reglas y misma cuenta que POST /contracts/:id/terminate.
+     */
+    get: operations["ContractsController_terminationPreview_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/documents/contract": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Subir el PDF del contrato firmado (reemplaza al anterior) */
+    post: operations["ContractsController_uploadContractPdf_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/documents/policy": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Subir el PDF de la póliza de caución (reemplaza al anterior) */
+    post: operations["ContractsController_uploadPolicyPdf_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/rent-updates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Aplicar el próximo aumento programado
+     * @description Con ICL/IPC el nuevo alquiler sale de la variación del índice entre el mes del aumento anterior y el del nuevo. Con FIXED/OTHER, `newRent` es obligatorio. Aplica un aumento por llamada.
+     */
+    post: operations["ContractsController_applyRentUpdate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/terminate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Rescindir anticipadamente
+     * @description Calcula y guarda la multa (10 % del canon futuro, RN-09); la propiedad vuelve a disponible.
+     */
+    post: operations["ContractsController_terminate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/renew": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Renovar
+     * @description Crea un contrato nuevo, activo, precargado con el original salvo lo que se indique (el inquilino puede cambiar); el original queda finalizado.
+     */
+    post: operations["ContractsController_renew_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
     trace?: never
   }
   "/api/v1/examples": {
@@ -1683,6 +1866,8 @@ export interface components {
       /** @enum {string} */
       status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
       ownerId: string | null
+      /** @description Contrato activo, si lo hay */
+      activeContractId: string | null
       owner: components["schemas"]["OwnerRefDto"] | null
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
@@ -1711,6 +1896,8 @@ export interface components {
       /** @enum {string} */
       status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
       ownerId: string | null
+      /** @description Contrato activo, si lo hay */
+      activeContractId: string | null
       owner: components["schemas"]["OwnerRefDto"] | null
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
@@ -1771,7 +1958,7 @@ export interface components {
       email: string | null
       /** @description Propiedades a cargo, en cualquier estado */
       propertyCount: number
-      /** @description Las que cuentan para el honorario reducido. Hasta la Fase 9, las alquiladas. */
+      /** @description Las que cuentan para el honorario reducido: con contrato activo. */
       activePropertyCount: number
       /** @description Honorario reducido (RN-07), calculado */
       reducedFee: boolean
@@ -1808,7 +1995,7 @@ export interface components {
       email: string | null
       /** @description Propiedades a cargo, en cualquier estado */
       propertyCount: number
-      /** @description Las que cuentan para el honorario reducido. Hasta la Fase 9, las alquiladas. */
+      /** @description Las que cuentan para el honorario reducido: con contrato activo. */
       activePropertyCount: number
       /** @description Honorario reducido (RN-07), calculado */
       reducedFee: boolean
@@ -1891,6 +2078,8 @@ export interface components {
       moveInDate: string | null
       guarantor: components["schemas"]["GuarantorRefDto"] | null
       hasPortalAccess: boolean
+      /** @description Contrato activo del que es titular, si lo hay */
+      activeContractId: string | null
       /**
        * @description Estado de pago. Siempre null hasta el motor de cobros (Fase 11).
        * @enum {string|null}
@@ -1918,6 +2107,9 @@ export interface components {
       guaranteeType: "PROPERTY" | "PAYSLIPS"
       guaranteeDetail: string
     }
+    RenterActiveContractDto: {
+      id: string
+    }
     RenterDetailDto: {
       id: string
       firstName: string
@@ -1932,6 +2124,8 @@ export interface components {
        */
       moveInDate: string | null
       hasPortalAccess: boolean
+      /** @description Contrato activo del que es titular, si lo hay */
+      activeContractId: string | null
       /**
        * @description Estado de pago. Siempre null hasta el motor de cobros (Fase 11).
        * @enum {string|null}
@@ -1944,8 +2138,8 @@ export interface components {
       address: string | null
       notes: string | null
       guarantor: components["schemas"]["RenterGuarantorDto"] | null
-      /** @description Contrato activo. Siempre null hasta los contratos (Fase 9). */
-      activeContract: Record<string, never> | null
+      /** @description Contrato activo del que es titular. El detalle se pide a GET /contracts/:id. */
+      activeContract: components["schemas"]["RenterActiveContractDto"] | null
       /** @description Historial de pagos. Siempre vacío hasta el motor de cobros (Fase 11). */
       payments: Record<string, never>[]
     }
@@ -2091,6 +2285,347 @@ export interface components {
        */
       guaranteeDetail?: string
       notes?: string | null
+    }
+    IndexValueDto: {
+      id: string
+      /** @enum {string} */
+      indexType: "ICL" | "IPC"
+      /** @example 2026-03 */
+      period: string
+      /** @example 1234.567890 */
+      value: string
+      /** @example manual */
+      source: string
+      /** Format: date-time */
+      createdAt: string
+    }
+    RegisterIndexValueDto: {
+      /**
+       * @example ICL
+       * @enum {string}
+       */
+      indexType: "ICL" | "IPC"
+      /**
+       * @description Mes, AAAA-MM
+       * @example 2026-03
+       */
+      period: string
+      /**
+       * @description Valor publicado, como string decimal con hasta 6 decimales y punto.
+       * @example 1234.567890
+       */
+      value: string
+    }
+    ContractPropertyRefDto: {
+      id: string
+      address: string
+    }
+    ContractPartyRefDto: {
+      id: string
+      fullName: string
+    }
+    ContractSummaryDto: {
+      id: string
+      property: components["schemas"]["ContractPropertyRefDto"] | null
+      owner: components["schemas"]["ContractPartyRefDto"] | null
+      renter: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date */
+      startDate: string
+      /**
+       * Format: date
+       * @description Último día, inclusive
+       */
+      endDate: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /**
+       * @description Alquiler vigente: el último del historial
+       * @example 150333.33
+       */
+      currentRent: string
+      /** @enum {string} */
+      status: "ACTIVE" | "FINISHED" | "TERMINATED"
+      hasSurety: boolean
+      /** Format: date */
+      policyExpiresAt: string | null
+      /** @description Hay caución y la póliza venció (RN-16) */
+      suretyExpired: boolean
+      /** @description Activo y vence dentro de los días de aviso (RN-12) */
+      expiringSoon: boolean
+      /** @description Activo y con el fin ya pasado, sin renovar */
+      expired: boolean
+      /**
+       * @description En %
+       * @example 5.00
+       */
+      feePercentage: string
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    ContractSuretyDto: {
+      insurerName: string | null
+      insurerAlertEmail: string | null
+      policyNumber: string | null
+      /** Format: date */
+      policyExpiresAt: string | null
+      policyPdfUrl: string | null
+      suretyExpired: boolean
+    }
+    ContractTerminationDto: {
+      /** Format: date */
+      terminatedAt: string
+      /** Format: date */
+      notifiedAt: string
+      /** @example 130000.00 */
+      penalty: string
+      /** @example 1300000.00 */
+      futureRent: string
+    }
+    ContractRentUpdateDto: {
+      id: string
+      /** Format: date */
+      effectiveFrom: string
+      previousRent: string | null
+      newRent: string
+      /** @enum {string} */
+      source: "INITIAL" | "INDEX" | "MANUAL"
+      /** @enum {string|null} */
+      indexType: "ICL" | "IPC" | null
+      /** @example 2026-03 */
+      indexFromPeriod: string | null
+      /** @example 2026-04 */
+      indexToPeriod: string | null
+      indexFromValue: string | null
+      indexToValue: string | null
+      appliedById: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    ContractTimelineDto: {
+      totalMonths: number
+      elapsedMonths: number
+      progressPercent: number
+    }
+    ContractDetailDto: {
+      id: string
+      property: components["schemas"]["ContractPropertyRefDto"] | null
+      owner: components["schemas"]["ContractPartyRefDto"] | null
+      renter: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date */
+      startDate: string
+      /**
+       * Format: date
+       * @description Último día, inclusive
+       */
+      endDate: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /**
+       * @description Alquiler vigente: el último del historial
+       * @example 150333.33
+       */
+      currentRent: string
+      /** @enum {string} */
+      status: "ACTIVE" | "FINISHED" | "TERMINATED"
+      hasSurety: boolean
+      /** Format: date */
+      policyExpiresAt: string | null
+      /** @description Hay caución y la póliza venció (RN-16) */
+      suretyExpired: boolean
+      /** @description Activo y vence dentro de los días de aviso (RN-12) */
+      expiringSoon: boolean
+      /** @description Activo y con el fin ya pasado, sin renovar */
+      expired: boolean
+      /**
+       * @description En %
+       * @example 5.00
+       */
+      feePercentage: string
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      guarantor: components["schemas"]["ContractPartyRefDto"] | null
+      initialRent: string
+      /** @description Estático: no sigue a los aumentos */
+      deposit: string
+      /** @enum {string} */
+      rentUpdateType: "ICL" | "IPC" | "FIXED" | "OTHER"
+      /** @enum {string} */
+      rentUpdateFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY"
+      notes: string | null
+      contractPdfUrl: string | null
+      surety: components["schemas"]["ContractSuretyDto"] | null
+      termination: components["schemas"]["ContractTerminationDto"] | null
+      renewedFromId: string | null
+      /** @description Historial del alquiler, del más reciente al más viejo */
+      rentUpdates: components["schemas"]["ContractRentUpdateDto"][]
+      /**
+       * Format: date
+       * @description Null si no está activo o termina antes del próximo aumento
+       */
+      nextRentUpdateOn: string | null
+      timeline: components["schemas"]["ContractTimelineDto"]
+      /** @description Estado de cada mes. Siempre vacío hasta el motor de cobros (Fase 11). */
+      monthlyStatus: Record<string, never>[]
+    }
+    TerminationPreviewDto: {
+      currentRent: string
+      /** @description Meses enteros hasta el fin */
+      remainingMonths: number
+      /** @description Días sueltos después de esos meses */
+      remainingDays: number
+      /** @description Días totales desde la notificación al fin */
+      totalDays: number
+      futureRent: string
+      /** @description 10 % del canon futuro (RN-09) */
+      penalty: string
+    }
+    CreateContractDto: {
+      /** @description Propiedad a alquilar. Tiene que tener propietario (de ahí sale el del contrato) y no tener otro contrato activo. */
+      propertyId: string
+      /** @description Inquilino titular, sin otro contrato activo. */
+      renterId: string
+      /** @description Garante. Si no viene, se toma el garante actual del inquilino; null para dejarlo sin garante. */
+      guarantorId?: string | null
+      /**
+       * Format: date
+       * @example 2026-03-01
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2028-02-29
+       */
+      endDate: string
+      /** @example 150333.33 */
+      initialRent: string
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency: "ARS" | "USD"
+      /**
+       * @example ICL
+       * @enum {string}
+       */
+      rentUpdateType: "ICL" | "IPC" | "FIXED" | "OTHER"
+      /**
+       * @example QUARTERLY
+       * @enum {string}
+       */
+      rentUpdateFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY"
+      /** @example 150333.33 */
+      deposit: string
+      /** @description Si el contrato exige seguro de caución */
+      hasSurety: boolean
+      insurerName?: string | null
+      /** @description Obligatorio con caución: ahí va la alerta automática (RN-10). */
+      insurerAlertEmail?: string | null
+      policyNumber?: string | null
+      /**
+       * Format: date
+       * @example 2027-03-01
+       */
+      policyExpiresAt?: string | null
+      notes?: string | null
+    }
+    PartialSuretyDto: {
+      /** @description Si el contrato exige seguro de caución */
+      hasSurety?: boolean
+      insurerName?: string | null
+      /** @description Obligatorio con caución: ahí va la alerta automática (RN-10). */
+      insurerAlertEmail?: string | null
+      policyNumber?: string | null
+      /**
+       * Format: date
+       * @example 2027-03-01
+       */
+      policyExpiresAt?: string | null
+    }
+    UpdateContractDto: {
+      notes?: string | null
+      /** @description Garante; null para sacarlo. */
+      guarantorId?: string | null
+      /** @description Se mezcla con la caución actual y se valida el resultado. */
+      surety?: components["schemas"]["PartialSuretyDto"]
+    }
+    ApplyRentUpdateDto: {
+      /**
+       * @description Sólo para contratos FIXED u OTHER: el nuevo alquiler. Con ICL/IPC se ignora, sale del índice.
+       * @example 120000.00
+       */
+      newRent?: string
+    }
+    TerminateContractDto: {
+      /**
+       * Format: date
+       * @description Fecha en que el inquilino notificó la rescisión.
+       * @example 2026-12-01
+       */
+      notifiedAt: string
+    }
+    TerminationResultDto: {
+      /** Format: date */
+      terminatedAt: string
+      /** Format: date */
+      notifiedAt: string
+      /** @example 130000.00 */
+      penalty: string
+      /** @example 1300000.00 */
+      futureRent: string
+      remainingMonths: number
+      remainingDays: number
+      contract: components["schemas"]["ContractDetailDto"]
+    }
+    RenewContractDto: {
+      /** @description Garante. Si no viene, se toma el garante actual del inquilino; null para dejarlo sin garante. */
+      guarantorId?: string | null
+      /** @example 150333.33 */
+      initialRent?: string
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency?: "ARS" | "USD"
+      /**
+       * @example ICL
+       * @enum {string}
+       */
+      rentUpdateType?: "ICL" | "IPC" | "FIXED" | "OTHER"
+      /**
+       * @example QUARTERLY
+       * @enum {string}
+       */
+      rentUpdateFrequency?: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY"
+      /** @example 150333.33 */
+      deposit?: string
+      /** @description Si el contrato exige seguro de caución */
+      hasSurety?: boolean
+      insurerName?: string | null
+      /** @description Obligatorio con caución: ahí va la alerta automática (RN-10). */
+      insurerAlertEmail?: string | null
+      policyNumber?: string | null
+      /**
+       * Format: date
+       * @example 2027-03-01
+       */
+      policyExpiresAt?: string | null
+      notes?: string | null
+      /** @description Otro inquilino (spec 7). Si no viene, el mismo. */
+      renterId?: string
+      /**
+       * Format: date
+       * @example 2028-03-01
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2030-02-28
+       */
+      endDate: string
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -4470,7 +5005,7 @@ export interface operations {
           "application/json": components["schemas"]["ApiErrorDto"]
         }
       }
-      /** @description Tiene un contrato activo */
+      /** @description Tiene un contrato activo: el estado lo maneja el contrato */
       409: {
         headers: {
           [name: string]: unknown
@@ -4911,7 +5446,7 @@ export interface operations {
         search?: string
         /** @description Se valida pero todavía no filtra: el estado de pago llega con el motor de cobros (Fase 11). */
         paymentStatus?: "UP_TO_DATE" | "OVERDUE"
-        /** @description Se valida pero todavía no filtra: la propiedad del inquilino sale de su contrato (Fase 9). */
+        /** @description Se valida pero todavía no filtra: inquilinos no conoce la propiedad de cada contrato (D-51). */
         propertyId?: string
       }
       header?: never
@@ -5452,6 +5987,597 @@ export interface operations {
         }
       }
       409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "IndicesController_list_api/v1": {
+    parameters: {
+      query: {
+        type: "ICL" | "IPC"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IndexValueDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "IndicesController_register_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterIndexValueDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IndexValueDto"]
+        }
+      }
+      /** @description Período o valor inválido */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ese mes ya está cargado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        status?: "ACTIVE" | "FINISHED" | "TERMINATED"
+        propertyId?: string
+        renterId?: string
+        ownerId?: string
+        /** @description Sólo los activos que vencen dentro de los días de aviso de la inmobiliaria (hoy inclusive). */
+        expiringSoon?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Contratos de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ContractSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateContractDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Fechas inválidas, o caución sin email de alerta */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description La propiedad ya tiene un contrato activo, o el inquilino ya es titular de otro */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Propiedad, inquilino o garante inexistente, o propiedad sin propietario */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateContractDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_terminationPreview_api/v1": {
+    parameters: {
+      query: {
+        /** @description Fecha en que el inquilino notificó la rescisión. */
+        notifiedAt: string
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TerminationPreviewDto"]
+        }
+      }
+      /** @description Fecha de notificación fuera del contrato */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_uploadContractPdf_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description No es un PDF o pesa más de 10 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_uploadPolicyPdf_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description No es un PDF o pesa más de 10 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_applyRentUpdate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApplyRentUpdateDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Falta `newRent` en un contrato FIXED/OTHER */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Todavía no corresponde, no quedan aumentos, o el contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Falta el valor del índice de algún período */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_terminate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TerminateContractDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TerminationResultDto"]
+        }
+      }
+      /** @description Fecha de notificación fuera del contrato */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_renew_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RenewContractDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Fechas inválidas o inicio anterior al original */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El original no está activo, o el inquilino nuevo ya tiene contrato */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
         headers: {
           [name: string]: unknown
         }

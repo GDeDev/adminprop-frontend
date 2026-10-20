@@ -1,4 +1,4 @@
-import type { Contract } from "@adminprop/shared-types"
+import type { MockContract } from "./contract.type"
 
 import {
   CONTRACT_IDS as C,
@@ -25,7 +25,7 @@ const noSuretyBond = {
  * pero ninguno cumplía el umbral al firmarse → quedaron en 5%. La liquidación
  * (Fase 12) recalcula con el estado actual.
  */
-export const contracts: Contract[] = [
+export const contracts: MockContract[] = [
   {
     id: C[0],
     tenantId: TENANT_ID,
