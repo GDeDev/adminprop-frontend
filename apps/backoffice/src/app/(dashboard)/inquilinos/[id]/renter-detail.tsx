@@ -32,7 +32,8 @@ import {
 
 import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
 import { formatNationalId } from "@/lib/owners"
-import { formatDate, GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
+import { formatDate } from "@/lib/dates"
+import { GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
 import {
   useDeleteRenter,
   useIssueRenterPortalCredentials,

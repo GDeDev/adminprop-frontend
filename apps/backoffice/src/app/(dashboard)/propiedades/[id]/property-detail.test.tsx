@@ -35,6 +35,7 @@ function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
     address: "Calle 7 1234",
     status: "AVAILABLE",
     ownerId: null,
+    activeContractId: null,
     owner: null,
     location: {
       id: "l1",

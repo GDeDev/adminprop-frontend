@@ -20,6 +20,7 @@ function makeRenter(overrides: Partial<RenterDetail> = {}): RenterDetail {
     notes: null,
     moveInDate: "2026-03-01",
     hasPortalAccess: false,
+    activeContractId: null,
     paymentStatus: null,
     guarantor: {
       id: "g1",

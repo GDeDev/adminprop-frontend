@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { formatDate, whatsappLink } from "./renters"
+import { whatsappLink } from "./renters"
 
 describe("whatsappLink", () => {
   it("arma el link sin espacios y con código de país (spec Fase 8, 6)", () => {
@@ -20,12 +20,5 @@ describe("whatsappLink", () => {
     expect(whatsappLink("")).toBeNull()
     expect(whatsappLink("consultar")).toBeNull()
     expect(whatsappLink("123")).toBeNull()
-  })
-})
-
-describe("formatDate", () => {
-  it("muestra la fecha sin pasar por la zona horaria", () => {
-    expect(formatDate("2026-03-01")).toBe("01/03/2026")
-    expect(formatDate(null)).toBe("—")
   })
 })

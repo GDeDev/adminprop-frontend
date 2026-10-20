@@ -44,10 +44,3 @@ export function whatsappLink(phone: string | null | undefined): string | null {
     ? `https://wa.me/${digits}`
     : null
 }
-
-/** "2026-03-01" → "01/03/2026", sin pasar por Date (evita el desfase UTC). */
-export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—"
-  const [year, month, day] = iso.split("-")
-  return `${day}/${month}/${year}`
-}
