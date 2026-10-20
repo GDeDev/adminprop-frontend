@@ -1,7 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronRight, ListTree, SlidersHorizontal, Users } from "lucide-react"
+import {
+  ChevronRight,
+  ListTree,
+  SlidersHorizontal,
+  TrendingUp,
+  Users,
+} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { useSession } from "@adminprop/session/client"
@@ -32,7 +38,7 @@ function SettingsLink({
   )
 }
 
-/** Secciones de configuración. Usuarios sólo la ven los administradores. */
+/** Secciones de configuración. Usuarios e Índices sólo las ven los administradores. */
 export function SettingsIndex() {
   const { user } = useSession()
 
@@ -51,14 +57,24 @@ export function SettingsIndex() {
           />
         </li>
         {user?.role === "ADMIN" && (
-          <li>
-            <SettingsLink
-              href="/configuracion/usuarios"
-              icon={Users}
-              title="Usuarios"
-              description="Administradores y empleados, roles y accesos."
-            />
-          </li>
+          <>
+            <li>
+              <SettingsLink
+                href="/configuracion/usuarios"
+                icon={Users}
+                title="Usuarios"
+                description="Administradores y empleados, roles y accesos."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/indices"
+                icon={TrendingUp}
+                title="Índices"
+                description="Valores mensuales de ICL e IPC para los aumentos de alquiler."
+              />
+            </li>
+          </>
         )}
         <li className="flex items-center gap-4 rounded-xl border border-dashed p-4 text-muted-foreground">
           <SlidersHorizontal aria-hidden className="size-5" />
