@@ -1,38 +1,27 @@
-import type { IsoDate, Timestamps, Uuid } from "./common"
+import type { ApiSchemas } from "./api"
 
 /**
- * Inquilino (PRD 5.3, Fase 8). Se usa "Renter" en código para no chocar
- * con "Tenant" (la inmobiliaria en el modelo multi-tenant).
+ * Inquilinos y garantes (PRD 5.3 y 5.4, Fase 8), tal como los devuelve la
+ * API. "Renter" en código para no chocar con "Tenant" (la inmobiliaria).
  */
-export interface Renter extends Timestamps {
-  id: Uuid
-  tenantId: Uuid
-  firstName: string
-  lastName: string
-  /** Único por tenant. */
-  nationalId: string
-  phone: string
-  email: string | null
-  address: string
-  /** Fecha de inicio del primer contrato. */
-  startDate: IsoDate
-  guarantorId: Uuid | null
-  portalUsername: string | null
-}
 
-export type GuaranteeType = "property" | "payslips"
+export type RenterSummary = ApiSchemas["RenterSummaryDto"]
+export type RenterDetail = ApiSchemas["RenterDetailDto"]
+export type RenterRef = ApiSchemas["RenterRefDto"]
+/** El garante como lo muestra la ficha del inquilino. */
+export type RenterGuarantor = ApiSchemas["RenterGuarantorDto"]
+/** Estado de pago del inquilino; `null` hasta que exista el motor de cobros. */
+export type RenterPaymentStatus = NonNullable<RenterSummary["paymentStatus"]>
 
-/** Garante (PRD 5.4, Fase 8). Puede garantizar varios contratos. */
-export interface Guarantor extends Timestamps {
-  id: Uuid
-  tenantId: Uuid
-  firstName: string
-  lastName: string
-  nationalId: string
-  phone: string
-  email: string | null
-  address: string
-  guaranteeType: GuaranteeType
-  /** Texto libre: dirección/datos registrales o empleador/monto. */
-  guaranteeDetails: string
-}
+export type CreateRenterRequest = ApiSchemas["CreateRenterDto"]
+export type UpdateRenterRequest = ApiSchemas["UpdateRenterDto"]
+export type RenterDataCheck = ApiSchemas["RenterDataCheckDto"]
+
+export type GuarantorSummary = ApiSchemas["GuarantorSummaryDto"]
+export type GuarantorDetail = ApiSchemas["GuarantorDetailDto"]
+export type GuarantorRef = ApiSchemas["GuarantorRefDto"]
+export type GuaranteeType = GuarantorSummary["guaranteeType"]
+
+export type CreateGuarantorRequest = ApiSchemas["CreateGuarantorDto"]
+export type UpdateGuarantorRequest = ApiSchemas["UpdateGuarantorDto"]
+export type GuarantorDataCheck = ApiSchemas["GuarantorDataCheckDto"]

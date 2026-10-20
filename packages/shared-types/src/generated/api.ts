@@ -973,6 +973,158 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/renters": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar, con búsqueda por nombre o DNI
+     * @description Cada inquilino trae a su garante. Los filtros `paymentStatus` (Fase 11) y `propertyId` (Fase 9) se aceptan y validan desde ya, pero todavía no filtran: no hay cuotas ni contratos contra qué cruzar.
+     */
+    get: operations["RentersController_list_api/v1"]
+    put?: never
+    /** Alta */
+    post: operations["RentersController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/renters/check": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Chequear el DNI mientras se completa el formulario
+     * @description El DNI repetido bloquea el alta.
+     */
+    get: operations["RentersController_check_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/renters/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha completa, con el garante expandido
+     * @description `activeContract` (Fase 9) y `payments` (Fase 11) vienen vacíos hasta esas fases.
+     */
+    get: operations["RentersController_findOne_api/v1"]
+    put?: never
+    post?: never
+    /**
+     * Eliminar (borrado lógico, sólo admin)
+     * @description Con un contrato activo no se puede: 409.
+     */
+    delete: operations["RentersController_remove_api/v1"]
+    options?: never
+    head?: never
+    /**
+     * Editar
+     * @description Incluye el cambio de garante (`guarantorId`, o null para sacarlo); queda en la auditoría.
+     */
+    patch: operations["RentersController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/renters/{id}/portal-credentials": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Generar (o regenerar) el acceso al portal
+     * @description Devuelve la contraseña una sola vez. Regenerarla invalida la anterior.
+     */
+    post: operations["RentersController_issuePortalCredentials_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/guarantors": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar, con búsqueda por nombre o DNI
+     * @description Cada garante trae cuántos inquilinos garantiza.
+     */
+    get: operations["GuarantorsController_list_api/v1"]
+    put?: never
+    /** Alta */
+    post: operations["GuarantorsController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/guarantors/check": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Chequear el DNI mientras se completa el formulario
+     * @description Si el DNI ya está cargado, el formulario de inquilino puede ofrecer elegirlo en vez de crearlo.
+     */
+    get: operations["GuarantorsController_check_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/guarantors/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Ficha completa, con los inquilinos que garantiza */
+    get: operations["GuarantorsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    /**
+     * Eliminar (borrado lógico, sólo admin)
+     * @description Si algún inquilino lo tiene de garante no se puede: 409.
+     */
+    delete: operations["GuarantorsController_remove_api/v1"]
+    options?: never
+    head?: never
+    /** Editar */
+    patch: operations["GuarantorsController_update_api/v1"]
+    trace?: never
+  }
   "/api/v1/examples": {
     parameters: {
       query?: never
@@ -1719,6 +1871,226 @@ export interface components {
       email: string
       /** @description Se muestra una sola vez: no se puede recuperar */
       password: string
+    }
+    GuarantorRefDto: {
+      id: string
+      fullName: string
+    }
+    RenterSummaryDto: {
+      id: string
+      firstName: string
+      lastName: string
+      fullName: string
+      nationalId: string
+      phone: string | null
+      email: string | null
+      /**
+       * Format: date
+       * @description AAAA-MM-DD
+       */
+      moveInDate: string | null
+      guarantor: components["schemas"]["GuarantorRefDto"] | null
+      hasPortalAccess: boolean
+      /**
+       * @description Estado de pago. Siempre null hasta el motor de cobros (Fase 11).
+       * @enum {string|null}
+       */
+      paymentStatus: "UP_TO_DATE" | "OVERDUE" | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    RenterRefDto: {
+      id: string
+      fullName: string
+    }
+    RenterDataCheckDto: {
+      nationalIdTakenBy: components["schemas"]["RenterRefDto"] | null
+    }
+    RenterGuarantorDto: {
+      id: string
+      fullName: string
+      nationalId: string
+      phone: string | null
+      email: string | null
+      /** @enum {string} */
+      guaranteeType: "PROPERTY" | "PAYSLIPS"
+      guaranteeDetail: string
+    }
+    RenterDetailDto: {
+      id: string
+      firstName: string
+      lastName: string
+      fullName: string
+      nationalId: string
+      phone: string | null
+      email: string | null
+      /**
+       * Format: date
+       * @description AAAA-MM-DD
+       */
+      moveInDate: string | null
+      hasPortalAccess: boolean
+      /**
+       * @description Estado de pago. Siempre null hasta el motor de cobros (Fase 11).
+       * @enum {string|null}
+       */
+      paymentStatus: "UP_TO_DATE" | "OVERDUE" | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      address: string | null
+      notes: string | null
+      guarantor: components["schemas"]["RenterGuarantorDto"] | null
+      /** @description Contrato activo. Siempre null hasta los contratos (Fase 9). */
+      activeContract: Record<string, never> | null
+      /** @description Historial de pagos. Siempre vacío hasta el motor de cobros (Fase 11). */
+      payments: Record<string, never>[]
+    }
+    CreateRenterDto: {
+      /** @example Iván */
+      firstName: string
+      /** @example López */
+      lastName: string
+      /**
+       * @description DNI o CUIT. Se aceptan puntos y guiones; se guarda sólo en dígitos.
+       * @example 30123456
+       */
+      nationalId: string
+      phone?: string | null
+      /** @description Hace falta para generarle acceso al portal. */
+      email?: string | null
+      address?: string | null
+      /**
+       * Format: date
+       * @description Fecha de ingreso, sin hora (AAAA-MM-DD).
+       * @example 2026-03-01
+       */
+      moveInDate?: string | null
+      /** @description Garante (tiene que existir en la inmobiliaria). Opcional. */
+      guarantorId?: string | null
+      notes?: string | null
+    }
+    UpdateRenterDto: {
+      /** @example Iván */
+      firstName?: string
+      /** @example López */
+      lastName?: string
+      /**
+       * @description DNI o CUIT. Se aceptan puntos y guiones; se guarda sólo en dígitos.
+       * @example 30123456
+       */
+      nationalId?: string
+      phone?: string | null
+      /** @description Hace falta para generarle acceso al portal. */
+      email?: string | null
+      address?: string | null
+      /**
+       * Format: date
+       * @description Fecha de ingreso, sin hora (AAAA-MM-DD).
+       * @example 2026-03-01
+       */
+      moveInDate?: string | null
+      /** @description Garante (tiene que existir en la inmobiliaria). Opcional. */
+      guarantorId?: string | null
+      notes?: string | null
+    }
+    GuarantorSummaryDto: {
+      id: string
+      firstName: string
+      lastName: string
+      fullName: string
+      nationalId: string
+      phone: string | null
+      email: string | null
+      /** @enum {string} */
+      guaranteeType: "PROPERTY" | "PAYSLIPS"
+      guaranteeDetail: string
+      /** @description Inquilinos que garantiza */
+      renterCount: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    GuarantorDataCheckDto: {
+      nationalIdTakenBy: components["schemas"]["GuarantorRefDto"] | null
+    }
+    GuarantorDetailDto: {
+      id: string
+      firstName: string
+      lastName: string
+      fullName: string
+      nationalId: string
+      phone: string | null
+      email: string | null
+      /** @enum {string} */
+      guaranteeType: "PROPERTY" | "PAYSLIPS"
+      guaranteeDetail: string
+      /** @description Inquilinos que garantiza */
+      renterCount: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      address: string | null
+      notes: string | null
+      /** @description Inquilinos que garantiza */
+      renters: components["schemas"]["RenterRefDto"][]
+    }
+    CreateGuarantorDto: {
+      /** @example Marta */
+      firstName: string
+      /** @example Gómez */
+      lastName: string
+      /**
+       * @description DNI o CUIT. Se aceptan puntos y guiones; se guarda sólo en dígitos.
+       * @example 27999888
+       */
+      nationalId: string
+      phone?: string | null
+      email?: string | null
+      address?: string | null
+      /**
+       * @description Con qué responde: un inmueble o sus recibos de sueldo.
+       * @example PROPERTY
+       * @enum {string}
+       */
+      guaranteeType: "PROPERTY" | "PAYSLIPS"
+      /**
+       * @description Texto libre, no vacío: dirección y datos registrales del inmueble, o empleador y sueldo aproximado.
+       * @example Calle 7 123, La Plata. Matrícula 12345.
+       */
+      guaranteeDetail: string
+      notes?: string | null
+    }
+    UpdateGuarantorDto: {
+      /** @example Marta */
+      firstName?: string
+      /** @example Gómez */
+      lastName?: string
+      /**
+       * @description DNI o CUIT. Se aceptan puntos y guiones; se guarda sólo en dígitos.
+       * @example 27999888
+       */
+      nationalId?: string
+      phone?: string | null
+      email?: string | null
+      address?: string | null
+      /**
+       * @description Con qué responde: un inmueble o sus recibos de sueldo.
+       * @example PROPERTY
+       * @enum {string}
+       */
+      guaranteeType?: "PROPERTY" | "PAYSLIPS"
+      /**
+       * @description Texto libre, no vacío: dirección y datos registrales del inmueble, o empleador y sueldo aproximado.
+       * @example Calle 7 123, La Plata. Matrícula 12345.
+       */
+      guaranteeDetail?: string
+      notes?: string | null
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -4519,6 +4891,567 @@ export interface operations {
       }
       /** @description El propietario no tiene email */
       422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "RentersController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        /** @description Parte del nombre, del apellido o del DNI */
+        search?: string
+        /** @description Se valida pero todavía no filtra: el estado de pago llega con el motor de cobros (Fase 11). */
+        paymentStatus?: "UP_TO_DATE" | "OVERDUE"
+        /** @description Se valida pero todavía no filtra: la propiedad del inquilino sale de su contrato (Fase 9). */
+        propertyId?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Inquilinos de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["RenterSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "RentersController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRenterDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterDetailDto"]
+        }
+      }
+      /** @description DNI o fecha de ingreso inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay un inquilino con ese DNI */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El garante no existe en la inmobiliaria */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "RentersController_check_api/v1": {
+    parameters: {
+      query?: {
+        nationalId?: string
+        /** @description En una edición, el propio inquilino */
+        excludeId?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterDataCheckDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "RentersController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "RentersController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "RentersController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRenterDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "RentersController_issuePortalCredentials_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalCredentialsDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Otro acceso del portal ya usa ese email */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El inquilino no tiene email */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "GuarantorsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        /** @description Parte del nombre, del apellido o del DNI */
+        search?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Garantes de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["GuarantorSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "GuarantorsController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateGuarantorDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GuarantorDetailDto"]
+        }
+      }
+      /** @description DNI inválido o detalle de la garantía vacío */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay un garante con ese DNI */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "GuarantorsController_check_api/v1": {
+    parameters: {
+      query?: {
+        nationalId?: string
+        /** @description En una edición, el propio garante */
+        excludeId?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GuarantorDataCheckDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "GuarantorsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GuarantorDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "GuarantorsController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "GuarantorsController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateGuarantorDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GuarantorDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
         headers: {
           [name: string]: unknown
         }

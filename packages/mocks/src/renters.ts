@@ -1,4 +1,7 @@
-import type { Guarantor, Renter } from "@adminprop/shared-types"
+import type {
+  MockGuarantor as Guarantor,
+  MockRenter as Renter,
+} from "./renter.type"
 
 import { GUARANTOR_IDS as G, RENTER_IDS as R, TENANT_ID } from "./ids"
 
