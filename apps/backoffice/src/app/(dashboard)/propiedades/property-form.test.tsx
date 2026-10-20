@@ -42,6 +42,23 @@ vi.mock("@/components/master-data-select", () => ({
     />
   ),
 }))
+// El selector de propietario busca contra la API: acá, un input simple.
+vi.mock("@/components/owner-select", () => ({
+  OwnerSelect: (props: {
+    id?: string
+    value: string | null
+    onChange: (id: string | null, fullName: string | null) => void
+  }) => (
+    <input
+      id={props.id}
+      aria-label={props.id}
+      value={props.value ?? ""}
+      onChange={(event) =>
+        props.onChange(event.target.value || null, event.target.value || null)
+      }
+    />
+  ),
+}))
 vi.mock("@/components/location-cascade-select", () => ({
   LocationCascadeSelect: (props: {
     value: string | null
@@ -94,7 +111,9 @@ describe("PropertyForm (alta)", () => {
 
     await fillStepOne(user)
     await user.click(screen.getByRole("button", { name: "Siguiente" }))
-    expect(await screen.findByText("Asignar después")).toBeInTheDocument()
+    expect(
+      await screen.findByText(/Se puede dejar sin propietario/)
+    ).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Siguiente" }))
     await user.type(screen.getByLabelText("property-amenities"), "a1")
     await user.click(screen.getByRole("button", { name: "Siguiente" }))
@@ -108,6 +127,7 @@ describe("PropertyForm (alta)", () => {
       address: "Calle 7 1234",
       locationId: "loc-1",
       propertyTypeId: "type-1",
+      ownerId: null,
       amenityIds: ["a1"],
       notes: null,
     })

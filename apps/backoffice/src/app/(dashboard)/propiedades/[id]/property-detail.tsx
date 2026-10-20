@@ -154,11 +154,28 @@ function Detail({ property }: { property: PropertyDetail }) {
           )}
         </Section>
 
-        <Placeholder
-          icon={UserRound}
-          title="Propietario"
-          text="Sin propietario asignado. El alta de propietarios llega en la próxima etapa."
-        />
+        <Section title="Propietario">
+          {property.owner ? (
+            <Link
+              href={`/propietarios/${property.owner.id}`}
+              className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+            >
+              <UserRound aria-hidden className="size-4 text-muted-foreground" />
+              {property.owner.fullName}
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Sin propietario asignado.{" "}
+              <Link
+                href={`/propiedades/${property.id}/editar`}
+                className="underline"
+              >
+                Asignar
+              </Link>
+              .
+            </p>
+          )}
+        </Section>
         <Placeholder
           icon={FileText}
           title="Contrato activo"

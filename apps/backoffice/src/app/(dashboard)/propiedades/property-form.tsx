@@ -26,6 +26,7 @@ import { cn } from "@adminprop/ui/lib/utils"
 
 import { LocationCascadeSelect } from "@/components/location-cascade-select"
 import { MasterDataSelect } from "@/components/master-data-select"
+import { OwnerSelect } from "@/components/owner-select"
 import { MAX_PHOTOS } from "@/lib/properties"
 import {
   useCreateProperty,
@@ -37,6 +38,7 @@ const schema = z.object({
   address: z.string().trim().min(1, "Ingresá la dirección.").max(200),
   locationId: z.string().min(1, "Elegí al menos la localidad."),
   propertyTypeId: z.string().min(1, "Elegí el tipo de propiedad."),
+  ownerId: z.string().nullable(),
   amenityIds: z.array(z.string()),
   notes: z.string().max(5000),
 })
@@ -45,7 +47,7 @@ type FormValues = z.infer<typeof schema>
 
 const STEPS = [
   { title: "Datos", fields: ["address", "locationId", "propertyTypeId"] },
-  { title: "Propietario", fields: [] },
+  { title: "Propietario", fields: ["ownerId"] },
   { title: "Amenities", fields: ["amenityIds", "notes"] },
   { title: "Fotos", fields: [] },
 ] as const
@@ -62,6 +64,7 @@ const draftSchema = z
     address: z.string(),
     locationId: z.string(),
     propertyTypeId: z.string(),
+    ownerId: z.string().nullable(),
     amenityIds: z.array(z.string()),
     notes: z.string(),
   })
@@ -71,6 +74,7 @@ const EMPTY: FormValues = {
   address: "",
   locationId: "",
   propertyTypeId: "",
+  ownerId: null,
   amenityIds: [],
   notes: "",
 }
@@ -119,6 +123,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
           address: property.address,
           locationId: property.locationId,
           propertyTypeId: property.propertyTypeId,
+          ownerId: property.ownerId,
           amenityIds: property.amenityIds,
           notes: property.notes ?? "",
         }
@@ -157,6 +162,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
       address: data.address,
       locationId: data.locationId,
       propertyTypeId: data.propertyTypeId,
+      ownerId: data.ownerId,
       amenityIds: data.amenityIds,
       notes: data.notes.trim() || null,
     }
@@ -326,15 +332,38 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
           />
         </FieldGroup>
 
-        {step === 1 && (
-          <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-            <p className="font-medium text-foreground">Asignar después</p>
-            <p>
-              El alta de propietarios llega en la próxima etapa. Por ahora la
-              propiedad se guarda sin propietario y se le asigna desde su ficha.
-            </p>
-          </div>
-        )}
+        <FieldGroup className={step === 1 ? "" : "hidden"}>
+          <Controller
+            name="ownerId"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="property-owner">Propietario</FieldLabel>
+                <OwnerSelect
+                  id="property-owner"
+                  value={field.value}
+                  selectedLabel={
+                    property?.ownerId === field.value
+                      ? property?.owner?.fullName
+                      : undefined
+                  }
+                  onChange={(id) => field.onChange(id)}
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldDescription>
+                  Se puede dejar sin propietario y asignarlo después.{" "}
+                  <Link href="/propietarios/nuevo" className="underline">
+                    Cargar un propietario nuevo
+                  </Link>
+                  .
+                </FieldDescription>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </FieldGroup>
 
         <FieldGroup className={step === 2 ? "" : "hidden"}>
           <Controller
