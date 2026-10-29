@@ -63,7 +63,7 @@ const schema = z
     hasIncrease: z.boolean(),
     increaseFrequency: z.union([
       z.literal(""),
-      z.enum(["MONTHLY", "QUARTERLY", "FOUR_MONTHLY"]),
+      z.enum(["MONTHLY", "QUARTERLY", "FOUR_MONTHLY", "SEMIANNUAL", "ANNUAL"]),
     ]),
     managedByAgency: z.boolean(),
     notes: z.string().max(2000),

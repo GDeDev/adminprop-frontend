@@ -88,14 +88,26 @@ export function BillingTermsSection({
         </dd>
         <dt className="text-muted-foreground">Punitorio</dt>
         <dd>
-          {terms.lateFeePercentage} % diario tras {terms.lateFeeGraceDays} días
-          de gracia
+          {terms.lateFeePercentage === null && terms.lateFeeGraceDays === null
+            ? "El de la inmobiliaria"
+            : [
+                terms.lateFeePercentage === null
+                  ? "% de la inmobiliaria"
+                  : terms.lateFeePercentage + " % diario",
+                terms.lateFeeGraceDays === null
+                  ? "gracia de la inmobiliaria"
+                  : "tras " + terms.lateFeeGraceDays + " días de gracia",
+              ].join(", ")}
           {(terms.inheritedLateFeePercentage ||
-            terms.inheritedLateFeeGraceDays) && (
-            <Badge variant="outline" className="ml-2">
-              De la inmobiliaria
-            </Badge>
-          )}
+            terms.inheritedLateFeeGraceDays) &&
+            !(
+              terms.lateFeePercentage === null &&
+              terms.lateFeeGraceDays === null
+            ) && (
+              <Badge variant="outline" className="ml-2">
+                Parte de la inmobiliaria
+              </Badge>
+            )}
         </dd>
         <dt className="text-muted-foreground">Depósito</dt>
         <dd>

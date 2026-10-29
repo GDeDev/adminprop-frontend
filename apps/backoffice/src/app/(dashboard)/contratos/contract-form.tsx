@@ -23,6 +23,7 @@ import type {
   ContractDetail,
   CreateContractRequest,
   Currency,
+  DepositReturnMode,
   RentUpdateFrequency,
   RentUpdateType,
 } from "@adminprop/shared-types"
@@ -47,6 +48,7 @@ import { Textarea } from "@adminprop/ui/components/textarea"
 import { cn } from "@adminprop/ui/lib/utils"
 
 import { GuarantorSelect } from "@/components/guarantor-select"
+import { DEPOSIT_RETURN_MODE_LABELS } from "@/lib/billing"
 import { PropertySelect } from "@/components/property-select"
 import { RenterSelect } from "@/components/renter-select"
 import {
@@ -67,6 +69,10 @@ import { addDays, formatDate } from "@/lib/dates"
 import { useProperty } from "@/lib/properties-api"
 import { useRenter } from "@/lib/renters-api"
 
+import {
+  BillingTermsFields,
+  billingTermsSchema,
+} from "./[id]/change-billing-terms-dialog"
 import { SuretyFields, suretySchema } from "./[id]/edit-contract-dialog"
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -85,14 +91,48 @@ const schema = z
     ),
     currency: z.enum(["ARS", "USD"]),
     rentUpdateType: z.enum(["ICL", "IPC", "FIXED", "OTHER"]),
-    rentUpdateFrequency: z.enum(["MONTHLY", "QUARTERLY", "FOUR_MONTHLY"]),
+    rentUpdateFrequency: z.enum([
+      "MONTHLY",
+      "QUARTERLY",
+      "FOUR_MONTHLY",
+      "SEMIANNUAL",
+      "ANNUAL",
+    ]),
+    fixedIncreasePercentage: z.string(),
     deposit: amount("Ingresá el depósito (puede ser 0)."),
+    depositCurrency: z.enum(["ARS", "USD"]),
+    depositReturnMode: z.enum(["FIXED", "FOLLOWS_RENT", "MANUAL"]),
+    ...billingTermsSchema.shape,
     surety: suretySchema,
     startDate: z.string().regex(DATE, "Ingresá la fecha de inicio."),
     endDate: z.string().regex(DATE, "Ingresá la fecha de fin."),
     notes: z.string().max(5000),
   })
   .superRefine((values, ctx) => {
+    // Las reglas de los términos de cobro son las del diálogo de la ficha;
+    // el % no se carga en el alta (lo fija la API, D-57).
+    const terms = billingTermsSchema.safeParse(values)
+    if (!terms.success) {
+      for (const issue of terms.error.issues) {
+        if (issue.path[0] === "feePercentage") continue
+        ctx.addIssue({
+          code: "custom",
+          path: issue.path,
+          message: issue.message,
+        })
+      }
+    }
+    if (
+      values.rentUpdateType === "FIXED" &&
+      values.fixedIncreasePercentage.trim() !== "" &&
+      normalizeAmount(values.fixedIncreasePercentage) === null
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["fixedIncreasePercentage"],
+        message: "Ingresá un porcentaje válido o dejalo vacío.",
+      })
+    }
     if (
       DATE.test(values.startDate) &&
       DATE.test(values.endDate) &&
@@ -119,7 +159,18 @@ const STEPS: { title: string; fields: FieldName[] }[] = [
       "currency",
       "rentUpdateType",
       "rentUpdateFrequency",
+      "fixedIncreasePercentage",
       "deposit",
+      "depositCurrency",
+      "depositReturnMode",
+      "collectionMode",
+      "feeMode",
+      "feeKind",
+      "feePercentage",
+      "feeAmount",
+      "customLateFee",
+      "lateFeePercentage",
+      "lateFeeGraceDays",
     ],
   },
   { title: "Caución", fields: ["surety"] },
@@ -143,7 +194,18 @@ const EMPTY: FormValues = {
   currency: "ARS",
   rentUpdateType: "ICL",
   rentUpdateFrequency: "QUARTERLY",
+  fixedIncreasePercentage: "",
   deposit: "",
+  depositCurrency: "ARS",
+  depositReturnMode: "FIXED",
+  collectionMode: "AGENCY",
+  feeMode: "DEDUCTED",
+  feeKind: "PERCENTAGE",
+  feePercentage: "",
+  feeAmount: "",
+  customLateFee: false,
+  lateFeePercentage: "",
+  lateFeeGraceDays: "",
   surety: {
     hasSurety: false,
     insurerName: "",
@@ -165,8 +227,25 @@ const draftSchema = z
     initialRent: z.string(),
     currency: z.enum(["ARS", "USD"]),
     rentUpdateType: z.enum(["ICL", "IPC", "FIXED", "OTHER"]),
-    rentUpdateFrequency: z.enum(["MONTHLY", "QUARTERLY", "FOUR_MONTHLY"]),
+    rentUpdateFrequency: z.enum([
+      "MONTHLY",
+      "QUARTERLY",
+      "FOUR_MONTHLY",
+      "SEMIANNUAL",
+      "ANNUAL",
+    ]),
+    fixedIncreasePercentage: z.string(),
     deposit: z.string(),
+    depositCurrency: z.enum(["ARS", "USD"]),
+    depositReturnMode: z.enum(["FIXED", "FOLLOWS_RENT", "MANUAL"]),
+    collectionMode: z.enum(["AGENCY", "OWNER_DIRECT"]),
+    feeMode: z.enum(["DEDUCTED", "OWNER_PAYS", "RENTER_PAYS_ON_BEHALF"]),
+    feeKind: z.enum(["PERCENTAGE", "FIXED"]),
+    feePercentage: z.string(),
+    feeAmount: z.string(),
+    customLateFee: z.boolean(),
+    lateFeePercentage: z.string(),
+    lateFeeGraceDays: z.string(),
     surety: z
       .object({
         hasSurety: z.boolean(),
@@ -207,7 +286,24 @@ function renewalValues(original: ContractDetail): FormValues {
     currency: original.currency,
     rentUpdateType: original.rentUpdateType,
     rentUpdateFrequency: original.rentUpdateFrequency,
+    fixedIncreasePercentage: original.fixedIncreasePercentage ?? "",
     deposit: original.deposit,
+    depositCurrency: original.depositCurrency,
+    depositReturnMode: original.depositReturnMode,
+    // Los términos de cobro vigentes del original se proponen para el nuevo.
+    collectionMode: original.billingTerms.collectionMode,
+    feeMode: original.billingTerms.feeMode,
+    feeKind: original.billingTerms.feeAmount ? "FIXED" : "PERCENTAGE",
+    feePercentage: original.billingTerms.feePercentage,
+    feeAmount: original.billingTerms.feeAmount ?? "",
+    customLateFee:
+      original.billingTerms.lateFeePercentage !== null ||
+      original.billingTerms.lateFeeGraceDays !== null,
+    lateFeePercentage: original.billingTerms.lateFeePercentage ?? "",
+    lateFeeGraceDays:
+      original.billingTerms.lateFeeGraceDays === null
+        ? ""
+        : String(original.billingTerms.lateFeeGraceDays),
     surety: {
       hasSurety: original.hasSurety,
       insurerName: original.surety?.insurerName ?? "",
@@ -376,7 +472,24 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
       currency: data.currency,
       rentUpdateType: data.rentUpdateType,
       rentUpdateFrequency: data.rentUpdateFrequency,
+      fixedIncreasePercentage:
+        data.rentUpdateType === "FIXED" &&
+        data.fixedIncreasePercentage.trim() !== ""
+          ? normalizeAmount(data.fixedIncreasePercentage)
+          : null,
       deposit: normalizeAmount(data.deposit)!,
+      depositCurrency: data.depositCurrency,
+      depositReturnMode: data.depositReturnMode,
+      collectionMode: data.collectionMode,
+      feeMode: data.feeMode,
+      feeAmount:
+        data.feeKind === "FIXED" ? normalizeAmount(data.feeAmount) : null,
+      lateFeePercentage: data.customLateFee
+        ? normalizeAmount(data.lateFeePercentage)
+        : null,
+      lateFeeGraceDays: data.customLateFee
+        ? Number(data.lateFeeGraceDays)
+        : null,
       hasSurety: data.surety.hasSurety,
       insurerName: data.surety.insurerName || null,
       insurerAlertEmail: data.surety.insurerAlertEmail || null,
@@ -756,11 +869,117 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
                   <FieldError errors={[fieldState.error]} />
                 ) : (
                   <FieldDescription>
-                    Queda fijo: no sigue a los aumentos.
+                    Lo recibido, en la moneda que se recibió.
                   </FieldDescription>
                 )}
               </Field>
             )}
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Controller
+              name="depositCurrency"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel htmlFor="contract-deposit-currency">
+                    Moneda del depósito
+                  </FieldLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => field.onChange(value as Currency)}
+                  >
+                    <SelectTrigger
+                      id="contract-deposit-currency"
+                      className="w-full"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(CURRENCY_LABELS) as Currency[]).map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {CURRENCY_LABELS[c]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+            />
+            <Controller
+              name="depositReturnMode"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel htmlFor="contract-deposit-mode">
+                    Cómo se devuelve
+                  </FieldLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) =>
+                      field.onChange(value as DepositReturnMode)
+                    }
+                  >
+                    <SelectTrigger
+                      id="contract-deposit-mode"
+                      className="w-full"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(
+                        Object.keys(
+                          DEPOSIT_RETURN_MODE_LABELS
+                        ) as DepositReturnMode[]
+                      ).map((mode) => (
+                        <SelectItem key={mode} value={mode}>
+                          {DEPOSIT_RETURN_MODE_LABELS[mode]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+            />
+          </div>
+          {values.rentUpdateType === "FIXED" && (
+            <Controller
+              name="fixedIncreasePercentage"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field
+                  data-invalid={fieldState.invalid}
+                  className="sm:max-w-xs"
+                >
+                  <FieldLabel htmlFor="contract-fixed-increase">
+                    Porcentaje fijo de aumento (opcional)
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="contract-fixed-increase"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : (
+                    <FieldDescription>
+                      Con un %, cada aumento se calcula solo; sin él, se carga a
+                      mano.
+                    </FieldDescription>
+                  )}
+                </Field>
+              )}
+            />
+          )}
+          <h3 className="font-display text-base font-semibold">
+            Cobro y honorarios
+          </h3>
+          <BillingTermsFields
+            form={form}
+            prefix="contract"
+            currency={values.currency ?? "ARS"}
+            percentageEditable={false}
           />
         </FieldGroup>
 

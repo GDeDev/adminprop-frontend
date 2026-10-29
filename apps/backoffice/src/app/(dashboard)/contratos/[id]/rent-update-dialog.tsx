@@ -49,7 +49,14 @@ export function RentUpdateDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const apply = useApplyRentUpdate()
-  const manual = !usesIndex(contract.rentUpdateType)
+  const indexed = usesIndex(contract.rentUpdateType)
+  const fixedPercentage =
+    contract.rentUpdateType === "FIXED"
+      ? contract.fixedIncreasePercentage
+      : null
+  // Sin índice ni % fijo, el monto es obligatorio; en los otros casos es un
+  // ajuste manual autorizado (Micaela, punto 8) y puede quedar vacío.
+  const requiresAmount = !indexed && fixedPercentage === null
   const [newRent, setNewRent] = React.useState("")
   const [fieldError, setFieldError] = React.useState<string | null>(null)
   const [error, setError] = React.useState<string | null>(null)
@@ -57,15 +64,19 @@ export function RentUpdateDialog({
   async function confirm() {
     setError(null)
     setFieldError(null)
-    const amount = manual ? normalizeAmount(newRent) : null
-    if (manual && amount === null) {
+    const amount = newRent.trim() === "" ? null : normalizeAmount(newRent)
+    if (newRent.trim() !== "" && amount === null) {
+      setFieldError("El monto no es válido.")
+      return
+    }
+    if (requiresAmount && amount === null) {
       setFieldError("Ingresá el nuevo alquiler.")
       return
     }
     try {
       const updated = await apply.mutateAsync({
         id: contract.id,
-        ...(manual ? { newRent: amount! } : {}),
+        ...(amount !== null ? { newRent: amount } : {}),
       })
       toast.success(
         `Aumento aplicado: ahora el alquiler es ${formatMoney(updated.currentRent, updated.currency)}.`
@@ -82,9 +93,11 @@ export function RentUpdateDialog({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Aplicar aumento</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            {manual
+            {requiresAmount
               ? "El contrato tiene actualización manual: cargá el alquiler nuevo."
-              : `El alquiler nuevo sale del ${RENT_UPDATE_TYPE_LABELS[contract.rentUpdateType]} del mes. Si falta cargar el índice, se avisa.`}
+              : indexed
+                ? `El alquiler nuevo sale del ${RENT_UPDATE_TYPE_LABELS[contract.rentUpdateType]} del mes. Si falta cargar el índice, se avisa. Podés cargar un monto a mano como ajuste autorizado.`
+                : `El alquiler sube ${fixedPercentage} % (porcentaje fijo del contrato). Podés cargar otro monto a mano como ajuste autorizado.`}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -106,10 +119,12 @@ export function RentUpdateDialog({
                 : "No quedan aumentos"}
             </dd>
           </dl>
-          {manual && (
+          {
             <Field data-invalid={fieldError !== null}>
               <FieldLabel htmlFor="rent-update-new-rent">
-                Nuevo alquiler
+                {requiresAmount
+                  ? "Nuevo alquiler"
+                  : "Nuevo alquiler (opcional)"}
               </FieldLabel>
               <Input
                 id="rent-update-new-rent"
@@ -127,7 +142,7 @@ export function RentUpdateDialog({
                 </FieldDescription>
               )}
             </Field>
-          )}
+          }
           {error && (
             <Alert variant="destructive" role="alert">
               <AlertDescription>{error}</AlertDescription>

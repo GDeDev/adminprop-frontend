@@ -24,6 +24,8 @@ function makeContract(
     expiringSoon: false,
     expired: false,
     feePercentage: "5.00",
+    collectionMode: "AGENCY",
+    feeMode: "DEDUCTED",
     createdAt: "2025-02-20T15:00:00.000Z",
     updatedAt: "2025-02-20T15:00:00.000Z",
     ...overrides,

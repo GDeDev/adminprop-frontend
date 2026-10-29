@@ -48,6 +48,7 @@ import { ContractBadges } from "../contract-list"
 import { ServicesSection } from "../../propiedades/[id]/services-section"
 import { AccountSection } from "./account-section"
 import { AdvanceExpensesSection } from "./advance-expenses-section"
+import { BillingTermsSection } from "./billing-terms-section"
 import { DocumentActions } from "./document-upload"
 import { EditContractDialog } from "./edit-contract-dialog"
 import { InstallmentsSection } from "./installments-section"
@@ -256,6 +257,12 @@ function Detail({ contract }: { contract: ContractDetail }) {
         </Section>
 
         <SuretySection contract={contract} today={today} />
+
+        <BillingTermsSection
+          contract={contract}
+          terms={contract.billingTerms}
+          history={contract.billingTermsHistory}
+        />
 
         <Section
           title="Documento del contrato"

@@ -141,8 +141,9 @@ export function ChangeBillingTermsDialog({
       feeAmount: terms.feeAmount ?? "",
       customLateFee:
         !terms.inheritedLateFeePercentage || !terms.inheritedLateFeeGraceDays,
-      lateFeePercentage: terms.lateFeePercentage,
-      lateFeeGraceDays: String(terms.lateFeeGraceDays),
+      lateFeePercentage: terms.lateFeePercentage ?? "",
+      lateFeeGraceDays:
+        terms.lateFeeGraceDays === null ? "" : String(terms.lateFeeGraceDays),
       notes: "",
     },
   })
@@ -282,10 +283,13 @@ export function BillingTermsFields<T extends BillingTermsValues>({
   form,
   prefix,
   currency,
+  percentageEditable = true,
 }: {
   form: ReturnType<typeof useForm<T>>
   prefix: string
   currency: Currency
+  /** En el alta el % lo fija la API según el propietario (D-57). */
+  percentageEditable?: boolean
 }) {
   const control = form.control as unknown as ReturnType<
     typeof useForm<BillingTermsValues>
@@ -406,6 +410,14 @@ export function BillingTermsFields<T extends BillingTermsValues>({
               </Field>
             )}
           />
+        ) : !percentageEditable ? (
+          <Field>
+            <FieldLabel>Porcentaje del alquiler</FieldLabel>
+            <FieldDescription>
+              Lo fija la inmobiliaria según el propietario: honorario estándar o
+              reducido. Se puede cambiar después desde la ficha.
+            </FieldDescription>
+          </Field>
         ) : (
           <Controller
             name="feePercentage"

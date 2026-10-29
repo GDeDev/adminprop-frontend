@@ -11,7 +11,7 @@ import {
   apiErrorMessage,
   apiFieldErrors,
 } from "@adminprop/session/client"
-import type { ContractDetail } from "@adminprop/shared-types"
+import type { ContractDetail, DepositReturnMode } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import {
@@ -30,10 +30,18 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@adminprop/ui/components/select"
 import { Switch } from "@adminprop/ui/components/switch"
 import { Textarea } from "@adminprop/ui/components/textarea"
 
 import { GuarantorSelect } from "@/components/guarantor-select"
+import { DEPOSIT_RETURN_MODE_LABELS } from "@/lib/billing"
 import { useUpdateContract } from "@/lib/contracts-api"
 
 export const suretySchema = z
@@ -62,6 +70,7 @@ export const suretySchema = z
 
 const schema = z.object({
   notes: z.string().max(5000),
+  depositReturnMode: z.enum(["FIXED", "FOLLOWS_RENT", "MANUAL"]),
   guarantorId: z.string().nullable(),
   surety: suretySchema,
 })
@@ -87,6 +96,7 @@ export function EditContractDialog({
     resolver: zodResolver(schema),
     defaultValues: {
       notes: contract.notes ?? "",
+      depositReturnMode: contract.depositReturnMode,
       guarantorId: contract.guarantor?.id ?? null,
       surety: {
         hasSurety: contract.hasSurety,
@@ -108,6 +118,7 @@ export function EditContractDialog({
       await update.mutateAsync({
         id: contract.id,
         notes: values.notes.trim() || null,
+        depositReturnMode: values.depositReturnMode,
         guarantorId: values.guarantorId,
         surety: {
           hasSurety: values.surety.hasSurety,
@@ -160,9 +171,9 @@ export function EditContractDialog({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Editar contrato</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Se pueden cambiar las observaciones, el garante y la caución.
-            Montos, fechas y partes cambian con un aumento, una rescisión o una
-            renovación.
+            Se pueden cambiar las observaciones, el garante, la caución y cómo
+            se devuelve el depósito. Montos, fechas y partes cambian con un
+            aumento, una rescisión o una renovación.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <form
@@ -208,6 +219,45 @@ export function EditContractDialog({
                 La póliza en PDF se sube desde la ficha.
               </FieldDescription>
             )}
+            <Controller
+              name="depositReturnMode"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel htmlFor="edit-contract-deposit-mode">
+                    Devolución del depósito
+                  </FieldLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) =>
+                      field.onChange(value as DepositReturnMode)
+                    }
+                  >
+                    <SelectTrigger
+                      id="edit-contract-deposit-mode"
+                      className="w-full"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(
+                        Object.keys(
+                          DEPOSIT_RETURN_MODE_LABELS
+                        ) as DepositReturnMode[]
+                      ).map((mode) => (
+                        <SelectItem key={mode} value={mode}>
+                          {DEPOSIT_RETURN_MODE_LABELS[mode]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>
+                    Lo que se devuelve al terminar el contrato (Micaela, punto
+                    1).
+                  </FieldDescription>
+                </Field>
+              )}
+            />
             <Controller
               name="notes"
               control={form.control}

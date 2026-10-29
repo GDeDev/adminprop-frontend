@@ -60,6 +60,8 @@ export const RENT_UPDATE_FREQUENCY_LABELS: Record<RentUpdateFrequency, string> =
     MONTHLY: "Mensual",
     QUARTERLY: "Trimestral",
     FOUR_MONTHLY: "Cuatrimestral",
+    SEMIANNUAL: "Semestral",
+    ANNUAL: "Anual",
   }
 
 export const RENT_UPDATE_SOURCE_LABELS: Record<RentUpdateSource, string> = {

@@ -33,6 +33,7 @@ import { formatDate } from "@/lib/dates"
 const MOVEMENT_LABELS: Record<AccountMovementType, string> = {
   INSTALLMENT: "Cuota",
   CHARGE: "Cargo",
+  LATE_FEE_ACCRUED: "Punitorio devengado",
   PAYMENT: "Pago",
   CREDIT_APPLIED: "Saldo a favor aplicado",
   CREDIT_GENERATED: "Saldo a favor generado",
