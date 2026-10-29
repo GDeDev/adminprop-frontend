@@ -3,6 +3,7 @@ import {
   FileText,
   KeyRound,
   LayoutDashboard,
+  Receipt,
   Settings,
   ShieldCheck,
   Users,
@@ -20,6 +21,7 @@ export const navItems: NavItem[] = [
   { href: "/garantes", label: "Garantes", icon: ShieldCheck },
   { href: "/contratos", label: "Contratos", icon: FileText },
   { href: "/cobros", label: "Cobros", icon: Wallet },
+  { href: "/liquidaciones", label: "Liquidaciones", icon: Receipt },
   { href: "/configuracion", label: "Configuración", icon: Settings },
 ]
 
