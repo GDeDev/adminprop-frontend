@@ -1,0 +1,12 @@
+# Fase 10 — Servicios y gastos adelantados (resumen funcional)
+
+> Para quien no programa. El detalle técnico está en `docs/tecnica/fase-10.md`.
+
+- **Servicios en la ficha de la propiedad:** una sección nueva con la tabla de expensas, luz, gas, agua, etc.: qué servicio es, quién lo paga (inquilino o propietario) y en qué moneda, cuándo vence, si está **al día** (verde) o **vencido hace N días** (rojo), y si tiene aumentos y con qué frecuencia. Los servicios que gestiona la inmobiliaria llevan la marca "Gestiona la inmobiliaria".
+- **Agregar servicio:** un formulario corto (en el celular sube desde abajo). Se elige el tipo de la lista de Maestros, quién paga y la moneda. "Tiene vencimiento" abre el campo de fecha; "Tiene aumentos" abre la frecuencia (mensual, trimestral, cuatrimestral). Si se prende uno sin completar el dato, avisa antes de guardar. Cada fila se puede editar o eliminar (con confirmación).
+- **Servicios en la ficha del contrato:** la misma tabla, pero mezclando los servicios **de la propiedad** (que el contrato hereda) con los **del contrato** (por ejemplo, un servicio que sólo este inquilino paga). Cada fila dice de cuál es. Un servicio agregado desde el contrato queda atado a ese contrato; los de la propiedad se agregan desde la ficha de la propiedad.
+- **Gastos adelantados en la ficha del contrato:** lo que el inquilino pagó por cuenta del propietario (una reparación, una expensa extraordinaria) y que después se le descuenta al propietario en la liquidación. Se registra con monto, moneda, qué se pagó, fecha y **el comprobante obligatorio** (foto o PDF, hasta 10 MB). Cada gasto muestra "Ver comprobante", quién lo registró y el estado: **"Pendiente de descuento"** (amarillo) o **"Descontado en liquidación"** (verde, con el número de la liquidación; el link a la liquidación llega con la etapa de liquidaciones).
+- Abajo de la lista están los totales del contrato: cuánto hay pendiente de descontar y cuánto ya se descontó. Las pestañas Todos / Pendientes / Descontados filtran la lista sin cambiar los totales.
+- Un gasto pendiente se puede corregir (monto, descripción, fecha; el comprobante no) y eliminar (sólo administradores). Uno ya descontado no se toca.
+- **Dashboard → Servicios vencidos:** arriba del dashboard aparece la lista de servicios vencidos de toda la inmobiliaria, los más atrasados primero, con el total en rojo y un link a cada propiedad. Se ven cinco; "Ver todos" muestra el resto.
+- Lo que no cambió: el asistente de nuevo contrato sigue sin paso de servicios; se cargan desde la ficha una vez creado.

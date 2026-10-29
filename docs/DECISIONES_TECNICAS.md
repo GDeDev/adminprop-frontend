@@ -326,6 +326,28 @@ La spec dice "propiedad (solo `disponible`)". La regla real de la API es "sin co
 
 `formatDate` salió de `lib/renters.ts` porque contratos la usa en todos lados. Las cuentas de días (badge de póliza, "en N días", inicio de la renovación) se hacen en UTC a partir del string `AAAA-MM-DD`: sin `new Date("2026-03-01")` local, que en Argentina da el día anterior.
 
+## Fase 10 — Servicios y gastos adelantados
+
+### DT-53 — Una sola sección de servicios para propiedad y contrato; sin paso en el wizard
+
+`ServicesSection` vive en `propiedades/[id]/` y la ficha del contrato la importa con `contractId` y el resultado de `useContractServices`, que trae los propios y los heredados con `scope` (D-66). La única diferencia visual es la marca "Del contrato" / "De la propiedad". Dos tablas casi iguales habrían divergido en el primer cambio. Por lo mismo no se agregó el paso "servicios" al wizard que DT-46 dejaba previsto: la API ata el servicio a un `contractId` que no existe hasta crear el contrato, y los servicios de la propiedad ya se heredan solos. Si Micaela pide cargarlos en el alta, es un paso que llama a `POST /properties/:id/services` después del `POST /contracts`, igual que el PDF.
+
+### DT-54 — Desde la ficha del contrato, el servicio nuevo es del contrato
+
+"Agregar servicio" en la ficha del contrato manda `contractId`; en la ficha de la propiedad, `null`. Es lo que el usuario está mirando: si está en el contrato, el servicio es de ese inquilino. Los heredados se editan desde cualquiera de las dos fichas (el `PATCH` no cambia la propiedad ni el contrato), así que no hace falta ir a la propiedad para corregir una fecha. Con la propiedad eliminada (`contract.property === null`) la sección se lista pero no deja agregar.
+
+### DT-55 — El comprobante se valida antes de subir y es obligatorio sólo al registrar
+
+La API exige el archivo por contenido (D-67). El front repite la regla por tipo MIME o extensión (JPG, PNG, WebP, PDF) y por tamaño (10 MB) en `receiptProblem`, para avisar antes de mandar 10 MB que van a rebotar. Al editar no se muestra el campo: la API no cambia el comprobante de un gasto, y un gasto mal cargado se elimina y se vuelve a registrar. `EXPENSE_ALREADY_SETTLED` (409) se muestra como error general y la sección se refresca.
+
+### DT-56 — "Liquidación {id}" sin link hasta la Fase 12
+
+La spec (5.2) pide el badge "Descontado en liquidación #X" con link a la liquidación "cuando exista". `ExpenseStatus` muestra el badge verde y, debajo, el `settlementId` como texto. Cuando la Fase 12 cree `/liquidaciones/[id]`, se cambia el `span` por un `Link` y nada más.
+
+### DT-57 — Vencidos en el dashboard: cinco a la vista, "Ver todos" con scroll infinito
+
+El dashboard real llega en la Fase 19, pero la spec (3.1) pide ver los vencidos de toda la inmobiliaria y la API ya los pagina del más atrasado al menos. `OverdueServices` muestra la primera página recortada a cinco filas con el total en el badge; "Ver todos" destapa la página entera y agrega `LoadMore`. Así la pantalla no se llena con cien filas si la inmobiliaria viene atrasada, y el componente se mueve tal cual a la tarjeta del dashboard de la Fase 19. Invalida con el resto de `services`: al corregir un vencimiento en una ficha, el dashboard se actualiza solo.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
