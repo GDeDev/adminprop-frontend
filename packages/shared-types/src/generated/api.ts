@@ -1188,8 +1188,8 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * Editar notas, caución o garante
-     * @description Fechas, montos, partes y estado no se editan: cambian por un aumento, una rescisión o una renovación.
+     * Editar notas, caución, garante o modo de devolución del depósito
+     * @description Fechas, montos, partes y estado no se editan: cambian por un aumento, una rescisión o una renovación. Los términos de cobro cambian por POST /contracts/:id/billing-terms.
      */
     patch: operations["ContractsController_update_api/v1"]
     trace?: never
@@ -1208,6 +1208,26 @@ export interface paths {
     get: operations["ContractsController_terminationPreview_api/v1"]
     put?: never
     post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/billing-terms": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cambiar los términos de cobro (sólo admin)
+     * @description Agrega una vigencia nueva: modalidad de cobro, honorarios (% o importe fijo) y punitorio. Lo que no viene se copia de la vigente; las anteriores quedan en el historial y las cuotas ya generadas no cambian.
+     */
+    post: operations["ContractsController_changeBillingTerms_api/v1"]
     delete?: never
     options?: never
     head?: never
@@ -1439,6 +1459,346 @@ export interface paths {
      * @description Monto, descripción y fecha. Un gasto ya descontado en una liquidación no se edita (409).
      */
     patch: operations["AdvanceExpensesController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/billing/installments/generate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Generar las cuotas de un mes (idempotente)
+     * @description Una cuota por contrato activo que cubre el mes, con el alquiler vigente y los términos de cobro copiados. Sin `period`, el mes siguiente. Correrlo dos veces no duplica.
+     */
+    post: operations["InstallmentsController_generate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar cuotas con saldos a hoy
+     * @description Filtros por mes, estado (OVERDUE calculado), contrato, inquilino, propiedad, propietario y modalidad de cobro.
+     */
+    get: operations["InstallmentsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/summary": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Resumen del mes por moneda
+     * @description Cantidades por estado, base, cargos, cobrado (por quién lo recibió), punitorio devengado y cobrado, honorarios devengados y saldo.
+     */
+    get: operations["InstallmentsController_summary_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha de la cuota
+     * @description Saldos a hoy, cargos, pagos (con cotización e imputación), ajustes del punitorio, detalle diario y saldo a favor disponible.
+     */
+    get: operations["InstallmentsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/breakdown": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Desglose a una fecha
+     * @description Base, cargos, días y punitorio, pagado por concepto, saldos, crédito disponible y total a pagar, recalculados a `asOf` (default hoy).
+     */
+    get: operations["InstallmentsController_breakdown_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Cuenta corriente del contrato
+     * @description Totales, cuotas y movimientos cronológicos (devengado, cargos, punitorio, pagos, saldos a favor, anulaciones) más el depósito con su devolución sugerida. El contrato puede estar en cualquier estado.
+     */
+    get: operations["InstallmentsController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/charges": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar un cargo a la cuota
+     * @description Expensas, multa de rescisión u otro concepto, en la moneda de la cuota. Sólo sobre una cuota no saldada. No devenga punitorio.
+     */
+    post: operations["PaymentsController_createCharge_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/charges/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un cargo sin imputaciones
+     * @description El cargo queda registrado como anulado y deja de contar.
+     */
+    post: operations["PaymentsController_voidCharge_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar un pago
+     * @description Multipart. Parcial o total, en la moneda del contrato o en la otra con cotización (fuente, fecha, valor). Se aplican antes los saldos a favor (`applyCredit`, default true); después el pago se imputa punitorio → alquiler → cargos, o según `allocation` (JSON). El exceso queda como saldo a favor. Recibido por el propietario nace pendiente de confirmación.
+     */
+    post: operations["PaymentsController_registerPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/apply-credit": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Aplicar saldo a favor a la cuota, a mano
+     * @description Sin plata: aplica los créditos disponibles del inquilino en la moneda del contrato (o uno puntual, hasta un monto). `payment` es la primera aplicación; `creditApplications`, las demás.
+     */
+    post: operations["PaymentsController_applyCredit_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/late-fee-adjustments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reducir o condonar el punitorio (sólo admin)
+     * @description REDUCE descuenta `amount` del punitorio pendiente; WAIVE lo condona entero y deja de devengar. Siempre con motivo.
+     */
+    post: operations["PaymentsController_adjustLateFee_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar pagos
+     * @description Filtros por contrato, inquilino, estado (pendientes de confirmación), quién lo recibió y rango de fechas de pago.
+     */
+    get: operations["PaymentsController_listPayments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/payments/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar un pago informado por el propietario
+     * @description No cambia saldos (A-11): es control interno.
+     */
+    post: operations["PaymentsController_confirmPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/payments/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un pago (sólo admin)
+     * @description Deja de contar en todo y la cuota se recalcula. El saldo a favor que generó tiene que estar sin usar; anular una aplicación de crédito devuelve el monto al crédito.
+     */
+    post: operations["PaymentsController_voidPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/renters/{renterId}/credits": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Saldos a favor de un inquilino
+     * @description Disponibles, aplicados, devueltos y anulados, con el total disponible por moneda.
+     */
+    get: operations["PaymentsController_listCredits_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/credits/{id}/refund": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Devolver un saldo a favor (sólo admin)
+     * @description Registra la devolución: fecha, medio y notas. Sólo un crédito disponible.
+     */
+    post: operations["PaymentsController_refundCredit_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/arrears": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mora por inquilino
+     * @description `?renterId=a&renterId=b` o `?renterIds=a,b`. Una fila por id pedido aunque no tenga cuotas (UP_TO_DATE). Para badges en listados y fichas.
+     */
+    get: operations["PaymentsController_arrears_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
     trace?: never
   }
   "/api/v1/examples": {
@@ -2488,14 +2848,68 @@ export interface components {
       /** @description Activo y con el fin ya pasado, sin renovar */
       expired: boolean
       /**
-       * @description En %
+       * @description En %: el vigente hoy según los términos de cobro
        * @example 5.00
        */
       feePercentage: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
       updatedAt: string
+    }
+    ContractCurrentBillingTermsDto: {
+      id: string
+      /** Format: date */
+      effectiveFrom: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+      /**
+       * @description Null = el de la inmobiliaria
+       * @example 5.00
+       */
+      lateFeePercentage: string | null
+      /**
+       * @description Null = los de la inmobiliaria
+       * @example 10
+       */
+      lateFeeGraceDays: number | null
+      notes: string | null
+      changedBy: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+      /** @description El % de punitorio es el de la inmobiliaria */
+      inheritedLateFeePercentage: boolean
+      /** @description La gracia es la de la inmobiliaria */
+      inheritedLateFeeGraceDays: boolean
+    }
+    ContractBillingTermsDto: {
+      id: string
+      /** Format: date */
+      effectiveFrom: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+      /** @description Null = el de la inmobiliaria */
+      lateFeePercentage: string | null
+      /** @description Null = los de la inmobiliaria */
+      lateFeeGraceDays: number | null
+      notes: string | null
+      changedBy: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
     }
     ContractSuretyDto: {
       insurerName: string | null
@@ -2532,6 +2946,8 @@ export interface components {
       indexToPeriod: string | null
       indexFromValue: string | null
       indexToValue: string | null
+      /** @description El % fijo aplicado (FIXED con fixedIncreasePercentage) */
+      fixedPercentage: string | null
       appliedById: string | null
       /** Format: date-time */
       createdAt: string
@@ -2572,22 +2988,36 @@ export interface components {
       /** @description Activo y con el fin ya pasado, sin renovar */
       expired: boolean
       /**
-       * @description En %
+       * @description En %: el vigente hoy según los términos de cobro
        * @example 5.00
        */
       feePercentage: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
       updatedAt: string
       guarantor: components["schemas"]["ContractPartyRefDto"] | null
       initialRent: string
-      /** @description Estático: no sigue a los aumentos */
+      /** @description Lo recibido, en depositCurrency */
       deposit: string
+      /** @enum {string} */
+      depositCurrency: "ARS" | "USD"
+      /** @enum {string} */
+      depositReturnMode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /** @example 10.00 */
+      fixedIncreasePercentage: string | null
+      billingTerms: components["schemas"]["ContractCurrentBillingTermsDto"]
+      /** @description Historial de términos de cobro, del más nuevo al más viejo */
+      billingTermsHistory: components["schemas"]["ContractBillingTermsDto"][]
       /** @enum {string} */
       rentUpdateType: "ICL" | "IPC" | "FIXED" | "OTHER"
       /** @enum {string} */
-      rentUpdateFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY"
+      rentUpdateFrequency:
+        "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | "SEMIANNUAL" | "ANNUAL"
       notes: string | null
       contractPdfUrl: string | null
       surety: components["schemas"]["ContractSuretyDto"] | null
@@ -2649,9 +3079,25 @@ export interface components {
        * @example QUARTERLY
        * @enum {string}
        */
-      rentUpdateFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY"
+      rentUpdateFrequency:
+        "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | "SEMIANNUAL" | "ANNUAL"
       /** @example 150333.33 */
       deposit: string
+      /**
+       * @description Moneda en que se recibió el depósito. Default: la del contrato.
+       * @enum {string}
+       */
+      depositCurrency?: "ARS" | "USD"
+      /**
+       * @description Cómo se devuelve el depósito al terminar. Default FIXED.
+       * @enum {string}
+       */
+      depositReturnMode?: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /**
+       * @description Con rentUpdateType FIXED: el % que se aplica solo en cada aumento. Sin él, el aumento se carga a mano.
+       * @example 10.00
+       */
+      fixedIncreasePercentage?: string | null
       /** @description Si el contrato exige seguro de caución */
       hasSurety: boolean
       insurerName?: string | null
@@ -2663,6 +3109,70 @@ export interface components {
        * @example 2027-03-01
        */
       policyExpiresAt?: string | null
+      notes?: string | null
+      /**
+       * @description Quién cobra el alquiler. Default AGENCY.
+       * @enum {string}
+       */
+      collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      /**
+       * @description Cómo cobra sus honorarios la inmobiliaria. Default DEDUCTED.
+       * @enum {string}
+       */
+      feeMode?: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /**
+       * @description Importe fijo de honorarios; si viene, manda sobre el %.
+       * @example 25000.00
+       */
+      feeAmount?: string | null
+      /**
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria.
+       * @example 5.00
+       */
+      lateFeePercentage?: string | null
+      /**
+       * @description Días del mes sin punitorio. Si no viene, los de la inmobiliaria.
+       * @example 10
+       */
+      lateFeeGraceDays?: number | null
+    }
+    ChangeBillingTermsDto: {
+      /**
+       * @description Quién cobra el alquiler. Default AGENCY.
+       * @enum {string}
+       */
+      collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      /**
+       * @description Cómo cobra sus honorarios la inmobiliaria. Default DEDUCTED.
+       * @enum {string}
+       */
+      feeMode?: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /**
+       * @description Importe fijo de honorarios; si viene, manda sobre el %.
+       * @example 25000.00
+       */
+      feeAmount?: string | null
+      /**
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria.
+       * @example 5.00
+       */
+      lateFeePercentage?: string | null
+      /**
+       * @description Días del mes sin punitorio. Si no viene, los de la inmobiliaria.
+       * @example 10
+       */
+      lateFeeGraceDays?: number | null
+      /**
+       * Format: date
+       * @description Desde cuándo rigen. Default hoy. No anterior a los términos vigentes y dentro del contrato.
+       * @example 2026-11-01
+       */
+      effectiveFrom?: string
+      /**
+       * @description En %
+       * @example 5.00
+       */
+      feePercentage?: string
       notes?: string | null
     }
     PartialSuretyDto: {
@@ -2684,10 +3194,12 @@ export interface components {
       guarantorId?: string | null
       /** @description Se mezcla con la caución actual y se valida el resultado. */
       surety?: components["schemas"]["PartialSuretyDto"]
+      /** @enum {string} */
+      depositReturnMode?: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
     }
     ApplyRentUpdateDto: {
       /**
-       * @description Sólo para contratos FIXED u OTHER: el nuevo alquiler. Con ICL/IPC se ignora, sale del índice.
+       * @description El nuevo alquiler a mano. Obligatorio en FIXED sin % fijo y en OTHER. Opcional en FIXED con % fijo (si no viene se calcula) y en ICL/IPC (ajuste manual autorizado; si no viene, sale del índice).
        * @example 120000.00
        */
       newRent?: string
@@ -2732,9 +3244,25 @@ export interface components {
        * @example QUARTERLY
        * @enum {string}
        */
-      rentUpdateFrequency?: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY"
+      rentUpdateFrequency?:
+        "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | "SEMIANNUAL" | "ANNUAL"
       /** @example 150333.33 */
       deposit?: string
+      /**
+       * @description Moneda en que se recibió el depósito. Default: la del contrato.
+       * @enum {string}
+       */
+      depositCurrency?: "ARS" | "USD"
+      /**
+       * @description Cómo se devuelve el depósito al terminar. Default FIXED.
+       * @enum {string}
+       */
+      depositReturnMode?: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /**
+       * @description Con rentUpdateType FIXED: el % que se aplica solo en cada aumento. Sin él, el aumento se carga a mano.
+       * @example 10.00
+       */
+      fixedIncreasePercentage?: string | null
       /** @description Si el contrato exige seguro de caución */
       hasSurety?: boolean
       insurerName?: string | null
@@ -2747,6 +3275,31 @@ export interface components {
        */
       policyExpiresAt?: string | null
       notes?: string | null
+      /**
+       * @description Quién cobra el alquiler. Default AGENCY.
+       * @enum {string}
+       */
+      collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      /**
+       * @description Cómo cobra sus honorarios la inmobiliaria. Default DEDUCTED.
+       * @enum {string}
+       */
+      feeMode?: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /**
+       * @description Importe fijo de honorarios; si viene, manda sobre el %.
+       * @example 25000.00
+       */
+      feeAmount?: string | null
+      /**
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria.
+       * @example 5.00
+       */
+      lateFeePercentage?: string | null
+      /**
+       * @description Días del mes sin punitorio. Si no viene, los de la inmobiliaria.
+       * @example 10
+       */
+      lateFeeGraceDays?: number | null
       /** @description Otro inquilino (spec 7). Si no viene, el mismo. */
       renterId?: string
       /**
@@ -2779,7 +3332,13 @@ export interface components {
       dueDate: string | null
       hasIncrease: boolean
       /** @enum {string|null} */
-      increaseFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      increaseFrequency:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
       managedByAgency: boolean
       notes: string | null
       /**
@@ -2822,7 +3381,13 @@ export interface components {
        * @example QUARTERLY
        * @enum {string|null}
        */
-      increaseFrequency?: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      increaseFrequency?:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
       /** @description Si la inmobiliaria gestiona el pago, o es sólo informativo (igual puede tener vencimiento). */
       managedByAgency: boolean
       notes?: string | null
@@ -2841,7 +3406,13 @@ export interface components {
       dueDate: string | null
       hasIncrease: boolean
       /** @enum {string|null} */
-      increaseFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      increaseFrequency:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
       managedByAgency: boolean
       notes: string | null
       /**
@@ -2879,7 +3450,13 @@ export interface components {
       dueDate: string | null
       hasIncrease: boolean
       /** @enum {string|null} */
-      increaseFrequency: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      increaseFrequency:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
       managedByAgency: boolean
       notes: string | null
       /**
@@ -2923,7 +3500,13 @@ export interface components {
        * @example QUARTERLY
        * @enum {string|null}
        */
-      increaseFrequency?: "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | null
+      increaseFrequency?:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
       /** @description Si la inmobiliaria gestiona el pago, o es sólo informativo (igual puede tener vencimiento). */
       managedByAgency?: boolean
       notes?: string | null
@@ -2979,6 +3562,489 @@ export interface components {
        * @example 2026-10-05
        */
       expenseDate?: string
+    }
+    GenerateInstallmentsDto: {
+      /**
+       * @description Mes `AAAA-MM`. Si no viene, el mes siguiente al actual.
+       * @example 2026-11
+       */
+      period?: string
+    }
+    InstallmentGenerationResultDto: {
+      /** @example 2026-11 */
+      period: string
+      /** @description Contratos activos que cubren el mes */
+      contracts: number
+      created: number
+      /** @description Ya tenían su cuota */
+      skipped: number
+    }
+    InstallmentContractRefDto: {
+      id: string
+    }
+    PropertyRefDto: {
+      id: string
+      address: string
+    }
+    InstallmentSummaryDto: {
+      id: string
+      /** @example 2026-10 */
+      period: string
+      contract: components["schemas"]["InstallmentContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example 200000.00 */
+      baseAmount: string
+      chargesTotal: string
+      /** @description Punitorio devengado a hoy */
+      lateFeeAccrued: string
+      /** @description Σ reducciones */
+      lateFeeAdjusted: string
+      lateFeeWaived: boolean
+      lateFeeBalance: string
+      /** @description Imputado por los pagos vigentes */
+      paidTotal: string
+      rentBalance: string
+      chargesBalance: string
+      totalDue: string
+      /** @description Informado por el propietario, sin confirmar */
+      pendingConfirmationTotal: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      /** Format: date */
+      graceEndDate: string
+      /** @description Días con punitorio */
+      feeDays: number
+      /** Format: date */
+      paidAt: string | null
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** Format: date-time */
+      createdAt: string
+    }
+    BillingSummaryByCurrencyDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      total: number
+      pending: number
+      partial: number
+      overdue: number
+      paid: number
+      baseTotal: string
+      chargesTotal: string
+      collectedTotal: string
+      collectedByAgency: string
+      collectedByOwner: string
+      pendingConfirmationTotal: string
+      lateFeeAccrued: string
+      lateFeeCollected: string
+      feeAccruedOnBase: string
+      feeAccruedOnCollected: string
+      balanceTotal: string
+    }
+    BillingSummaryDto: {
+      /** @example 2026-10 */
+      period: string
+      byCurrency: components["schemas"]["BillingSummaryByCurrencyDto"][]
+    }
+    UserRefDto: {
+      id: string
+      fullName: string
+    }
+    InstallmentChargeDto: {
+      id: string
+      /** @enum {string} */
+      concept: "SERVICE" | "TERMINATION_PENALTY" | "OTHER"
+      description: string
+      amount: string
+      createdBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      voidedAt: string | null
+      voidReason: string | null
+    }
+    PaymentDto: {
+      id: string
+      installmentId: string
+      contractId: string
+      renterId: string
+      /** @example 2026-10 */
+      period: string
+      /** Format: date */
+      paidAt: string
+      /** @enum {string} */
+      paidCurrency: "ARS" | "USD"
+      /** @description En paidCurrency */
+      amount: string
+      /** @example 1487.5000 */
+      exchangeRate: string | null
+      /** @enum {string|null} */
+      exchangeRateSource: "OFFICIAL" | "MEP" | "OTHER" | null
+      /** Format: date */
+      exchangeRateDate: string | null
+      amountInContractCurrency: string
+      /** @enum {string} */
+      kind: "CASH_IN" | "CREDIT_APPLICATION"
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER"
+      /** @enum {string} */
+      receivedBy: "AGENCY" | "OWNER"
+      /** @enum {string} */
+      status: "PENDING_CONFIRMATION" | "CONFIRMED" | "VOIDED"
+      lateFeeApplied: string
+      rentApplied: string
+      chargesApplied: string
+      creditGenerated: string
+      creditId: string | null
+      receiptUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      confirmedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+      voidedBy: components["schemas"]["UserRefDto"] | null
+      voidReason: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    LateFeeAdjustmentDto: {
+      id: string
+      /** @enum {string} */
+      kind: "REDUCE" | "WAIVE"
+      amount: string
+      reason: string
+      createdBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    LateFeeDayDto: {
+      /** Format: date */
+      day: string
+      dayNumber: number
+      outstandingBase: string
+      /** @example 5.00 */
+      dailyPercentage: string
+      amount: string
+    }
+    InstallmentDetailDto: {
+      id: string
+      /** @example 2026-10 */
+      period: string
+      contract: components["schemas"]["InstallmentContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example 200000.00 */
+      baseAmount: string
+      chargesTotal: string
+      /** @description Punitorio devengado a hoy */
+      lateFeeAccrued: string
+      /** @description Σ reducciones */
+      lateFeeAdjusted: string
+      lateFeeWaived: boolean
+      lateFeeBalance: string
+      /** @description Imputado por los pagos vigentes */
+      paidTotal: string
+      rentBalance: string
+      chargesBalance: string
+      totalDue: string
+      /** @description Informado por el propietario, sin confirmar */
+      pendingConfirmationTotal: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      /** Format: date */
+      graceEndDate: string
+      /** @description Días con punitorio */
+      feeDays: number
+      /** Format: date */
+      paidAt: string | null
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** Format: date-time */
+      createdAt: string
+      /** @example 5.00 */
+      lateFeePercentage: string
+      lateFeeGraceDays: number
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+      feeOnBase: string
+      feeOnCollected: string
+      charges: components["schemas"]["InstallmentChargeDto"][]
+      /** @description Más nuevos primero */
+      payments: components["schemas"]["PaymentDto"][]
+      lateFeeAdjustments: components["schemas"]["LateFeeAdjustmentDto"][]
+      lateFeeDays: components["schemas"]["LateFeeDayDto"][]
+      /** @description Disponible del inquilino en la moneda del contrato */
+      creditsAvailable: string
+      notes: string | null
+      /** Format: date-time */
+      updatedAt: string
+    }
+    InstallmentBreakdownDto: {
+      installmentId: string
+      period: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** Format: date */
+      asOf: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      baseAmount: string
+      chargesTotal: string
+      /** Format: date */
+      graceEndDate: string
+      feeDays: number
+      lateFeePercentage: string
+      lateFeeAccrued: string
+      lateFeeAdjusted: string
+      lateFeeWaived: boolean
+      rentPaid: string
+      chargesPaid: string
+      lateFeePaid: string
+      rentBalance: string
+      chargesBalance: string
+      lateFeeBalance: string
+      totalDue: string
+      creditAvailable: string
+      totalDueAfterCredit: string
+      days: components["schemas"]["LateFeeDayDto"][]
+    }
+    ContractAccountContractDto: {
+      id: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @enum {string} */
+      depositReturnMode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+    }
+    ContractAccountTotalsDto: {
+      accrued: string
+      chargesTotal: string
+      lateFeeAccrued: string
+      lateFeeAdjusted: string
+      collected: string
+      collectedByAgency: string
+      collectedByOwner: string
+      pendingConfirmation: string
+      balance: string
+      creditsAvailable: string
+      feeAccruedOnBase: string
+      feeAccruedOnCollected: string
+    }
+    ContractAccountInstallmentDto: {
+      id: string
+      period: string
+      baseAmount: string
+      chargesTotal: string
+      lateFeeAccrued: string
+      lateFeeBalance: string
+      paidTotal: string
+      totalDue: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      /** Format: date */
+      graceEndDate: string
+      /** Format: date */
+      paidAt: string | null
+    }
+    ContractAccountMovementDto: {
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      type:
+        | "INSTALLMENT"
+        | "CHARGE"
+        | "LATE_FEE_ACCRUED"
+        | "PAYMENT"
+        | "CREDIT_APPLIED"
+        | "CREDIT_GENERATED"
+        | "CREDIT_REFUNDED"
+        | "LATE_FEE_ADJUSTMENT"
+        | "PAYMENT_VOIDED"
+        | "DEPOSIT_RECEIVED"
+      description: string
+      debit: string | null
+      credit: string | null
+      /** @description Saldo acumulado (deuda positiva) */
+      balance: string
+      installmentId: string | null
+      paymentId: string | null
+    }
+    ContractAccountDepositDto: {
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      returnMode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /** @description FIXED: el depósito; FOLLOWS_RENT: el alquiler vigente; MANUAL: null */
+      suggestedReturn: string | null
+    }
+    ContractAccountDto: {
+      contract: components["schemas"]["ContractAccountContractDto"]
+      totals: components["schemas"]["ContractAccountTotalsDto"]
+      installments: components["schemas"]["ContractAccountInstallmentDto"][]
+      /** @description Cronológico ascendente */
+      movements: components["schemas"]["ContractAccountMovementDto"][]
+      deposit: components["schemas"]["ContractAccountDepositDto"]
+    }
+    CreateChargeDto: {
+      /** @enum {string} */
+      concept: "SERVICE" | "TERMINATION_PENALTY" | "OTHER"
+      /** @example Expensas de octubre */
+      description: string
+      /** @example 150333.33 */
+      amount: string
+    }
+    VoidDto: {
+      reason: string
+    }
+    RegisterPaymentResultDto: {
+      payment: components["schemas"]["PaymentDto"]
+      /** @description Aplicaciones de saldo a favor hechas en la misma operación */
+      creditApplications: components["schemas"]["PaymentDto"][]
+      installment: components["schemas"]["InstallmentDetailDto"]
+    }
+    ApplyCreditDto: {
+      /** @description Un crédito puntual; si no, los disponibles del más viejo al más nuevo. */
+      creditId?: string
+      /**
+       * @description Hasta este monto; si no, hasta cubrir la deuda.
+       * @example 20000.00
+       */
+      amount?: string
+    }
+    CreateLateFeeAdjustmentDto: {
+      /** @enum {string} */
+      kind: "REDUCE" | "WAIVE"
+      /**
+       * @description Sólo REDUCE: lo que se descuenta del punitorio.
+       * @example 5000.00
+       */
+      amount?: string
+      reason: string
+    }
+    PaymentListItemDto: {
+      id: string
+      installmentId: string
+      contractId: string
+      renterId: string
+      /** @example 2026-10 */
+      period: string
+      /** Format: date */
+      paidAt: string
+      /** @enum {string} */
+      paidCurrency: "ARS" | "USD"
+      /** @description En paidCurrency */
+      amount: string
+      /** @example 1487.5000 */
+      exchangeRate: string | null
+      /** @enum {string|null} */
+      exchangeRateSource: "OFFICIAL" | "MEP" | "OTHER" | null
+      /** Format: date */
+      exchangeRateDate: string | null
+      amountInContractCurrency: string
+      /** @enum {string} */
+      kind: "CASH_IN" | "CREDIT_APPLICATION"
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER"
+      /** @enum {string} */
+      receivedBy: "AGENCY" | "OWNER"
+      /** @enum {string} */
+      status: "PENDING_CONFIRMATION" | "CONFIRMED" | "VOIDED"
+      lateFeeApplied: string
+      rentApplied: string
+      chargesApplied: string
+      creditGenerated: string
+      creditId: string | null
+      receiptUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      confirmedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+      voidedBy: components["schemas"]["UserRefDto"] | null
+      voidReason: string | null
+      /** Format: date-time */
+      createdAt: string
+      renter: components["schemas"]["RenterRefDto"] | null
+      property: components["schemas"]["PropertyRefDto"] | null
+      /**
+       * @description La del contrato
+       * @enum {string}
+       */
+      currency: "ARS" | "USD"
+    }
+    CreditTotalDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      available: string
+    }
+    RenterCreditDto: {
+      id: string
+      renterId: string
+      contractId: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      amount: string
+      remaining: string
+      /** @enum {string} */
+      status: "AVAILABLE" | "APPLIED" | "REFUNDED" | "VOIDED"
+      originPaymentId: string
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date */
+      refundedAt: string | null
+      /** @enum {string|null} */
+      refundMethod: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | null
+      refundNotes: string | null
+    }
+    RenterCreditsDto: {
+      renterId: string
+      totals: components["schemas"]["CreditTotalDto"][]
+      /** @description Todos, más nuevos primero */
+      credits: components["schemas"]["RenterCreditDto"][]
+    }
+    RefundCreditDto: {
+      /**
+       * Format: date
+       * @example 2026-10-20
+       */
+      refundedAt: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER"
+      notes?: string
+    }
+    MoneyByCurrencyDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      amount: string
+    }
+    RenterArrearsDto: {
+      renterId: string
+      /** @enum {string} */
+      status: "UP_TO_DATE" | "PENDING" | "OVERDUE"
+      overdueInstallments: number
+      maxDaysOverdue: number
+      lateFeeAccrued: components["schemas"]["MoneyByCurrencyDto"][]
+      balance: components["schemas"]["MoneyByCurrencyDto"][]
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -6675,6 +7741,58 @@ export interface operations {
       }
     }
   }
+  "ContractsController_changeBillingTerms_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangeBillingTermsDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Fecha fuera del contrato o valores inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description La fecha es anterior a los términos vigentes, o el contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
   "ContractsController_uploadContractPdf_api/v1": {
     parameters: {
       query?: never
@@ -7406,6 +8524,825 @@ export interface operations {
       }
       /** @description Ya descontado en una liquidación */
       409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_generate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateInstallmentsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentGenerationResultDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        period?: string
+        /** @description OVERDUE: con saldo y la gracia vencida. PENDING y PARTIAL excluyen las vencidas. */
+        status?: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+        contractId?: string
+        renterId?: string
+        propertyId?: string
+        ownerId?: string
+        collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Cuotas de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InstallmentSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_summary_api/v1": {
+    parameters: {
+      query: {
+        period: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["BillingSummaryDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_breakdown_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Fecha del desglose. Default hoy. */
+        asOf?: string
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentBreakdownDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_account_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractAccountDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_createCharge_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateChargeDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cuota saldada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_voidCharge_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado, o con pagos imputados */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_registerPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: date */
+          paidAt: string
+          /** @example 150000.00 */
+          amount: string
+          /** @enum {string} */
+          paidCurrency: "ARS" | "USD"
+          /** @example 1487.5000 */
+          exchangeRate?: string
+          /** @enum {string} */
+          exchangeRateSource?: "OFFICIAL" | "MEP" | "OTHER"
+          /** Format: date */
+          exchangeRateDate?: string
+          /** @enum {string} */
+          method: "TRANSFER" | "CASH" | "OTHER"
+          /** @enum {string} */
+          receivedBy?: "AGENCY" | "OWNER"
+          /** @example {"lateFee":"0.00","rent":"100000.00","charges":"0.00"} */
+          allocation?: string
+          /** @enum {string} */
+          applyCredit?: "true" | "false"
+          notes?: string
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RegisterPaymentResultDto"]
+        }
+      }
+      /** @description Monto, fecha, cotización, imputación o comprobante inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cuota saldada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_applyCredit_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApplyCreditDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RegisterPaymentResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Sin saldo a favor disponible, otra moneda, o cuota saldada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_adjustLateFee_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateLateFeeAdjustmentDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_listPayments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        contractId?: string
+        renterId?: string
+        status?: "PENDING_CONFIRMATION" | "CONFIRMED" | "VOIDED"
+        receivedBy?: "AGENCY" | "OWNER"
+        /** @description Fecha de pago desde */
+        from?: string
+        /** @description Fecha de pago hasta */
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Pagos de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentListItemDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_confirmPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PaymentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya confirmado o anulado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_voidPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado, o el crédito que generó ya se usó */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_listCredits_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        renterId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterCreditsDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_refundCredit_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RefundCreditDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterCreditDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El crédito no está disponible */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_arrears_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Repetible: `?renterId=a&renterId=b`. */
+        renterId?: string[]
+        /** @description Alternativa: ids separados por coma. */
+        renterIds?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterArrearsDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
         headers: {
           [name: string]: unknown
         }
