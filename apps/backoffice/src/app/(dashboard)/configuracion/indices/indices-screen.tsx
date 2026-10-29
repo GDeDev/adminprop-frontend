@@ -53,6 +53,8 @@ import { INDEX_TYPE_LABELS } from "@/lib/contracts"
 import { useIndexValues, useRegisterIndexValue } from "@/lib/contracts-api"
 import { formatPeriod } from "@/lib/dates"
 
+import { IndexStatusPanel } from "./index-status"
+
 const INDEX_TYPES: IndexType[] = ["ICL", "IPC"]
 
 const dateTimeFormat = new Intl.DateTimeFormat("es-AR", {
@@ -85,10 +87,13 @@ export function IndicesScreen() {
         </h1>
         <p className="text-sm text-muted-foreground">
           Valores mensuales de ICL e IPC: con ellos se calculan los aumentos de
-          los contratos. Son los mismos para todas las inmobiliarias.
+          los contratos. Son los mismos para todas las inmobiliarias. Se traen
+          solos del BCRA y del INDEC; si la fuente falla, se cargan a mano.
           {!canRegister && " Sólo un administrador puede cargarlos."}
         </p>
       </div>
+
+      <IndexStatusPanel canRun={canRegister} />
 
       {canRegister && <RegisterForm onRegistered={setType} />}
 

@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { ComingSoon } from "@adminprop/ui/components/coming-soon"
 
 import { MockDataCheck } from "./mock-data-check"
+import { InternalAlerts } from "./internal-alerts"
 import { OverdueServices } from "./overdue-services"
 
 export const metadata: Metadata = { title: "Dashboard" }
@@ -14,6 +15,7 @@ export default function Page() {
         title="Dashboard"
         description="Resumen del mes, alertas y accesos rápidos — Fase 19."
       />
+      <InternalAlerts />
       <OverdueServices />
       <MockDataCheck />
     </div>

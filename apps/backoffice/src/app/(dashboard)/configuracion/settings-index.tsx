@@ -5,6 +5,7 @@ import {
   ChevronRight,
   ListTree,
   SlidersHorizontal,
+  Timer,
   TrendingUp,
   Users,
 } from "lucide-react"
@@ -64,6 +65,14 @@ export function SettingsIndex() {
                 icon={Users}
                 title="Usuarios"
                 description="Administradores y empleados, roles y accesos."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/automatizaciones"
+                icon={Timer}
+                title="Automatizaciones"
+                description="Cuotas, aumentos, índices y avisos que corren solos; historial y ejecución manual."
               />
             </li>
             <li>

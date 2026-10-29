@@ -35,6 +35,10 @@ vi.mock("@adminprop/session/client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@adminprop/session/client")>()),
   useSession: () => ({ user: { id: "u1", role } as User }),
 }))
+vi.mock("@/lib/automations-api", () => ({
+  useIndexStatus: () => ({ isPending: false, isError: false, data: [] }),
+  useRunJob: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
 vi.mock("@/lib/contracts-api", () => ({
   useIndexValues: (type: string) => ({
     isPending: false,
