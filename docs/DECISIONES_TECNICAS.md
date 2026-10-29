@@ -348,6 +348,44 @@ La spec (5.2) pide el badge "Descontado en liquidación #X" con link a la liquid
 
 El dashboard real llega en la Fase 19, pero la spec (3.1) pide ver los vencidos de toda la inmobiliaria y la API ya los pagina del más atrasado al menos. `OverdueServices` muestra la primera página recortada a cinco filas con el total en el badge; "Ver todos" destapa la página entera y agrega `LoadMore`. Así la pantalla no se llena con cien filas si la inmobiliaria viene atrasada, y el componente se mueve tal cual a la tarjeta del dashboard de la Fase 19. Invalida con el resto de `services`: al corregir un vencimiento en una ficha, el dashboard se actualiza solo.
 
+## Fase 11 — Cobros y punitorios
+
+### DT-58 — Pantallas escritas en paralelo contra nombres de DTOs acordados
+
+El backend y el frontend de la fase se hicieron a la vez: los nombres de los DTOs de vista (`InstallmentSummaryDto`, `PaymentDto`, `ContractAccountDto`, …) se fijaron por escrito antes de codear y el frontend arrancó con interfaces a mano en `shared-types/billing.ts`. Cuando el backend exportó el `openapi.json`, se regeneraron los tipos y el archivo pasó a ser alias de `ApiSchemas`, como el resto. La única diferencia que apareció fue un valor más en `AccountMovementType` (`LATE_FEE_ACCRUED`), que el `Record` de etiquetas obligó a contemplar. Si en otra fase se repite el patrón, la regla es la misma: alias en cuanto exista el contrato, nunca interfaces a mano en `main`.
+
+### DT-59 — Cobros arranca en el mes actual; `?renterId=` muestra todas las cuotas de un inquilino
+
+`/cobros` muestra el mes en curso con el resumen por moneda; las flechas y el `<input type="month">` cambian de mes. Desde la ficha del inquilino se llega con `?renterId=`: ahí no hay mes ni resumen, se listan todas sus cuotas, de la más nueva a la más vieja. `useSearchParams` obliga a envolver la pantalla en `Suspense` en la `page`.
+
+### DT-60 — El estado de la cuota es el de la API; el front sólo lo pinta
+
+`PENDING`, `PARTIAL`, `OVERDUE` y `PAID` vienen calculados (D-71); el badge agrega los días de punitorio ("Vencida · 5 días") con `feeDays`, también de la API. Dos badges más salen de campos ya calculados: "Pago sin confirmar" (`pendingConfirmationTotal` distinto de cero) y "Punitorio condonado" (`lateFeeWaived`). Nada se deduce de fechas en el front.
+
+### DT-61 — Toda mutación de cobros invalida la clave `billing` entera
+
+Un pago cambia la cuota, el resumen del mes, la cuenta corriente del contrato, los créditos del inquilino y su mora. En vez de invalidar cada clave, `useBillingMutation` invalida `["billing"]` y listo; además los listados de inquilinos muestran mora, pero la leen de `billing/arrears`, así que también quedan al día. Es más consulta de la necesaria y menos riesgo de una pantalla vieja; si pesa, se afina por clave.
+
+### DT-62 — La imputación manual no suma en el front
+
+DT-51 prohíbe aritmética de plata en el cliente. El diálogo de pago muestra el saldo de cada concepto al lado del campo y manda los tres montos como vienen; la API valida que sumen lo pagado y no superen los saldos (`PAYMENT_INVALID_ALLOCATION`) y el mensaje vuelve al campo "Alquiler". Lo mismo con la cotización: el equivalente lo calcula la API y se muestra después.
+
+### DT-63 — La cotización se exige en el front cuando la moneda difiere, y la API la vuelve a exigir
+
+Con la moneda del pago distinta de la del contrato aparecen cotización, fuente y fecha; sin cotización o fuente no se manda (A-9). La API responde igual `PAYMENT_EXCHANGE_RATE_REQUIRED`, que también se mapea al campo: la regla vive en los dos lados porque la del front es sólo para avisar antes.
+
+### DT-64 — Anulaciones con motivo en un diálogo compartido
+
+Pagos y cargos se anulan con `ReasonDialog` (motivo obligatorio, botón destructivo); el diálogo recibe la mutación como función. Lo mismo vale para la Fase 12 (cancelar liquidaciones, anular transferencias). Sólo admin ve el tacho en los pagos; en los cargos puede cualquiera mientras la cuota no esté cobrada, y la API rechaza con 409 si ya tienen imputaciones.
+
+### DT-65 — Los términos de cobro comparten campos entre el wizard y la ficha
+
+`BillingTermsFields` (en `change-billing-terms-dialog.tsx`) y `billingTermsSchema` se usan en el diálogo de la ficha y en el paso "Condiciones" del wizard, con el mismo truco de tipos que `SuretyFields` (DT-46). En el alta el porcentaje no se carga: lo fija la API según el propietario (D-57) y el campo se reemplaza por un texto (`percentageEditable={false}`); el wizard quita del `superRefine` los errores de `feePercentage`. La renovación propone los términos vigentes del original, que la API recibe como campos del alta.
+
+### DT-66 — Mora en lote para el listado de inquilinos
+
+El listado pide `/billing/arrears` una vez con todos los ids de la página cargada (`useArrears`), en vez de una consulta por fila, y mantiene un `Map` por inquilino. El filtro por estado de pago sigue deshabilitado: la API todavía no filtra (D-46) y filtrar en el cliente mentiría sobre el total. El badge "Sin datos" quedó para mientras carga.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
