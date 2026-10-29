@@ -22,5 +22,9 @@ export default defineConfig({
     passWithNoTests: true,
     setupFiles: ["./test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    // El wizard de contratos recorre cinco pasos con userEvent: con la suite
+    // entera en paralelo supera los 5 s por defecto y arrastra a los tests
+    // siguientes del archivo (borrador compartido en localStorage).
+    testTimeout: 15_000,
   },
 })

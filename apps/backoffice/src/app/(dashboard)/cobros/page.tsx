@@ -1,14 +1,17 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 
-import { ComingSoon } from "@adminprop/ui/components/coming-soon"
+import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
+
+import { BillingScreen } from "./billing-screen"
 
 export const metadata: Metadata = { title: "Cobros" }
 
 export default function Page() {
+  // `useSearchParams` en la pantalla exige un límite de Suspense.
   return (
-    <ComingSoon
-      title="Cobros"
-      description="Cobros del mes y punitorios — Fase 11."
-    />
+    <Suspense fallback={<PageSkeleton cards={3} />}>
+      <BillingScreen />
+    </Suspense>
   )
 }

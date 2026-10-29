@@ -44,3 +44,9 @@ if (typeof window !== "undefined" && !window.matchMedia) {
     })),
   })
 }
+
+// jsdom no implementa scrollIntoView, que el Select de Radix llama al abrir
+// para enfocar la opción elegida. Un stub inerte alcanza.
+if (typeof Element !== "undefined") {
+  Element.prototype.scrollIntoView ??= () => {}
+}
