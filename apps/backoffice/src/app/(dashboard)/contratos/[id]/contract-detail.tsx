@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   TrendingUp,
   UserRound,
-  Wallet,
 } from "lucide-react"
 
 import { apiErrorMessage } from "@adminprop/session/client"
@@ -47,9 +46,11 @@ import { useContractServices } from "@/lib/services-api"
 
 import { ContractBadges } from "../contract-list"
 import { ServicesSection } from "../../propiedades/[id]/services-section"
+import { AccountSection } from "./account-section"
 import { AdvanceExpensesSection } from "./advance-expenses-section"
 import { DocumentActions } from "./document-upload"
 import { EditContractDialog } from "./edit-contract-dialog"
+import { InstallmentsSection } from "./installments-section"
 import { RentUpdateDialog } from "./rent-update-dialog"
 import { TerminateDialog } from "./terminate-dialog"
 
@@ -308,11 +309,8 @@ function Detail({ contract }: { contract: ContractDetail }) {
         />
         <AdvanceExpensesSection contract={contract} />
 
-        <Placeholder
-          icon={Wallet}
-          title="Estado mes a mes"
-          text="Qué meses están pagos, pendientes o en mora. Aparece con los cobros."
-        />
+        <InstallmentsSection contract={contract} />
+        <AccountSection contract={contract} />
       </div>
 
       {dialog === "edit" && (
@@ -545,27 +543,6 @@ function Section({
         {action}
       </div>
       {children}
-    </section>
-  )
-}
-
-/** Espacio reservado para lo que llega en otras fases (spec 5.2). */
-function Placeholder({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: typeof UserRound
-  title: string
-  text: string
-}) {
-  return (
-    <section className="flex items-start gap-3 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-      <Icon aria-hidden className="mt-0.5 size-5 shrink-0" />
-      <div>
-        <h2 className="font-medium text-foreground">{title}</h2>
-        <p>{text}</p>
-      </div>
     </section>
   )
 }

@@ -11,7 +11,6 @@ import {
   Pencil,
   ShieldCheck,
   Trash2,
-  Wallet,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -30,7 +29,9 @@ import {
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
 
+import { ArrearsBadge } from "@/components/arrears-badge"
 import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
+import { useRenterArrears } from "@/lib/billing-api"
 import { formatNationalId } from "@/lib/owners"
 import { formatDate } from "@/lib/dates"
 import { GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
@@ -40,7 +41,7 @@ import {
   useRenter,
 } from "@/lib/renters-api"
 
-import { PaymentBadge } from "../renter-list"
+import { RenterBillingSection } from "./credits-section"
 
 /** Ficha de inquilino (spec Fase 8, 5.2). */
 export function RenterDetailScreen({ id }: { id: string }) {
@@ -65,6 +66,7 @@ export function RenterDetailScreen({ id }: { id: string }) {
 
 function Detail({ renter }: { renter: RenterDetail }) {
   const { user } = useSession()
+  const arrears = useRenterArrears(renter.id)
   const whatsapp = whatsappLink(renter.phone)
 
   return (
@@ -88,7 +90,7 @@ function Detail({ renter }: { renter: RenterDetail }) {
                 ` · Ingresó el ${formatDate(renter.moveInDate)}`}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              <PaymentBadge renter={renter} />
+              <ArrearsBadge arrears={arrears.data} />
               {renter.hasPortalAccess && (
                 <Badge variant="outline" className="gap-1">
                   <KeyRound aria-hidden className="size-3" />
@@ -186,11 +188,7 @@ function Detail({ renter }: { renter: RenterDetail }) {
             </p>
           )}
         </Section>
-        <Placeholder
-          icon={Wallet}
-          title="Historial de pagos"
-          text="Aparece cuando existan contratos y cobros."
-        />
+        <RenterBillingSection renterId={renter.id} />
       </div>
     </div>
   )
@@ -259,26 +257,6 @@ function Section({
         {action}
       </div>
       {children}
-    </section>
-  )
-}
-
-function Placeholder({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: typeof FileText
-  title: string
-  text: string
-}) {
-  return (
-    <section className="flex items-start gap-3 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-      <Icon aria-hidden className="mt-0.5 size-5 shrink-0" />
-      <div>
-        <h2 className="font-medium text-foreground">{title}</h2>
-        <p>{text}</p>
-      </div>
     </section>
   )
 }

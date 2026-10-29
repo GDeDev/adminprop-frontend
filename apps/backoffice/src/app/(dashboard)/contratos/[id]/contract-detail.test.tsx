@@ -110,6 +110,14 @@ vi.mock("@/lib/contracts-api", () => ({
   }),
 }))
 // Servicios y gastos tienen sus propios tests: acá, vacíos.
+vi.mock("@/lib/billing-api", () => ({
+  useContractInstallments: () => ({
+    isPending: false,
+    isError: false,
+    data: { data: [], pagination: { total: 0 } },
+  }),
+  useContractAccount: () => ({ isPending: true, isError: false }),
+}))
 vi.mock("@/lib/services-api", () => ({
   useContractServices: () => ({ isPending: false, isError: false, data: [] }),
   useCreateService: () => ({ mutateAsync: vi.fn(), isPending: false }),

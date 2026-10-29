@@ -40,6 +40,19 @@ function makeRenter(overrides: Partial<RenterDetail> = {}): RenterDetail {
 }
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
+vi.mock("@/lib/billing-api", () => ({
+  useRenterArrears: () => ({
+    isPending: false,
+    isError: false,
+    data: undefined,
+  }),
+  useRenterCredits: () => ({
+    isPending: false,
+    isError: false,
+    data: { renterId: "r1", totals: [], credits: [] },
+  }),
+  useRefundCredit: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))
@@ -74,12 +87,12 @@ describe("RenterDetailScreen", () => {
     )
   })
 
-  it("sin garante ofrece asignarlo; el estado de pago es un placeholder", () => {
+  it("sin garante ofrece asignarlo; sin cuotas el estado de pago dice sin datos", () => {
     renter = makeRenter({ guarantor: null, phone: null })
     render(<RenterDetailScreen id="renter-1" />)
 
     expect(screen.getByText(/Sin garante/)).toBeInTheDocument()
-    expect(screen.getByText("Sin datos")).toBeInTheDocument()
+    expect(screen.getAllByText("Sin datos")).toHaveLength(2)
     expect(
       screen.queryByRole("link", { name: "WhatsApp" })
     ).not.toBeInTheDocument()
