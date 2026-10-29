@@ -49,6 +49,7 @@ import { ServicesSection } from "../../propiedades/[id]/services-section"
 import { AccountSection } from "./account-section"
 import { AdvanceExpensesSection } from "./advance-expenses-section"
 import { BillingTermsSection } from "./billing-terms-section"
+import { ContractSettlementsSection } from "./contract-settlements-section"
 import { DocumentActions } from "./document-upload"
 import { EditContractDialog } from "./edit-contract-dialog"
 import { InstallmentsSection } from "./installments-section"
@@ -317,6 +318,7 @@ function Detail({ contract }: { contract: ContractDetail }) {
         <AdvanceExpensesSection contract={contract} />
 
         <InstallmentsSection contract={contract} />
+        <ContractSettlementsSection contract={contract} />
         <AccountSection contract={contract} />
       </div>
 

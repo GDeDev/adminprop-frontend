@@ -30,6 +30,8 @@ import { useContractAccount } from "@/lib/billing-api"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 
+import { DepositReturnDialog } from "./deposit-return-dialog"
+
 const MOVEMENT_LABELS: Record<AccountMovementType, string> = {
   INSTALLMENT: "Cuota",
   CHARGE: "Cargo",
@@ -52,10 +54,13 @@ const PREVIEW_ROWS = 8
 export function AccountSection({
   contract,
 }: {
-  contract: Pick<ContractDetail, "id" | "currency">
+  contract: Pick<ContractDetail, "id" | "currency" | "status">
 }) {
   const query = useContractAccount(contract.id)
   const [expanded, setExpanded] = React.useState(false)
+  const [returning, setReturning] = React.useState(false)
+  // El depósito se devuelve al terminar el contrato (A-13, PRD 11.5).
+  const canReturnDeposit = contract.status !== "ACTIVE"
 
   return (
     <section
@@ -81,11 +86,39 @@ export function AccountSection({
           )}
         </p>
       ) : (
-        <Account
-          account={query.data}
-          expanded={expanded}
-          onExpand={() => setExpanded(true)}
-        />
+        <>
+          <Account
+            account={query.data}
+            expanded={expanded}
+            onExpand={() => setExpanded(true)}
+          />
+          {canReturnDeposit && (
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setReturning(true)}
+              >
+                Devolver depósito
+              </Button>
+            </div>
+          )}
+          {returning && (
+            <DepositReturnDialog
+              contractId={contract.id}
+              deposit={query.data.deposit}
+              installments={query.data.installments
+                .filter((i) => i.status !== "PAID")
+                .map((i) => ({
+                  id: i.id,
+                  period: i.period,
+                  totalDue: i.totalDue,
+                }))}
+              open
+              onOpenChange={(open) => !open && setReturning(false)}
+            />
+          )}
+        </>
       )}
     </section>
   )

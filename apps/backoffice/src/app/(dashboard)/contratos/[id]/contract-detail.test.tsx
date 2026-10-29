@@ -133,6 +133,18 @@ vi.mock("@/lib/contracts-api", () => ({
   }),
 }))
 // Servicios y gastos tienen sus propios tests: acá, vacíos.
+vi.mock("@/lib/settlements-api", () => ({
+  useInfiniteSettlements: () => ({
+    isPending: false,
+    isError: false,
+    data: { pages: [{ data: [], pagination: { total: 0 } }] },
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn(),
+  }),
+  useCreateSettlement: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useRegisterDepositReturn: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
 vi.mock("@/lib/billing-api", () => ({
   useContractInstallments: () => ({
     isPending: false,

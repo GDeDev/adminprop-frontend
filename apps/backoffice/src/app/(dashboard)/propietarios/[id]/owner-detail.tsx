@@ -9,13 +9,12 @@ import {
   KeyRound,
   Landmark,
   Pencil,
-  Receipt,
   Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
-import type { OwnerDetail } from "@adminprop/shared-types"
+import type { OwnerDetail, OwnerFeeSettings } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
@@ -40,6 +39,10 @@ import {
 import { StatusBadge } from "../../propiedades/property-list"
 import { ReducedFeeBadge } from "../owner-list"
 import { BankAccountDialog } from "./bank-account-dialog"
+import {
+  OwnerFeeAccountSection,
+  OwnerSettlementsSection,
+} from "./owner-settlements-section"
 
 /** Ficha de propietario (spec Fase 7, 5.2). */
 export function OwnerDetailScreen({ id }: { id: string }) {
@@ -156,15 +159,14 @@ function Detail({ owner }: { owner: OwnerDetail }) {
 
         <PortalAccessSection owner={owner} />
 
-        <section className="flex items-start gap-3 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-          <Receipt aria-hidden className="mt-0.5 size-5 shrink-0" />
-          <div>
-            <h2 className="font-medium text-foreground">
-              Historial de liquidaciones
-            </h2>
-            <p>Aparece cuando existan contratos y cobros.</p>
-          </div>
-        </section>
+        <OwnerSettlementsSection owner={owner} />
+        <OwnerFeeAccountSection
+          owner={owner}
+          feeSettings={
+            (owner as OwnerDetail & { feeSettings?: OwnerFeeSettings })
+              .feeSettings
+          }
+        />
       </div>
     </div>
   )

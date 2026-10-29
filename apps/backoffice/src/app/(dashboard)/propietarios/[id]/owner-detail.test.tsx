@@ -49,6 +49,29 @@ function makeOwner(overrides: Partial<OwnerDetail> = {}): OwnerDetail {
 const issue = vi.fn()
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
+vi.mock("@/lib/settlements-api", () => ({
+  useInfiniteOwnerSettlements: () => ({
+    isPending: false,
+    isError: false,
+    data: { pages: [{ data: [], pagination: { total: 0 } }] },
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn(),
+  }),
+  useOwnerFeeAccount: () => ({
+    isPending: false,
+    isError: false,
+    data: {
+      ownerId: "o1",
+      totals: [],
+      receivables: [],
+      payments: [],
+      movements: [],
+    },
+  }),
+  useRegisterFeePayment: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateOwnerFeeSettings: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))
