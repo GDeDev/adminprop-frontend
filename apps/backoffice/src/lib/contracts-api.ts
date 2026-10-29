@@ -10,6 +10,7 @@ import {
 import type {
   ApiSuccess,
   ApplyRentUpdateRequest,
+  ChangeBillingTermsRequest,
   ContractDetail,
   ContractStatus,
   ContractSummary,
@@ -138,6 +139,32 @@ export function useUpdateContract() {
     ({ id, ...body }: UpdateContractRequest & { id: string }) =>
       unwrap(apiClient.patch(`/contracts/${id}`, body))
   )
+}
+
+/**
+ * Términos de cobro nuevos (rediseño Fase 11, 2.2): modalidad de cobro,
+ * honorarios y punitorio desde una fecha; la fila anterior no se pisa. Sólo
+ * admin. Invalida cobros: las cuotas futuras copian los términos vigentes.
+ */
+export function useChangeBillingTerms() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...body
+    }: ChangeBillingTermsRequest & { id: string }): Promise<ContractDetail> =>
+      unwrap(apiClient.post(`/contracts/${id}/billing-terms`, body)),
+    onSuccess: (contract) => {
+      queryClient.setQueryData(
+        [...contractsKey, "detail", contract.id],
+        contract
+      )
+      void queryClient.invalidateQueries({
+        queryKey: [...contractsKey, "list"],
+      })
+      void queryClient.invalidateQueries({ queryKey: ["billing"] })
+    },
+  })
 }
 
 /** Devuelve el contrato nuevo; el original queda finalizado (D-61). */
