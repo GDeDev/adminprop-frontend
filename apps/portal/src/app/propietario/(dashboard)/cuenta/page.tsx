@@ -1,14 +1,9 @@
 import type { Metadata } from "next"
 
-import { ComingSoon } from "@adminprop/ui/components/coming-soon"
+import { OwnerAccountScreen } from "./account-screen"
 
 export const metadata: Metadata = { title: "Estado de cuenta" }
 
 export default function Page() {
-  return (
-    <ComingSoon
-      title="Estado de cuenta"
-      description="Liquidaciones pendientes y confirmadas del mes — Fase 17."
-    />
-  )
+  return <OwnerAccountScreen />
 }
