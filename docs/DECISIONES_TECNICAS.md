@@ -386,6 +386,32 @@ Pagos y cargos se anulan con `ReasonDialog` (motivo obligatorio, botón destruct
 
 El listado pide `/billing/arrears` una vez con todos los ids de la página cargada (`useArrears`), en vez de una consulta por fila, y mantiene un `Map` por inquilino. El filtro por estado de pago sigue deshabilitado: la API todavía no filtra (D-46) y filtrar en el cliente mentiría sobre el total. El badge "Sin datos" quedó para mientras carga.
 
+## Fase 12 — Liquidaciones
+
+### DT-67 — Una pantalla con tres pestañas: liquidaciones, consolidados y honorarios
+
+Las tres cosas son del mismo flujo mensual y el usuario pasa de una a otra: liquida, agrupa en el consolidado, cobra los honorarios que no se descontaron. Van en `/liquidaciones` con pestañas (la pestaña inicial sale de `?tab=`), igual que Cobros con sus pagos por confirmar (DT-59). Los consolidados tienen ficha propia en `/liquidaciones/consolidados/[id]`; los honorarios no: su detalle vive en la ficha del propietario, que es donde se cobran.
+
+### DT-68 — Las mutaciones de liquidaciones invalidan también cobros, gastos y propietarios
+
+Confirmar una liquidación marca pagos (`settlementId`) y gastos adelantados (`settled`), y mueve la cuenta de honorarios del propietario. En vez de perseguir cada clave, `useSettlementMutation` invalida `settlements`, `billing`, `advance-expenses` y `owners` (misma lógica que DT-61). Es más consulta y menos pantallas viejas.
+
+### DT-69 — El signo de los ajustes lo da el concepto, no el usuario
+
+El diálogo pide un monto siempre positivo y el concepto decide: retención, adelanto y otra deducción restan; "otro a favor del propietario" suma (`adjustmentSubtracts`). El total de ajustes viene con signo de la API y se muestra con "−" delante cuando es negativo, sin hacer cuentas (DT-51).
+
+### DT-70 — Transferir sólo con neto positivo; el neto negativo se informa
+
+Una liquidación puede quedar con neto negativo (gastos y retenciones mayores que lo cobrado): se confirma igual para que quede registrado que el propietario debe, pero el botón "Registrar transferencia" no aparece. La API rechaza de todos modos una transferencia que supere el neto (`SETTLEMENT_TRANSFER_EXCEEDS_NET`, mapeado al campo importe).
+
+### DT-71 — La devolución del depósito vive en la cuenta corriente del contrato
+
+El botón "Devolver depósito" aparece en la sección "Cuenta corriente" de la ficha del contrato cuando el contrato no está activo y todavía no se devolvió; el diálogo propone el monto sugerido por el modo de devolución (`deposit.suggestedReturn`) y arma las deducciones como filas (concepto, justificación, monto; una deuda puede imputarse a una cuota con saldo). La suma la valida la API (`DEPOSIT_RETURN_UNBALANCED`): el front sólo muestra el mensaje con el depósito recibido. Una vez devuelto, la misma sección lo muestra y el botón desaparece.
+
+### DT-72 — Configuración de honorarios del propietario junto a su cuenta, no en el alta
+
+El % propio, la base (punitorios y/o cargos) y el modo de envío se editan desde la ficha del propietario, en la sección "Honorarios", sólo admin. No van en el formulario de alta/edición de propietarios: son excepciones a la regla de la inmobiliaria y quedan a la vista de lo que afectan (la cuenta de honorarios). Hasta que la API los devolvió, el front los trataba como opcionales; con el `openapi.json` de la fase pasaron a obligatorios en `OwnerDetail`.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
