@@ -74,6 +74,7 @@ function makeSettlement(
     payments: [
       {
         paymentId: "pay1",
+        installmentId: "i1",
         installmentPeriod: "2026-10",
         paidAt: "2026-10-15",
         rentApplied: "200000.00",
@@ -88,6 +89,7 @@ function makeSettlement(
         description: "Plomero",
         expenseDate: "2026-10-03",
         amount: "15000.00",
+        currency: "ARS",
       },
     ],
     skippedExpenses: [],

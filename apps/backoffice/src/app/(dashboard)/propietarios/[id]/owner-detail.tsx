@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
-import type { OwnerDetail, OwnerFeeSettings } from "@adminprop/shared-types"
+import type { OwnerDetail } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
@@ -160,13 +160,7 @@ function Detail({ owner }: { owner: OwnerDetail }) {
         <PortalAccessSection owner={owner} />
 
         <OwnerSettlementsSection owner={owner} />
-        <OwnerFeeAccountSection
-          owner={owner}
-          feeSettings={
-            (owner as OwnerDetail & { feeSettings?: OwnerFeeSettings })
-              .feeSettings
-          }
-        />
+        <OwnerFeeAccountSection owner={owner} feeSettings={owner.feeSettings} />
       </div>
     </div>
   )

@@ -63,6 +63,7 @@ function makePayment(overrides: Partial<Payment> = {}): Payment {
     chargesApplied: "0.00",
     creditGenerated: "0.00",
     creditId: null,
+    settlementId: null,
     receiptUrl: "https://files.test/recibo.pdf",
     notes: null,
     registeredBy: { id: "u1", fullName: "Marta Admin" },

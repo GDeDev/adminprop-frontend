@@ -224,6 +224,7 @@ describe("BillingScreen", () => {
         chargesApplied: "0.00",
         creditGenerated: "0.00",
         creditId: null,
+        settlementId: null,
         receiptUrl: null,
         notes: null,
         registeredBy: null,

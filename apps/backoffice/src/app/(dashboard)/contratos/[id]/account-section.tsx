@@ -43,6 +43,8 @@ const MOVEMENT_LABELS: Record<AccountMovementType, string> = {
   LATE_FEE_ADJUSTMENT: "Ajuste de punitorio",
   PAYMENT_VOIDED: "Pago anulado",
   DEPOSIT_RECEIVED: "Depósito recibido",
+  DEPOSIT_RETURNED: "Depósito devuelto",
+  DEPOSIT_DEDUCTION: "Deducción del depósito",
 }
 
 const PREVIEW_ROWS = 8
@@ -92,7 +94,7 @@ export function AccountSection({
             expanded={expanded}
             onExpand={() => setExpanded(true)}
           />
-          {canReturnDeposit && (
+          {canReturnDeposit && !query.data.deposit.returned && (
             <div className="mt-3">
               <Button
                 variant="outline"
@@ -181,8 +183,23 @@ function Account({
         <p className="text-muted-foreground">
           {DEPOSIT_RETURN_MODE_LABELS[deposit.returnMode]}
           {deposit.suggestedReturn &&
+            !deposit.returned &&
             ` · a devolver hoy: ${formatMoney(deposit.suggestedReturn, deposit.currency)}`}
         </p>
+        {deposit.returned && (
+          <p className="mt-1">
+            Devuelto el {formatDate(deposit.returned.returnedAt)}:{" "}
+            <span className="tabular-nums">
+              {formatMoney(deposit.returned.returnedAmount, deposit.currency)}
+            </span>
+            {deposit.returned.deductions.length > 0 &&
+              ` · ${deposit.returned.deductions.length} ${
+                deposit.returned.deductions.length === 1
+                  ? "deducción"
+                  : "deducciones"
+              }`}
+          </p>
+        )}
       </div>
 
       {movements.length === 0 ? (

@@ -25,6 +25,12 @@ function makeOwner(overrides: Partial<OwnerDetail> = {}): OwnerDetail {
     propertyCount: 1,
     activePropertyCount: 1,
     reducedFee: false,
+    feeSettings: {
+      feePercentage: null,
+      feeIncludesLateFees: false,
+      feeIncludesCharges: false,
+      statementSendMode: "BOTH",
+    },
     hasPortalAccess: false,
     bankAccount: {
       cbu: "0170099220000067891234",

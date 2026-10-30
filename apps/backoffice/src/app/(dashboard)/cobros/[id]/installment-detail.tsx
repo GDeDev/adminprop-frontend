@@ -552,6 +552,17 @@ function PaymentRows({
                     {payment.notes}
                   </p>
                 )}
+                {payment.settlementId && (
+                  <p className="text-xs text-muted-foreground">
+                    Liquidado al propietario:{" "}
+                    <Link
+                      href={`/liquidaciones/${payment.settlementId}`}
+                      className="underline"
+                    >
+                      ver liquidación
+                    </Link>
+                  </p>
+                )}
                 {payment.voidedAt && (
                   <p className="text-xs text-destructive">
                     Anulado el {formatDate(payment.voidedAt.slice(0, 10))}

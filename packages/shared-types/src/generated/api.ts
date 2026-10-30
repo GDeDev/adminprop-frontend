@@ -953,6 +953,26 @@ export interface paths {
     patch: operations["OwnersController_updateBankAccount_api/v1"]
     trace?: never
   }
+  "/api/v1/owners/{id}/fee-settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Honorarios y modo de envío (sólo admin)
+     * @description Override del % de honorarios (null = regla por umbral de la inmobiliaria), qué conceptos cobrados entran en la base además del alquiler, y qué se le manda al cerrar el consolidado. Lo que no viene no cambia.
+     */
+    patch: operations["OwnersController_updateFeeSettings_api/v1"]
+    trace?: never
+  }
   "/api/v1/owners/{id}/portal-credentials": {
     parameters: {
       query?: never
@@ -1581,6 +1601,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/contracts/{contractId}/deposit-return": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Devolver el depósito en garantía
+     * @description Sólo contratos finalizados, rescindidos o activos con el fin ya pasado, y una sola vez. `returnedAmount + Σ deducciones` tiene que ser el depósito. Una deducción DEBT con cuota crea un pago DEPOSIT sobre ella.
+     */
+    post: operations["InstallmentsController_returnDeposit_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/billing/installments/{id}/charges": {
     parameters: {
       query?: never
@@ -1795,6 +1835,445 @@ export interface paths {
     get: operations["PaymentsController_arrears_api/v1"]
     put?: never
     post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar liquidaciones
+     * @description Filtros por propietario, propiedad, contrato, mes y estado.
+     */
+    get: operations["SettlementsController_list_api/v1"]
+    put?: never
+    /**
+     * Crear la liquidación pendiente de un contrato
+     * @description Toma los pagos cobrados por la inmobiliaria sin liquidar, los gastos adelantados pendientes en la moneda del contrato y calcula los honorarios cuota por cuota. Una sola pendiente por contrato.
+     */
+    post: operations["SettlementsController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/owners/{ownerId}/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de liquidaciones de un propietario
+     * @description Ficha del propietario y portal (Fase 17).
+     */
+    get: operations["SettlementsController_listByOwner_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha de la liquidación
+     * @description Pagos incluidos con su cuota, gastos, honorarios con base y modalidad, ajustes, transferencias y consolidado.
+     */
+    get: operations["SettlementsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/recalculate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Recalcular una liquidación pendiente
+     * @description Vuelve a tomar pagos y gastos; los ajustes manuales se conservan.
+     */
+    post: operations["SettlementsController_recalculate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/adjustments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar una retención, un adelanto u otro ajuste
+     * @description Sólo sobre una pendiente. El monto es positivo; el concepto da el signo.
+     */
+    post: operations["SettlementsController_addAdjustment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/adjustments/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un ajuste
+     * @description Sólo mientras la liquidación está pendiente.
+     */
+    post: operations["SettlementsController_voidAdjustment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar la liquidación
+     * @description Congela los números, marca los pagos y los gastos como liquidados y, si los honorarios no se descuentan, los devenga en la cuenta del propietario. Inmutable desde ahí.
+     */
+    post: operations["SettlementsController_confirm_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/cancel": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cancelar una liquidación pendiente (sólo admin)
+     * @description Libera sus pagos y gastos para la próxima liquidación del contrato.
+     */
+    post: operations["SettlementsController_cancel_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/transfers": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar una transferencia al propietario
+     * @description Multipart. Sólo sobre una confirmada o transferida; la suma no puede superar el neto. Al cubrirlo, la liquidación pasa a TRANSFERRED.
+     */
+    post: operations["SettlementsController_registerTransfer_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/transfers/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular una transferencia (sólo admin)
+     * @description Resta del total transferido; la liquidación puede volver a CONFIRMED (A-18).
+     */
+    post: operations["SettlementsController_voidTransfer_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Listar consolidados */
+    get: operations["StatementsController_list_api/v1"]
+    put?: never
+    /**
+     * Abrir el consolidado del mes de un propietario
+     * @description Nace abierto y vacío, con el modo de envío del propietario. Uno por propietario y mes.
+     */
+    post: operations["StatementsController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha del consolidado
+     * @description Sus liquidaciones con alquiler, punitorios, cargos, honorarios, gastos, ajustes, neto y transferido, y los totales por moneda.
+     */
+    get: operations["StatementsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/candidates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Liquidaciones del propietario que se pueden agregar
+     * @description Confirmadas o transferidas, sin consolidado.
+     */
+    get: operations["StatementsController_candidates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar liquidaciones al consolidado
+     * @description Sólo confirmadas o transferidas, del mismo propietario y sin consolidado.
+     */
+    post: operations["StatementsController_addSettlements_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/settlements/{settlementId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Quitar una liquidación del consolidado (sólo abierto) */
+    delete: operations["StatementsController_removeSettlement_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/close": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cerrar el consolidado
+     * @description Congela los totales por moneda y el modo de envío; emite el evento para el email y el PDF.
+     */
+    post: operations["StatementsController_close_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/reopen": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Reabrir un consolidado cerrado (sólo admin) */
+    post: operations["StatementsController_reopen_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-receivables": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Honorarios a cobrar
+     * @description Filtros por propietario, contrato y estado. Más nuevos primero.
+     */
+    get: operations["FeesController_listReceivables_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/owners/{ownerId}/fee-account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Cuenta de honorarios de un propietario
+     * @description Devengado, cobrado, pendiente y sin imputar por moneda; receivables, pagos y movimientos cronológicos.
+     */
+    get: operations["FeesController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar un pago de honorarios
+     * @description Multipart. Lo paga el propietario o el inquilino por su cuenta. Se imputa a los honorarios pendientes más viejos (del contrato, si viene) en esa moneda; el exceso queda sin imputar.
+     */
+    post: operations["FeesController_registerPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-payments/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un pago de honorarios (sólo admin)
+     * @description Deshace sus imputaciones: los honorarios vuelven a estar pendientes.
+     */
+    post: operations["FeesController_voidPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-payments/{id}/allocate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Imputar el saldo sin asignar de un pago
+     * @description A los honorarios pendientes de hoy del propietario (y del contrato, si el pago vino con uno).
+     */
+    post: operations["FeesController_allocate_api/v1"]
     delete?: never
     options?: never
     head?: never
@@ -2471,6 +2950,14 @@ export interface components {
       bankName: string | null
       holder: string | null
     }
+    OwnerFeeSettingsDto: {
+      /** @example 4.50 */
+      feePercentage: string | null
+      feeIncludesLateFees: boolean
+      feeIncludesCharges: boolean
+      /** @enum {string} */
+      statementSendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+    }
     OwnerPropertyDto: {
       id: string
       address: string
@@ -2500,6 +2987,7 @@ export interface components {
       address: string | null
       notes: string | null
       bankAccount: components["schemas"]["BankAccountViewDto"]
+      feeSettings: components["schemas"]["OwnerFeeSettingsDto"]
       properties: components["schemas"]["OwnerPropertyDto"][]
     }
     BankAccountDto: {
@@ -2544,6 +3032,19 @@ export interface components {
       email?: string | null
       address?: string | null
       notes?: string | null
+    }
+    UpdateOwnerFeeSettingsDto: {
+      /**
+       * @description Override del % de honorarios. Null vuelve a la regla por umbral de la inmobiliaria.
+       * @example 4.50
+       */
+      feePercentage?: string | null
+      /** @description Los punitorios cobrados entran en la base del honorario. */
+      feeIncludesLateFees?: boolean
+      /** @description Los cargos del propietario (multa, otros) entran en la base. Los cargos SERVICE nunca. */
+      feeIncludesCharges?: boolean
+      /** @enum {string} */
+      statementSendMode?: "SUMMARY" | "RECEIPTS" | "BOTH"
     }
     PortalCredentialsDto: {
       userId: string
@@ -3692,7 +4193,7 @@ export interface components {
       /** @enum {string} */
       kind: "CASH_IN" | "CREDIT_APPLICATION"
       /** @enum {string} */
-      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER"
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
       /** @enum {string} */
       receivedBy: "AGENCY" | "OWNER"
       /** @enum {string} */
@@ -3712,6 +4213,8 @@ export interface components {
       voidedAt: string | null
       voidedBy: components["schemas"]["UserRefDto"] | null
       voidReason: string | null
+      /** @description Liquidación que lo incluyó (Fase 12); null = sin liquidar */
+      settlementId: string | null
       /** Format: date-time */
       createdAt: string
     }
@@ -3878,6 +4381,8 @@ export interface components {
         | "LATE_FEE_ADJUSTMENT"
         | "PAYMENT_VOIDED"
         | "DEPOSIT_RECEIVED"
+        | "DEPOSIT_RETURNED"
+        | "DEPOSIT_DEDUCTION"
       description: string
       debit: string | null
       credit: string | null
@@ -3885,6 +4390,32 @@ export interface components {
       balance: string
       installmentId: string | null
       paymentId: string | null
+    }
+    DepositReturnDeductionDto: {
+      id: string
+      /** @enum {string} */
+      concept: "DEBT" | "DAMAGE" | "OTHER"
+      description: string
+      amount: string
+      installmentId: string | null
+      paymentId: string | null
+    }
+    DepositReturnDto: {
+      id: string
+      contractId: string
+      /** Format: date */
+      returnedAt: string
+      depositAmount: string
+      /** @enum {string} */
+      depositCurrency: "ARS" | "USD"
+      returnedAmount: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      deductions: components["schemas"]["DepositReturnDeductionDto"][]
+      /** Format: date-time */
+      createdAt: string
     }
     ContractAccountDepositDto: {
       amount: string
@@ -3894,6 +4425,7 @@ export interface components {
       returnMode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
       /** @description FIXED: el depósito; FOLLOWS_RENT: el alquiler vigente; MANUAL: null */
       suggestedReturn: string | null
+      returned: components["schemas"]["DepositReturnDto"] | null
     }
     ContractAccountDto: {
       contract: components["schemas"]["ContractAccountContractDto"]
@@ -3902,6 +4434,32 @@ export interface components {
       /** @description Cronológico ascendente */
       movements: components["schemas"]["ContractAccountMovementDto"][]
       deposit: components["schemas"]["ContractAccountDepositDto"]
+    }
+    DepositDeductionInputDto: {
+      /** @enum {string} */
+      concept: "DEBT" | "DAMAGE" | "OTHER"
+      /** @example Cuota de octubre impaga */
+      description: string
+      /** @example 150333.33 */
+      amount: string
+      /** @description Sólo en DEBT: la cuota a la que se imputa. Crea un pago DEPOSIT sobre ella. */
+      installmentId?: string
+    }
+    RegisterDepositReturnDto: {
+      /**
+       * Format: date
+       * @example 2026-10-31
+       */
+      returnedAt: string
+      /**
+       * @description Lo que se le devuelve al inquilino; puede ser 0.
+       * @example 80000.00
+       */
+      returnedAmount: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      notes?: string
+      deductions: components["schemas"]["DepositDeductionInputDto"][]
     }
     CreateChargeDto: {
       /** @enum {string} */
@@ -3962,7 +4520,7 @@ export interface components {
       /** @enum {string} */
       kind: "CASH_IN" | "CREDIT_APPLICATION"
       /** @enum {string} */
-      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER"
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
       /** @enum {string} */
       receivedBy: "AGENCY" | "OWNER"
       /** @enum {string} */
@@ -3982,6 +4540,8 @@ export interface components {
       voidedAt: string | null
       voidedBy: components["schemas"]["UserRefDto"] | null
       voidReason: string | null
+      /** @description Liquidación que lo incluyó (Fase 12); null = sin liquidar */
+      settlementId: string | null
       /** Format: date-time */
       createdAt: string
       renter: components["schemas"]["RenterRefDto"] | null
@@ -4013,7 +4573,7 @@ export interface components {
       /** Format: date */
       refundedAt: string | null
       /** @enum {string|null} */
-      refundMethod: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | null
+      refundMethod: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT" | null
       refundNotes: string | null
     }
     RenterCreditsDto: {
@@ -4029,7 +4589,7 @@ export interface components {
        */
       refundedAt: string
       /** @enum {string} */
-      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER"
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
       notes?: string
     }
     MoneyByCurrencyDto: {
@@ -4045,6 +4605,335 @@ export interface components {
       maxDaysOverdue: number
       lateFeeAccrued: components["schemas"]["MoneyByCurrencyDto"][]
       balance: components["schemas"]["MoneyByCurrencyDto"][]
+    }
+    CreateSettlementDto: {
+      contractId: string
+      /**
+       * @description Mes de la liquidación. Si no viene, el mes actual.
+       * @example 2026-10
+       */
+      period?: string
+    }
+    SettlementContractRefDto: {
+      id: string
+    }
+    SettlementPaymentDto: {
+      paymentId: string
+      installmentId: string
+      /** @example 2026-09 */
+      installmentPeriod: string
+      /** Format: date */
+      paidAt: string
+      rentApplied: string
+      lateFeeApplied: string
+      ownerChargesApplied: string
+      serviceChargesApplied: string
+    }
+    SettlementExpenseDto: {
+      expenseId: string
+      description: string
+      /** Format: date */
+      expenseDate: string
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+    }
+    SettlementAdjustmentDto: {
+      id: string
+      /** @enum {string} */
+      concept:
+        "WITHHOLDING" | "OWNER_ADVANCE" | "OTHER_DEDUCTION" | "OTHER_CREDIT"
+      description: string
+      /** @description Siempre positivo; el signo lo da el concepto */
+      amount: string
+      /** @description Null en los automáticos */
+      createdBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      voidedAt: string | null
+      voidReason: string | null
+    }
+    SettlementTransferDto: {
+      id: string
+      /** Format: date */
+      transferredAt: string
+      amount: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      receiptUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+    }
+    SettlementDetailDto: {
+      id: string
+      /**
+       * @description Mes en que se liquida
+       * @example 2026-10
+       */
+      period: string
+      /** @description Parcial N del mes */
+      sequence: number
+      /** @enum {string} */
+      status: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      contract: components["schemas"]["SettlementContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      rentTotal: string
+      lateFeeTotal: string
+      /** @description Cargos TERMINATION_PENALTY y OTHER */
+      ownerChargesTotal: string
+      /** @description Cargos SERVICE: no entran al neto */
+      serviceChargesTotal: string
+      feeTotal: string
+      /** @description Los honorarios se descontaron del neto */
+      feeDeducted: boolean
+      expensesTotal: string
+      /** @description Con signo */
+      adjustmentsTotal: string
+      /** @description Puede ser negativo */
+      netAmount: string
+      transferredTotal: string
+      statementId: string | null
+      hasVoidedPayments: boolean
+      /** Format: date-time */
+      confirmedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      /**
+       * @description De la cuota más reciente incluida
+       * @enum {string}
+       */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmountFixed: string | null
+      /** @description Sobre qué se calculó el honorario */
+      feeBase: string
+      /** @description Las cuotas incluidas tenían términos distintos */
+      mixedFeeTerms: boolean
+      /** @description El propietario no tiene cuenta bancaria cargada (A-17: se avisa) */
+      ownerBankAccountMissing: boolean
+      payments: components["schemas"]["SettlementPaymentDto"][]
+      expenses: components["schemas"]["SettlementExpenseDto"][]
+      /** @description Gastos pendientes en otra moneda que el contrato: no se descuentan */
+      skippedExpenses: components["schemas"]["SettlementExpenseDto"][]
+      adjustments: components["schemas"]["SettlementAdjustmentDto"][]
+      transfers: components["schemas"]["SettlementTransferDto"][]
+      confirmedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      cancelledAt: string | null
+      cancelReason: string | null
+      notes: string | null
+      /** Format: date-time */
+      updatedAt: string
+    }
+    SettlementSummaryDto: {
+      id: string
+      /**
+       * @description Mes en que se liquida
+       * @example 2026-10
+       */
+      period: string
+      /** @description Parcial N del mes */
+      sequence: number
+      /** @enum {string} */
+      status: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      contract: components["schemas"]["SettlementContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      rentTotal: string
+      lateFeeTotal: string
+      /** @description Cargos TERMINATION_PENALTY y OTHER */
+      ownerChargesTotal: string
+      /** @description Cargos SERVICE: no entran al neto */
+      serviceChargesTotal: string
+      feeTotal: string
+      /** @description Los honorarios se descontaron del neto */
+      feeDeducted: boolean
+      expensesTotal: string
+      /** @description Con signo */
+      adjustmentsTotal: string
+      /** @description Puede ser negativo */
+      netAmount: string
+      transferredTotal: string
+      statementId: string | null
+      hasVoidedPayments: boolean
+      /** Format: date-time */
+      confirmedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    CreateSettlementAdjustmentDto: {
+      /**
+       * @description WITHHOLDING, OWNER_ADVANCE y OTHER_DEDUCTION restan; OTHER_CREDIT suma.
+       * @enum {string}
+       */
+      concept:
+        "WITHHOLDING" | "OWNER_ADVANCE" | "OTHER_DEDUCTION" | "OTHER_CREDIT"
+      /** @example Retención IIBB */
+      description: string
+      /** @example 150333.33 */
+      amount: string
+    }
+    CreateOwnerStatementDto: {
+      ownerId: string
+      /** @example 2026-10 */
+      period: string
+    }
+    OwnerStatementTotalsDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      rentTotal: string
+      lateFeeTotal: string
+      /** @description Cargos del propietario */
+      chargesTotal: string
+      feeTotal: string
+      expensesTotal: string
+      /** @description Con signo */
+      adjustmentsTotal: string
+      netTotal: string
+      transferredTotal: string
+    }
+    OwnerStatementDetailDto: {
+      id: string
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @example 2026-10 */
+      period: string
+      /** @enum {string} */
+      status: "OPEN" | "CLOSED"
+      /** @enum {string} */
+      sendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+      settlementsCount: number
+      /** @description Por moneda; congelados al cerrar, en vivo mientras está abierto */
+      totals: components["schemas"]["OwnerStatementTotalsDto"][]
+      /** Format: date-time */
+      closedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      settlements: components["schemas"]["SettlementSummaryDto"][]
+      closedBy: components["schemas"]["UserRefDto"] | null
+      notes: string | null
+    }
+    OwnerStatementSummaryDto: {
+      id: string
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @example 2026-10 */
+      period: string
+      /** @enum {string} */
+      status: "OPEN" | "CLOSED"
+      /** @enum {string} */
+      sendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+      settlementsCount: number
+      /** @description Por moneda; congelados al cerrar, en vivo mientras está abierto */
+      totals: components["schemas"]["OwnerStatementTotalsDto"][]
+      /** Format: date-time */
+      closedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    AddStatementSettlementsDto: {
+      settlementIds: string[]
+    }
+    CloseOwnerStatementDto: {
+      /**
+       * @description Default: el del consolidado (que nació con el del propietario).
+       * @enum {string}
+       */
+      sendMode?: "SUMMARY" | "RECEIPTS" | "BOTH"
+    }
+    FeeReceivableDto: {
+      id: string
+      owner: components["schemas"]["OwnerRefDto"] | null
+      contract: components["schemas"]["SettlementContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      /** @example 2026-10 */
+      installmentPeriod: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      source: "OWNER_DIRECT_PAYMENT" | "SETTLEMENT_NOT_DEDUCTED"
+      /** @enum {string} */
+      payer: "OWNER" | "RENTER"
+      amount: string
+      paidAmount: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "PAID" | "VOIDED"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmountFixed: string | null
+      baseAmount: string
+      /** @description Su pago de origen se anuló con cobros imputados */
+      needsReview: boolean
+      /** Format: date-time */
+      createdAt: string
+    }
+    FeeAccountTotalsDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      accrued: string
+      collected: string
+      pending: string
+      unallocated: string
+    }
+    FeePaymentAllocationDto: {
+      feeReceivableId: string
+      amount: string
+    }
+    FeePaymentDto: {
+      id: string
+      ownerId: string
+      contractId: string | null
+      /** Format: date */
+      paidAt: string
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      /** @enum {string} */
+      paidBy: "OWNER" | "RENTER"
+      unallocatedAmount: string
+      receiptUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+      voidReason: string | null
+      allocations: components["schemas"]["FeePaymentAllocationDto"][]
+      /** Format: date-time */
+      createdAt: string
+    }
+    FeeMovementDto: {
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      type: "ACCRUED" | "PAYMENT" | "PAYMENT_VOIDED" | "RECEIVABLE_VOIDED"
+      description: string
+      debit: string | null
+      credit: string | null
+      /** @description Saldo acumulado por moneda (deuda positiva) */
+      balance: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+    }
+    OwnerFeeAccountDto: {
+      ownerId: string
+      totals: components["schemas"]["FeeAccountTotalsDto"][]
+      /** @description Más nuevos primero */
+      receivables: components["schemas"]["FeeReceivableDto"][]
+      /** @description Más nuevos primero */
+      payments: components["schemas"]["FeePaymentDto"][]
+      /** @description Cronológicos */
+      movements: components["schemas"]["FeeMovementDto"][]
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -6806,6 +7695,57 @@ export interface operations {
       }
     }
   }
+  "OwnersController_updateFeeSettings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOwnerFeeSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerDetailDto"]
+        }
+      }
+      /** @description % inválido */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
   "OwnersController_issuePortalCredentials_api/v1": {
     parameters: {
       query?: never
@@ -8779,6 +9719,67 @@ export interface operations {
       }
     }
   }
+  "InstallmentsController_returnDeposit_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterDepositReturnDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["DepositReturnDto"]
+        }
+      }
+      /** @description No cierra con el depósito, fecha o deducción inválidas */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Contrato vigente o depósito ya devuelto */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
   "PaymentsController_createCharge_api/v1": {
     parameters: {
       query?: never
@@ -9343,6 +10344,1198 @@ export interface operations {
       }
       /** @description Rol insuficiente */
       403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        ownerId?: string
+        propertyId?: string
+        contractId?: string
+        period?: string
+        status?: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Liquidaciones de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["SettlementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSettlementDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay una pendiente, o no hay nada que liquidar */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_listByOwner_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        period?: string
+        status?: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      }
+      header?: never
+      path: {
+        ownerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Liquidaciones del propietario */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["SettlementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_recalculate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_addAdjustment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSettlementAdjustmentDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_voidAdjustment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado o liquidación no pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_confirm_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_cancel_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_registerTransfer_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: date */
+          transferredAt: string
+          /** @example 95000.00 */
+          amount: string
+          /** @enum {string} */
+          method: "TRANSFER" | "CASH" | "OTHER"
+          notes?: string
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Monto, fecha o comprobante inválidos, o supera el neto */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está confirmada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_voidTransfer_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        ownerId?: string
+        period?: string
+        status?: "OPEN" | "CLOSED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Consolidados de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["OwnerStatementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateOwnerStatementDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay uno para ese mes */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El propietario no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_candidates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementSummaryDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_addSettlements_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddStatementSettlementsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cerrado, no confirmada o ya consolidada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description De otro propietario */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_removeSettlement_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        settlementId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cerrado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_close_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CloseOwnerStatementDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya cerrado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_reopen_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya abierto */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_listReceivables_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        ownerId?: string
+        contractId?: string
+        status?: "PENDING" | "PARTIAL" | "PAID" | "VOIDED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Honorarios devengados */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["FeeReceivableDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_account_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ownerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerFeeAccountDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El propietario no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_registerPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: uuid */
+          ownerId: string
+          /** Format: uuid */
+          contractId?: string
+          /** Format: date */
+          paidAt: string
+          /** @example 5000.00 */
+          amount: string
+          /** @enum {string} */
+          currency: "ARS" | "USD"
+          /** @enum {string} */
+          method: "TRANSFER" | "CASH" | "OTHER"
+          /** @enum {string} */
+          paidBy: "OWNER" | "RENTER"
+          notes?: string
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FeePaymentDto"]
+        }
+      }
+      /** @description Monto, fecha o comprobante inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Propietario o contrato inválidos */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_voidPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FeePaymentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_allocate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FeePaymentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Anulado */
+      409: {
         headers: {
           [name: string]: unknown
         }

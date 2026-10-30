@@ -58,6 +58,7 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   TRANSFER: "Transferencia",
   CASH: "Efectivo",
   CREDIT: "Saldo a favor",
+  DEPOSIT: "Depósito en garantía",
   OTHER: "Otro",
 }
 
