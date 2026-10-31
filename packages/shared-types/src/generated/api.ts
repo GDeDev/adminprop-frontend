@@ -2280,6 +2280,140 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/automations/jobs": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Catálogo de jobs
+     * @description Nombre, cron legible, última ejecución de la inmobiliaria (o la global, en índices) y próxima corrida prevista.
+     */
+    get: operations["AutomationsController_jobs_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/executions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de ejecuciones
+     * @description Las de la inmobiliaria más las globales (índices). Más nuevas primero.
+     */
+    get: operations["AutomationsController_executions_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/jobs/{job}/run": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ejecutar un job ahora
+     * @description Encola una corrida manual y responde 202 con el id de la ejecución. Se saltea la condición "hoy es el día N" pero no la idempotencia: no duplica nada. Con `period`, procesa ese mes (generar cuotas, consolidados). `indices.fetch` es global.
+     */
+    post: operations["AutomationsController_run_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/alerts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Avisos internos
+     * @description Avisos para el personal de los últimos 30 días (aumento pendiente, índice no disponible, cuota con base desactualizada, consolidado pendiente), más nuevos primero.
+     */
+    get: operations["AutomationsController_alerts_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/alerts/read-all": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Marcar todos los avisos como leídos */
+    post: operations["AutomationsController_readAll_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/alerts/{id}/read": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Marcar un aviso como leído */
+    patch: operations["AutomationsController_read_api/v1"]
+    trace?: never
+  }
+  "/api/v1/indices/status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de los índices
+     * @description Por tipo: último mes cargado, fuente, último intento de traerlo y su resultado.
+     */
+    get: operations["IndexStatusController_status_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/examples": {
     parameters: {
       query?: never
@@ -4934,6 +5068,107 @@ export interface components {
       payments: components["schemas"]["FeePaymentDto"][]
       /** @description Cronológicos */
       movements: components["schemas"]["FeeMovementDto"][]
+    }
+    JobExecutionDto: {
+      id: string
+      /** @example billing.arrears-notice */
+      job: string
+      /** @description Null en los globales */
+      tenantId: string | null
+      /**
+       * Format: date
+       * @description Día (hora local) de la corrida
+       */
+      scheduledFor: string
+      /** Format: date-time */
+      startedAt: string
+      /** Format: date-time */
+      finishedAt: string | null
+      /** @enum {string} */
+      status: "RUNNING" | "SUCCEEDED" | "PARTIAL" | "FAILED" | "SKIPPED"
+      /** @description Cuántas cosas tocó */
+      affected: number
+      /** @example 3 cuotas creadas, 12 ya existían */
+      summary: string | null
+      error: string | null
+      /** @enum {string} */
+      triggeredBy: "SCHEDULE" | "MANUAL"
+      triggeredByUser: components["schemas"]["UserRefDto"] | null
+    }
+    JobDto: {
+      /** @example installments.generate */
+      name: string
+      /** @example Generar cuotas del mes */
+      title: string
+      description: string
+      /** @example 10 0 * * * */
+      cron: string
+      /** @example todos los días a las 00:10 */
+      cronLabel: string
+      /** @enum {string} */
+      scope: "TENANT" | "GLOBAL"
+      /** @description La del tenant, o la global en los jobs globales */
+      lastExecution: components["schemas"]["JobExecutionDto"] | null
+      /** @description ISO. Null si el disparo automático está apagado */
+      nextRunAt: string | null
+    }
+    RunJobDto: {
+      /**
+       * @description Mes a procesar, si el job lo admite (generar cuotas, consolidados). Sin él, el de hoy.
+       * @example 2026-11
+       */
+      period?: string
+    }
+    RunJobResultDto: {
+      /** @description Se consulta en GET /automations/executions */
+      executionId: string
+    }
+    InternalAlertDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "STATEMENT_PENDING"
+        | "DOCUMENT_FAILED"
+        | "JOB_FAILED"
+      title: string
+      body: string
+      /** @example CONTRACT */
+      entityType: string | null
+      entityId: string | null
+      /**
+       * @description Ruta relativa del backoffice
+       * @example /contratos/00000000-0000-4000-8000-000000000000
+       */
+      link: string | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      readAt: string | null
+    }
+    ReadAllAlertsResultDto: {
+      updated: number
+    }
+    IndexStatusDto: {
+      /** @enum {string} */
+      indexType: "ICL" | "IPC"
+      /** @example 2026-09 */
+      latestPeriod: string | null
+      latestValue: string | null
+      /** @example bcra */
+      source: string | null
+      /** Format: date-time */
+      lastAttemptAt: string | null
+      /** @enum {string|null} */
+      lastAttemptStatus: "SUCCEEDED" | "PARTIAL" | "FAILED" | "SKIPPED" | null
+      lastAttemptError: string | null
+      /**
+       * @description bcra-indec | manual
+       * @example bcra-indec
+       */
+      provider: string
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -11541,6 +11776,262 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_jobs_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["JobDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_executions_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        job?: string
+        status?: "RUNNING" | "SUCCEEDED" | "PARTIAL" | "FAILED" | "SKIPPED"
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Ejecuciones de jobs */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["JobExecutionDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_run_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        job: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RunJobDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RunJobResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El job no existe */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay una corrida en curso de ese job */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_alerts_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        /** @description Sólo los no leídos */
+        unreadOnly?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Avisos internos */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InternalAlertDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_readAll_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ReadAllAlertsResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_read_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InternalAlertDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El aviso no existe */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "IndexStatusController_status_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IndexStatusDto"][]
         }
       }
     }
