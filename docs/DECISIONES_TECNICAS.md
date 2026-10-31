@@ -412,6 +412,16 @@ El botón "Devolver depósito" aparece en la sección "Cuenta corriente" de la f
 
 El % propio, la base (punitorios y/o cargos) y el modo de envío se editan desde la ficha del propietario, en la sección "Honorarios", sólo admin. No van en el formulario de alta/edición de propietarios: son excepciones a la regla de la inmobiliaria y quedan a la vista de lo que afectan (la cuenta de honorarios). Hasta que la API los devolvió, el front los trataba como opcionales; con el `openapi.json` de la fase pasaron a obligatorios en `OwnerDetail`.
 
+## Fase 13 — Automatizaciones
+
+### DT-73 — Los jobs y su catálogo los define la API; el front sólo sabe cuáles piden un mes
+
+La lista de tareas, sus textos y su frecuencia vienen de `GET /automations/jobs`: agregar un job no toca el front. La única excepción es `PERIOD_JOBS` (`installments.generate` y `settlements.statement-reminder`), los que aceptan `period` al correrlos a mano; el resto ejecuta sin diálogo de mes.
+
+### DT-74 — Automatizaciones sólo para admin; los avisos internos los ven admin y empleado
+
+Configuración → Automatizaciones muestra un estado vacío a quien no es admin (la API también lo rechaza). Los avisos internos del tablero los ven admin y empleado. Un aviso se marca leído una sola vez para todo el tenant (la API guarda un único `readAt`): si una persona lo marca, desaparece para las demás.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
