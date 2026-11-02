@@ -3,6 +3,8 @@ import type {
   RenterPaymentStatus,
 } from "@adminprop/shared-types"
 
+import { buildWhatsAppLink } from "./whatsapp"
+
 export const GUARANTEE_TYPE_LABELS: Record<GuaranteeType, string> = {
   PROPERTY: "Propiedad en garantía",
   PAYSLIPS: "Recibos de sueldo",
@@ -23,24 +25,7 @@ export const PAYMENT_STATUS_META: Record<
   OVERDUE: { label: "En mora", badge: "mora" },
 }
 
-/**
- * Link de WhatsApp (spec 5.2): sólo dígitos, con código de país. Un número
- * argentino sin código ("11 5555-1234", "011...", "15...") se lleva a +54 9.
- * Devuelve null si no parece un teléfono.
- */
+/** Link de WhatsApp sin mensaje (spec Fase 8, 5.2); ver `buildWhatsAppLink`. */
 export function whatsappLink(phone: string | null | undefined): string | null {
-  if (!phone) return null
-  let digits = phone.replace(/\D/g, "")
-  if (digits.startsWith("00")) digits = digits.slice(2)
-  if (!digits.startsWith("54")) {
-    if (digits.startsWith("0")) digits = digits.slice(1)
-    // Celular escrito como "15 xxxx xxxx" (sin característica): no se puede
-    // completar sin saber la ciudad; se manda como está y WhatsApp decide.
-    digits = `549${digits}`
-  } else if (!digits.startsWith("549")) {
-    digits = `549${digits.slice(2)}`
-  }
-  return digits.length >= 12 && digits.length <= 15
-    ? `https://wa.me/${digits}`
-    : null
+  return buildWhatsAppLink(phone)
 }
