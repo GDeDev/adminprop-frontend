@@ -53,6 +53,9 @@ vi.mock("@/lib/billing-api", () => ({
   }),
   useRefundCredit: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
+vi.mock("@/lib/notifications-api", () => ({
+  useWhatsAppTemplates: () => ({ data: [] }),
+}))
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))

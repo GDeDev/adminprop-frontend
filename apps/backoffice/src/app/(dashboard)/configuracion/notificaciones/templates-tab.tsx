@@ -29,7 +29,7 @@ import {
 } from "@adminprop/ui/components/select"
 import { Textarea } from "@adminprop/ui/components/textarea"
 
-import { insertVariable, unknownVariables } from "@/lib/notifications"
+import { unknownVariables } from "@/lib/notifications"
 import {
   usePreviewTemplate,
   useNotificationTemplates,
@@ -39,7 +39,7 @@ import {
 } from "@/lib/notifications-api"
 import { useDebouncedValue } from "@/lib/use-debounced-value"
 
-import { VariableChips } from "./variable-chips"
+import { useVariableInsert, VariableChips } from "./variable-chips"
 
 /** Pestaña "Plantillas": editor de asunto y texto con vista previa en vivo. */
 export function TemplatesTab() {
@@ -110,6 +110,11 @@ export function TemplateEditor({
   const [bodyText, setBodyText] = React.useState(template.bodyText)
   const [restoreOpen, setRestoreOpen] = React.useState(false)
   const bodyRef = React.useRef<HTMLTextAreaElement>(null)
+  const [insertVariableInBody, markBodyTouched] = useVariableInsert(
+    bodyRef,
+    bodyText,
+    setBodyText
+  )
   const update = useUpdateNotificationTemplate()
   const restore = useRestoreNotificationTemplate()
   const sendTest = useSendTemplateTest()
@@ -117,18 +122,6 @@ export function TemplateEditor({
   const dirty = subject !== template.subject || bodyText !== template.bodyText
   const unknown = unknownVariables(`${subject} ${bodyText}`, template.variables)
   const invalid = subject.trim() === "" || bodyText.trim() === ""
-
-  function insert(name: string) {
-    const area = bodyRef.current
-    const start = area?.selectionStart ?? bodyText.length
-    const end = area?.selectionEnd ?? bodyText.length
-    const next = insertVariable(bodyText, name, start, end)
-    setBodyText(next.text)
-    requestAnimationFrame(() => {
-      area?.focus()
-      area?.setSelectionRange(next.cursor, next.cursor)
-    })
-  }
 
   async function save() {
     try {
@@ -192,6 +185,7 @@ export function TemplateEditor({
           <Textarea
             id="template-body"
             ref={bodyRef}
+            onFocus={markBodyTouched}
             rows={10}
             value={bodyText}
             onChange={(event) => setBodyText(event.target.value)}
@@ -200,7 +194,10 @@ export function TemplateEditor({
 
         <div className="flex flex-col gap-2">
           <p className="text-sm font-medium">Insertar variable</p>
-          <VariableChips variables={template.variables} onInsert={insert} />
+          <VariableChips
+            variables={template.variables}
+            onInsert={insertVariableInBody}
+          />
           <p className="text-xs text-muted-foreground">
             Se insertan en el texto, donde está el cursor. Los datos faltantes
             salen vacíos; el mail se envía igual.

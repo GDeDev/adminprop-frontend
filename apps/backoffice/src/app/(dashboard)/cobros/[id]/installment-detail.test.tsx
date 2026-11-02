@@ -22,6 +22,13 @@ vi.mock("@adminprop/session/client", async (importOriginal) => {
   }
 })
 
+vi.mock("@/lib/notifications-api", () => ({
+  useWhatsAppTemplates: () => ({ data: [] }),
+}))
+vi.mock("@/lib/renters-api", () => ({
+  useRenter: () => ({ data: { phone: "11 5555-1234" } }),
+}))
+
 vi.mock("@/lib/billing-api", () => ({
   useInstallment: () => ({
     isPending: false,

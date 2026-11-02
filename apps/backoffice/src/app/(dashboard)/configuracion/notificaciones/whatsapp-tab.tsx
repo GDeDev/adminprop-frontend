@@ -13,13 +13,13 @@ import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Textarea } from "@adminprop/ui/components/textarea"
 
-import { insertVariable, unknownVariables } from "@/lib/notifications"
+import { unknownVariables } from "@/lib/notifications"
 import {
   useUpdateWhatsAppTemplate,
   useWhatsAppTemplates,
 } from "@/lib/notifications-api"
 
-import { VariableChips } from "./variable-chips"
+import { useVariableInsert, VariableChips } from "./variable-chips"
 
 /** Pestaña "WhatsApp": textos que el personal manda a mano desde las fichas. */
 export function WhatsAppTab() {
@@ -71,22 +71,15 @@ export function WhatsAppTemplateCard({
 }) {
   const [body, setBody] = React.useState(template.body)
   const areaRef = React.useRef<HTMLTextAreaElement>(null)
+  const [insertVariableInField, markTouched] = useVariableInsert(
+    areaRef,
+    body,
+    setBody
+  )
   const update = useUpdateWhatsAppTemplate()
   const dirty = body !== template.body
   const unknown = unknownVariables(body, template.variables)
   const fieldId = `whatsapp-${template.key}`
-
-  function insert(name: string) {
-    const area = areaRef.current
-    const start = area?.selectionStart ?? body.length
-    const end = area?.selectionEnd ?? body.length
-    const next = insertVariable(body, name, start, end)
-    setBody(next.text)
-    requestAnimationFrame(() => {
-      area?.focus()
-      area?.setSelectionRange(next.cursor, next.cursor)
-    })
-  }
 
   async function save() {
     try {
@@ -114,11 +107,15 @@ export function WhatsAppTemplateCard({
       <Textarea
         id={fieldId}
         ref={areaRef}
+        onFocus={markTouched}
         rows={6}
         value={body}
         onChange={(event) => setBody(event.target.value)}
       />
-      <VariableChips variables={template.variables} onInsert={insert} />
+      <VariableChips
+        variables={template.variables}
+        onInsert={insertVariableInField}
+      />
       {unknown.length > 0 && (
         <p className="text-sm text-destructive" role="alert">
           Variables que no existen:{" "}

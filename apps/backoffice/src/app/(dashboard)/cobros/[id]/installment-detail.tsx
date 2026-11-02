@@ -52,8 +52,16 @@ import {
   useVoidPayment,
 } from "@/lib/billing-api"
 import { DownloadPdfButton } from "@/components/download-pdf-button"
+import { WhatsAppButton } from "@/components/whatsapp-button"
 import { formatMoney } from "@/lib/contracts"
-import { addDays, formatDate } from "@/lib/dates"
+import {
+  addDays,
+  daysBetween,
+  formatDate,
+  formatPeriod,
+  todayIso,
+} from "@/lib/dates"
+import { useRenter } from "@/lib/renters-api"
 
 import { InstallmentBadges } from "../billing-screen"
 import { ApplyCreditDialog } from "./apply-credit-dialog"
@@ -99,6 +107,14 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
   const confirm = useConfirmPayment()
   const voidPayment = useVoidPayment()
   const voidCharge = useVoidCharge()
+  const renter = useRenter(
+    installment.renter?.id ?? "",
+    installment.renter !== null
+  )
+  const overdueDays = Math.max(
+    0,
+    daysBetween(installment.graceEndDate, todayIso())
+  )
   const money = (amount: string) => formatMoney(amount, installment.currency)
   const owes = !isZero(installment.totalDue)
   const hasCredit = !isZero(installment.creditsAvailable)
@@ -169,6 +185,18 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <WhatsAppButton
+              phone={renter.data?.phone}
+              templateKeys={["PAYMENT_REMINDER", "ARREARS"]}
+              values={{
+                recipientName: installment.renter?.fullName,
+                propertyAddress: installment.property?.address,
+                amount: money(installment.totalDue),
+                period: formatPeriod(installment.period),
+                dueDate: formatDate(installment.graceEndDate),
+                daysOverdue: overdueDays > 0 ? String(overdueDays) : "",
+              }}
+            />
             <Button onClick={() => open({ kind: "payment" })}>
               <CircleDollarSign aria-hidden />
               Registrar pago

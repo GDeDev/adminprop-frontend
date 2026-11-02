@@ -11,6 +11,7 @@ import { BottomNav } from "@adminprop/ui/components/bottom-nav"
 import { Button } from "@adminprop/ui/components/button"
 import { ThemeToggle } from "@adminprop/ui/components/theme-toggle"
 
+import { TenantNameProvider } from "./tenant-name"
 import { mobileMoreItems, mobileNavItems, navItems } from "@/lib/navigation"
 import { displayName, roleLabel } from "@/lib/users"
 
@@ -91,50 +92,52 @@ export function AppShell({
   const pathname = usePathname()
 
   return (
-    <div className="min-h-svh md:flex">
-      <AppSidebar
-        items={navItems}
-        pathname={pathname}
-        linkComponent={Link}
-        header={<BrandMark tenantName={tenantName} />}
-        footer={<AccountFooter />}
-      />
+    <TenantNameProvider name={tenantName}>
+      <div className="min-h-svh md:flex">
+        <AppSidebar
+          items={navItems}
+          pathname={pathname}
+          linkComponent={Link}
+          header={<BrandMark tenantName={tenantName} />}
+          footer={<AccountFooter />}
+        />
 
-      <div className="flex min-h-svh min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
-          <div className="min-w-0">
-            <BrandMark tenantName={tenantName} />
-          </div>
-          <div className="flex shrink-0 items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-muted"
-              aria-label="Mi perfil"
-              title="Mi perfil"
-              asChild
-            >
-              <Link href="/perfil">
-                <UserRound aria-hidden />
-              </Link>
-            </Button>
-            <ThemeToggle className="hover:bg-muted" />
-            <SignOutButton className="hover:bg-muted" />
-          </div>
-        </header>
+        <div className="flex min-h-svh min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+            <div className="min-w-0">
+              <BrandMark tenantName={tenantName} />
+            </div>
+            <div className="flex shrink-0 items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-muted"
+                aria-label="Mi perfil"
+                title="Mi perfil"
+                asChild
+              >
+                <Link href="/perfil">
+                  <UserRound aria-hidden />
+                </Link>
+              </Button>
+              <ThemeToggle className="hover:bg-muted" />
+              <SignOutButton className="hover:bg-muted" />
+            </div>
+          </header>
 
-        {/* pb-28: que la BottomNav no tape el final del contenido en mobile. */}
-        <main className="flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-10">
-          {children}
-        </main>
+          {/* pb-28: que la BottomNav no tape el final del contenido en mobile. */}
+          <main className="flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-10">
+            {children}
+          </main>
+        </div>
+
+        <BottomNav
+          items={mobileNavItems}
+          more={{ items: mobileMoreItems }}
+          pathname={pathname}
+          linkComponent={Link}
+        />
       </div>
-
-      <BottomNav
-        items={mobileNavItems}
-        more={{ items: mobileMoreItems }}
-        pathname={pathname}
-        linkComponent={Link}
-      />
-    </div>
+    </TenantNameProvider>
   )
 }

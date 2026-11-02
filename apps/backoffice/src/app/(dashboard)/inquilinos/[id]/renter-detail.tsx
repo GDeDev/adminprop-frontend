@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   FileText,
   KeyRound,
-  MessageCircle,
   Pencil,
   ShieldCheck,
   Trash2,
@@ -34,6 +33,7 @@ import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
 import { useRenterArrears } from "@/lib/billing-api"
 import { formatNationalId } from "@/lib/owners"
 import { formatDate } from "@/lib/dates"
+import { WhatsAppButton } from "@/components/whatsapp-button"
 import { GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
 import {
   useDeleteRenter,
@@ -67,8 +67,6 @@ export function RenterDetailScreen({ id }: { id: string }) {
 function Detail({ renter }: { renter: RenterDetail }) {
   const { user } = useSession()
   const arrears = useRenterArrears(renter.id)
-  const whatsapp = whatsappLink(renter.phone)
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
@@ -100,14 +98,11 @@ function Detail({ renter }: { renter: RenterDetail }) {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {whatsapp && (
-              <Button variant="outline" asChild>
-                <a href={whatsapp} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle aria-hidden />
-                  WhatsApp
-                </a>
-              </Button>
-            )}
+            <WhatsAppButton
+              phone={renter.phone}
+              templateKeys={["PAYMENT_REMINDER", "ARREARS"]}
+              values={{ recipientName: renter.fullName }}
+            />
             <Button variant="outline" asChild>
               <Link href={`/inquilinos/${renter.id}/editar`}>
                 <Pencil aria-hidden />
