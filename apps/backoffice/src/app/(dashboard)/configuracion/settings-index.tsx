@@ -4,6 +4,7 @@ import Link from "next/link"
 import {
   ChevronRight,
   Building2,
+  History,
   ListTree,
   SlidersHorizontal,
   Timer,
@@ -82,6 +83,14 @@ export function SettingsIndex() {
                 icon={Timer}
                 title="Automatizaciones"
                 description="Cuotas, aumentos, índices y avisos que corren solos; historial y ejecución manual."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/auditoria"
+                icon={History}
+                title="Auditoría"
+                description="Quién hizo qué y cuándo: altas, cambios, ingresos y envíos."
               />
             </li>
             <li>
