@@ -4,27 +4,25 @@ import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 
 import { Badge } from "@adminprop/ui/components/badge"
-import { ComingSoon } from "@adminprop/ui/components/coming-soon"
 
+import { ContactForm } from "@/components/contact-form"
 import { PublicHeader } from "@/components/public-header"
-import { getPublicProperties, getPublicProperty } from "@/lib/public-properties"
+import { getPublicProperty, publicTenantSlug } from "@/lib/public-api"
+import { priceLabel } from "@/lib/public-format"
 
-// SSG de las propiedades disponibles; el resto de los ids da 404 (Fase 22:
-// una propiedad no disponible no se expone aunque exista).
-export const dynamicParams = false
-
-export function generateStaticParams() {
-  return getPublicProperties().map((property) => ({ id: property.id }))
-}
+// Una propiedad que deja de estar disponible se deja de mostrar (404) al
+// revalidar; no se prearman fichas en el build.
+export const revalidate = 60
 
 export async function generateMetadata(
   props: PageProps<"/propiedades/[id]">
 ): Promise<Metadata> {
   const { id } = await props.params
-  const property = getPublicProperty(id)
+  const property = await getPublicProperty(id)
   if (!property) return {}
   return {
     title: `${property.propertyType} en ${property.neighborhood ?? property.address}`,
+    description: property.publicDescription?.slice(0, 160),
   }
 }
 
@@ -32,13 +30,14 @@ export default async function PropertyPage(
   props: PageProps<"/propiedades/[id]">
 ) {
   const { id } = await props.params
-  const property = getPublicProperty(id)
+  const property = await getPublicProperty(id)
   if (!property) notFound()
+  const slug = publicTenantSlug()
 
   return (
     <>
       <PublicHeader />
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
+      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
         <Link
           href="/"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -46,14 +45,34 @@ export default async function PropertyPage(
           <ArrowLeft className="size-4" /> Volver al listado
         </Link>
 
+        {property.photos.length > 0 && (
+          <div
+            className="flex snap-x gap-2 overflow-x-auto rounded-xl"
+            role="group"
+            aria-label="Fotos de la propiedad"
+          >
+            {property.photos.map((photo, index) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={photo.id}
+                src={photo.url}
+                alt={`Foto ${index + 1} de ${property.address}`}
+                className="h-72 min-w-[85%] snap-center rounded-xl object-cover sm:min-w-[60%]"
+              />
+            ))}
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
           <p className="text-sm text-accent">
-            {property.propertyType}
-            {property.neighborhood && ` · ${property.neighborhood}`}
+            {property.propertyType} · {property.location}
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">
             {property.address}
           </h1>
+          <p className="font-display text-2xl font-semibold tabular-nums">
+            {priceLabel(property.price, property.currency)}
+          </p>
           {property.amenities.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {property.amenities.map((amenity) => (
@@ -65,10 +84,30 @@ export default async function PropertyPage(
           )}
         </div>
 
-        <ComingSoon
-          title="Ficha pública"
-          description="Fotos, descripción, precio y formulario de contacto — Fase 22."
-        />
+        {property.publicDescription && (
+          <p className="whitespace-pre-line text-muted-foreground">
+            {property.publicDescription}
+          </p>
+        )}
+
+        {property.features.length > 0 && (
+          <dl className="grid grid-cols-2 gap-3 rounded-xl border bg-card p-4 text-sm sm:grid-cols-3">
+            {property.features.map((feature) => (
+              <div key={feature.label}>
+                <dt className="text-muted-foreground">{feature.label}</dt>
+                <dd className="font-medium">{feature.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {slug && (
+          <ContactForm
+            slug={slug}
+            propertyId={property.id}
+            defaultMessage={`Hola, me interesa la propiedad de ${property.address}.`}
+          />
+        )}
       </main>
     </>
   )
