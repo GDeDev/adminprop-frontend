@@ -422,7 +422,7 @@ Los botones no leen `pdfUrl` de los DTOs de liquidación o pago: piden el docume
 
 ### DT-77 — Recibo para todo pago que no sea aplicación de saldo, ya confirmado
 
-El botón "Recibo" aparece en cada pago confirmado o anulado con `kind !== CREDIT_APPLICATION` (A-30: las aplicaciones de saldo no emiten recibo). Un pago pendiente de confirmación no lo muestra: el recibo se emite al confirmar.
+El botón "Recibo" aparece en cada pago confirmado o anulado con `kind !== CREDIT_APPLICATION` (A-33: las aplicaciones de saldo no emiten recibo). Un pago pendiente de confirmación no lo muestra: el recibo se emite al confirmar.
 
 ### DT-78 — Configuración → Inmobiliaria con formulario simple, sin zod
 
