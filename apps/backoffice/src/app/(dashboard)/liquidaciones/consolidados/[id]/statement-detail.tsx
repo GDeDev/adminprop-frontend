@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ChevronLeft, FileDown, Lock, LockOpen, Plus, X } from "lucide-react"
+import { ChevronLeft, Lock, LockOpen, Plus, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
@@ -41,6 +41,7 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 
+import { DownloadPdfButton } from "@/components/download-pdf-button"
 import { periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -169,14 +170,11 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
               </>
             ) : (
               <>
-                <Button
-                  variant="outline"
-                  disabled
-                  title="Llega con la generación de PDFs (Fase 15)"
-                >
-                  <FileDown aria-hidden />
-                  Descargar PDF
-                </Button>
+                <DownloadPdfButton
+                  kind="OWNER_STATEMENT"
+                  entityId={statement.id}
+                  canRegenerate={user?.role === "ADMIN"}
+                />
                 {isAdmin && (
                   <Button
                     variant="outline"
