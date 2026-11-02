@@ -18,3 +18,4 @@ export type JobTrigger = JobExecution["triggeredBy"]
 export type JobScope = Job["scope"]
 export type InternalAlertType = InternalAlert["type"]
 export type IndexFetchStatus = NonNullable<IndexStatus["lastAttemptStatus"]>
+export type AsyncJobStatus = ApiSchemas["AsyncJobStatusDto"]
