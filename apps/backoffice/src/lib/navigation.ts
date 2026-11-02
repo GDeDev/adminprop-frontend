@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Building2,
   FileText,
   KeyRound,
@@ -22,6 +23,7 @@ export const navItems: NavItem[] = [
   { href: "/contratos", label: "Contratos", icon: FileText },
   { href: "/cobros", label: "Cobros", icon: Wallet },
   { href: "/liquidaciones", label: "Liquidaciones", icon: Receipt },
+  { href: "/reportes", label: "Reportes", icon: BarChart3 },
   { href: "/configuracion", label: "Configuración", icon: Settings },
 ]
 
