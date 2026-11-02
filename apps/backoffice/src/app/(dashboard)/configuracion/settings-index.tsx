@@ -3,6 +3,7 @@
 import Link from "next/link"
 import {
   ChevronRight,
+  Bell,
   Building2,
   History,
   ListTree,
@@ -83,6 +84,14 @@ export function SettingsIndex() {
                 icon={Timer}
                 title="Automatizaciones"
                 description="Cuotas, aumentos, índices y avisos que corren solos; historial y ejecución manual."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/notificaciones"
+                icon={Bell}
+                title="Notificaciones"
+                description="Avisos por email y WhatsApp: eventos, plantillas, historial de envíos."
               />
             </li>
             <li>
