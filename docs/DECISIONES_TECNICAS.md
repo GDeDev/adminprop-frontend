@@ -454,6 +454,18 @@ Siete reportes en una pantalla con un `Select` agrupado (Financieros / Operativo
 
 `EntityHistory` se monta en el `page.tsx` de contrato, propiedad, propietario, inquilino, cuota y liquidación (no dentro de cada pantalla) y no renderiza nada para empleados. Reutiliza `AuditRow` de la pantalla de auditoría; el nombre de la entidad es el del modelo de la API (`Contract`, `Property`, `Owner`, `Renter`, `Installment`, `Settlement`).
 
+### DT-83 — El inventario se crea vacío y se completa en el editor
+
+"Realizar inventario" crea el borrador (la API lo precarga con la plantilla estándar, A-43) y lleva al editor; así las fotos tienen siempre un ítem guardado al que colgarse. Los ítems nuevos agregados a mano muestran "Guardá el borrador para adjuntar fotos" hasta que tengan id.
+
+### DT-84 — Confirmar guarda primero y advierte por ítems malos sin foto
+
+Confirmar hace un PATCH con el estado actual y después el POST de confirmación; si hay ítems en mal estado sin foto se pide una confirmación explícita (la spec pide advertir, no bloquear). Un confirmado es de sólo lectura y se corrige con un inventario nuevo que lleva el motivo (A-42).
+
+### DT-85 — Comparación imprimible, sin PDF todavía
+
+La comparación se imprime con el diálogo del navegador (`print:hidden` en los botones). El PDF propio queda para ampliar la Fase 15 (A-45).
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.

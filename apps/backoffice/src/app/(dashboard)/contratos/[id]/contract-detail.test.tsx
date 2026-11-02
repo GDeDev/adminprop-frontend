@@ -114,6 +114,8 @@ function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
   }
 }
 
+vi.mock("./inventory-section", () => ({ InventorySection: () => null }))
+
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))

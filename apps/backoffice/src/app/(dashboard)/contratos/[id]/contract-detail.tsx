@@ -54,6 +54,7 @@ import { ContractSettlementsSection } from "./contract-settlements-section"
 import { DocumentActions } from "./document-upload"
 import { EditContractDialog } from "./edit-contract-dialog"
 import { InstallmentsSection } from "./installments-section"
+import { InventorySection } from "./inventory-section"
 import { RentUpdateDialog } from "./rent-update-dialog"
 import { TerminateDialog } from "./terminate-dialog"
 
@@ -312,6 +313,10 @@ function Detail({ contract }: { contract: ContractDetail }) {
             </div>
           </Section>
         )}
+
+        <Section title="Inventario del inmueble" className="md:col-span-2">
+          <InventorySection contractId={contract.id} />
+        </Section>
 
         <Section title="Historial de aumentos" className="md:col-span-2">
           <RentHistory contract={contract} />
