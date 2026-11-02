@@ -3,6 +3,7 @@
 import Link from "next/link"
 import {
   ChevronRight,
+  Building2,
   ListTree,
   SlidersHorizontal,
   Timer,
@@ -59,6 +60,14 @@ export function SettingsIndex() {
         </li>
         {user?.role === "ADMIN" && (
           <>
+            <li>
+              <SettingsLink
+                href="/configuracion/inmobiliaria"
+                icon={Building2}
+                title="Inmobiliaria"
+                description="Razón social, CUIT, datos bancarios, logo y color que salen en los PDF."
+              />
+            </li>
             <li>
               <SettingsLink
                 href="/configuracion/usuarios"
