@@ -466,6 +466,18 @@ Confirmar hace un PATCH con el estado actual y después el POST de confirmación
 
 La comparación se imprime con el diálogo del navegador (`print:hidden` en los botones). El PDF propio queda para ampliar la Fase 15 (A-45).
 
+### DT-86 — Filtros del listado público como formulario GET
+
+Los filtros (ubicación, tipo, moneda, precio) son un `<form method="get">` que recarga la home con la query en la URL: funciona sin JavaScript, se comparte el link y el servidor revalida el listado cada 60 s (ISR). "Ver más" es un link a la página siguiente, no un scroll infinito.
+
+### DT-87 — La inmobiliaria del sitio público sale de `PORTAL_TENANT_SLUG`
+
+El servidor arma `/public/:slug/...` con el slug del entorno; el formulario de contacto recibe el slug como prop porque se envía desde el navegador. Cuando el tenant se resuelva por dominio, sólo cambia `getPortalTenantSlug`.
+
+### DT-88 — Honeypot y mensaje amable si la propiedad ya no está disponible
+
+El formulario trae un campo `website` fuera de pantalla que debe llegar vacío (A-48). Si la API responde que la propiedad ya no está disponible, se reemplaza el formulario por un aviso con vuelta al listado, sin error crudo. Precio y descripción pública son campos nuevos de la propiedad (A-46); su carga en el wizard del backoffice espera al OpenAPI regenerado.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
