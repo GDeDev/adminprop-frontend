@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { LogOut, UserRound } from "lucide-react"
 
 import { useSession } from "@adminprop/session/client"
 import { AppSidebar } from "@adminprop/ui/components/app-sidebar"
@@ -56,12 +56,16 @@ function AccountFooter() {
     <div className="flex flex-col gap-3">
       {user && (
         <div className="flex items-center justify-between gap-2 px-3">
-          <div className="min-w-0">
+          <Link
+            href="/perfil"
+            className="min-w-0 rounded-md hover:underline focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+            aria-label="Mi perfil"
+          >
             <p className="truncate text-sm font-medium">{displayName(user)}</p>
             <p className="truncate text-xs text-sidebar-muted">
               {roleLabel(user.role)}
             </p>
-          </div>
+          </Link>
           <SignOutButton className="shrink-0 text-sidebar-foreground hover:bg-sidebar-border/60 focus-visible:ring-accent" />
         </div>
       )}
@@ -102,6 +106,18 @@ export function AppShell({
             <BrandMark tenantName={tenantName} />
           </div>
           <div className="flex shrink-0 items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-muted"
+              aria-label="Mi perfil"
+              title="Mi perfil"
+              asChild
+            >
+              <Link href="/perfil">
+                <UserRound aria-hidden />
+              </Link>
+            </Button>
             <ThemeToggle className="hover:bg-muted" />
             <SignOutButton className="hover:bg-muted" />
           </div>
