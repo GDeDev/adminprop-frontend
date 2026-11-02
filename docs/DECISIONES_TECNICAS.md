@@ -438,6 +438,22 @@ El botón "Recibo" aparece en cada pago confirmado o anulado con `kind !== CREDI
 
 Son once campos de texto opcionales que la API normaliza; sólo se valida en el cliente el color (`#rrggbb`) y el tamaño del logo (2 MB). Vacío se envía como `null` para borrar el dato. El nombre comercial no se puede vaciar.
 
+### DT-79 — El frontend fija el contrato de reportes y auditoría
+
+Las Fases 19 y 20 se escribieron primero en el front: `shared-types/src/reports.ts` y `audit.ts` son el contrato que el backend implementa (anotado en `REDISENO_FASE_19_20.md`, sección 8). Los importes siempre llegan por moneda (`CurrencyAmount[]`) y se muestran con `formatMoneyList`; nunca se suman monedas distintas.
+
+### DT-80 — Gráfico propio en SVG, un panel por moneda
+
+El dashboard dibuja devengado vs. cobrado con SVG propio (A-37), un gráfico por moneda con movimiento. Las alturas se calculan con `Number()` sólo para dibujar; los valores exactos se muestran con el formateador de siempre en el `<title>` de cada barra.
+
+### DT-81 — Reportes con un selector, no con pestañas anidadas
+
+Siete reportes en una pantalla con un `Select` agrupado (Financieros / Operativos) y los filtros que cada uno necesita. Excel y PDF descargan con los filtros que se están viendo (`downloadExport`, por blob para mandar el token). Los reportes por propietario e inquilino quedan para cuando exista su endpoint.
+
+### DT-82 — Historial por ficha sólo para admin, en la página de la ruta
+
+`EntityHistory` se monta en el `page.tsx` de contrato, propiedad, propietario, inquilino, cuota y liquidación (no dentro de cada pantalla) y no renderiza nada para empleados. Reutiliza `AuditRow` de la pantalla de auditoría; el nombre de la entidad es el del modelo de la API (`Contract`, `Property`, `Owner`, `Renter`, `Installment`, `Settlement`).
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
