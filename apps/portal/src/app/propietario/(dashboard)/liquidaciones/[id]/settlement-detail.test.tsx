@@ -66,6 +66,7 @@ describe("OwnerSettlementDetailScreen", () => {
           description: "Plomero",
           expenseDate: "2026-10-03",
           amount: "15000.00",
+          currency: "ARS",
         },
       ],
       skippedExpenses: [],
