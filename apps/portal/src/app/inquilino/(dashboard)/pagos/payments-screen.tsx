@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronRight, FileDown } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 
 import { apiErrorMessage } from "@adminprop/session/client"
 import type { InstallmentSummary } from "@adminprop/shared-types"
@@ -25,8 +25,9 @@ import {
   PAYMENT_METHOD_LABELS,
   periodLabel,
 } from "@/lib/format"
+import { PortalPdfButton } from "@/components/portal-pdf-button"
 import {
-  renterReceiptUrl,
+  renterReceiptPath,
   useRenterInstallment,
   useRenterInstallments,
 } from "@/lib/portal-api"
@@ -204,16 +205,12 @@ function InstallmentDialog({
                     </div>
                     {payment.kind === "CASH_IN" &&
                       payment.status === "CONFIRMED" && (
-                        <Button variant="ghost" size="sm" asChild>
-                          <a
-                            href={renterReceiptUrl(payment.id)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <FileDown aria-hidden />
-                            Recibo
-                          </a>
-                        </Button>
+                        <PortalPdfButton
+                          path={renterReceiptPath(payment.id)}
+                          label="Recibo"
+                          variant="ghost"
+                          size="sm"
+                        />
                       )}
                   </li>
                 ))}

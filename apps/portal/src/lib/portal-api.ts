@@ -96,9 +96,9 @@ export function useRenterInstallment(id: string | null) {
   })
 }
 
-/** URL del recibo PDF de un pago (Fase 15); el navegador sigue el 302. */
-export function renterReceiptUrl(paymentId: string): string {
-  return `${process.env.NEXT_PUBLIC_API_URL ?? ""}/portal/renter/payments/${paymentId}/receipt`
+/** Recibo PDF de un pago (Fase 15), para `PortalPdfButton`. */
+export function renterReceiptPath(paymentId: string): string {
+  return `/portal/renter/payments/${paymentId}/receipt`
 }
 
 // ---------------------------------------------------------------------------
@@ -196,10 +196,21 @@ export function useOwnerPropertyInstallments(propertyId: string) {
   })
 }
 
-export function ownerSettlementPdfUrl(id: string): string {
-  return `${process.env.NEXT_PUBLIC_API_URL ?? ""}/portal/owner/settlements/${id}/pdf`
+export function ownerSettlementPdfPath(id: string): string {
+  return `/portal/owner/settlements/${id}/pdf`
 }
 
-export function ownerStatementPdfUrl(id: string): string {
-  return `${process.env.NEXT_PUBLIC_API_URL ?? ""}/portal/owner/statements/${id}/pdf`
+export function ownerStatementPdfPath(id: string): string {
+  return `/portal/owner/statements/${id}/pdf`
+}
+
+/**
+ * Abre un PDF del portal. La API exige el token, que un link directo no manda:
+ * se pide `?format=json` (devuelve `{ url }`) y se abre esa URL (D-114).
+ */
+export async function openPortalPdf(path: string): Promise<void> {
+  const { data } = await apiClient.get<ApiSuccess<{ url: string }>>(path, {
+    params: { format: "json" },
+  })
+  window.open(data.data.url, "_blank", "noopener,noreferrer")
 }

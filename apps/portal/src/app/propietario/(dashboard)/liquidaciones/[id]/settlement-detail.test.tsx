@@ -19,8 +19,8 @@ vi.mock("@/lib/portal-api", () => ({
     mutateAsync: acknowledge,
     isPending: false,
   }),
-  ownerSettlementPdfUrl: (id: string) =>
-    `/api/portal/owner/settlements/${id}/pdf`,
+  ownerSettlementPdfPath: (id: string) => `/portal/owner/settlements/${id}/pdf`,
+  openPortalPdf: vi.fn(),
 }))
 
 afterEach(() => {
@@ -99,10 +99,9 @@ describe("OwnerSettlementDetailScreen", () => {
     ).toBeInTheDocument()
     expect(screen.getByText("−$ 10.000,00")).toBeInTheDocument()
     expect(screen.getByText(/Plomero/)).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /Descargar PDF/ })).toHaveAttribute(
-      "href",
-      "/api/portal/owner/settlements/s1/pdf"
-    )
+    expect(
+      screen.getByRole("button", { name: /Descargar PDF/ })
+    ).toBeInTheDocument()
     await user.click(
       screen.getByRole("button", { name: /Recibí la transferencia/ })
     )

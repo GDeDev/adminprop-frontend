@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { CheckCircle2, ChevronLeft, FileDown } from "lucide-react"
+import { CheckCircle2, ChevronLeft } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
@@ -18,8 +18,9 @@ import {
   periodLabel,
   SETTLEMENT_STATUS_META,
 } from "@/lib/format"
+import { PortalPdfButton } from "@/components/portal-pdf-button"
 import {
-  ownerSettlementPdfUrl,
+  ownerSettlementPdfPath,
   useAcknowledgeSettlement,
   useOwnerSettlement,
 } from "@/lib/portal-api"
@@ -203,16 +204,10 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
         <div className="mt-4 flex flex-wrap gap-2">
           {settlement.status !== "PENDING" &&
             settlement.status !== "CANCELLED" && (
-              <Button variant="outline" asChild>
-                <a
-                  href={ownerSettlementPdfUrl(settlement.id)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <FileDown aria-hidden />
-                  Descargar PDF
-                </a>
-              </Button>
+              <PortalPdfButton
+                path={ownerSettlementPdfPath(settlement.id)}
+                label="Descargar PDF"
+              />
             )}
           {settlement.status === "TRANSFERRED" &&
             !settlement.acknowledgedAt && (

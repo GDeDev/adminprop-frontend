@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ChevronRight, FileDown } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 
 import { apiErrorMessage } from "@adminprop/session/client"
 import type {
@@ -22,8 +22,9 @@ import {
   periodLabel,
   SETTLEMENT_STATUS_META,
 } from "@/lib/format"
+import { PortalPdfButton } from "@/components/portal-pdf-button"
 import {
-  ownerStatementPdfUrl,
+  ownerStatementPdfPath,
   useOwnerSettlements,
   useOwnerStatements,
 } from "@/lib/portal-api"
@@ -186,16 +187,11 @@ function StatementRow({ statement }: { statement: OwnerStatementSummary }) {
         </p>
       </div>
       {statement.status === "CLOSED" && (
-        <Button variant="outline" size="sm" asChild>
-          <a
-            href={ownerStatementPdfUrl(statement.id)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FileDown aria-hidden />
-            PDF
-          </a>
-        </Button>
+        <PortalPdfButton
+          path={ownerStatementPdfPath(statement.id)}
+          label="PDF"
+          size="sm"
+        />
       )}
     </div>
   )
