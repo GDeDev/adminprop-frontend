@@ -3,6 +3,7 @@ import type {
   InternalAlertType,
   JobExecutionStatus,
   JobTrigger,
+  NotificationAlertType,
 } from "@adminprop/shared-types"
 
 import type { BadgeMeta } from "./contracts"
@@ -27,13 +28,27 @@ export const TRIGGER_LABELS: Record<JobTrigger, string> = {
   MANUAL: "Manual",
 }
 
-export const ALERT_TYPE_LABELS: Record<InternalAlertType, string> = {
+/** Tipos de la campana: los de la Fase 13 más los que suma la Fase 14 (A-55). */
+export type AlertType = InternalAlertType | NotificationAlertType
+
+export const ALERT_TYPE_LABELS: Record<AlertType, string> = {
   RENT_UPDATE_PENDING: "Aumento pendiente de aplicar",
   INDEX_FETCH_FAILED: "Índice no disponible",
   INSTALLMENT_BASE_OUTDATED: "Cuota con base desactualizada",
   STATEMENT_PENDING: "Consolidado pendiente de cerrar",
   DOCUMENT_FAILED: "Documento no generado",
   JOB_FAILED: "Automatización fallida",
+  NOTIFICATION_FAILED: "Notificación no enviada",
+  EMAIL_BOUNCED: "Email rebotado",
+}
+
+export type AlertIconKind = "delivery-failed" | "email-bounced" | "default"
+
+/** Qué ícono lleva cada aviso: los de entrega de mails se distinguen de los de sistema. */
+export function alertIconKind(type: string): AlertIconKind {
+  if (type === "NOTIFICATION_FAILED") return "delivery-failed"
+  if (type === "EMAIL_BOUNCED") return "email-bounced"
+  return "default"
 }
 
 const dateTime = new Intl.DateTimeFormat("es-AR", {

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Bell, Check } from "lucide-react"
+import { AlertTriangle, Bell, Check, MailWarning } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
@@ -11,12 +11,37 @@ import { Button } from "@adminprop/ui/components/button"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 
 import { LoadMore } from "@/components/load-more"
-import { ALERT_TYPE_LABELS, relativeTime } from "@/lib/automations"
+import {
+  ALERT_TYPE_LABELS,
+  alertIconKind,
+  relativeTime,
+} from "@/lib/automations"
 import {
   useInfiniteAlerts,
   useMarkAlertRead,
   useMarkAllAlertsRead,
 } from "@/lib/automations-api"
+
+function AlertTypeIcon({ type }: { type: string }) {
+  const className = "mt-0.5 size-4 shrink-0"
+  switch (alertIconKind(type)) {
+    case "delivery-failed":
+      return (
+        <AlertTriangle
+          aria-hidden
+          className={`${className} text-destructive`}
+        />
+      )
+    case "email-bounced":
+      return (
+        <MailWarning aria-hidden className={`${className} text-destructive`} />
+      )
+    default:
+      return (
+        <Bell aria-hidden className={`${className} text-muted-foreground`} />
+      )
+  }
+}
 
 /**
  * Avisos internos de las automatizaciones (rediseño Fase 13, sección 6):
@@ -97,21 +122,24 @@ export function InternalAlerts() {
                 key={alert.id}
                 className="flex flex-wrap items-start justify-between gap-2 py-2"
               >
-                <div className="min-w-0">
-                  <p className="font-medium">
-                    {alert.link ? (
-                      <Link href={alert.link} className="hover:underline">
-                        {alert.title}
-                      </Link>
-                    ) : (
-                      alert.title
-                    )}
-                  </p>
-                  <p className="text-muted-foreground">{alert.body}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {ALERT_TYPE_LABELS[alert.type]} ·{" "}
-                    {relativeTime(alert.createdAt)}
-                  </p>
+                <div className="flex min-w-0 gap-2">
+                  <AlertTypeIcon type={alert.type} />
+                  <div className="min-w-0">
+                    <p className="font-medium">
+                      {alert.link ? (
+                        <Link href={alert.link} className="hover:underline">
+                          {alert.title}
+                        </Link>
+                      ) : (
+                        alert.title
+                      )}
+                    </p>
+                    <p className="text-muted-foreground">{alert.body}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {ALERT_TYPE_LABELS[alert.type]} ·{" "}
+                      {relativeTime(alert.createdAt)}
+                    </p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
