@@ -412,6 +412,22 @@ El botón "Devolver depósito" aparece en la sección "Cuenta corriente" de la f
 
 El % propio, la base (punitorios y/o cargos) y el modo de envío se editan desde la ficha del propietario, en la sección "Honorarios", sólo admin. No van en el formulario de alta/edición de propietarios: son excepciones a la regla de la inmobiliaria y quedan a la vista de lo que afectan (la cuenta de honorarios). Hasta que la API los devolvió, el front los trataba como opcionales; con el `openapi.json` de la fase pasaron a obligatorios en `OwnerDetail`.
 
+### DT-75 — La descarga de PDF siempre pasa por `GET /documents/:kind/:entityId`
+
+Los botones no leen `pdfUrl` de los DTOs de liquidación o pago: piden el documento vigente por tipo y entidad. Así hay un solo camino (también para "todavía no está listo") y las pantallas no dependen de que cada resumen traiga la URL. `fetchDocument` consulta cada 3 s hasta 30 s mientras el estado es `PENDING`; después avisa "probá en un momento". Un `FAILED` avisa que un administrador puede regenerarlo.
+
+### DT-76 — "Regenerar" es un botón aparte, sólo admin, junto al de descarga
+
+`DownloadPdfButton` acepta `canRegenerate`; el botón de regenerar es un componente interno para que las pantallas sin proveedor de consultas (y sus tests) sigan funcionando sin él. Se muestra en liquidaciones y consolidados; el recibo y la rescisión sólo descargan.
+
+### DT-77 — Recibo para todo pago que no sea aplicación de saldo, ya confirmado
+
+El botón "Recibo" aparece en cada pago confirmado o anulado con `kind !== CREDIT_APPLICATION` (A-30: las aplicaciones de saldo no emiten recibo). Un pago pendiente de confirmación no lo muestra: el recibo se emite al confirmar.
+
+### DT-78 — Configuración → Inmobiliaria con formulario simple, sin zod
+
+Son once campos de texto opcionales que la API normaliza; sólo se valida en el cliente el color (`#rrggbb`) y el tamaño del logo (2 MB). Vacío se envía como `null` para borrar el dato. El nombre comercial no se puede vaciar.
+
 ## ⚠️ Inconsistencias detectadas en las specs (a revisar, no resueltas)
 
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
