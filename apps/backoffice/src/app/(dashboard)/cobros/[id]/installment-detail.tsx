@@ -51,6 +51,7 @@ import {
   useVoidCharge,
   useVoidPayment,
 } from "@/lib/billing-api"
+import { DownloadPdfButton } from "@/components/download-pdf-button"
 import { formatMoney } from "@/lib/contracts"
 import { addDays, formatDate } from "@/lib/dates"
 
@@ -584,6 +585,16 @@ function PaymentRows({
                     </a>
                   </Button>
                 )}
+                {payment.kind !== "CREDIT_APPLICATION" &&
+                  payment.status !== "PENDING_CONFIRMATION" && (
+                    <DownloadPdfButton
+                      kind="PAYMENT_RECEIPT"
+                      entityId={payment.id}
+                      label="Recibo"
+                      variant="ghost"
+                      size="sm"
+                    />
+                  )}
                 {payment.status === "PENDING_CONFIRMATION" && (
                   <Button
                     size="sm"

@@ -40,6 +40,7 @@ import {
   RENT_UPDATE_TYPE_LABELS,
   timelineLabel,
 } from "@/lib/contracts"
+import { DownloadPdfButton } from "@/components/download-pdf-button"
 import { useContract } from "@/lib/contracts-api"
 import { formatDate, formatPeriod, todayIso } from "@/lib/dates"
 import { useContractServices } from "@/lib/services-api"
@@ -302,6 +303,13 @@ function Detail({ contract }: { contract: ContractDetail }) {
             <p className="mt-3 text-sm text-muted-foreground">
               El cobro de la multa se registra desde los cobros.
             </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <DownloadPdfButton
+                kind="TERMINATION_NOTICE"
+                entityId={contract.id}
+                label="Cálculo de la rescisión"
+              />
+            </div>
           </Section>
         )}
 

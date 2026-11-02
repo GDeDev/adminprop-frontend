@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ExternalLink,
-  FileDown,
   Landmark,
   Plus,
   RefreshCw,
@@ -25,6 +24,7 @@ import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 
+import { DownloadPdfButton } from "@/components/download-pdf-button"
 import { FEE_MODE_LABELS, isZero, periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -228,14 +228,11 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
             )}
             {settlement.status !== "PENDING" &&
               settlement.status !== "CANCELLED" && (
-                <Button
-                  variant="outline"
-                  disabled
-                  title="Llega con la generación de PDFs (Fase 15)"
-                >
-                  <FileDown aria-hidden />
-                  Descargar PDF
-                </Button>
+                <DownloadPdfButton
+                  kind="SETTLEMENT"
+                  entityId={settlement.id}
+                  canRegenerate={user?.role === "ADMIN"}
+                />
               )}
           </div>
         </div>
