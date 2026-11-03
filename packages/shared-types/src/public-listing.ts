@@ -14,6 +14,11 @@ export interface PublicPropertySummary {
   currency: Currency | null
   coverPhotoUrl: string | null
   amenities: string[]
+  /** Sitio web (spec web-inmobiliaria 4.3): campos aditivos. `areaM2` es la superficie total. */
+  operation: "SALE" | "RENT"
+  rooms: number | null
+  coveredAreaM2: number | null
+  ageYears: number | null
 }
 
 export interface PublicPropertyDetail extends PublicPropertySummary {
@@ -44,5 +49,10 @@ export interface PublicListingQuery {
   priceFrom?: string
   priceTo?: string
   currency?: Currency
+  /** Sitio web: venta o alquiler, mínimos de dormitorios y baños, y selección por ids. */
+  operation?: "SALE" | "RENT"
+  bedrooms?: number
+  bathrooms?: number
+  ids?: string[]
   page?: number
 }

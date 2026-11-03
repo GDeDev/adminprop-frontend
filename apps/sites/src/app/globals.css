@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@source "../**/*.{ts,tsx}";
+
+/*
+ * El color, la tipografía y las esquinas de cada sitio salen de variables CSS
+ * (`--site-*`) que pone el layout según el tema de la inmobiliaria: cambiar un
+ * color no requiere rebuild. Estas utilidades (`bg-site-primary`, `text-site-text`,
+ * `rounded-site`, `font-site`…) las leen.
+ */
+@theme inline {
+  --color-site-primary: var(--site-primary);
+  --color-site-on-primary: var(--site-on-primary);
+  --color-site-secondary: var(--site-secondary);
+  --color-site-on-secondary: var(--site-on-secondary);
+  --color-site-bg: var(--site-background);
+  --color-site-surface: var(--site-surface);
+  --color-site-text: var(--site-text);
+  --color-site-muted: color-mix(
+    in srgb,
+    var(--site-text) 78%,
+    var(--site-background)
+  );
+  --color-site-border: color-mix(
+    in srgb,
+    var(--site-text) 20%,
+    var(--site-background)
+  );
+  --radius-site: var(--site-radius);
+  --font-site: var(--site-font);
+}
+
+/* Valores de respaldo (página de error global, 404 sin sitio). */
+:root {
+  --site-primary: #1d4ed8;
+  --site-on-primary: #ffffff;
+  --site-secondary: #475569;
+  --site-on-secondary: #ffffff;
+  --site-background: #ffffff;
+  --site-surface: #f1f5f9;
+  --site-text: #0f172a;
+  --site-radius: 16px;
+  --site-font:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--site-background);
+  color: var(--site-text);
+  font-family: var(--site-font);
+}
+
+/* Foco visible sobre cualquier fondo: el color del texto siempre contrasta. */
+:focus-visible {
+  outline: 3px solid var(--site-text);
+  outline-offset: 3px;
+}
+
+/* Salto al contenido para teclado y lectores de pantalla. */
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: var(--site-primary);
+  color: var(--site-on-primary);
+  border-radius: 0.5rem;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* Aparición suave de las secciones; se apaga con prefers-reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* El honeypot sale de pantalla sin `display:none` (algunos bots lo detectan). */
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
