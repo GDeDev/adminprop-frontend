@@ -36,6 +36,9 @@ vi.mock("@/lib/services-api", () => ({
   useDeleteService: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
 
+// La publicación tiene sus propios tests.
+vi.mock("./publication-section", () => ({ PublicationSection: () => null }))
+
 function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
   return {
     id: "p1",

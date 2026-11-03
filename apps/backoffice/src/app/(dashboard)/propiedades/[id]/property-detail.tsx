@@ -49,6 +49,7 @@ import {
 import { usePropertyServices } from "@/lib/services-api"
 
 import { StatusBadge } from "../property-list"
+import { PublicationSection } from "./publication-section"
 import { ServicesSection } from "./services-section"
 
 /** Ficha de propiedad (spec Fase 6, 5.2). */
@@ -209,6 +210,8 @@ function Detail({ property }: { property: PropertyDetail }) {
           text="Aparece cuando existan contratos y cobros."
         />
       </div>
+
+      <PublicationSection propertyId={property.id} />
 
       <PhotoManager property={property} />
     </div>
