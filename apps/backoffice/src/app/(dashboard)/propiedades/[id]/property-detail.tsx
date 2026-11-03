@@ -70,6 +70,7 @@ export function PropertyDetailScreen({ id }: { id: string }) {
 function Detail({ property }: { property: PropertyDetail }) {
   const { user } = useSession()
   const services = usePropertyServices(property.id)
+  const router = useRouter()
 
   return (
     <div className="flex flex-col gap-6">
@@ -202,6 +203,11 @@ function Detail({ property }: { property: PropertyDetail }) {
       <AppraisalSection
         propertyId={property.id}
         locationId={property.locationId}
+        onUse={(price, currency) =>
+          router.push(
+            `/propiedades/${property.id}/editar?precio=${price}&moneda=${currency}`
+          )
+        }
       />
 
       <PublicationSection propertyId={property.id} />
