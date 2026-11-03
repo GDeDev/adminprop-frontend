@@ -24,7 +24,8 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     // El wizard de contratos recorre cinco pasos con userEvent: con la suite
     // entera en paralelo supera los 5 s por defecto y arrastra a los tests
-    // siguientes del archivo (borrador compartido en localStorage).
-    testTimeout: 15_000,
+    // siguientes del archivo (borrador compartido en localStorage). 60 s: en el
+    // pre-commit un cambio en packages/ corre todas las pruebas de la app a la vez.
+    testTimeout: 60_000,
   },
 })
