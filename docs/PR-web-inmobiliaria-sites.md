@@ -19,7 +19,7 @@ Rama `feature/web-inmobiliaria-sites` → `dev`. Spec: `adminprop-repo-files/spe
 4. **DT-123** — El formulario de contacto pasa por el propio sitio y reenvía la IP del visitante; requiere `TRUST_PROXY=true` en la API (A-130 del backend).
 5. **DT-126** — Ampliaciones aditivas de `public-listing.ts` (`operation`, `rooms`, `coveredAreaM2`, `ageYears`; `operation`/`bedrooms`/`bathrooms`/`ids` en la query).
 6. **DT-109 / DT-111 / DT-112** (backoffice) — Cambio de template con cambios sin guardar, aviso al salir (el botón «atrás» no se puede frenar con el App Router) y dominio propio con instrucciones DNS genéricas.
-7. **Pendiente de Giuliano**: variables nuevas en Doppler (A-SITES-5) y `NEXT_PUBLIC_SITES_URL` / `NEXT_PUBLIC_SITES_DNS_TARGET` del backoffice; en el backend, `SITES_BASE_DOMAIN`.
+7. **Pendiente de Giuliano**: variables nuevas en Doppler (A-SITES-5) y, para la revalidación, `SITES_REVALIDATE_SECRET` en `sites` y `SITES_REVALIDATE_URL`/`SITES_REVALIDATE_SECRET` en el backend y `NEXT_PUBLIC_SITES_URL` / `NEXT_PUBLIC_SITES_DNS_TARGET` del backoffice; en el backend, `SITES_BASE_DOMAIN`.
 
 ## Desvíos respecto del contrato
 
@@ -42,6 +42,25 @@ Rama `feature/web-inmobiliaria-sites` → `dev`. Spec: `adminprop-repo-files/spe
   | MODERN ficha  | 96          | 100           | 100       | 100 |
 
 - **Responsive**: capturas de home, listado y ficha de los dos templates a 375, 768 y 1280 px en `docs/capturas-web-inmobiliaria/`, y una auditoría automática (sin scroll horizontal, targets táctiles ≥ 44 px, `alt` en todas las imágenes, un solo `h1`) con **0 problemas** en 2 sitios × 3 anchos × 5 páginas.
+
+## Segunda ronda: revisión de este PR (DT-127 a DT-133)
+
+Hice una revisión del código de los dos PR y corregí lo encontrado:
+
+| Hallazgo                                                             | Corrección                                                                                                                   |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Un 429 o 5xx de la API dejaba a un sitio real en 404 (y se cacheaba) | `UpstreamError`, 503 con `Retry-After`, último valor conocido, ISR conserva la última versión buena (DT-127)                 |
+| La IP del visitante se podía falsificar con `X-Forwarded-For`        | `lib/client-ip.ts` (DT-128)                                                                                                  |
+| El tema en un `div` dejaba el `html` blanco en sitios oscuros        | `:root` en un `<style>` + `theme-color` (DT-129)                                                                             |
+| Publicar tardaba hasta ~2 min en verse                               | `POST /api/revalidate` + tags por sitio (DT-130); **verificado contra la API real: el título nuevo se ve apenas se publica** |
+| Animación de aparición sin verificar con movimiento                  | Rango acotado y medido (DT-131)                                                                                              |
+| Paginación sin números, rango de precio invertido, pedidos en serie  | DT-132                                                                                                                       |
+| El backoffice no validaba el rol en la página                        | `AdminGate` (DT-133)                                                                                                         |
+| Dominio propio sin verificación en el editor                         | Pestaña Dominio con el registro TXT (DT-133), contra el backend D-170                                                        |
+
+Resultados: `typecheck`, `lint` y `format:check` verdes; tests **sites 73**, **backoffice 302**, ui 39, portal 19, session 30. Contra la API real: revalidación con secreto (401 sin él o con uno malo), tema en `:root`, `theme-color`, y las secciones llegan a opacidad 1 con movimiento activo a 375 y 1280 px.
+
+**Sigue sin hacerse** (explicado en DT-133): favoritos, autoguardado, deshacer, recorte de imágenes, miniaturas reales y orden por precio.
 
 ## Lo que NO pude verificar
 

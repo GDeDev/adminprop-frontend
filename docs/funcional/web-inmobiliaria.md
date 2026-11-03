@@ -24,3 +24,7 @@ Los dos muestran lo mismo; cambian el diseño. Los colores, la tipografía y las
 - Si el sitio no está publicado, o la dirección no existe, se ve «No encontramos este sitio».
 - Una propiedad que ya no está disponible muestra «No encontramos esta página» con un botón para volver al inicio.
 - El sitio funciona en celular, tableta y escritorio, y se puede usar con teclado y lector de pantalla.
+
+- Cuando la inmobiliaria publica un cambio, el sitio se actualiza en la próxima visita (antes podía tardar un par de minutos).
+- Si el servicio tiene un problema momentáneo, el sitio sigue mostrando la última versión buena en vez de un error.
+- La paginación del listado muestra los números de página, y un rango de precio al revés se corrige solo.

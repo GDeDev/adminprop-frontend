@@ -645,3 +645,41 @@ Las secciones aparecen con `animation-timeline: view()`: cero JavaScript, y sin 
 - **A-SITES-3** · Redes sociales con glifos propios en SVG (lucide ya no trae logos de marcas).
 - **A-SITES-4** · «Propiedades parecidas» = misma operación, sin la actual (la ficha pública no expone el id del tipo).
 - **A-SITES-5** · Variables de entorno nuevas de `apps/sites`: `API_URL` (o `NEXT_PUBLIC_API_URL`), `SITES_PREVIEW_ANCESTORS`, `SITES_ALLOW_SLUG_PATH`, `SITES_IMAGE_SOURCES`. **Pendiente de Giuliano**: crearlas en Doppler (config nueva para `sites`) y cargar `SITES_BASE_DOMAIN` en el backend.
+
+### Segunda ronda (revisión de los PR)
+
+Salió de revisar el código de los dos PR (seguridad, correctitud, usabilidad y rendimiento). Lo que sigue corrige o mejora lo de arriba.
+
+### DT-127 — Una falla de la API no se cachea como "no existe"
+
+`get()` devuelve `null` solo ante un 404; cualquier otra falla (red, 5xx, 429) lanza `UpstreamError`. Con ISR, si la regeneración falla Next sigue sirviendo la última versión buena. Para el host: `cachedHostLookup` distingue `found | missing | error`; ante `error` sirve el último valor conocido (hasta 10 min) y, si no hay ninguno, el `proxy` responde **503 con `Retry-After`** en vez de 404. Antes, un 429 por tráfico ajeno (600/min por IP) dejaba a los sitios reales en 404 durante el ataque. Destacadas, filtros y «parecidas» fallan en silencio (la página sale igual); el listado muestra su propio aviso.
+
+### DT-128 — IP del visitante: no se confía en el primer `X-Forwarded-For`
+
+El primer valor lo escribe el cliente: con `TRUST_PROXY=true` en la API alcanzaba para esquivar el límite de 5 consultas por hora. `lib/client-ip.ts` toma el header que fije `SITES_CLIENT_IP_HEADER` (el que garantice la plataforma) o, si no, cuenta desde la derecha según `SITES_TRUSTED_PROXY_HOPS` (default 1), y descarta lo que no sea una IP.
+
+### DT-129 — El tema va en `:root` (con `<style>`), no en un `div`
+
+Con las variables en un `div`, el `html` quedaba con el fondo de respaldo: en un sitio oscuro el rebote del scroll en el celular y las áreas seguras de iOS se veían blancas. Ahora `themeCss` genera `:root{…}` en un `<style>`. Para que React no escape nada, las pilas de fuentes van **sin comillas** y todos los valores salen de `themeStyle` (hex, px y pilas de la lista cerrada); hay tests de que no entra `" ' < > &`. Además `generateViewport` pone `theme-color` con el fondo del sitio.
+
+### DT-130 — Revalidación bajo demanda al publicar
+
+La API avisa con `POST /api/revalidate` (`Authorization: Bearer <SITES_REVALIDATE_SECRET>`, `{ slug }`) al publicar, despublicar y verificar un dominio. El endpoint invalida el tag `site:<slug>` con `revalidateTag(tag, { expire: 0 })` y vacía la caché de hosts; todas las llamadas a la API del sitio llevan ese tag. Antes un cambio podía tardar hasta ~2 minutos en verse (caché de la API + caché de fetch + ISR). Sin secreto el endpoint responde 404 (apagado); el secreto se compara con `timingSafeEqual` sobre hashes.
+
+### DT-131 — Animación de aparición acotada
+
+`animation-range: entry 0% cover 14%`: una sección más alta que la pantalla no queda a medio aparecer. Se midió con movimiento activo (no solo con `reduced-motion`): todas las secciones llegan a opacidad 1 al leerlas, incluso las de 2600 px.
+
+### DT-132 — Paginación numerada, rango de precio invertido y pedidos en paralelo
+
+Paginación con ventana (primera, última, actual y vecinas); un rango «desde» mayor que «hasta» se invierte en vez de dar un listado vacío; la ficha pide la propiedad y las «parecidas» a la vez; el sitemap pide el resto de las páginas en paralelo.
+
+### DT-133 — Backoffice: guarda de rol y verificación de dominio
+
+`AdminGate` muestra «Sólo para administradores» a un empleado que entra por URL (la API ya lo frenaba con 403; antes veía la pantalla llena de errores). La pestaña Dominio muestra si el dominio está verificado y, si no, el registro TXT con botones de copiar y «Verificar dominio». `useSiteDomain` / `useVerifySiteDomain` consumen los endpoints nuevos del backend (D-170); los tipos salen del OpenAPI regenerado y `SiteDomain` está en `site-api.ts`.
+
+### Qué NO se hizo de la revisión (y por qué)
+
+- **Favoritos**: opcional en la spec; necesitan una página que lea `localStorage` y pida propiedades desde el navegador (CORS por dominio propio o un proxy más).
+- **Autoguardado, deshacer, recorte de imágenes, miniaturas reales de los templates y orden por precio**: son producto, no correcciones; el orden por precio además necesita soporte en la API.
+- **Quitar `'unsafe-inline'` de `script-src`**: depende de que Next permita CSP por hash en rutas con ISR.

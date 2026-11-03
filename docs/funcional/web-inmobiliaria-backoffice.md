@@ -28,3 +28,14 @@ Dos templates, **Clásico** y **Moderno**, con una maqueta de cómo se ven con s
 ## Propiedades: operación, precio y características
 
 En el alta y la edición de propiedades hay un paso nuevo, **Publicación**: operación (Alquiler o Venta, Alquiler por defecto), precio y moneda (sin precio el público ve «Consultar»), descripción pública, ambientes, dormitorios, baños, superficie total y cubierta (hasta 2 decimales) y antigüedad. Todos son opcionales; dejar un campo vacío lo borra. La ficha de la propiedad muestra estos datos. Esos datos son los que usa el sitio público.
+
+## Dominio propio: cómo se verifica
+
+1. En la pestaña **Dominio**, escribí tu dominio (por ejemplo `www.tuinmobiliaria.com.ar`) y guardalo. Queda **reservado**, pero el sitio todavía no responde ahí.
+2. Aparece un registro **TXT** (un nombre y un valor). Cargalo en el DNS de tu dominio, en el panel donde lo compraste.
+3. Cuando lo hayas cargado, tocá **Verificar dominio**. Los cambios de DNS pueden tardar un rato (a veces unas horas): si todavía no lo encuentra, te avisa y podés probar de nuevo.
+4. Una vez verificado, el dominio es tuyo: ninguna otra inmobiliaria puede usarlo. Para que el sitio responda ahí falta además el registro **CNAME** que te indica el equipo de Adminprop.
+
+Si cambiás o quitás el dominio, hay que volver a verificarlo. Esto evita que alguien reserve el dominio de otra persona.
+
+«Mi sitio web» es solo para administradores: un empleado que entra por la dirección ve un aviso.

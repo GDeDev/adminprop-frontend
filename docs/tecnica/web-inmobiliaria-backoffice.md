@@ -47,3 +47,8 @@ Contrato: `adminprop-repo-files/specs/web-inmobiliaria.md` (secciones 5 y 6.2). 
 - Variables nuevas (opcionales): `NEXT_PUBLIC_SITES_URL` (default `http://localhost:3003`) y `NEXT_PUBLIC_SITES_DNS_TARGET`.
 - El botón «atrás» del navegador no pasa por el aviso de cambios sin guardar (DT-111).
 - El backoffice no valida el largo de los textos: muestra el contador y la API devuelve el error por campo.
+
+## Segunda ronda (revisión de los PR)
+
+- **Guarda de rol** (`admin-gate.tsx`, DT-133): un empleado que entra a `/sitio-web` por URL ve «Sólo para administradores».
+- **Dominio propio verificado** (`domain-tab.tsx`): estado Verificado / Falta verificar, registro TXT (host y valor) con botones de copiar, «Verificar dominio» (deshabilitado si hay un dominio escrito sin guardar) y los avisos `DOMAIN_NOT_VERIFIED` y `DOMAIN_TAKEN`. Con la verificación apagada (desarrollo) el dominio se muestra verificado al cargarlo. Hooks `useSiteDomain` y `useVerifySiteDomain` en `lib/site-api.ts`.

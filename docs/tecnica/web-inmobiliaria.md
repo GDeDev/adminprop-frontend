@@ -1,6 +1,6 @@
 # Sitios web de las inmobiliarias — documentación técnica (`apps/sites`)
 
-Spec: `adminprop-repo-files/specs/web-inmobiliaria.md` (sesión B). Backend: rama `feature/web-inmobiliaria-api`. Editor del backoffice: ver [`web-inmobiliaria-backoffice.md`](web-inmobiliaria-backoffice.md). Decisiones DT-115 a DT-126 en `DECISIONES_TECNICAS.md`. Rama `feature/web-inmobiliaria-sites`, desde `feature/fase-24-tasacion-automatica`.
+Spec: `adminprop-repo-files/specs/web-inmobiliaria.md` (sesión B). Backend: rama `feature/web-inmobiliaria-api`. Editor del backoffice: ver [`web-inmobiliaria-backoffice.md`](web-inmobiliaria-backoffice.md). Decisiones DT-115 a DT-133 en `DECISIONES_TECNICAS.md`. Rama `feature/web-inmobiliaria-sites`, desde `feature/fase-24-tasacion-automatica`.
 
 ## Qué se construyó
 
@@ -44,12 +44,19 @@ src/lib/                     api (server-only), theme, site-route, listing-query
 
 SEO por página con `generateMetadata` desde `seo`, Open Graph, favicon del sitio, `noindex` en la vista previa y JSON-LD (`RealEstateAgent` y `RealEstateListing`).
 
+## Resiliencia y caché (segunda ronda)
+
+- Una falla de la API nunca se cachea como 404 (DT-127): 503 con `Retry-After` en el proxy, última versión buena en ISR.
+- **`POST /api/revalidate`** (DT-130): la API lo llama al publicar, despublicar o verificar un dominio; el cambio se ve en la próxima visita. Con el secreto sin configurar queda apagado y el sitio se actualiza solo a los 60 s.
+- El tema va en `:root` (DT-129) y el `theme-color` del navegador sale del fondo del sitio.
+
 ## Seguridad
 
 - **Cero `dangerouslySetInnerHTML`.** Todo lo que escribe la inmobiliaria se renderiza como texto de React (hay un test con `<img onerror>` y `<script>` en cada campo). El JSON-LD va como texto con `<` escapado.
 - `next.config.ts`: CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS, `COOP`; `frame-ancestors 'none'` salvo la vista previa (DT-121, DT-122). Sin `X-Powered-By`.
 - El tema se revalida antes de llegar a un `style`; los links de WhatsApp y teléfono se arman solo con dígitos; las redes sociales ya llegan validadas (https y del dominio de la red).
-- El formulario de contacto: honeypot `website`, validación de campos, comprobación de `Origin`, límite de tamaño, y reenvío server-side (DT-123).
+- El formulario de contacto: honeypot `website`, validación de campos, comprobación de `Origin`, límite de tamaño, y reenvío server-side (DT-123) con la IP del visitante tomada de forma confiable (DT-128).
+- El token de la vista previa viaja en la ruta (puede quedar en logs de acceso del servidor); es de solo lectura, dura 15 minutos y abre únicamente el borrador de su inmobiliaria.
 
 ## Accesibilidad y responsive
 
