@@ -77,7 +77,9 @@ export function BillingScreen() {
   const renterId = searchParams.get("renterId")
   const [period, setPeriod] = React.useState(currentPeriod())
   const [tab, setTab] = React.useState<Tab>("installments")
-  const [generating, setGenerating] = React.useState(false)
+  const [generating, setGenerating] = React.useState(
+    searchParams.get("generar") === "1"
+  )
 
   return (
     <div className="flex flex-col gap-6">

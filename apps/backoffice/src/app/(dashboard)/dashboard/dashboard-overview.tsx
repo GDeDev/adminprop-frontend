@@ -252,7 +252,7 @@ function Overview({ report }: { report: DashboardReport }) {
           </Link>
         </Button>
         <Button asChild variant="outline">
-          <Link href="/configuracion/automatizaciones">
+          <Link href="/cobros?generar=1">
             <Timer aria-hidden />
             Generar cuotas
           </Link>
