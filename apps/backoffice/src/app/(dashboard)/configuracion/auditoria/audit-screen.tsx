@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { ChevronDown, ChevronLeft, ChevronRight, Download } from "lucide-react"
 import { toast } from "sonner"
 
@@ -11,10 +12,10 @@ import type {
   AuditActorKind,
   AuditEntry,
 } from "@adminprop/shared-types"
-import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -31,6 +32,9 @@ import {
   AUDIT_ACTION_LABELS,
   AUDIT_ACTOR_LABELS,
   auditActor,
+  auditEntityHref,
+  auditEntityLabel,
+  auditFieldLabel,
   auditValue,
 } from "@/lib/audit"
 import {
@@ -55,7 +59,12 @@ function formatDateTime(iso: string): string {
 /** Configuración → Auditoría (rediseño Fase 20, sección 6). Sólo administradores. */
 export function AuditScreen() {
   const { user } = useSession()
-  const [filters, setFilters] = React.useState<AuditFilters>({})
+  // "Ver todo" del historial de una ficha llega con ?entity=…&entityId=…
+  const searchParams = useSearchParams()
+  const [filters, setFilters] = React.useState<AuditFilters>(() => ({
+    entity: searchParams.get("entity") ?? undefined,
+    entityId: searchParams.get("entityId") ?? undefined,
+  }))
   const [searchText, setSearchText] = React.useState("")
   const search = useDebouncedValue(searchText, 300)
   const effective = React.useMemo(
@@ -137,7 +146,7 @@ export function AuditScreen() {
             <SelectItem value={ALL}>Todas las entidades</SelectItem>
             {catalog.data?.entities.map((entity) => (
               <SelectItem key={entity} value={entity}>
-                {entity}
+                {auditEntityLabel(entity)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -202,9 +211,11 @@ export function AuditScreen() {
       {query.isPending ? (
         <PageSkeleton />
       ) : query.isError ? (
-        <Alert variant="destructive" role="alert">
-          <AlertDescription>No se pudo cargar la auditoría.</AlertDescription>
-        </Alert>
+        <ErrorState
+          title="No se pudo cargar la auditoría"
+          description="Probá de nuevo en un rato."
+          onRetry={() => void query.refetch()}
+        />
       ) : entries.length === 0 ? (
         <EmptyState
           title="Sin movimientos"
@@ -258,10 +269,12 @@ export function AuditRow({
           <ChevronRight aria-hidden className="mt-1 size-4 shrink-0" />
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="text-sm">{entry.summary || entry.entity}</p>
+          <p className="text-sm">
+            {entry.summary || auditEntityLabel(entry.entity)}
+          </p>
           <p className="text-xs text-muted-foreground">
             {formatDateTime(entry.createdAt)} · {auditActor(entry)} ·{" "}
-            {entry.entity}
+            {auditEntityLabel(entry.entity)}
           </p>
         </div>
         <Badge variant="outline">{AUDIT_ACTION_LABELS[entry.action]}</Badge>
@@ -276,35 +289,56 @@ function AuditDetail({ id }: { id: string }) {
   if (detail.isPending) return <Skeleton className="m-3 h-16" />
   if (detail.isError) {
     return (
-      <p className="p-3 text-sm text-destructive">
-        No se pudo cargar el detalle.
+      <p className="p-3 text-sm text-destructive" role="alert">
+        No se pudo cargar el detalle.{" "}
+        <button
+          type="button"
+          className="underline"
+          onClick={() => void detail.refetch()}
+        >
+          Reintentar
+        </button>
       </p>
     )
   }
   const { changes } = detail.data
+  const href = auditEntityHref(detail.data.entity, detail.data.entityId)
+  const link = href && (
+    <p className="px-3 pb-2 text-sm md:ml-7">
+      <Link href={href} className="underline">
+        Ver {auditEntityLabel(detail.data.entity).toLowerCase()}
+      </Link>
+    </p>
+  )
   if (changes.length === 0) {
     return (
-      <p className="px-10 pb-3 text-sm text-muted-foreground">
-        Sin cambios de campos para mostrar.
-      </p>
+      <>
+        <p className="px-10 pb-3 text-sm text-muted-foreground">
+          Sin cambios de campos para mostrar.
+        </p>
+        {link}
+      </>
     )
   }
   return (
-    <dl className="mx-3 mb-3 grid grid-cols-[auto_1fr_1fr] gap-x-4 gap-y-1 rounded-lg bg-muted/50 p-3 text-sm md:ml-10">
-      <dt className="text-xs font-medium text-muted-foreground">Campo</dt>
-      <dd className="text-xs font-medium text-muted-foreground">Antes</dd>
-      <dd className="text-xs font-medium text-muted-foreground">Después</dd>
-      {changes.map((change) => (
-        <React.Fragment key={change.field}>
-          <dt className="font-medium">{change.field}</dt>
-          <dd className="break-words text-muted-foreground">
-            {auditValue(change.before, change.beforeLabel)}
-          </dd>
-          <dd className="break-words">
-            {auditValue(change.after, change.afterLabel)}
-          </dd>
-        </React.Fragment>
-      ))}
-    </dl>
+    <>
+      {link}
+      <dl className="mx-3 mb-3 grid grid-cols-[auto_1fr_1fr] gap-x-4 gap-y-1 rounded-lg bg-muted/50 p-3 text-sm md:ml-10">
+        <dt className="text-xs font-medium text-muted-foreground">Campo</dt>
+        <dd className="text-xs font-medium text-muted-foreground">Antes</dd>
+        <dd className="text-xs font-medium text-muted-foreground">Después</dd>
+        {changes.map((change) => (
+          <React.Fragment key={change.field}>
+            <dt className="font-medium">{auditFieldLabel(change.field)}</dt>
+            <dd className="break-words text-muted-foreground">
+              {auditValue(change.before, change.beforeLabel)}
+            </dd>
+            <dd className="break-words">
+              {auditValue(change.after, change.afterLabel)}
+            </dd>
+          </React.Fragment>
+        ))}
+      </dl>
+    </>
   )
 }

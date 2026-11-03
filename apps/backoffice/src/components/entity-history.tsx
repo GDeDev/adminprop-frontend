@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 
 import { useSession } from "@adminprop/session/client"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
@@ -37,7 +38,15 @@ function HistoryList({
 
   return (
     <section className="rounded-xl border bg-card p-4" aria-label="Historial">
-      <h2 className="mb-2 font-display text-lg font-semibold">Historial</h2>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h2 className="font-display text-lg font-semibold">Historial</h2>
+        <Link
+          href={`/configuracion/auditoria?entity=${encodeURIComponent(entity)}&entityId=${encodeURIComponent(entityId)}`}
+          className="text-sm underline"
+        >
+          Ver todo
+        </Link>
+      </div>
       {history.isPending ? (
         <Skeleton className="h-12" />
       ) : history.isError ? (

@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest"
 
 import type { AuditEntry } from "@adminprop/shared-types"
 
-import { auditActor, auditValue } from "./audit"
+import {
+  auditActor,
+  auditEntityHref,
+  auditEntityLabel,
+  auditFieldLabel,
+  auditValue,
+} from "./audit"
 
 const base: AuditEntry = {
   id: "1",
@@ -43,5 +49,20 @@ describe("auditValue", () => {
     expect(auditValue(null)).toBe("—")
     expect(auditValue(true)).toBe("Sí")
     expect(auditValue(12)).toBe("12")
+  })
+})
+
+describe("etiquetas de auditoría", () => {
+  it("traduce entidades y campos, con respaldo legible", () => {
+    expect(auditEntityLabel("OwnerStatement")).toBe("Consolidado")
+    expect(auditEntityLabel("Algo")).toBe("Algo")
+    expect(auditFieldLabel("feePercentage")).toBe("Porcentaje de honorarios")
+    expect(auditFieldLabel("someNewField")).toBe("Some new field")
+  })
+
+  it("linkea a la ficha cuando existe", () => {
+    expect(auditEntityHref("Property", "p1")).toBe("/propiedades/p1")
+    expect(auditEntityHref("Payment", "x")).toBeNull()
+    expect(auditEntityHref("Property", null)).toBeNull()
   })
 })
