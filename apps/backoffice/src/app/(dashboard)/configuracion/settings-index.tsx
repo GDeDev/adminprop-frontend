@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Bell,
   DatabaseZap,
+  Megaphone,
   Building2,
   History,
   ListTree,
@@ -93,6 +94,14 @@ export function SettingsIndex() {
                 icon={Bell}
                 title="Notificaciones"
                 description="Avisos por email y WhatsApp: eventos, plantillas, historial de envíos."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/canales"
+                icon={Megaphone}
+                title="Canales de publicación"
+                description="Conectá Mercado Libre para publicar propiedades y recibir consultas."
               />
             </li>
             <li>
