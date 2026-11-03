@@ -6,6 +6,7 @@ import type {
   ApiSuccess,
   ResetSiteTemplateRequest,
   SiteAsset,
+  SiteDomain,
   SitePreviewToken,
   SiteSettings,
   SiteTemplateInfo,
@@ -17,6 +18,7 @@ import { apiClient } from "./api-client"
 import { previewRefreshDelay } from "./site"
 
 const settingsKey = ["site", "settings"] as const
+const domainKey = ["site", "domain"] as const
 
 async function unwrap<T>(
   request: Promise<{ data: ApiSuccess<T> }>
@@ -49,7 +51,11 @@ function useSettingsMutation<V>(run: (variables: V) => Promise<SiteSettings>) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: run,
-    onSuccess: (data) => queryClient.setQueryData(settingsKey, data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(settingsKey, data)
+      // Cambiar o quitar el dominio cambia su verificación y el registro DNS.
+      void queryClient.invalidateQueries({ queryKey: domainKey })
+    },
   })
 }
 
@@ -120,4 +126,20 @@ export function useSubdomainAvailability(value: string, enabled: boolean) {
     staleTime: 10_000,
     retry: false,
   })
+}
+
+/** Estado del dominio propio y el registro TXT que hay que cargar en el DNS. */
+export function useSiteDomain() {
+  return useQuery({
+    queryKey: domainKey,
+    queryFn: () => unwrap<SiteDomain>(apiClient.get("/site/domain")),
+    refetchOnWindowFocus: false,
+  })
+}
+
+/** `POST /site/domain/verify`: busca el TXT; 422 `DOMAIN_NOT_VERIFIED` si todavía no está. */
+export function useVerifySiteDomain() {
+  return useSettingsMutation(() =>
+    unwrap<SiteSettings>(apiClient.post("/site/domain/verify"))
+  )
 }

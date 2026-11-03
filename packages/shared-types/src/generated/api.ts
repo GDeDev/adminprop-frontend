@@ -3481,6 +3481,46 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/site/domain": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado del dominio propio
+     * @description Si está verificado y, si no, el registro TXT que hay que cargar en el DNS para demostrar que es tuyo.
+     */
+    get: operations["SiteController_domain_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/domain/verify": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Verificar el dominio propio
+     * @description Busca el registro TXT en el DNS. Hasta que se verifica, el dominio está reservado pero no resuelve el sitio.
+     */
+    post: operations["SiteController_verifyDomain_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/site/subdomain-availability": {
     parameters: {
       query?: never
@@ -7713,6 +7753,23 @@ export interface components {
       /** @description JWT corto; se manda como ?preview= al sitio */
       token: string
       expiresAt: string
+    }
+    DomainRecordDto: {
+      /** @enum {string} */
+      type: "TXT"
+      /** @example _adminprop-verify.www.mi-inmobiliaria.com.ar */
+      host: string
+      /** @example adminprop-verify=0123456789abcdef0123456789abcdef */
+      value: string
+    }
+    SiteDomainDto: {
+      customDomain: string | null
+      /** @description Solo un dominio verificado resuelve el sitio */
+      verified: boolean
+      verifiedAt: string | null
+      /** @description false en desarrollo: el dominio se activa al cargarlo */
+      verificationRequired: boolean
+      record: components["schemas"]["DomainRecordDto"] | null
     }
     SubdomainAvailabilityDto: {
       value: string
@@ -17449,6 +17506,80 @@ export interface operations {
       }
       /** @description No es administrador */
       403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_domain_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteDomainDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_verifyDomain_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description DOMAIN_TAKEN: otra inmobiliaria lo verificó primero */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description DOMAIN_NOT_VERIFIED o NO_CUSTOM_DOMAIN */
+      422: {
         headers: {
           [name: string]: unknown
         }

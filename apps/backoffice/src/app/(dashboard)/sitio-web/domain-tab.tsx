@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, Loader2, TriangleAlert } from "lucide-react"
+import { Check, Clock, Copy, Loader2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorCode, apiErrorMessage } from "@adminprop/session/client"
@@ -16,7 +16,12 @@ import {
 } from "@adminprop/ui/components/field"
 import { Input } from "@adminprop/ui/components/input"
 
-import { useSubdomainAvailability, useUpdateSiteSettings } from "@/lib/site-api"
+import {
+  useSiteDomain,
+  useSubdomainAvailability,
+  useUpdateSiteSettings,
+  useVerifySiteDomain,
+} from "@/lib/site-api"
 import {
   isValidSubdomainFormat,
   normalizeDomainInput,
@@ -213,7 +218,7 @@ function CustomDomainCard({ settings }: { settings: SiteSettings }) {
       )
     } catch (cause) {
       if (apiErrorCode(cause) === "DOMAIN_TAKEN") {
-        setConflict("Ese dominio ya está en uso por otra inmobiliaria.")
+        setConflict("Ese dominio ya fue verificado por otra inmobiliaria.")
       } else {
         toast.error(apiErrorMessage(cause, "No se pudo guardar el dominio."))
       }
@@ -255,40 +260,7 @@ function CustomDomainCard({ settings }: { settings: SiteSettings }) {
         {message && <FieldError errors={[{ message }]} />}
       </Field>
 
-      <Alert>
-        <AlertDescription className="flex flex-col gap-2">
-          <span className="font-medium">
-            Cómo conectarlo (en el DNS de tu dominio)
-          </span>
-          <ol className="ml-4 list-decimal space-y-1">
-            <li>
-              Entrá al panel donde compraste el dominio (donde se administran
-              los registros DNS).
-            </li>
-            <li>
-              Creá un registro <strong>CNAME</strong> para <code>www</code>{" "}
-              {DNS_TARGET ? (
-                <>
-                  que apunte a <code className="break-all">{DNS_TARGET}</code>.
-                </>
-              ) : (
-                <>que apunte al destino que te pase el equipo de Adminprop.</>
-              )}
-            </li>
-            <li>
-              Si querés que también funcione sin «www», pedile a tu proveedor un
-              redireccionamiento hacia la versión con «www».
-            </li>
-            <li>
-              Guardá el dominio acá. Los cambios de DNS pueden tardar hasta 24
-              horas en verse.
-            </li>
-          </ol>
-          <span className="text-muted-foreground">
-            Guardar el dominio no lo conecta solo: el DNS lo cargás vos.
-          </span>
-        </AlertDescription>
-      </Alert>
+      <DomainVerification hasUnsavedChange={changed} />
 
       <div className="flex flex-wrap gap-2">
         <Button
@@ -312,5 +284,181 @@ function CustomDomainCard({ settings }: { settings: SiteSettings }) {
         )}
       </div>
     </section>
+  )
+}
+
+/**
+ * Estado del dominio guardado y cómo demostrar que es propio. Hasta que se
+ * verifica con un registro TXT, el dominio está reservado pero el sitio no
+ * responde ahí (así nadie puede reservar el dominio de otro).
+ */
+function DomainVerification({
+  hasUnsavedChange,
+}: {
+  hasUnsavedChange: boolean
+}) {
+  const domain = useSiteDomain()
+  const verify = useVerifySiteDomain()
+  const [message, setMessage] = React.useState<string | null>(null)
+
+  if (domain.isPending) {
+    return (
+      <p
+        className="flex items-center gap-2 text-sm text-muted-foreground"
+        role="status"
+      >
+        <Loader2 aria-hidden className="size-4 animate-spin" />
+        Buscando el estado del dominio…
+      </p>
+    )
+  }
+  if (domain.isError || !domain.data) {
+    return (
+      <Alert variant="destructive" role="alert">
+        <AlertDescription className="flex flex-wrap items-center gap-2">
+          No pudimos ver el estado del dominio.
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => void domain.refetch()}
+          >
+            Reintentar
+          </Button>
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  const { customDomain, verified, record, verificationRequired } = domain.data
+  if (!customDomain) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Cargá tu dominio y te damos un registro DNS para demostrar que es tuyo.
+      </p>
+    )
+  }
+
+  async function onVerify() {
+    setMessage(null)
+    try {
+      await verify.mutateAsync()
+      toast.success("Dominio verificado: tu sitio ya responde ahí.")
+    } catch (cause) {
+      const code = apiErrorCode(cause)
+      if (code === "DOMAIN_NOT_VERIFIED") {
+        setMessage(
+          apiErrorMessage(cause, "Todavía no encontramos el registro.")
+        )
+      } else if (code === "DOMAIN_TAKEN") {
+        setMessage("Otra inmobiliaria verificó ese dominio primero.")
+      } else {
+        toast.error(apiErrorMessage(cause, "No se pudo verificar el dominio."))
+      }
+    }
+  }
+
+  if (verified || !verificationRequired) {
+    return (
+      <p
+        role="status"
+        className="flex items-center gap-2 rounded-lg border bg-muted/50 p-3 text-sm"
+      >
+        <Check aria-hidden className="size-4 shrink-0" />
+        <span>
+          <strong>{customDomain}</strong> está verificado.
+          {DNS_TARGET ? (
+            <>
+              {" "}
+              Para que el sitio responda ahí, creá un registro{" "}
+              <strong>CNAME</strong> hacia{" "}
+              <code className="break-all">{DNS_TARGET}</code>.
+            </>
+          ) : (
+            <>
+              {" "}
+              Para que responda ahí, pedile al equipo de Adminprop el destino
+              del CNAME.
+            </>
+          )}
+        </span>
+      </p>
+    )
+  }
+
+  return (
+    <Alert>
+      <AlertDescription className="flex flex-col gap-3">
+        <span className="flex items-center gap-2 font-medium">
+          <Clock aria-hidden className="size-4" />
+          Falta verificar {customDomain}
+        </span>
+        <p>
+          Mientras no lo verifiques, el dominio queda reservado pero el sitio no
+          responde ahí. Para demostrar que es tuyo, cargá este registro
+          <strong> TXT</strong> en el DNS de tu dominio:
+        </p>
+        {record && (
+          <dl className="grid gap-2 text-sm">
+            <CopyRow label="Nombre (host)" value={record.host} />
+            <CopyRow label="Valor" value={record.value} />
+          </dl>
+        )}
+        <p className="text-muted-foreground">
+          Los cambios de DNS pueden tardar un rato en propagarse (a veces hasta
+          unas horas). Cuando lo cargues, tocá «Verificar dominio».
+        </p>
+        {message && (
+          <p role="alert" className="flex items-start gap-2 text-destructive">
+            <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+            {message}
+          </p>
+        )}
+        <div>
+          <Button
+            type="button"
+            disabled={verify.isPending || hasUnsavedChange}
+            onClick={() => void onVerify()}
+          >
+            {verify.isPending ? "Verificando…" : "Verificar dominio"}
+          </Button>
+          {hasUnsavedChange && (
+            <span className="ml-3 text-sm text-muted-foreground">
+              Primero guardá el dominio que escribiste.
+            </span>
+          )}
+        </div>
+      </AlertDescription>
+    </Alert>
+  )
+}
+
+function CopyRow({ label, value }: { label: string; value: string }) {
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value)
+      toast.success("Copiado.")
+    } catch {
+      toast.error("No pudimos copiar: seleccionalo a mano.")
+    }
+  }
+  return (
+    <div className="flex flex-col gap-1">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="flex items-center gap-2">
+        <code className="min-w-0 flex-1 rounded bg-muted px-2 py-1.5 break-all">
+          {value}
+        </code>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          aria-label={`Copiar ${label.toLowerCase()}`}
+          onClick={() => void copy()}
+        >
+          <Copy aria-hidden className="size-4" />
+        </Button>
+      </dd>
+    </div>
   )
 }

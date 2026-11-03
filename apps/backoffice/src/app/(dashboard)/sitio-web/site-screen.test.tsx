@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { AxiosError } from "axios"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import type { SiteSettings } from "@adminprop/shared-types"
+import type { SiteDomain, SiteSettings } from "@adminprop/shared-types"
 
 import { makeSettings, makeTemplates } from "../../../../test/site-fixtures"
 import { SiteScreen } from "./site-screen"
@@ -11,6 +11,8 @@ import { SiteScreen } from "./site-screen"
 let role = "ADMIN"
 let settings: SiteSettings
 const update = vi.fn()
+const verifyDomain = vi.fn()
+let domainState: SiteDomain
 const reset = vi.fn()
 const publish = vi.fn()
 const unpublish = vi.fn()
@@ -64,6 +66,13 @@ vi.mock("@/lib/site-api", () => ({
     isFetching: false,
     isError: false,
   }),
+  useSiteDomain: () => ({
+    isPending: false,
+    isError: false,
+    data: domainState,
+    refetch: vi.fn(),
+  }),
+  useVerifySiteDomain: () => ({ mutateAsync: verifyDomain, isPending: false }),
 }))
 
 function apiFailure(errors: { field?: string; message: string }[]) {
@@ -79,6 +88,14 @@ function apiFailure(errors: { field?: string; message: string }[]) {
 beforeEach(() => {
   role = "ADMIN"
   settings = makeSettings()
+  domainState = {
+    customDomain: null,
+    verified: false,
+    verifiedAt: null,
+    verificationRequired: true,
+    record: null,
+  }
+  verifyDomain.mockResolvedValue(undefined)
   update.mockResolvedValue(undefined)
   reset.mockResolvedValue(undefined)
   publish.mockResolvedValue(undefined)
@@ -576,5 +593,115 @@ describe("Mi sitio web", () => {
       "<img src=x onerror=alert(1)>"
     )
     expect(container.querySelector("img[src='x']")).toBeNull()
+  })
+
+  describe("verificación del dominio propio", () => {
+    const pending = (): SiteDomain => ({
+      customDomain: "www.oppido.com.ar",
+      verified: false,
+      verifiedAt: null,
+      verificationRequired: true,
+      record: {
+        type: "TXT",
+        host: "_adminprop-verify.www.oppido.com.ar",
+        value: "adminprop-verify=0123456789abcdef0123456789abcdef",
+      },
+    })
+
+    async function openDomainTab() {
+      const user = userEvent.setup()
+      render(<SiteScreen />)
+      await user.click(screen.getByRole("tab", { name: "Dominio" }))
+      return user
+    }
+
+    it("sin dominio cargado explica que se pide un registro para demostrar que es tuyo", async () => {
+      await openDomainTab()
+      expect(
+        screen.getByText(/cargá tu dominio y te damos un registro dns/i)
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Verificar dominio" })
+      ).toBeNull()
+    })
+
+    it("un dominio sin verificar muestra el registro TXT y que el sitio todavía no responde ahí", async () => {
+      settings = makeSettings()
+      settings.customDomain = "www.oppido.com.ar"
+      domainState = pending()
+      await openDomainTab()
+
+      expect(
+        screen.getByText(/falta verificar www\.oppido\.com\.ar/i)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("_adminprop-verify.www.oppido.com.ar")
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("adminprop-verify=0123456789abcdef0123456789abcdef")
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/el sitio\s+no responde ahí/i)
+      ).toBeInTheDocument()
+    })
+
+    it("verifica con el botón y, si el TXT todavía no está, muestra el aviso de la API", async () => {
+      settings = makeSettings()
+      settings.customDomain = "www.oppido.com.ar"
+      domainState = pending()
+      verifyDomain.mockRejectedValueOnce(
+        new AxiosError("422", "ERR", undefined, undefined, {
+          status: 422,
+          statusText: "",
+          headers: {},
+          config: {} as never,
+          data: {
+            code: "DOMAIN_NOT_VERIFIED",
+            message:
+              "Todavía no encontramos el registro TXT en _adminprop-verify.www.oppido.com.ar.",
+          },
+        })
+      )
+      const user = await openDomainTab()
+
+      await user.click(
+        screen.getByRole("button", { name: "Verificar dominio" })
+      )
+
+      expect(
+        await screen.findByText(/todavía no encontramos el registro txt/i)
+      ).toBeInTheDocument()
+      expect(verifyDomain).toHaveBeenCalledTimes(1)
+    })
+
+    it("un dominio verificado se muestra como tal, sin pedir el registro", async () => {
+      settings = makeSettings()
+      settings.customDomain = "www.oppido.com.ar"
+      domainState = {
+        ...pending(),
+        verified: true,
+        verifiedAt: "2026-11-03T12:00:00Z",
+      }
+      await openDomainTab()
+
+      expect(screen.getByText(/está verificado\./i)).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Verificar dominio" })
+      ).toBeNull()
+    })
+
+    it("no deja verificar mientras hay un dominio escrito sin guardar", async () => {
+      settings = makeSettings()
+      settings.customDomain = "www.oppido.com.ar"
+      domainState = pending()
+      const user = await openDomainTab()
+
+      await user.type(screen.getByLabelText("Nombre del dominio"), "x")
+
+      expect(
+        screen.getByRole("button", { name: "Verificar dominio" })
+      ).toBeDisabled()
+      expect(screen.getByText(/primero guardá el dominio/i)).toBeInTheDocument()
+    })
   })
 })

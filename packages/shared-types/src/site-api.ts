@@ -37,3 +37,23 @@ export interface SubdomainAvailability {
 export interface SiteHost {
   slug: string
 }
+
+/** Registro DNS que prueba que un dominio propio es de la inmobiliaria. */
+export interface SiteDomainRecord {
+  type: "TXT"
+  host: string
+  value: string
+}
+
+/**
+ * `GET /site/domain`. Solo un dominio verificado resuelve el sitio; hasta
+ * entonces está reservado pero inactivo. Con `verificationRequired: false`
+ * (desarrollo) se activa al cargarlo.
+ */
+export interface SiteDomain {
+  customDomain: string | null
+  verified: boolean
+  verifiedAt: string | null
+  verificationRequired: boolean
+  record: SiteDomainRecord | null
+}
