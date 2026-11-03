@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { Checkbox } from "@adminprop/ui/components/checkbox"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
@@ -100,6 +101,10 @@ function Editor({
   const correct = useCorrectInventory()
   const upload = useUploadItemPhotos()
   const removePhoto = useDeleteInventoryPhoto()
+  // Confirmar el inventario es irreversible: siempre se pregunta, y si hay
+  // ítems en mal estado sin foto se listan.
+  const [confirming, setConfirming] = React.useState<string[] | null>(null)
+  const [detaching, setDetaching] = React.useState<string | null>(null)
 
   const [items, setItems] = React.useState<DraftItem[]>(() =>
     detail.items.map(toDraft)
@@ -167,23 +172,20 @@ function Editor({
     if (await save()) toast.success("Borrador guardado.")
   }
 
-  async function confirmInventory() {
+  async function askToConfirm() {
     const saved = await save()
     if (!saved) return
-    const missing = poorWithoutPhotos(saved)
-    if (
-      missing.length > 0 &&
-      !window.confirm(
-        `Hay ítems en mal estado sin foto (${missing.join(", ")}). Se recomienda adjuntar una para respaldo. ¿Confirmar igual? Después no se puede editar.`
-      )
-    ) {
-      return
-    }
+    setConfirming(poorWithoutPhotos(saved))
+  }
+
+  async function confirmInventory() {
     try {
       await confirm.mutateAsync(detail.id)
       toast.success("Inventario confirmado. Ya no se puede editar.")
+      setConfirming(null)
     } catch (cause) {
       toast.error(apiErrorMessage(cause, "No se pudo confirmar el inventario."))
+      setConfirming(null)
     }
   }
 
@@ -209,8 +211,9 @@ function Editor({
     try {
       await removePhoto.mutateAsync({ inventoryId: detail.id, photoId })
     } catch (cause) {
-      toast.error(apiErrorMessage(cause, "No se pudo quitar la foto."))
+      toast.error(apiErrorMessage(cause, "No se pudo quitar la foto del ítem."))
     }
+    setDetaching(null)
   }
 
   async function startCorrection() {
@@ -359,7 +362,7 @@ function Editor({
                             size="icon-sm"
                             className="absolute -top-2 -right-2"
                             aria-label="Quitar foto"
-                            onClick={() => void detach(photo.id)}
+                            onClick={() => setDetaching(photo.id)}
                           >
                             <Trash2 aria-hidden />
                           </Button>
@@ -437,7 +440,7 @@ function Editor({
             Guardar borrador
           </Button>
           <Button
-            onClick={() => void confirmInventory()}
+            onClick={() => void askToConfirm()}
             disabled={update.isPending || confirm.isPending}
           >
             Confirmar inventario
@@ -471,6 +474,39 @@ function Editor({
           </Button>
         </div>
       )}
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => !open && setConfirming(null)}
+        title="¿Confirmar el inventario?"
+        description="Una vez confirmado ya no se puede editar: si hay un error, se corrige con un inventario nuevo."
+        confirmLabel={
+          confirming && confirming.length > 0
+            ? "Confirmar igual"
+            : "Confirmar inventario"
+        }
+        destructive={false}
+        pending={confirm.isPending}
+        onConfirm={confirmInventory}
+      >
+        {confirming && confirming.length > 0 && (
+          <Alert role="alert">
+            <TriangleAlert aria-hidden />
+            <AlertDescription>
+              Hay ítems en mal estado sin foto: {confirming.join(", ")}. Se
+              recomienda adjuntar una para respaldo.
+            </AlertDescription>
+          </Alert>
+        )}
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={detaching !== null}
+        onOpenChange={(open) => !open && setDetaching(null)}
+        title="¿Quitar la foto?"
+        description="La foto se borra del inventario y no se puede recuperar."
+        confirmLabel="Quitar foto"
+        pending={removePhoto.isPending}
+        onConfirm={() => (detaching ? detach(detaching) : undefined)}
+      />
     </div>
   )
 }

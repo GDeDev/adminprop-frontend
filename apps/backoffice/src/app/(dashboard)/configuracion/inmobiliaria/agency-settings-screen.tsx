@@ -12,6 +12,7 @@ import type {
 } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import {
   Field,
@@ -222,6 +223,7 @@ function LogoSection({ settings }: { settings: TenantSettings }) {
   const remove = useRemoveTenantLogo()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [preview, setPreview] = React.useState<string | null>(null)
+  const [removing, setRemoving] = React.useState(false)
 
   React.useEffect(() => {
     return () => {
@@ -254,6 +256,7 @@ function LogoSection({ settings }: { settings: TenantSettings }) {
     } catch (cause) {
       toast.error(apiErrorMessage(cause, "No se pudo eliminar el logo."))
     }
+    setRemoving(false)
   }
 
   const shown = preview ?? settings.logoUrl
@@ -298,7 +301,7 @@ function LogoSection({ settings }: { settings: TenantSettings }) {
               variant="ghost"
               size="sm"
               disabled={remove.isPending}
-              onClick={() => void removeLogo()}
+              onClick={() => setRemoving(true)}
             >
               <Trash2 aria-hidden />
               Quitar
@@ -306,6 +309,15 @@ function LogoSection({ settings }: { settings: TenantSettings }) {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={removing}
+        onOpenChange={setRemoving}
+        title="¿Quitar el logo?"
+        description="Los PDF y las pantallas dejan de mostrar el logo hasta que subas otro."
+        confirmLabel="Quitar logo"
+        pending={remove.isPending}
+        onConfirm={removeLogo}
+      />
     </section>
   )
 }

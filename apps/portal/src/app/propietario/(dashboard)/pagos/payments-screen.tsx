@@ -21,7 +21,7 @@ import {
   formatMoney,
   INSTALLMENT_STATUS_META,
   isZero,
-  periodLabel,
+  periodTitle,
 } from "@/lib/format"
 import {
   useOwnerProperties,
@@ -119,9 +119,7 @@ function Installments({ propertyId }: { propertyId: string }) {
               className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4"
             >
               <div>
-                <p className="font-medium capitalize">
-                  {periodLabel(installment.period)}
-                </p>
+                <p className="font-medium">{periodTitle(installment.period)}</p>
                 <p className="text-sm text-muted-foreground tabular-nums">
                   {money(installment.baseAmount)}
                   {!isZero(installment.paidTotal) &&

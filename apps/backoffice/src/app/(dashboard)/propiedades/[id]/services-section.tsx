@@ -13,14 +13,7 @@ import type {
 } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 import {
   Table,
@@ -321,33 +314,19 @@ function DeleteServiceDialog({
   }
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="sm:max-w-md">
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>¿Eliminar el servicio?</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>
-            {typeName(service)} deja de aparecer en la propiedad y sus
-            contratos.
-          </ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
-        <ResponsiveDialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={remove.isPending}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => void confirm()}
-            disabled={remove.isPending}
-          >
-            Eliminar
-          </Button>
-        </ResponsiveDialogFooter>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="¿Eliminar el servicio?"
+      description={
+        <>
+          {typeName(service)} deja de aparecer en la propiedad y sus contratos.
+        </>
+      }
+      confirmLabel="Eliminar"
+      pending={remove.isPending}
+      onConfirm={confirm}
+    />
   )
 }
 

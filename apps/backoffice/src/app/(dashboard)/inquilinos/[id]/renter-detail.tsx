@@ -19,14 +19,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { ArrearsBadge } from "@/components/arrears-badge"
 import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
@@ -329,31 +322,20 @@ function DeleteButton({ renter }: { renter: RenterDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>
-              ¿Eliminar al inquilino?
-            </ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {renter.fullName} deja de aparecer en el sistema y pierde el
-              acceso al portal. Con un contrato activo no se puede eliminar.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar al inquilino?"
+        description={
+          <>
+            {renter.fullName} deja de aparecer en el sistema y pierde el acceso
+            al portal. Con un contrato activo no se puede eliminar.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }

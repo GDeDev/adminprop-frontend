@@ -17,6 +17,7 @@ import { apiErrorMessage, useSession } from "@adminprop/session/client"
 import type { InternalRole, User } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,6 +109,13 @@ function UsersManager({ meId }: { meId: string }) {
     setFormOpen(true)
   }
 
+  const [deactivating, setDeactivating] = React.useState<User | null>(null)
+
+  function askToggleActive(user: User) {
+    if (user.isActive) setDeactivating(user)
+    else void toggleActive(user)
+  }
+
   async function toggleActive(user: User) {
     try {
       await setActive.mutateAsync({ id: user.id, active: !user.isActive })
@@ -117,15 +125,23 @@ function UsersManager({ meId }: { meId: string }) {
           : `${displayName(user)} volvió a estar activo.`
       )
     } catch (cause) {
-      toast.error(apiErrorMessage(cause, "No se pudo cambiar el estado."))
+      toast.error(
+        apiErrorMessage(
+          cause,
+          user.isActive
+            ? "No se pudo desactivar al usuario."
+            : "No se pudo reactivar al usuario."
+        )
+      )
     }
+    setDeactivating(null)
   }
 
   const actions = {
     meId,
     onEdit: openEdit,
     onReset: setResetting,
-    onToggleActive: toggleActive,
+    onToggleActive: askToggleActive,
   }
   const pagination = users.data?.pagination
 
@@ -302,6 +318,21 @@ function UsersManager({ meId }: { meId: string }) {
         key={resetting?.id ?? "closed"}
         user={resetting}
         onOpenChange={(open) => !open && setResetting(null)}
+      />
+      <ConfirmDialog
+        open={deactivating !== null}
+        onOpenChange={(open) => !open && setDeactivating(null)}
+        title="¿Desactivar al usuario?"
+        description={
+          deactivating
+            ? `${displayName(deactivating)} no va a poder ingresar y se le cierran todas las sesiones abiertas. Después se lo puede reactivar.`
+            : undefined
+        }
+        confirmLabel="Desactivar"
+        pending={setActive.isPending}
+        onConfirm={() =>
+          deactivating ? toggleActive(deactivating) : undefined
+        }
       />
     </div>
   )

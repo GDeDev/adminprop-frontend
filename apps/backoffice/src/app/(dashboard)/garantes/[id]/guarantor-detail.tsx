@@ -12,14 +12,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { formatNationalId } from "@/lib/owners"
 import { GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
@@ -207,30 +200,21 @@ function DeleteButton({ guarantor }: { guarantor: GuarantorDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>¿Eliminar al garante?</ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {guarantor.fullName} deja de aparecer en el sistema. Si algún
-              inquilino lo tiene asignado, no se puede eliminar: primero cambiá
-              el garante de ese inquilino.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar al garante?"
+        description={
+          <>
+            {guarantor.fullName} deja de aparecer en el sistema. Si algún
+            inquilino lo tiene asignado, no se puede eliminar: primero cambiá el
+            garante de ese inquilino.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }

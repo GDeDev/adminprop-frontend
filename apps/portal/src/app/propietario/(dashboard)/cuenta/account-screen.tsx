@@ -14,7 +14,7 @@ import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
   formatMoney,
   isZero,
-  periodLabel,
+  periodTitle,
   SETTLEMENT_STATUS_META,
 } from "@/lib/format"
 import { useOwnerAccount } from "@/lib/portal-api"
@@ -50,8 +50,8 @@ export function OwnerAccountScreen() {
           >
             <ChevronLeft aria-hidden />
           </Button>
-          <span className="font-display text-lg font-semibold capitalize">
-            {periodLabel(period)}
+          <span className="font-display text-lg font-semibold">
+            {periodTitle(period)}
           </span>
           <Button
             variant="outline"

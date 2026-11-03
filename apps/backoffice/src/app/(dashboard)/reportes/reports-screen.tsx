@@ -7,9 +7,9 @@ import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
 import type { ReportFormat } from "@adminprop/shared-types"
-import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -35,6 +35,7 @@ import {
   periodLabel,
   shiftPeriod,
 } from "@/lib/billing"
+import { PeriodInput } from "@/components/period-input"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 import {
@@ -132,38 +133,28 @@ export function ReportsScreen() {
         </Select>
         {USES_RANGE.includes(report) && (
           <>
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              Desde
-              <Input
-                type="month"
+            <div className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Desde</span>
+              <PeriodInput
+                label="Desde"
                 value={range.from}
-                max={range.to}
-                onChange={(event) =>
-                  setRange((current) => ({
-                    ...current,
-                    from: event.target.value,
-                  }))
+                onChange={(from) =>
+                  setRange((current) => ({ ...current, from }))
                 }
               />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              Hasta
-              <Input
-                type="month"
+            </div>
+            <div className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Hasta</span>
+              <PeriodInput
+                label="Hasta"
                 value={range.to}
-                min={range.from}
-                onChange={(event) =>
-                  setRange((current) => ({
-                    ...current,
-                    to: event.target.value,
-                  }))
-                }
+                onChange={(to) => setRange((current) => ({ ...current, to }))}
               />
-            </label>
+            </div>
           </>
         )}
         {report === "arrears" && (
-          <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+          <label className="flex flex-col gap-1 text-sm font-medium">
             Días de atraso mínimos
             <Input
               type="number"
@@ -174,7 +165,7 @@ export function ReportsScreen() {
           </label>
         )}
         {report === "expiring" && (
-          <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+          <label className="flex flex-col gap-1 text-sm font-medium">
             Vencen dentro de (días)
             <Input
               type="number"
@@ -240,7 +231,11 @@ export function exportConfig(
   }
 }
 
-type QueryState = { isPending: boolean; isError: boolean }
+type QueryState = {
+  isPending: boolean
+  isError: boolean
+  refetch?: () => unknown
+}
 
 function State({
   query,
@@ -254,9 +249,11 @@ function State({
   if (query.isPending) return <PageSkeleton />
   if (query.isError) {
     return (
-      <Alert variant="destructive" role="alert">
-        <AlertDescription>No se pudo cargar el reporte.</AlertDescription>
-      </Alert>
+      <ErrorState
+        title="No se pudo cargar el reporte"
+        description="Probá de nuevo en un rato."
+        onRetry={query.refetch ? () => void query.refetch?.() : undefined}
+      />
     )
   }
   if (empty) {
@@ -268,16 +265,33 @@ function State({
     )
   }
   return (
-    <div className="overflow-x-auto rounded-xl border bg-card">{children}</div>
+    <div className="rounded-xl border bg-card">
+      <p className="px-3 pt-2 text-xs text-muted-foreground lg:hidden">
+        Deslizá hacia el costado para ver todas las columnas.
+      </p>
+      <div className="overflow-x-auto">{children}</div>
+    </div>
   )
 }
 
-function Head({ columns }: { columns: string[] }) {
+function Head({
+  columns,
+  right = [],
+}: {
+  columns: string[]
+  /** Columnas de montos o cantidades: alineadas a la derecha. */
+  right?: string[]
+}) {
   return (
     <TableHeader>
       <TableRow>
         {columns.map((column) => (
-          <TableHead key={column}>{column}</TableHead>
+          <TableHead
+            key={column}
+            className={right.includes(column) ? "text-right" : undefined}
+          >
+            {column}
+          </TableHead>
         ))}
       </TableRow>
     </TableHeader>
@@ -302,6 +316,15 @@ function IncomeTable({ range }: { range: RangeFilters }) {
             "Neto liquidado",
             "Transferido",
           ]}
+          right={[
+            "Alquiler",
+            "Punitorios",
+            "Cargos",
+            "Honorarios devengados",
+            "Honorarios cobrados",
+            "Neto liquidado",
+            "Transferido",
+          ]}
         />
         <TableBody>
           {rows.map((row) => (
@@ -317,7 +340,7 @@ function IncomeTable({ range }: { range: RangeFilters }) {
                 row.netSettled,
                 row.netTransferred,
               ].map((amount, index) => (
-                <TableCell key={index} className="tabular-nums">
+                <TableCell key={index} className="text-right tabular-nums">
                   {formatMoney(amount, row.currency)}
                 </TableCell>
               ))}
@@ -348,6 +371,7 @@ function PaymentsTable({ range }: { range: RangeFilters }) {
             "Propietario",
             "Importe",
           ]}
+          right={["Importe"]}
         />
         <TableBody>
           {rows.map((row) => (
@@ -357,7 +381,7 @@ function PaymentsTable({ range }: { range: RangeFilters }) {
               <TableCell>{row.renterName}</TableCell>
               <TableCell>{row.propertyAddress}</TableCell>
               <TableCell>{row.ownerName}</TableCell>
-              <TableCell className="tabular-nums">
+              <TableCell className="text-right tabular-nums">
                 {formatMoney(row.amount, row.currency)}
               </TableCell>
             </TableRow>
@@ -384,6 +408,7 @@ function ArrearsTable({ minDays }: { minDays: number }) {
             "Saldo",
             "Punitorio",
           ]}
+          right={["Cuotas", "Saldo", "Punitorio"]}
         />
         <TableBody>
           {rows.map((row) => (
@@ -398,14 +423,14 @@ function ArrearsTable({ minDays }: { minDays: number }) {
               </TableCell>
               <TableCell>{row.propertyAddress}</TableCell>
               <TableCell>{row.ownerName}</TableCell>
-              <TableCell className="tabular-nums">
+              <TableCell className="text-right tabular-nums">
                 {row.overdueInstallments}
               </TableCell>
               <TableCell>{daysLabel(row.maxDaysOverdue)}</TableCell>
-              <TableCell className="tabular-nums">
+              <TableCell className="text-right tabular-nums">
                 {formatMoneyList(row.balance)}
               </TableCell>
-              <TableCell className="tabular-nums">
+              <TableCell className="text-right tabular-nums">
                 {formatMoneyList(row.lateFee)}
               </TableCell>
             </TableRow>
@@ -431,6 +456,7 @@ function PropertiesTable({ status }: { status: "RENTED" | "AVAILABLE" }) {
               ? ["Propiedad", "Inquilino", "Alquiler", "Fin del contrato"]
               : ["Propiedad", "Días sin alquilar"]
           }
+          right={["Alquiler", "Días sin alquilar"]}
         />
         <TableBody>
           {rows.map((row) => (
@@ -446,7 +472,7 @@ function PropertiesTable({ status }: { status: "RENTED" | "AVAILABLE" }) {
               {status === "RENTED" ? (
                 <>
                   <TableCell>{row.renterName ?? "—"}</TableCell>
-                  <TableCell className="tabular-nums">
+                  <TableCell className="text-right tabular-nums">
                     {row.rent
                       ? formatMoney(row.rent.amount, row.rent.currency)
                       : "—"}
@@ -458,7 +484,7 @@ function PropertiesTable({ status }: { status: "RENTED" | "AVAILABLE" }) {
                   </TableCell>
                 </>
               ) : (
-                <TableCell className="tabular-nums">
+                <TableCell className="text-right tabular-nums">
                   {row.daysVacant ?? "—"}
                 </TableCell>
               )}
@@ -478,6 +504,7 @@ function ExpiringTable({ withinDays }: { withinDays: number }) {
       <Table>
         <Head
           columns={["Propiedad", "Inquilino", "Vence", "Faltan", "Renovación"]}
+          right={["Faltan"]}
         />
         <TableBody>
           {rows.map((row) => (
@@ -492,7 +519,9 @@ function ExpiringTable({ withinDays }: { withinDays: number }) {
               </TableCell>
               <TableCell>{row.renterName}</TableCell>
               <TableCell>{formatDate(row.endDate)}</TableCell>
-              <TableCell className="tabular-nums">{row.daysLeft} d</TableCell>
+              <TableCell className="text-right tabular-nums">
+                {row.daysLeft} d
+              </TableCell>
               <TableCell>{row.renewalInProgress ? "En curso" : "—"}</TableCell>
             </TableRow>
           ))}
