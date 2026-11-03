@@ -483,3 +483,23 @@ El formulario trae un campo `website` fuera de pantalla que debe llegar vacío (
 1. **Precio y descripción pública de la Propiedad.** El PRD 5.1 no define campo de precio ni descripción pública (solo `observaciones`, que son notas internas). Pero la Fase 22 filtra por `precioDesde/precioHasta` y muestra "precio" y "descripción" en la ficha pública, y la Fase 24 habla de "el paso donde se carga el precio" en el alta de Propiedad. Los mocks **no** inventan esos campos (regla de la Fase 2). Hay que definirlo antes de la Fase 6 o de la Fase 22.
 2. **Fase 16, 2.3** menciona `VITE_API_URL`: quedó de cuando el backoffice era React+Vite. Con Next.js la variable es `NEXT_PUBLIC_API_URL`.
 3. **Fase 22** dice "sin foco SEO", pero el PRD 14.1 y el pedido del scaffold piden SSR/SSG para SEO. El scaffold ya hace SSG de la home y de las fichas, que no cuesta nada extra.
+
+### DT-89 — Contrato de la Fase 14 escrito a mano y `buildWhatsAppLink` en el backoffice
+
+Los DTOs salen de `REDISENO_FASE_14.md` (sección 6) y viven en `shared-types/src/notifications.ts` hasta regenerar desde el OpenAPI. No existe un paquete `shared-utils`: `buildWhatsAppLink` queda en `apps/backoffice/src/lib/whatsapp.ts` (el `whatsappLink` de `renters.ts` delega en ella) y el backend mantiene su copia con los mismos casos de prueba (A-57: sin código de país se asume móvil argentino, `549`; se quita el 0 inicial y el 15 de celular; un número con `+` de otro país se respeta). Si hace falta compartirla de verdad, se extrae a un paquete.
+
+### DT-90 — Plantillas: vista previa con debounce y prueba sobre lo guardado
+
+El editor pide `/preview` 400 ms después de la última tecla y muestra el HTML en un `iframe sandbox` (sin scripts) o el texto plano. "Enviarme una prueba" usa la plantilla guardada (el endpoint no recibe cuerpo), por eso se deshabilita con cambios sin guardar. Las variables desconocidas se detectan en el cliente y bloquean el guardado (la API igual responde 422 `TEMPLATE_UNKNOWN_VARIABLE`). Los chips insertan en el cursor; si el campo nunca se tocó, al final.
+
+### DT-91 — Historial en tarjetas y reintento masivo con polling de `/jobs/:id/status`
+
+Una sola lista de tarjetas (apiladas en mobile, en fila desde `sm`) en vez de tabla más tarjetas duplicadas. "Reintentar todas las fallidas" respeta los filtros tipo/desde/hasta, dispara el AsyncJob y `useJobStatus` (nuevo, `lib/jobs-api.ts`) consulta cada 2 s hasta que termina; al terminar refresca el historial y avisa con toast. Estados con los tokens del sistema de diseño (`disponible`, `mora`, `mantenimiento`, `alquilada`, `borrador`).
+
+### DT-92 — Eventos y preferencias se guardan al tocar, mandando la lista completa
+
+Los interruptores de Eventos y canales y de Mis notificaciones guardan en el momento. Como los requests son listas (`settings[]`, `items[]`), se manda la lista completa con el cambio aplicado. Los obligatorios se muestran bloqueados con candado. `/perfil` es una página nueva (enlazada desde el pie del sidebar y la barra superior mobile) con "Mis notificaciones" como primera sección.
+
+### DT-93 — Campana y botones de WhatsApp
+
+`NOTIFICATION_FAILED` y `EMAIL_BOUNCED` se suman a los tipos de aviso (`AlertType`) con ícono y color de error propios, sin tocar el tipo generado. El botón de WhatsApp (ficha de inquilino y de cuota) abre un menú con las plantillas elegibles y rellena `{{variables}}` en el cliente (monto ya formateado, sin calcular dinero); `agencyName` sale de un contexto con el nombre de la inmobiliaria. Sin teléfono utilizable no se muestra; si las plantillas no cargan queda el link directo.
