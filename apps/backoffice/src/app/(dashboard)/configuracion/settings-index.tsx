@@ -9,7 +9,6 @@ import {
   Building2,
   History,
   ListTree,
-  SlidersHorizontal,
   Timer,
   TrendingUp,
   Users,
@@ -44,7 +43,7 @@ function SettingsLink({
   )
 }
 
-/** Secciones de configuración. Usuarios e Índices sólo las ven los administradores. */
+/** Secciones de configuración. Usuarios e Índices solo las ven los administradores. */
 export function SettingsIndex() {
   const { user } = useSession()
 
@@ -130,15 +129,6 @@ export function SettingsIndex() {
             </li>
           </>
         )}
-        <li className="flex items-center gap-4 rounded-xl border border-dashed p-4 text-muted-foreground">
-          <SlidersHorizontal aria-hidden className="size-5" />
-          <div>
-            <p className="font-medium">Parámetros de la inmobiliaria</p>
-            <p className="text-sm">
-              Honorarios, punitorios y días de corte. Más adelante.
-            </p>
-          </div>
-        </li>
       </ul>
     </div>
   )

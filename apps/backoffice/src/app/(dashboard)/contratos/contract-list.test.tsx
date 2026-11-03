@@ -130,6 +130,6 @@ describe("ContractList", () => {
     expect(screen.getByLabelText("Filtrar por estado")).toBeInTheDocument()
     expect(screen.getByLabelText("Filtrar por propiedad")).toBeInTheDocument()
     expect(screen.getByLabelText("Filtrar por inquilino")).toBeInTheDocument()
-    expect(screen.getByLabelText("Sólo por vencer")).toBeInTheDocument()
+    expect(screen.getByLabelText("Solo por vencer")).toBeInTheDocument()
   })
 })

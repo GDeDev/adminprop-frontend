@@ -46,7 +46,7 @@ export async function fetchDocument(
   }
 }
 
-/** Encola una versión nueva del documento (sólo admin). */
+/** Encola una versión nueva del documento (solo admin). */
 export function useRegenerateDocument() {
   const queryClient = useQueryClient()
   return useMutation({

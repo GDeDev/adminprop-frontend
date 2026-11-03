@@ -40,7 +40,7 @@ afterEach(() => {
 })
 
 describe("ChangeBillingTermsDialog", () => {
-  it("precarga los términos vigentes y manda sólo lo que cambia con la fecha", async () => {
+  it("precarga los términos vigentes y manda solo lo que cambia con la fecha", async () => {
     change.mockResolvedValue({})
     const user = userEvent.setup()
     render(

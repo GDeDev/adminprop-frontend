@@ -203,7 +203,7 @@ describe("RowCard", () => {
     expect(onChange).toHaveBeenCalledWith({ excluded: true })
   })
 
-  it("en el resultado es de sólo lectura", () => {
+  it("en el resultado es de solo lectura", () => {
     render(
       <RowCard
         row={row}

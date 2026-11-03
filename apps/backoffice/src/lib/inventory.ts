@@ -37,8 +37,8 @@ export const CHANGE_LABELS: Record<InventoryChange, string> = {
   WORSE: "Empeoró",
   BETTER: "Mejoró",
   SAME: "Sin cambios",
-  ONLY_DELIVERY: "Sólo en la entrega",
-  ONLY_RETURN: "Sólo en la devolución",
+  ONLY_DELIVERY: "Solo en la entrega",
+  ONLY_RETURN: "Solo en la devolución",
 }
 
 /** Ítems agrupados por categoría, en el orden en que aparecen. */

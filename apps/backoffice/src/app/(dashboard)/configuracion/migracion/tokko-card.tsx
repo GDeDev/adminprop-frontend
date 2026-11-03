@@ -24,7 +24,7 @@ export function parseLimit(raw: string): number | undefined | "invalid" {
   return Number(text)
 }
 
-/** "Desde Tokko": la key vive en el servidor; acá sólo se elige qué traer. */
+/** "Desde Tokko": la key vive en el servidor; acá solo se elige qué traer. */
 export function TokkoCard() {
   const router = useRouter()
   const analyze = useAnalyzeTokko()
@@ -53,7 +53,10 @@ export function TokkoCard() {
       className="flex flex-col gap-4 rounded-xl border bg-card p-4"
     >
       <div className="flex items-start gap-3">
-        <Building2 aria-hidden className="mt-0.5 size-5 text-primary" />
+        <Building2
+          aria-hidden
+          className="mt-0.5 size-5 shrink-0 text-primary"
+        />
         <div>
           <h2 id="tokko-title" className="font-medium">
             Desde Tokko

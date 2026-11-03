@@ -96,7 +96,7 @@ export function buildAppraisalRequest(
 }
 
 /**
- * Posición (0 a 100) del precio sugerido dentro de la barra del rango. Es sólo
+ * Posición (0 a 100) del precio sugerido dentro de la barra del rango. Es solo
  * presentación: los montos los calcula la API (DT-11).
  */
 export function markerPosition(

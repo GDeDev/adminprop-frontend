@@ -69,7 +69,7 @@ describe("UsersScreen", () => {
 
     render(<UsersScreen />)
 
-    expect(screen.getByText("Sólo para administradores")).toBeInTheDocument()
+    expect(screen.getByText("Solo para administradores")).toBeInTheDocument()
     expect(screen.queryByText("Nuevo usuario")).not.toBeInTheDocument()
   })
 
@@ -82,7 +82,7 @@ describe("UsersScreen", () => {
     expect(within(table).getByText("(vos)")).toBeInTheDocument()
   })
 
-  it("sobre sí mismo sólo ofrece editar", async () => {
+  it("sobre sí mismo solo ofrece editar", async () => {
     render(<UsersScreen />)
     const user = userEvent.setup()
 
@@ -98,7 +98,7 @@ describe("UsersScreen", () => {
       screen.queryByRole("menuitem", { name: /Desactivar/ })
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole("menuitem", { name: /Resetear/ })
+      screen.queryByRole("menuitem", { name: /Restablecer/ })
     ).not.toBeInTheDocument()
   })
 
@@ -114,6 +114,10 @@ describe("UsersScreen", () => {
     await user.click(
       await screen.findByRole("menuitem", { name: "Desactivar" })
     )
+
+    // Desactivar cierra sesiones: pide confirmación antes de llamar a la API.
+    expect(setActive).not.toHaveBeenCalled()
+    await user.click(await screen.findByRole("button", { name: "Desactivar" }))
 
     expect(setActive).toHaveBeenCalledWith({ id: "emp-1", active: false })
   })

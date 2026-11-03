@@ -9,7 +9,7 @@ const month = (
 ) => ({ period, accrued, collected })
 
 describe("historyCurrencies", () => {
-  it("devuelve sólo las monedas con movimiento, ARS primero", () => {
+  it("devuelve solo las monedas con movimiento, ARS primero", () => {
     const history = [
       month("2026-09", [{ currency: "USD", amount: "500.00" }]),
       month(

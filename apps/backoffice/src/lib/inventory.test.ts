@@ -21,7 +21,7 @@ describe("groupByCategory", () => {
 })
 
 describe("poorWithoutPhotos", () => {
-  it("lista sólo los ítems malos sin foto", () => {
+  it("lista solo los ítems malos sin foto", () => {
     const detail = {
       items: [
         {

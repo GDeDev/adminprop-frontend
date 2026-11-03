@@ -46,7 +46,7 @@ import {
   emptyBankAccount,
 } from "./bank-account-fields"
 
-/** "20.123.456" → "20123456". La API guarda sólo dígitos (D-41). */
+/** "20.123.456" → "20123456". La API guarda solo dígitos (D-41). */
 export function nationalIdDigits(value: string): string {
   return value.replace(/[\s.-]/g, "")
 }

@@ -37,7 +37,7 @@ import { useAdjustLateFee } from "@/lib/billing-api"
 import { formatMoney, normalizeAmount } from "@/lib/contracts"
 
 /**
- * Reducir o condonar el punitorio (Micaela #3 y #4), sólo admin. Queda el
+ * Reducir o condonar el punitorio (Micaela #3 y #4), solo admin. Queda el
  * ajuste con motivo, usuario y fecha; condonar además frena el devengo.
  */
 export function LateFeeAdjustmentDialog({

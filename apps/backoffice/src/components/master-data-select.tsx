@@ -31,7 +31,7 @@ interface Option {
 interface BaseProps {
   /** Qué maestro: uno plano, o ubicaciones filtradas por nivel y padre. */
   source: CatalogKey | "locations"
-  /** Sólo para `source="locations"`: para los selects en cascada. */
+  /** Solo para `source="locations"`: para los selects en cascada. */
   level?: LocationLevel
   parentId?: string
   id?: string
@@ -60,7 +60,7 @@ export type MasterDataSelectProps = SingleProps | MultipleProps
  * ubicación) o múltiple (amenities). Lo reusan los formularios de las fases
  * siguientes.
  *
- * Trae también los desactivados, pero sólo los muestra si ya estaban
+ * Trae también los desactivados, pero solo los muestra si ya estaban
  * elegidos (spec 4: un registro viejo sigue mostrando su valor) y no se
  * pueden volver a elegir.
  */
@@ -200,7 +200,7 @@ function optionLabel(option: Option) {
 function useOptions(props: MasterDataSelectProps) {
   const { source } = props
   const isLocation = source === "locations"
-  // Los dos hooks se llaman siempre (reglas de hooks), pero sólo el que
+  // Los dos hooks se llaman siempre (reglas de hooks), pero solo el que
   // corresponde hace el request.
   const catalog = useCatalog(
     source === "locations" ? "property-types" : source,

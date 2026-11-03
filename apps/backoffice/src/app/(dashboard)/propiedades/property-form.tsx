@@ -73,7 +73,7 @@ const STEPS = [
   { title: "Fotos", fields: [] },
 ] as const
 
-/** Borrador del alta en el navegador (spec 5.3). Sólo datos, no fotos. */
+/** Borrador del alta en el navegador (spec 5.3). Solo datos, no fotos. */
 const DRAFT_KEY = "adminprop:property-draft"
 
 /**
@@ -130,7 +130,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
   const [step, setStep] = React.useState(0)
   const [photos, setPhotos] = React.useState<File[]>([])
   const [error, setError] = React.useState<string | null>(null)
-  // El formulario sólo se renderiza en el navegador (detrás de SessionGate),
+  // El formulario solo se renderiza en el navegador (detrás de SessionGate),
   // así que el borrador se lee al montar, sin un efecto.
   const [initialDraft] = React.useState(() =>
     editing || typeof window === "undefined" ? null : readDraft()
@@ -444,7 +444,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
                 </FieldLabel>
                 <Textarea {...field} id="property-notes" rows={4} />
                 <FieldDescription>
-                  Sólo las ve la inmobiliaria: nunca salen en el portal.
+                  Solo las ve la inmobiliaria: nunca salen en el portal.
                 </FieldDescription>
               </Field>
             )}

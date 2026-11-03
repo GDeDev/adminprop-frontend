@@ -39,7 +39,7 @@ export function BatchScreen({
   if (user?.role !== "ADMIN") {
     return (
       <EmptyState
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="La migración de datos la hacen los administradores."
       />
     )

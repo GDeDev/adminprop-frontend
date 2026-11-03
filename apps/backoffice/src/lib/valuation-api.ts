@@ -21,7 +21,7 @@ async function unwrap<T>(
   return (await request).data.data
 }
 
-/** Tasación de alquiler: es síncrona y consulta sólo la base (201). */
+/** Tasación de alquiler: es síncrona y consulta solo la base (201). */
 export function useAppraiseProperty(propertyId: string) {
   const queryClient = useQueryClient()
   return useMutation({

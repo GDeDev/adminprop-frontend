@@ -33,7 +33,7 @@ export function RenewContract({ id }: { id: string }) {
     return (
       <EmptyState
         title="Este contrato no se puede renovar"
-        description="Sólo se renuevan los contratos activos. Si ya venció y quedó finalizado, cargá uno nuevo."
+        description="Solo se renuevan los contratos activos. Si ya venció y quedó finalizado, cargá uno nuevo."
         action={
           <Button asChild variant="outline">
             <Link href={`/contratos/${id}`}>Volver al contrato</Link>

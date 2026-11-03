@@ -8,7 +8,7 @@ import { areaForPath, PORTAL_AREAS, SESSION_COOKIE_PREFIX } from "@/lib/session"
  * Las áreas de propietarios e inquilinos requieren sesión: sin la cookie, al
  * login de esa área antes de renderizar. El resto del portal es público.
  *
- * Sólo mira que la cookie exista. Que sea válida y del rol correcto lo
+ * Solo mira que la cookie exista. Que sea válida y del rol correcto lo
  * resuelve `ProtectedRoute` en el cliente.
  */
 export function proxy(request: NextRequest) {

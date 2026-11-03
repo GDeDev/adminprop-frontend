@@ -259,7 +259,7 @@ function PortalAccessSection({ owner }: { owner: OwnerDetail }) {
         {!owner.email
           ? "Cargale un email para poder darle acceso: es su usuario del portal."
           : owner.hasPortalAccess
-            ? `Entra al portal con ${owner.email}. Si perdió la contraseña, generale una nueva: la anterior deja de servir.`
+            ? `Entra al portal con ${owner.email}. Si no la recuerda, generale una contraseña nueva: la anterior deja de servir.`
             : `Todavía no tiene acceso. Se le genera un usuario (${owner.email}) y una contraseña que se muestra una sola vez.`}
       </p>
       <PortalCredentialsDialog

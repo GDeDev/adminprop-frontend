@@ -43,8 +43,8 @@ export const STATEMENT_STATUS_META: Record<StatementStatus, BadgeMeta> = {
 }
 
 export const SEND_MODE_LABELS: Record<StatementSendMode, string> = {
-  SUMMARY: "Sólo el resumen",
-  RECEIPTS: "Sólo los comprobantes",
+  SUMMARY: "Solo el resumen",
+  RECEIPTS: "Solo los comprobantes",
   BOTH: "Resumen y comprobantes",
 }
 

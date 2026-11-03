@@ -28,7 +28,7 @@ export const USERS_PAGE_SIZE = 20
 
 const usersKey = ["users"] as const
 
-/** Admins y empleados de la inmobiliaria (`GET /users`, sólo admin). */
+/** Admins y empleados de la inmobiliaria (`GET /users`, solo admin). */
 export function useUsers(filters: UserFilters) {
   return useQuery({
     queryKey: [...usersKey, filters],

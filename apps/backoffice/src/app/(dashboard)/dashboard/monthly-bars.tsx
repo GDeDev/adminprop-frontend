@@ -5,7 +5,7 @@ import { formatMoney } from "@/lib/contracts"
 
 type History = DashboardReport["history"]
 
-/** Total de un mes en una moneda (los importes llegan como string; sólo se compara para dibujar). */
+/** Total de un mes en una moneda (los importes llegan como string; solo se compara para dibujar). */
 function amountOf(
   items: { currency: Currency; amount: string }[],
   currency: Currency
@@ -26,7 +26,7 @@ export function historyCurrencies(history: History): Currency[] {
 
 /**
  * Barras de devengado vs. cobrado por mes, en SVG propio (A-37). Un gráfico
- * por moneda: nunca se mezclan pesos con dólares. La altura es sólo visual;
+ * por moneda: nunca se mezclan pesos con dólares. La altura es solo visual;
  * el valor exacto va en el texto de cada barra.
  */
 export function MonthlyBars({ history }: { history: History }) {
@@ -109,7 +109,7 @@ function CurrencyBars({
                 x={x}
                 y={height + 16}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[11px]"
+                className={`fill-muted-foreground text-[18px] sm:text-[11px] ${index % 2 === 1 ? "max-sm:hidden" : ""}`}
               >
                 {month.period.slice(5)}/{month.period.slice(2, 4)}
               </text>

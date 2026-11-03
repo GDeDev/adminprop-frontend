@@ -11,7 +11,7 @@ import type {
 /**
 /**
  * Etiquetas y formato del portal. `formatMoney` y `periodLabel` son los
- * compartidos (`@adminprop/ui/lib/format`); acá sólo presentación, sin
+ * compartidos (`@adminprop/ui/lib/format`); acá solo presentación, sin
  * aritmética (los montos los calcula la API).
  */
 
@@ -90,7 +90,7 @@ export const COLLECTION_MODE_LABELS: Record<CollectionMode, string> = {
   OWNER_DIRECT: "Le pagás directamente al propietario",
 }
 
-/** Link de WhatsApp con texto precargado. `phone` sólo dígitos con país. */
+/** Link de WhatsApp con texto precargado. `phone` solo dígitos con país. */
 export function whatsappUrl(phone: string, text: string): string {
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
 }

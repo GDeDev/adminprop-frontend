@@ -39,7 +39,7 @@ import { normalizeAmount } from "@/lib/contracts"
 import { SEND_MODE_LABELS } from "@/lib/settlements"
 import { useUpdateOwnerFeeSettings } from "@/lib/settlements-api"
 
-/** Honorarios por propietario (Micaela #5) y modo de envío del resumen (#7). Sólo admin. */
+/** Honorarios por propietario (Micaela #5) y modo de envío del resumen (#7). Solo admin. */
 export function OwnerFeeSettingsDialog({
   ownerId,
   settings,
