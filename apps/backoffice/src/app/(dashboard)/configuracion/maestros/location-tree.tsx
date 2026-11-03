@@ -9,6 +9,7 @@ import type { LocationLevel, LocationNode } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Switch } from "@adminprop/ui/components/switch"
 import { cn } from "@adminprop/ui/lib/utils"
@@ -118,15 +119,13 @@ export function LocationTree({ canEdit }: { canEdit: boolean }) {
       {tree.isPending ? (
         <PageSkeleton cards={1} />
       ) : tree.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar las ubicaciones"
           description={apiErrorMessage(
             tree.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void tree.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void tree.refetch()}
         />
       ) : tree.data.length === 0 ? (
         <EmptyState

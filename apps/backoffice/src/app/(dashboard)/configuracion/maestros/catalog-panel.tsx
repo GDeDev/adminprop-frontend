@@ -9,6 +9,7 @@ import type { CatalogItem, CatalogKey } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Switch } from "@adminprop/ui/components/switch"
 
@@ -74,15 +75,13 @@ export function CatalogPanel({
       {items.isPending ? (
         <PageSkeleton cards={2} />
       ) : items.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudo cargar"
           description={apiErrorMessage(
             items.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void items.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void items.refetch()}
         />
       ) : items.data.length === 0 ? (
         <EmptyState

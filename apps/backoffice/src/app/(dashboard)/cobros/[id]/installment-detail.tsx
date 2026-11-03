@@ -233,7 +233,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Breakdown installment={installment} />
         <Section title="Términos de cobro">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
@@ -274,7 +274,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
           </dl>
         </Section>
 
-        <Section title="Pagos" className="md:col-span-2">
+        <Section title="Pagos" className="lg:col-span-2">
           {installment.payments.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Todavía no hay pagos registrados.

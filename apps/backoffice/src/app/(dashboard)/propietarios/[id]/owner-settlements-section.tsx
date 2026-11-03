@@ -40,7 +40,7 @@ export function OwnerSettlementsSection({ owner }: { owner: OwnerDetail }) {
 
   return (
     <section
-      className="rounded-xl border bg-card p-4 md:col-span-2"
+      className="rounded-xl border bg-card p-4 lg:col-span-2"
       aria-labelledby="owner-settlements-title"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -141,7 +141,7 @@ export function OwnerFeeAccountSection({
 
   return (
     <section
-      className="rounded-xl border bg-card p-4 md:col-span-2"
+      className="rounded-xl border bg-card p-4 lg:col-span-2"
       aria-labelledby="owner-fees-title"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

@@ -16,6 +16,7 @@ import type {
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -183,15 +184,13 @@ function SettlementList() {
       {query.isPending ? (
         <PageSkeleton cards={3} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar las liquidaciones"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : settlements.length === 0 ? (
         <EmptyState
@@ -209,14 +208,14 @@ function SettlementList() {
         />
       ) : (
         <>
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {settlements.map((settlement) => (
               <li key={settlement.id}>
                 <SettlementCard settlement={settlement} />
               </li>
             ))}
           </ul>
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -355,15 +354,13 @@ function StatementList() {
       {query.isPending ? (
         <PageSkeleton cards={2} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los consolidados"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : statements.length === 0 ? (
         <EmptyState
@@ -519,15 +516,13 @@ function FeeReceivableList() {
       {query.isPending ? (
         <PageSkeleton cards={2} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los honorarios"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : receivables.length === 0 ? (
         <EmptyState

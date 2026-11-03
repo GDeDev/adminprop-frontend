@@ -16,6 +16,7 @@ import type {
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -348,15 +349,13 @@ function InstallmentList({
       {query.isPending ? (
         <PageSkeleton cards={3} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar las cuotas"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : installments.length === 0 ? (
         <EmptyState
@@ -374,14 +373,14 @@ function InstallmentList({
         />
       ) : (
         <>
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {installments.map((installment) => (
               <li key={installment.id}>
                 <InstallmentCard installment={installment} />
               </li>
             ))}
           </ul>
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <Table>
               <TableHeader>
                 <TableRow>

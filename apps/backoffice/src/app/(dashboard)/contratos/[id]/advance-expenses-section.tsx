@@ -79,7 +79,7 @@ export function AdvanceExpensesSection({
   }
 
   return (
-    <section className="rounded-xl border bg-card p-4 md:col-span-2">
+    <section className="rounded-xl border bg-card p-4 lg:col-span-2">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-lg font-semibold">
           Gastos adelantados
@@ -199,7 +199,7 @@ function ExpenseRows({
 }) {
   return (
     <>
-      <ul className="flex flex-col gap-2 md:hidden">
+      <ul className="flex flex-col gap-2 lg:hidden">
         {expenses.map((expense) => (
           <li key={expense.id} className="rounded-lg border p-3 text-sm">
             <div className="flex items-start justify-between gap-2">
@@ -230,7 +230,7 @@ function ExpenseRows({
           </li>
         ))}
       </ul>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <Table>
           <TableHeader>
             <TableRow>

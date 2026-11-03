@@ -3,8 +3,8 @@
 import { apiErrorMessage } from "@adminprop/session/client"
 import type { PortalRenterContract } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
-import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Progress } from "@adminprop/ui/components/progress"
 
@@ -25,12 +25,10 @@ export function RenterContractScreen() {
   if (query.isPending) return <PageSkeleton cards={2} />
   if (query.isError) {
     return (
-      <EmptyState
+      <ErrorState
         title="No pudimos cargar tu contrato"
         description={apiErrorMessage(query.error, "Probá de nuevo en un rato.")}
-        action={
-          <Button onClick={() => void query.refetch()}>Reintentar</Button>
-        }
+        onRetry={() => void query.refetch()}
       />
     )
   }

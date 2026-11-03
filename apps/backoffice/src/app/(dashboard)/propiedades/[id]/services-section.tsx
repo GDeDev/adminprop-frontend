@@ -80,7 +80,7 @@ export function ServicesSection({
   }
 
   return (
-    <section className="rounded-xl border bg-card p-4 md:col-span-2">
+    <section className="rounded-xl border bg-card p-4 lg:col-span-2">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-lg font-semibold">Servicios</h2>
         {propertyId && (
@@ -159,7 +159,7 @@ function ServiceRows({
 }) {
   return (
     <>
-      <ul className="flex flex-col gap-2 md:hidden">
+      <ul className="flex flex-col gap-2 lg:hidden">
         {services.map((service) => {
           const status = serviceStatusMeta(service)
           return (
@@ -192,7 +192,7 @@ function ServiceRows({
           )
         })}
       </ul>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <Table>
           <TableHeader>
             <TableRow>

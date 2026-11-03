@@ -22,6 +22,7 @@ import { apiClient } from "./api-client"
 export interface PropertyFilters {
   status?: PropertyStatus
   propertyTypeId?: string
+  ownerId?: string
   search?: string
 }
 
@@ -44,6 +45,7 @@ export function useInfiniteProperties(filters: PropertyFilters) {
           limit: PAGE_SIZE,
           status: filters.status,
           propertyTypeId: filters.propertyTypeId,
+          ownerId: filters.ownerId,
           search: filters.search || undefined,
         },
       })

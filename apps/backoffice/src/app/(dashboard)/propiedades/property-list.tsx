@@ -9,6 +9,7 @@ import type { PropertyStatus, PropertySummary } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -28,6 +29,7 @@ import {
 } from "@adminprop/ui/components/table"
 
 import { MasterDataSelect } from "@/components/master-data-select"
+import { OwnerSelect } from "@/components/owner-select"
 import { STATUS_META } from "@/lib/properties"
 import { useInfiniteProperties } from "@/lib/properties-api"
 import { useDebouncedValue } from "@/lib/use-debounced-value"
@@ -38,17 +40,23 @@ type StatusFilter = PropertyStatus | "ALL"
 export function PropertyList() {
   const [status, setStatus] = React.useState<StatusFilter>("ALL")
   const [typeId, setTypeId] = React.useState<string | null>(null)
+  const [ownerId, setOwnerId] = React.useState<string | null>(null)
   const [search, setSearch] = React.useState("")
   const debouncedSearch = useDebouncedValue(search.trim())
 
   const query = useInfiniteProperties({
     status: status === "ALL" ? undefined : status,
     propertyTypeId: typeId ?? undefined,
+    ownerId: ownerId ?? undefined,
     search: debouncedSearch,
   })
   const properties = query.data?.pages.flatMap((page) => page.data) ?? []
   const total = query.data?.pages[0]?.pagination.total ?? 0
-  const filtered = status !== "ALL" || typeId !== null || debouncedSearch !== ""
+  const filtered =
+    status !== "ALL" ||
+    typeId !== null ||
+    ownerId !== null ||
+    debouncedSearch !== ""
 
   return (
     <div className="flex flex-col gap-6">
@@ -69,8 +77,8 @@ export function PropertyList() {
         </Button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-        <div className="relative">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto_auto]">
+        <div className="relative sm:col-span-2 lg:col-span-1">
           <Search
             aria-hidden
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -103,7 +111,7 @@ export function PropertyList() {
             ))}
           </SelectContent>
         </Select>
-        <div className="flex gap-2 sm:w-56">
+        <div className="flex gap-2 lg:w-56">
           <MasterDataSelect
             source="property-types"
             value={typeId}
@@ -117,20 +125,26 @@ export function PropertyList() {
             </Button>
           )}
         </div>
+        <div className="sm:col-span-2 lg:col-span-1 lg:w-56">
+          <OwnerSelect
+            value={ownerId}
+            onChange={(id) => setOwnerId(id)}
+            placeholder="Todos los propietarios"
+            aria-label="Filtrar por propietario"
+          />
+        </div>
       </div>
 
       {query.isPending ? (
         <PageSkeleton cards={3} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar las propiedades"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : properties.length === 0 ? (
         <EmptyState
@@ -153,7 +167,7 @@ export function PropertyList() {
         />
       ) : (
         <>
-          <ul className="grid gap-3 sm:grid-cols-2 md:hidden">
+          <ul className="grid gap-3 sm:grid-cols-2 lg:hidden">
             {properties.map((property) => (
               <li key={property.id}>
                 <PropertyCard property={property} />

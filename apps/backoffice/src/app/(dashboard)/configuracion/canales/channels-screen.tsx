@@ -80,7 +80,7 @@ export function ChannelsScreen() {
           </AlertDescription>
         </Alert>
       )}
-      <ul className="grid gap-3 md:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {channels.data?.map((channel) => (
           <li key={channel.channel}>
             <ChannelCard channel={channel} />
