@@ -37,6 +37,7 @@ import { MasterDataSelect } from "@/components/master-data-select"
 import { OwnerSelect } from "@/components/owner-select"
 import { CURRENCY_LABELS, normalizeAmount } from "@/lib/contracts"
 import { useDraftKey } from "@/lib/drafts"
+import { OVERSIZED_PHOTO_MESSAGE, splitOversizedPhotos } from "@/lib/photos"
 import { MAX_PHOTOS } from "@/lib/properties"
 import {
   useCreateProperty,
@@ -556,8 +557,12 @@ function PhotoPicker({
     const images = [...list].filter((f) =>
       /^image\/(jpeg|png|webp)$/.test(f.type)
     )
-    const next = [...files, ...images].slice(0, MAX_PHOTOS)
-    if (files.length + images.length > MAX_PHOTOS) {
+    const { accepted, oversized } = splitOversizedPhotos(images)
+    if (oversized.length > 0) {
+      toast.error(OVERSIZED_PHOTO_MESSAGE(oversized.length))
+    }
+    const next = [...files, ...accepted].slice(0, MAX_PHOTOS)
+    if (files.length + accepted.length > MAX_PHOTOS) {
       toast.warning(`Se pueden cargar hasta ${MAX_PHOTOS} fotos.`)
     }
     onChange(next)

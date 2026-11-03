@@ -33,12 +33,18 @@ export interface ApiClientOptions {
  * en silencio y reintenta una vez. Si el refresh tampoco anda, llama a
  * `onUnauthenticated`.
  */
+const UPLOAD_TIMEOUT_MS = 120_000
+
 export function createApiClient(options: ApiClientOptions): AxiosInstance {
   const client = axios.create({ baseURL: options.baseURL, timeout: 15_000 })
 
   client.interceptors.request.use((config) => {
     const token = tokenStore.get()
     if (token) config.headers.Authorization = `Bearer ${token}`
+    // Subidas (fotos, PDFs): 15 s es poco con datos móviles.
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      config.timeout = Math.max(config.timeout ?? 0, UPLOAD_TIMEOUT_MS)
+    }
     return config
   })
 

@@ -203,3 +203,23 @@ describe("safeNextPath", () => {
     expect(safeNextPath(null, "/dashboard")).toBe("/dashboard")
   })
 })
+
+describe("timeout de subidas", () => {
+  it("sube el timeout para multipart y deja el de siempre para el resto", async () => {
+    const seen: Array<number | undefined> = []
+    const client = createApiClient({
+      baseURL: "http://api.test",
+      onUnauthenticated: vi.fn(),
+    })
+    client.defaults.adapter = async (config) => {
+      seen.push(config.timeout)
+      return { data: {}, status: 200, statusText: "", headers: {}, config }
+    }
+
+    await client.get("/x")
+    await client.post("/y", new FormData())
+
+    expect(seen[0]).toBe(15_000)
+    expect(seen[1]).toBeGreaterThanOrEqual(120_000)
+  })
+})

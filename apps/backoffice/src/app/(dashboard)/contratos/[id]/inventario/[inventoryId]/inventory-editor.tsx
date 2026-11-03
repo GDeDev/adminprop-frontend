@@ -38,6 +38,7 @@ import {
   useUpdateInventory,
   useUploadItemPhotos,
 } from "@/lib/inventory-api"
+import { OVERSIZED_PHOTO_MESSAGE, splitOversizedPhotos } from "@/lib/photos"
 
 /** Ítem en edición: `id` vacío mientras no se guardó. */
 interface DraftItem {
@@ -188,11 +189,16 @@ function Editor({
 
   async function attach(itemId: string, files: FileList | null) {
     if (!files || files.length === 0) return
+    const { accepted, oversized } = splitOversizedPhotos([...files])
+    if (oversized.length > 0) {
+      toast.error(OVERSIZED_PHOTO_MESSAGE(oversized.length))
+    }
+    if (accepted.length === 0) return
     try {
       await upload.mutateAsync({
         inventoryId: detail.id,
         itemId,
-        files: [...files],
+        files: accepted,
       })
     } catch (cause) {
       toast.error(apiErrorMessage(cause, "No se pudieron subir las fotos."))

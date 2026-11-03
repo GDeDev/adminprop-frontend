@@ -38,6 +38,7 @@ import {
 } from "@adminprop/ui/components/responsive-dialog"
 
 import { AmenityIcon } from "@/components/amenity-icon"
+import { OVERSIZED_PHOTO_MESSAGE, splitOversizedPhotos } from "@/lib/photos"
 import { MANUAL_TRANSITIONS, MAX_PHOTOS, STATUS_META } from "@/lib/properties"
 import {
   useChangePropertyStatus,
@@ -395,8 +396,13 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
 
   async function add(list: FileList | null) {
     if (!list || list.length === 0) return
-    const files = [...list].slice(0, remaining)
-    if (list.length > remaining) {
+    const { accepted, oversized } = splitOversizedPhotos([...list])
+    if (oversized.length > 0) {
+      toast.error(OVERSIZED_PHOTO_MESSAGE(oversized.length))
+    }
+    const files = accepted.slice(0, remaining)
+    if (files.length === 0) return
+    if (accepted.length > remaining) {
       toast.warning(
         `Sólo entran ${remaining} fotos más (máximo ${MAX_PHOTOS}).`
       )
