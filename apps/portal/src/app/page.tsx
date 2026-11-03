@@ -10,10 +10,12 @@ import {
 } from "@adminprop/ui/components/card"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 
+import { PublicFooter } from "@/components/public-footer"
 import { PublicHeader } from "@/components/public-header"
 import { ListingFilters } from "@/components/listing-filters"
 import { getPublicFilters, getPublicListing } from "@/lib/public-api"
-import { listingHref, parseListingQuery, priceLabel } from "@/lib/public-format"
+import { PriceText } from "@/components/price-text"
+import { listingHref, parseListingQuery } from "@/lib/public-format"
 
 // El listado se vuelve a pedir a la API como mucho una vez por minuto.
 export const revalidate = 60
@@ -88,9 +90,11 @@ export default async function HomePage(props: PageProps<"/">) {
                       <CardTitle className="font-display text-lg">
                         {property.address}
                       </CardTitle>
-                      <p className="font-display text-xl font-semibold tabular-nums">
-                        {priceLabel(property.price, property.currency)}
-                      </p>
+                      <PriceText
+                        price={property.price}
+                        currency={property.currency}
+                        className="text-xl"
+                      />
                       <p className="text-sm text-muted-foreground">
                         {[
                           property.bedrooms !== null &&
@@ -134,6 +138,7 @@ export default async function HomePage(props: PageProps<"/">) {
           </div>
         )}
       </main>
+      <PublicFooter />
     </>
   )
 }

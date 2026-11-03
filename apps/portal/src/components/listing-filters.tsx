@@ -3,8 +3,10 @@ import Link from "next/link"
 import type { PublicFilters, PublicListingQuery } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
 
+// Mismo aspecto que `Input`/`Select` del sistema (select nativo: el formulario
+// GET funciona sin JavaScript). Borde visible también en oscuro.
 const FIELD =
-  "h-11 w-full rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "h-11 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:h-9 md:text-sm dark:border-muted-foreground/50 dark:bg-input/30 [&>option]:bg-background [&>option]:text-foreground"
 
 /**
  * Filtros del listado: un formulario GET, así funcionan sin JavaScript y
@@ -23,7 +25,7 @@ export function ListingFilters({
       method="get"
       className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-6"
     >
-      <label className="flex flex-col gap-1 text-xs text-muted-foreground lg:col-span-2">
+      <label className="flex flex-col gap-1 text-sm font-medium lg:col-span-2">
         Ubicación
         <select
           name="locationId"
@@ -38,7 +40,7 @@ export function ListingFilters({
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         Tipo
         <select
           name="propertyTypeId"
@@ -53,7 +55,7 @@ export function ListingFilters({
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         Moneda
         <select
           name="currency"
@@ -65,7 +67,7 @@ export function ListingFilters({
           <option value="USD">Dólares</option>
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         Precio desde
         <input
           name="priceFrom"
@@ -74,7 +76,7 @@ export function ListingFilters({
           className={FIELD}
         />
       </label>
-      <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         Precio hasta
         <input
           name="priceTo"

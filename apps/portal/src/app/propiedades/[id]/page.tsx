@@ -6,9 +6,10 @@ import { ArrowLeft } from "lucide-react"
 import { Badge } from "@adminprop/ui/components/badge"
 
 import { ContactForm } from "@/components/contact-form"
+import { PriceText } from "@/components/price-text"
+import { PublicFooter } from "@/components/public-footer"
 import { PublicHeader } from "@/components/public-header"
 import { getPublicProperty, publicTenantSlug } from "@/lib/public-api"
-import { priceLabel } from "@/lib/public-format"
 
 // Una propiedad que deja de estar disponible se deja de mostrar (404) al
 // revalidar; no se prearman fichas en el build.
@@ -70,9 +71,11 @@ export default async function PropertyPage(
           <h1 className="text-3xl font-semibold tracking-tight">
             {property.address}
           </h1>
-          <p className="font-display text-2xl font-semibold tabular-nums">
-            {priceLabel(property.price, property.currency)}
-          </p>
+          <PriceText
+            price={property.price}
+            currency={property.currency}
+            className="text-2xl"
+          />
           {property.amenities.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {property.amenities.map((amenity) => (
@@ -109,6 +112,7 @@ export default async function PropertyPage(
           />
         )}
       </main>
+      <PublicFooter />
     </>
   )
 }
