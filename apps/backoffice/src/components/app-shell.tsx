@@ -12,7 +12,12 @@ import { Button } from "@adminprop/ui/components/button"
 import { ThemeToggle } from "@adminprop/ui/components/theme-toggle"
 
 import { TenantNameProvider } from "./tenant-name"
-import { mobileMoreItems, mobileNavItems, navItems } from "@/lib/navigation"
+import {
+  mobileMoreItems,
+  mobileNavItems,
+  navItems,
+  visibleNavItems,
+} from "@/lib/navigation"
 import { displayName, roleLabel } from "@/lib/users"
 
 /** Slot de marca: nombre de la inmobiliaria (o "Adminprop" sin sesión). */
@@ -90,12 +95,14 @@ export function AppShell({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { user } = useSession()
+  const role = user?.role
 
   return (
     <TenantNameProvider name={tenantName}>
       <div className="min-h-svh md:flex">
         <AppSidebar
-          items={navItems}
+          items={visibleNavItems(navItems, role)}
           pathname={pathname}
           linkComponent={Link}
           header={<BrandMark tenantName={tenantName} />}
@@ -132,8 +139,8 @@ export function AppShell({
         </div>
 
         <BottomNav
-          items={mobileNavItems}
-          more={{ items: mobileMoreItems }}
+          items={visibleNavItems(mobileNavItems, role)}
+          more={{ items: visibleNavItems(mobileMoreItems, role) }}
           pathname={pathname}
           linkComponent={Link}
         />

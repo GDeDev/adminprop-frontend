@@ -31,6 +31,7 @@ describe("OwnerSettlementDetailScreen", () => {
   it("muestra el desglose, el PDF y el acuse de recibo de una transferida", async () => {
     settlement = {
       id: "s1",
+      pdfUrl: null,
       period: "2026-10",
       sequence: 1,
       status: "TRANSFERRED",
