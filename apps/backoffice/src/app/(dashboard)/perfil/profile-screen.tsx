@@ -5,8 +5,9 @@ import { useSession } from "@adminprop/session/client"
 import { displayName, roleLabel } from "@/lib/users"
 
 import { MyNotifications } from "./my-notifications"
+import { SecuritySection } from "./security-section"
 
-/** Perfil del usuario logueado. Por ahora: datos básicos y "Mis notificaciones". */
+/** Perfil del usuario logueado. Datos básicos, "Mis notificaciones" y seguridad de la cuenta. */
 export function ProfileScreen() {
   const { user } = useSession()
 
@@ -23,6 +24,7 @@ export function ProfileScreen() {
         )}
       </div>
       <MyNotifications />
+      <SecuritySection />
     </div>
   )
 }
