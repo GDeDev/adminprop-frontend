@@ -49,7 +49,11 @@ async function get<T>(
 export function getPublicListing(
   query: PublicListingQuery
 ): Promise<Paginated<PublicPropertySummary> | null> {
-  return get("/properties", { ...query, limit: PUBLIC_PAGE_SIZE })
+  return get("/properties", {
+    ...query,
+    ids: query.ids?.join(","),
+    limit: PUBLIC_PAGE_SIZE,
+  })
 }
 
 /** Ficha pública; null si no existe o ya no está disponible. */
