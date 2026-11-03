@@ -519,3 +519,27 @@ Excluir una fila o elegir su resolución (`PATCH /rows/:rowId`) se guarda en el 
 ### DT-97 — Descargas por blob, fotos y propiedades a revisar
 
 La plantilla y el reporte `.xlsx` se bajan con `responseType: "blob"` (mismo patrón que los reportes) para mandar el token. "Reintentar fotos" lanza `assets/retry` y muestra su job. "Ver propiedades a revisar" enlaza a `/propiedades?needsReview=true`; el listado de propiedades todavía no lee ese filtro (queda para cuando el backend lo exponga).
+
+### DT-98 — Contrato de la Fase 23 escrito a mano y `@dnd-kit`
+
+Los DTOs del CRM y la multipublicación salen de `REDISENO_FASE_23.md` (secciones 5 a 7) y viven en `shared-types/src/crm.ts` y `listings.ts` hasta regenerar desde el OpenAPI. Se agregaron `InquiryPropertyRef`, `InquiryUserRef`, `PipelineColumn`, `CrmAssignee`, `CrmTopProperty`, `PropertyInquiryDailyPoint` y `ConnectChannelResult` para nombrar sub-objetos descritos en línea. El arrastre usa `@dnd-kit/core` + `@dnd-kit/sortable` (lo pide el rediseño; nuevas dependencias del backoffice), con sensor de teclado.
+
+### DT-99 — Mover una consulta: vecinos, actualización optimista y diálogos de cierre
+
+El rediseño dice que la posición se calcula "con los vecinos dados (`beforeId`/`afterId`)" sin precisar el sentido. Se asume `beforeId` = la tarjeta que queda **arriba** del lugar elegido y `afterId` = la que queda **abajo** (cualquiera puede faltar en los extremos); los vecinos se calculan sin contar la tarjeta que se mueve (`neighborsAt`). El movimiento es optimista (`applyMove` sobre todas las consultas de pipeline cacheadas); si la API falla, se restaura la copia y se avisa con toast, y siempre se invalida `crm` al terminar, lo que además recarga las columnas ante un conflicto. «Perdida» abre un diálogo con los motivos fijos del rediseño más «Otro» con texto; «Ganada» ofrece vincular un contrato de la propiedad (opcional). Ambos diálogos se montan sólo cuando hacen falta.
+
+### DT-100 — Tablero responsive: arrastre en escritorio, pestañas y «Mover a…» en mobile
+
+Desde `md` (`useIsDesktop`) se muestra el tablero de seis columnas; debajo, pestañas por etapa con contador y un selector «Mover a…» en cada tarjeta. En el tablero la tarjeta tiene un botón de arrastre propio (asa) con `aria-label`, de modo que el cuerpo de la tarjeta sigue siendo un botón que abre el panel; el teclado funciona con espacio + flechas. «Ver más» de cada columna pide `GET /crm/inquiries?stage=` y descarta las repetidas. El panel de detalle es un `ResponsiveDialog` (Drawer en mobile) y también permite cambiar la etapa.
+
+### DT-101 — WhatsApp de una consulta: pestaña abierta antes de pedir el link
+
+`GET /crm/inquiries/:id/whatsapp-link` es asíncrono, y abrir la pestaña después del `await` lo bloquea el navegador. Se abre una pestaña en blanco en el click, se le asigna la URL al llegar y se cierra si `url` es `null` (consulta sin teléfono utilizable). Sólo si hubo URL se registra `contact-attempts` con canal `WHATSAPP`. El selector de plantilla del panel lista las plantillas de WhatsApp de la Fase 14 (por defecto `INQUIRY_FIRST_CONTACT`).
+
+### DT-102 — Publicación: acciones por estado y «Actualizar» sobre el endpoint de publicar
+
+El rediseño define "Actualizar publicación" pero no un endpoint propio, así que `update` llama a `…/listings/:channel/publish` (el backend decide si crea o actualiza). Las acciones salen del estado (`listingActions`): sin publicar/cerrada → Publicar (si `canPublish`); error → Reintentar y Cerrar; publicada/pausada → Actualizar (sólo con `hasUnpublishedChanges`), Pausar/Reanudar y Cerrar; publicando → ninguna. Publicar, reintentar y actualizar devuelven 202 `{ jobId }` y se sigue con `useJobStatus`; pausar, reanudar y cerrar devuelven la publicación. Si el canal está `DISCONNECTED` se enlaza a Configuración → Canales; `UNAVAILABLE` se muestra deshabilitado con el motivo. Los faltantes salen de `missingForPublish` (o del 422 `LISTING_NOT_READY` si trae `missing`).
+
+### DT-103 — Navegación, permisos y tarjeta del dashboard
+
+«Consultas» (`/crm`) entra en el menú para administrador y empleado (A-89: los portales no la ven); Configuración → Canales de publicación sólo la ven y usan los administradores (conectar/desconectar son de admin en el rediseño). La tarjeta «Consultas sin atender» del dashboard cuenta, entre las hasta 50 tarjetas de la columna `NEW` del pipeline, las de más de 24 h y muestra «+» si hay más tarjetas que las cargadas; no hay un endpoint específico. Las analíticas de la propiedad usan los últimos 30 días y avisan que las vistas se cuentan desde la activación (A-83).
