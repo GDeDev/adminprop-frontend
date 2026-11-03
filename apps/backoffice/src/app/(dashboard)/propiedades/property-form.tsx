@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ChevronLeft, ImagePlus, X } from "lucide-react"
+import { Calculator, ChevronLeft, ImagePlus, X } from "lucide-react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -39,6 +39,8 @@ import { CURRENCY_LABELS, normalizeAmount } from "@/lib/contracts"
 import { useDraftKey } from "@/lib/drafts"
 import { OVERSIZED_PHOTO_MESSAGE, splitOversizedPhotos } from "@/lib/photos"
 import { MAX_PHOTOS } from "@/lib/properties"
+
+import { AppraisalSheet } from "./[id]/appraisal-sheet"
 import {
   useCreateProperty,
   useUpdateProperty,
@@ -143,6 +145,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
   const create = useCreateProperty()
   const update = useUpdateProperty()
   const upload = useUploadPropertyPhotos()
+  const [appraising, setAppraising] = React.useState(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -160,6 +163,21 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
         }
       : (initialDraft ?? EMPTY),
   })
+
+  // «Usar este precio» desde la ficha llega con ?precio=…&moneda=…: se
+  // precarga en el formulario, sin guardar.
+  React.useEffect(() => {
+    if (!editing) return
+    const params = new URLSearchParams(window.location.search)
+    const price = params.get("precio")
+    const currency = params.get("moneda")
+    if (price && /^\d+(\.\d{1,2})?$/.test(price)) {
+      form.setValue("listingPrice", price, { shouldDirty: true })
+      if (currency === "ARS" || currency === "USD") {
+        form.setValue("listingCurrency", currency, { shouldDirty: true })
+      }
+    }
+  }, [editing, form])
 
   const values = useWatch({ control: form.control })
   React.useEffect(() => {
@@ -454,7 +472,22 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
                   />
                   <FieldDescription>
                     Vacío = «Consultar» en el portal.
+                    {!editing &&
+                      " Después de guardar la propiedad podés pedir un precio sugerido."}
                   </FieldDescription>
+                  {property && (
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setAppraising(true)}
+                      >
+                        <Calculator aria-hidden />
+                        Sugerir precio
+                      </Button>
+                    </div>
+                  )}
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -531,6 +564,21 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
           </Button>
         </div>
       </form>
+      {property && (
+        <AppraisalSheet
+          propertyId={property.id}
+          locationId={property.locationId}
+          open={appraising}
+          onOpenChange={setAppraising}
+          onUse={(price, currency) => {
+            form.setValue("listingPrice", price, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+            form.setValue("listingCurrency", currency, { shouldDirty: true })
+          }}
+        />
+      )}
     </div>
   )
 }
