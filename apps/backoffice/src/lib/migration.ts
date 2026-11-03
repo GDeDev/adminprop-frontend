@@ -1,3 +1,4 @@
+import { apiErrorCode, apiErrorMessage } from "@adminprop/session/client"
 import type {
   ImportBatchStatus,
   ImportCounts,
@@ -240,4 +241,12 @@ export function mastersSummary(masters: ImportMastersCount): string {
     )
   }
   return parts.join(", ")
+}
+
+/** Mensaje de un error de la API, con textos propios para los códigos de la migración. */
+export function migrationApiError(error: unknown, fallback: string): string {
+  return (
+    migrationErrorMessage(apiErrorCode(error) ?? undefined) ??
+    apiErrorMessage(error, fallback)
+  )
 }

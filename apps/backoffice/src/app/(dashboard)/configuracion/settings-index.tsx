@@ -4,6 +4,7 @@ import Link from "next/link"
 import {
   ChevronRight,
   Bell,
+  DatabaseZap,
   Building2,
   History,
   ListTree,
@@ -100,6 +101,14 @@ export function SettingsIndex() {
                 icon={History}
                 title="Auditoría"
                 description="Quién hizo qué y cuándo: altas, cambios, ingresos y envíos."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/migracion"
+                icon={DatabaseZap}
+                title="Migración de datos"
+                description="Importá propietarios, inquilinos, propiedades y contratos desde Excel o Tokko."
               />
             </li>
             <li>
