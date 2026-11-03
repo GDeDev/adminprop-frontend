@@ -11,6 +11,9 @@ import { Textarea } from "@adminprop/ui/components/textarea"
 
 import { apiClient } from "@/lib/api-client"
 
+// El borde `input` del tema oscuro casi no se distingue del fondo de la tarjeta.
+const VISIBLE_BORDER = "dark:border-muted-foreground/50"
+
 type Outcome = "sent" | "unavailable" | null
 
 /**
@@ -102,7 +105,7 @@ export function ContactForm({
       className="flex flex-col gap-3 rounded-xl border bg-card p-4"
       aria-label="Consultar por esta propiedad"
     >
-      <h2 className="font-display text-lg font-semibold">Consultar</h2>
+      <h2 className="font-display text-lg font-semibold">Enviá tu consulta</h2>
       {error && (
         <Alert variant="destructive" role="alert">
           <AlertDescription>{error}</AlertDescription>
@@ -112,6 +115,7 @@ export function ContactForm({
         <label className="flex flex-col gap-1 text-sm">
           Nombre
           <Input
+            className={VISIBLE_BORDER}
             autoComplete="name"
             value={values.name}
             onChange={(event) => set("name", event.target.value)}
@@ -120,6 +124,7 @@ export function ContactForm({
         <label className="flex flex-col gap-1 text-sm">
           Email
           <Input
+            className={VISIBLE_BORDER}
             type="email"
             autoComplete="email"
             value={values.email}
@@ -129,6 +134,7 @@ export function ContactForm({
         <label className="flex flex-col gap-1 text-sm">
           Teléfono
           <Input
+            className={VISIBLE_BORDER}
             type="tel"
             autoComplete="tel"
             value={values.phone}
@@ -139,6 +145,7 @@ export function ContactForm({
       <label className="flex flex-col gap-1 text-sm">
         Mensaje
         <Textarea
+          className={VISIBLE_BORDER}
           rows={4}
           value={values.message}
           onChange={(event) => set("message", event.target.value)}

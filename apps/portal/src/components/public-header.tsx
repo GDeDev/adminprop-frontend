@@ -2,16 +2,30 @@ import Link from "next/link"
 
 import { ThemeToggle } from "@adminprop/ui/components/theme-toggle"
 
-/** Header del sitio público. El nombre/logo es slot de marca del tenant. */
-export function PublicHeader() {
+import { getTenantBranding } from "@/lib/tenant-branding"
+
+/** Header del sitio público: nombre y logo de la inmobiliaria (slot de marca). */
+export async function PublicHeader() {
+  const branding = await getTenantBranding()
+  const name = branding?.name ?? "Propiedades en alquiler"
+
   return (
     <header className="sticky top-0 z-30 bg-sidebar pt-[env(safe-area-inset-top)] text-sidebar-foreground">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
         <Link
           href="/"
-          className="font-display text-xl font-semibold tracking-tight"
+          className="flex min-w-0 items-center gap-2 font-display text-xl font-semibold tracking-tight"
         >
-          Adminprop
+          {branding?.logoUrl && (
+            // Logo del tenant: host variable, sin next/image.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={branding.logoUrl}
+              alt=""
+              className="h-8 w-auto max-w-32 shrink-0 object-contain"
+            />
+          )}
+          <span className="truncate">{name}</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm text-sidebar-muted">
           <Link
