@@ -8,14 +8,7 @@ import { apiErrorMessage, useSession } from "@adminprop/session/client"
 import type { AdvanceExpense, ContractDetail } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 import {
   Table,
@@ -373,34 +366,20 @@ function DeleteExpenseDialog({
   }
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="sm:max-w-md">
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>¿Eliminar el gasto?</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>
-            {expense.description} (
-            {formatMoney(expense.amount, expense.currency)}) deja de aparecer y
-            su comprobante se borra. Un gasto ya descontado no se puede
-            eliminar.
-          </ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
-        <ResponsiveDialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={remove.isPending}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => void confirm()}
-            disabled={remove.isPending}
-          >
-            Eliminar
-          </Button>
-        </ResponsiveDialogFooter>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="¿Eliminar el gasto?"
+      description={
+        <>
+          {expense.description} ({formatMoney(expense.amount, expense.currency)}
+          ) deja de aparecer y su comprobante se borra. Un gasto ya descontado
+          no se puede eliminar.
+        </>
+      }
+      confirmLabel="Eliminar"
+      pending={remove.isPending}
+      onConfirm={confirm}
+    />
   )
 }

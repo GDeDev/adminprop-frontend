@@ -72,7 +72,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
         <h1 className="font-display text-2xl font-semibold tracking-tight">
           {settlement.property?.address ?? "Propiedad"}
         </h1>
-        <p className="text-sm text-muted-foreground capitalize">
+        <p className="text-sm text-muted-foreground">
           Liquidación de {periodLabel(settlement.period)}
           {settlement.sequence > 1 && ` (${settlement.sequence})`}
         </p>

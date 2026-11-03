@@ -25,6 +25,7 @@ import {
   isZero,
   PAYMENT_METHOD_LABELS,
   periodLabel,
+  periodTitle,
 } from "@/lib/format"
 import { PortalPdfButton } from "@/components/portal-pdf-button"
 import {
@@ -111,9 +112,7 @@ function InstallmentRow({
       className="flex w-full items-center justify-between gap-3 rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="min-w-0">
-        <p className="font-medium capitalize">
-          {periodLabel(installment.period)}
-        </p>
+        <p className="font-medium">{periodTitle(installment.period)}</p>
         <p className="text-sm text-muted-foreground tabular-nums">
           {money(installment.baseAmount)}
           {!isZero(installment.lateFeeAccrued) &&
@@ -146,7 +145,7 @@ function InstallmentDialog({
     <ResponsiveDialog open onOpenChange={(open) => !open && onClose()}>
       <ResponsiveDialogContent className="sm:max-w-md">
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle className="capitalize">
+          <ResponsiveDialogTitle>
             {installment
               ? `Cuota de ${periodLabel(installment.period)}`
               : "Cuota"}

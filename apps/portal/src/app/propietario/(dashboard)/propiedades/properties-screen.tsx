@@ -91,7 +91,7 @@ function PropertyCard({ property }: { property: PortalOwnerProperty }) {
         {installment && meta && (
           <p className="mt-1 text-sm">
             <Badge variant={meta.badge}>{meta.label}</Badge>
-            <span className="ml-2 text-muted-foreground capitalize">
+            <span className="ml-2 text-muted-foreground">
               cuota de {periodLabel(installment.period)}
             </span>
           </p>

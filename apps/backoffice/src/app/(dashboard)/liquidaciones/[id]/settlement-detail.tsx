@@ -324,8 +324,8 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                   className="flex flex-wrap justify-between gap-2 py-2"
                 >
                   <div>
-                    <p className="font-medium capitalize">
-                      Cuota {periodLabel(payment.installmentPeriod)}
+                    <p className="font-medium">
+                      Cuota de {periodLabel(payment.installmentPeriod)}
                     </p>
                     <p className="text-xs text-muted-foreground tabular-nums">
                       Pagado el {formatDate(payment.paidAt)} · alquiler{" "}

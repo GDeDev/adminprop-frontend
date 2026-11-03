@@ -1,6 +1,5 @@
 import type {
   CollectionMode,
-  Currency,
   DepositReturnMode,
   InstallmentStatus,
   PaymentMethod,
@@ -10,41 +9,19 @@ import type {
 } from "@adminprop/shared-types"
 
 /**
- * Formato y etiquetas del portal. Copia mínima de los helpers del backoffice
- * (`lib/contracts.ts`, `lib/billing.ts`): sólo presentación, sin aritmética
- * (los montos los calcula la API). Consolidar en un paquete compartido cuando
- * la Fase 19 los necesite también para los reportes.
+/**
+ * Etiquetas y formato del portal. `formatMoney` y `periodLabel` son los
+ * compartidos (`@adminprop/ui/lib/format`); acá sólo presentación, sin
+ * aritmética (los montos los calcula la API).
  */
 
-export function formatMoney(amount: string, currency: Currency): string {
-  return (
-    new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 2,
-    })
-      .format(Number(amount))
-      // Intl separa el símbolo con un espacio duro; se normaliza a uno común.
-      .split(String.fromCharCode(160))
-      .join(" ")
-  )
-}
+// `formatMoney` y `periodLabel` viven en @adminprop/ui/lib/format.
+export { formatMoney, periodLabel, periodTitle } from "@adminprop/ui/lib/format"
 
 /** `AAAA-MM-DD` → `dd/mm/aaaa`, sin desfase de zona horaria. */
 export function formatDate(iso: string): string {
   const [year, month, day] = iso.slice(0, 10).split("-")
   return `${day}/${month}/${year}`
-}
-
-/** `AAAA-MM` → "octubre de 2026". */
-export function periodLabel(period: string): string {
-  const [year, month] = period.split("-").map(Number)
-  if (!year || !month) return period
-  return new Intl.DateTimeFormat("es-AR", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, 1)))
 }
 
 export function isZero(amount: string): boolean {

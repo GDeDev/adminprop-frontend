@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 
-import { periodLabel } from "@/lib/billing"
+import { periodTitle } from "@/lib/billing"
 import { useContractInstallments } from "@/lib/billing-api"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -71,9 +71,9 @@ export function InstallmentsSection({
                 <div className="flex items-center justify-between gap-2">
                   <Link
                     href={`/cobros/${installment.id}`}
-                    className="font-medium capitalize hover:underline"
+                    className="font-medium hover:underline"
                   >
-                    {periodLabel(installment.period)}
+                    {periodTitle(installment.period)}
                   </Link>
                   <InstallmentBadges installment={installment} />
                 </div>
@@ -103,9 +103,9 @@ export function InstallmentsSection({
                     <TableCell>
                       <Link
                         href={`/cobros/${installment.id}`}
-                        className="font-medium capitalize hover:underline"
+                        className="font-medium hover:underline"
                       >
-                        {periodLabel(installment.period)}
+                        {periodTitle(installment.period)}
                       </Link>
                       {installment.paidAt && (
                         <p className="text-xs text-muted-foreground">

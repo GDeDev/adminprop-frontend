@@ -17,7 +17,6 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { ErrorState } from "@adminprop/ui/components/error-state"
-import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
   ResponsiveDialog,
@@ -61,6 +60,7 @@ import {
   useGenerateInstallments,
   useInfiniteInstallments,
 } from "@/lib/billing-api"
+import { PeriodInput } from "@/components/period-input"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 
@@ -69,8 +69,6 @@ import { PendingPayments } from "./pending-payments"
 type StatusFilter = InstallmentStatus | "ALL"
 type ModeFilter = CollectionMode | "ALL"
 type Tab = "installments" | "payments"
-
-const PERIOD = /^\d{4}-(0[1-9]|1[0-2])$/
 
 /** Cobros del mes (spec 5.1): resumen, cuotas con su estado y pagos por confirmar. */
 export function BillingScreen() {
@@ -147,35 +145,30 @@ function PeriodPicker({
   onChange: (period: string) => void
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex items-center gap-2">
       <Button
         variant="outline"
         size="icon"
+        className="shrink-0"
         aria-label="Mes anterior"
         onClick={() => onChange(shiftPeriod(period, -1))}
       >
         <ChevronLeft aria-hidden />
       </Button>
-      <Input
-        type="month"
-        aria-label="Mes"
-        className="w-44"
+      <PeriodInput
         value={period}
-        onChange={(event) => {
-          if (PERIOD.test(event.target.value)) onChange(event.target.value)
-        }}
+        onChange={onChange}
+        className="min-w-0 flex-1 sm:flex-none"
       />
       <Button
         variant="outline"
         size="icon"
+        className="shrink-0"
         aria-label="Mes siguiente"
         onClick={() => onChange(shiftPeriod(period, 1))}
       >
         <ChevronRight aria-hidden />
       </Button>
-      <span className="font-display text-lg font-semibold capitalize">
-        {periodLabel(period)}
-      </span>
     </div>
   )
 }
@@ -185,7 +178,7 @@ function Summary({ period }: { period: string }) {
   const query = useBillingSummary(period)
   if (query.isPending) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
         <Skeleton className="h-20" />
         <Skeleton className="h-20" />
         <Skeleton className="h-20" />
@@ -221,7 +214,7 @@ function SummaryRow({ row }: { row: BillingSummaryByCurrency }) {
   return (
     <section
       aria-label={`Resumen en ${row.currency}`}
-      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4"
     >
       <Stat
         label={`Cobrado · ${row.currency}`}
@@ -273,9 +266,11 @@ function Stat({
           ? "text-muted-foreground"
           : ""
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-xl border bg-card p-3 sm:p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={`font-display text-xl font-semibold tabular-nums ${color}`}>
+      <p
+        className={`font-display text-base font-semibold tabular-nums sm:text-xl ${color}`}
+      >
         {value}
       </p>
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
@@ -541,18 +536,8 @@ function GenerateDialog({
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <div className="px-4 sm:px-0">
-          <label className="text-sm font-medium" htmlFor="generate-period">
-            Mes
-          </label>
-          <Input
-            id="generate-period"
-            type="month"
-            className="mt-1 w-44"
-            value={period}
-            onChange={(event) => {
-              if (PERIOD.test(event.target.value)) setPeriod(event.target.value)
-            }}
-          />
+          <p className="mb-1 text-sm font-medium">Mes</p>
+          <PeriodInput value={period} onChange={setPeriod} />
         </div>
         <ResponsiveDialogFooter>
           <Button

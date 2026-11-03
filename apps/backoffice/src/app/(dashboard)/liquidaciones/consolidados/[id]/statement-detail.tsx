@@ -14,6 +14,7 @@ import type {
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { Checkbox } from "@adminprop/ui/components/checkbox"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { Label } from "@adminprop/ui/components/label"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
@@ -86,6 +87,8 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
   const open = statement.status === "OPEN"
   const [adding, setAdding] = React.useState(false)
   const [closing, setClosing] = React.useState(false)
+  const [removing, setRemoving] = React.useState<SettlementSummary | null>(null)
+  const [reopening, setReopening] = React.useState(false)
   const remove = useRemoveStatementSettlement()
   const reopen = useReopenStatement()
   const meta = STATEMENT_STATUS_META[statement.status]
@@ -98,8 +101,14 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
       })
       toast.success("Liquidación quitada del consolidado.")
     } catch (cause) {
-      toast.error(apiErrorMessage(cause, "No se pudo quitar."))
+      toast.error(
+        apiErrorMessage(
+          cause,
+          "No se pudo quitar la liquidación del consolidado."
+        )
+      )
     }
+    setRemoving(null)
   }
 
   async function reopenStatement() {
@@ -107,8 +116,9 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
       await reopen.mutateAsync(statement.id)
       toast.success("Consolidado reabierto.")
     } catch (cause) {
-      toast.error(apiErrorMessage(cause, "No se pudo reabrir."))
+      toast.error(apiErrorMessage(cause, "No se pudo reabrir el consolidado."))
     }
+    setReopening(false)
   }
 
   return (
@@ -124,10 +134,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="font-display text-2xl font-semibold tracking-tight">
-              Consolidado de{" "}
-              <span className="capitalize">
-                {periodLabel(statement.period)}
-              </span>
+              Consolidado de {periodLabel(statement.period)}
             </h1>
             <p className="text-sm text-muted-foreground">
               {statement.owner ? (
@@ -178,7 +185,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                 {isAdmin && (
                   <Button
                     variant="outline"
-                    onClick={() => void reopenStatement()}
+                    onClick={() => setReopening(true)}
                     disabled={reopen.isPending}
                   >
                     <LockOpen aria-hidden />
@@ -290,7 +297,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                           variant="ghost"
                           size="icon-sm"
                           aria-label={`Quitar ${settlementLabel(settlement)}`}
-                          onClick={() => void removeSettlement(settlement)}
+                          onClick={() => setRemoving(settlement)}
                           disabled={remove.isPending}
                         >
                           <X aria-hidden />
@@ -319,6 +326,25 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
           onOpenChange={(isOpen) => !isOpen && setClosing(false)}
         />
       )}
+      <ConfirmDialog
+        open={removing !== null}
+        onOpenChange={(open) => !open && setRemoving(null)}
+        title="¿Quitar la liquidación del consolidado?"
+        description="Vuelve a quedar suelta y se puede agregar a otro consolidado. No se borra."
+        confirmLabel="Quitar"
+        pending={remove.isPending}
+        onConfirm={() => (removing ? removeSettlement(removing) : undefined)}
+      />
+      <ConfirmDialog
+        open={reopening}
+        onOpenChange={setReopening}
+        title="¿Reabrir el consolidado?"
+        description="Vuelve a quedar abierto y se le pueden agregar o quitar liquidaciones. Hay que cerrarlo de nuevo para que el propietario lo vea como definitivo."
+        confirmLabel="Reabrir"
+        destructive={false}
+        pending={reopen.isPending}
+        onConfirm={reopenStatement}
+      />
     </div>
   )
 }
