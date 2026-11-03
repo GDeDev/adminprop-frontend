@@ -91,7 +91,7 @@ describe("Configuración → Maestros", () => {
     expect(screen.queryByRole("button", { name: /Agregar/ })).toBeNull()
     expect(screen.queryByRole("switch")).toBeNull()
     expect(
-      screen.getByText(/Sólo un administrador puede cambiarlas/)
+      screen.getByText(/Solo un administrador puede cambiarlas/)
     ).toBeInTheDocument()
   })
 

@@ -99,6 +99,6 @@ describe("IndicesScreen", () => {
     expect(
       screen.queryByRole("form", { name: "Cargar un valor" })
     ).not.toBeInTheDocument()
-    expect(screen.getByText(/Sólo un administrador/)).toBeInTheDocument()
+    expect(screen.getByText(/Solo un administrador/)).toBeInTheDocument()
   })
 })

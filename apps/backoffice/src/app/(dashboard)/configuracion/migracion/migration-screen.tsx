@@ -11,14 +11,14 @@ import { BatchHistory } from "./batch-history"
 import { ExcelCard } from "./excel-card"
 import { TokkoCard } from "./tokko-card"
 
-/** Configuración → Migración de datos (rediseño Fase 21, sección 7). Sólo administradores. */
+/** Configuración → Migración de datos (rediseño Fase 21, sección 7). Solo administradores. */
 export function MigrationScreen() {
   const { user } = useSession()
 
   if (user?.role !== "ADMIN") {
     return (
       <EmptyState
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="La migración de datos la hacen los administradores."
       />
     )

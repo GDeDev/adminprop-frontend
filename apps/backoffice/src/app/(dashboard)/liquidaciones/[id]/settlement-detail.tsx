@@ -314,7 +314,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
         <Section title="Pagos incluidos">
           {settlement.payments.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Sin pagos: sólo gastos.
+              Sin pagos: solo gastos.
             </p>
           ) : (
             <ul className="flex flex-col divide-y text-sm">

@@ -25,7 +25,7 @@ import { NameDialog } from "./name-dialog"
 
 /**
  * Un maestro plano: listado con toggle de activo y alta rápida (spec Fase 5,
- * 6). Los empleados lo ven, pero sólo un admin lo cambia.
+ * 6). Los empleados lo ven, pero solo un admin lo cambia.
  */
 export function CatalogPanel({
   catalog,

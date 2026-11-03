@@ -98,7 +98,7 @@ describe("Ficha de propiedad", () => {
     expect(screen.getByText("(desactivado)")).toBeInTheDocument()
   })
 
-  it("ofrece sólo las transiciones de estado permitidas", async () => {
+  it("ofrece solo las transiciones de estado permitidas", async () => {
     property = makeProperty({ status: "MAINTENANCE" })
     render(<PropertyDetailScreen id="p1" />)
     const user = userEvent.setup()
@@ -111,7 +111,7 @@ describe("Ficha de propiedad", () => {
     expect(changeStatus).toHaveBeenCalledWith({ id: "p1", status: "AVAILABLE" })
   })
 
-  it("sólo un admin ve el botón de eliminar", () => {
+  it("solo un admin ve el botón de eliminar", () => {
     property = makeProperty()
     const { unmount } = render(<PropertyDetailScreen id="p1" />)
     expect(

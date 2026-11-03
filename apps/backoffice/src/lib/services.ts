@@ -26,7 +26,7 @@ export const INCREASE_FREQUENCY_LABELS: Record<IncreaseFrequency, string> =
 /**
  * Badge del estado de un servicio (spec 5.1): verde al día, rojo vencido.
  * El estado y los días lo calcula la API al leer (RN: `dueDate < hoy`);
- * acá sólo se traduce. Sin vencimiento no hay badge: no hay nada que vencer.
+ * acá solo se traduce. Sin vencimiento no hay badge: no hay nada que vencer.
  */
 export function serviceStatusMeta(
   service: Pick<PropertyService, "hasDueDate" | "status" | "daysOverdue">

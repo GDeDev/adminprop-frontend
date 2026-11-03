@@ -11,7 +11,7 @@ import { useEntityHistory } from "@/lib/audit-api"
 
 /**
  * "Historial" de una ficha: los últimos cambios de esa entidad (rediseño
- * Fase 20, sección 6). Sólo lo ve el administrador; para el resto no se
+ * Fase 20, sección 6). Solo lo ve el administrador; para el resto no se
  * renderiza nada.
  */
 export function EntityHistory({

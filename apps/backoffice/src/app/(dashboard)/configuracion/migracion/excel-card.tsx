@@ -59,7 +59,10 @@ export function ExcelCard() {
       className="flex flex-col gap-4 rounded-xl border bg-card p-4"
     >
       <div className="flex items-start gap-3">
-        <FileSpreadsheet aria-hidden className="mt-0.5 size-5 text-primary" />
+        <FileSpreadsheet
+          aria-hidden
+          className="mt-0.5 size-5 shrink-0 text-primary"
+        />
         <div>
           <h2 id="excel-title" className="font-medium">
             Desde Excel

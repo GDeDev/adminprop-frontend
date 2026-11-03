@@ -42,7 +42,7 @@ export interface BillingTermsSectionProps {
 /**
  * "Términos de cobro" de la ficha del contrato (rediseño Fase 11, 2.2):
  * quién cobra, cómo se cobran los honorarios, el punitorio y el depósito,
- * con el historial de vigencias. Cambiarlos es sólo para admin.
+ * con el historial de vigencias. Cambiarlos es solo para admin.
  */
 export function BillingTermsSection({
   contract,

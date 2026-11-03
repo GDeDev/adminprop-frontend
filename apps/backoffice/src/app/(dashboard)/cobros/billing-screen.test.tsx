@@ -177,12 +177,11 @@ describe("BillingScreen", () => {
   it("cambia de mes con las flechas y manda el filtro de estado", async () => {
     const user = userEvent.setup()
     render(<BillingScreen />)
-    const month = screen.getByLabelText("Mes") as HTMLInputElement
-    const before = month.value
+    const before = lastInstallmentFilters.period
 
     await user.click(screen.getByRole("button", { name: "Mes siguiente" }))
-    expect(month.value).not.toBe(before)
-    expect(lastInstallmentFilters.period).toBe(month.value)
+    expect(lastInstallmentFilters.period).not.toBe(before)
+    expect(lastInstallmentFilters.period).toMatch(/^\d{4}-\d{2}$/)
   })
 
   it("genera las cuotas del mes y avisa cuántas creó", async () => {

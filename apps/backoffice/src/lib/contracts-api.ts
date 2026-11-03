@@ -37,7 +37,7 @@ export interface ContractFilters {
   propertyId?: string
   renterId?: string
   ownerId?: string
-  /** Sólo los activos que vencen dentro de los días de aviso de la inmobiliaria. */
+  /** Solo los activos que vencen dentro de los días de aviso de la inmobiliaria. */
   expiringSoon?: boolean
 }
 
@@ -85,7 +85,7 @@ export function useContract(id: string) {
 }
 
 /**
- * Desglose de la multa (spec 5.4) antes de rescindir. Sólo consulta con una
+ * Desglose de la multa (spec 5.4) antes de rescindir. Solo consulta con una
  * fecha completa; mientras el usuario la escribe, no pide nada.
  */
 export function useTerminationPreview(id: string, notifiedAt: string) {
@@ -133,7 +133,7 @@ export function useCreateContract() {
   )
 }
 
-/** Sólo notas, garante y caución (D-55). */
+/** Solo notas, garante y caución (D-55). */
 export function useUpdateContract() {
   return useContractMutation(
     ({ id, ...body }: UpdateContractRequest & { id: string }) =>
@@ -143,7 +143,7 @@ export function useUpdateContract() {
 
 /**
  * Términos de cobro nuevos (rediseño Fase 11, 2.2): modalidad de cobro,
- * honorarios y punitorio desde una fecha; la fila anterior no se pisa. Sólo
+ * honorarios y punitorio desde una fecha; la fila anterior no se pisa. Solo
  * admin. Invalida cobros: las cuotas futuras copian los términos vigentes.
  */
 export function useChangeBillingTerms() {
@@ -183,7 +183,7 @@ export function useRenewContract() {
   )
 }
 
-/** Aplica el próximo aumento programado; `newRent` sólo con FIXED/OTHER (D-60). */
+/** Aplica el próximo aumento programado; `newRent` solo con FIXED/OTHER (D-60). */
 export function useApplyRentUpdate() {
   return useContractMutation(
     ({ id, ...body }: ApplyRentUpdateRequest & { id: string }) =>
@@ -247,7 +247,7 @@ export function useIndexValues(type: IndexType) {
   })
 }
 
-/** Carga a mano el valor de un mes (sólo admin). */
+/** Carga a mano el valor de un mes (solo admin). */
 export function useRegisterIndexValue() {
   const queryClient = useQueryClient()
   return useMutation({

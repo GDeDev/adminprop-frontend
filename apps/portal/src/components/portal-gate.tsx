@@ -11,7 +11,7 @@ import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { PORTAL_AREAS } from "@/lib/session"
 
 /**
- * Área logueada del portal: sólo para el rol de esa área. Un inquilino que
+ * Área logueada del portal: solo para el rol de esa área. Un inquilino que
  * abre el portal de propietarios va al login de propietarios.
  */
 export function PortalGate({

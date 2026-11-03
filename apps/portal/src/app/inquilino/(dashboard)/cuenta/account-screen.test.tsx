@@ -111,7 +111,7 @@ describe("RenterAccountScreen", () => {
     render(<RenterAccountScreen />)
 
     expect(
-      screen.getByRole("heading", { name: "$ 250.000,00" })
+      screen.getByRole("heading", { name: "$\u00a0250.000,00" })
     ).toBeInTheDocument()
     expect(screen.getByText("En mora · 5 días")).toBeInTheDocument()
     expect(screen.getByText(/Venció el 10\/10\/2026/)).toBeInTheDocument()

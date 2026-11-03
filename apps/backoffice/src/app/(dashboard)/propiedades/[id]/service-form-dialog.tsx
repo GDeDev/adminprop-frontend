@@ -103,7 +103,7 @@ export interface ServiceFormDialogProps {
 
 /**
  * Alta rápida y edición de un servicio (spec 5.1): bottom sheet en mobile,
- * con la fecha y la frecuencia que aparecen sólo al prender su interruptor.
+ * con la fecha y la frecuencia que aparecen solo al prender su interruptor.
  */
 export function ServiceFormDialog({
   propertyId,

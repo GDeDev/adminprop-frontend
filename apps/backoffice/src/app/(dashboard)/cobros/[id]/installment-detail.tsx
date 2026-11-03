@@ -292,7 +292,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
         <Section title="Cargos">
           {installment.charges.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Sin cargos: la cuota es sólo el alquiler.
+              Sin cargos: la cuota es solo el alquiler.
             </p>
           ) : (
             <ul className="flex flex-col divide-y text-sm">
@@ -427,7 +427,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
           title="¿Anular el cargo?"
           description={`"${dialog.charge.description}" por ${money(
             dialog.charge.amount
-          )} deja de sumar a la cuota. Sólo se puede si todavía no se le imputó ningún pago.`}
+          )} deja de sumar a la cuota. Solo se puede si todavía no se le imputó ningún pago.`}
           confirmLabel="Anular cargo"
           successMessage="Cargo anulado."
           errorMessage="No se pudo anular el cargo."

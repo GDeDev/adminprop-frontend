@@ -188,7 +188,7 @@ describe("TemplateEditor", () => {
     expect(test).toBeDisabled()
   })
 
-  it("restaurar sólo aparece en plantillas personalizadas", () => {
+  it("restaurar solo aparece en plantillas personalizadas", () => {
     const { rerender } = render(<TemplateEditor template={template} />)
     expect(
       screen.queryByRole("button", { name: /Restaurar original/ })

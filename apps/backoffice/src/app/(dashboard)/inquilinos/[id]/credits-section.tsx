@@ -174,7 +174,7 @@ export function RenterBillingSection({ renterId }: { renterId: string }) {
   )
 }
 
-/** Devolución de un saldo a favor (Micaela #6), con fecha y medio. Sólo admin. */
+/** Devolución de un saldo a favor (Micaela #6), con fecha y medio. Solo admin. */
 function RefundDialog({
   credit,
   open,

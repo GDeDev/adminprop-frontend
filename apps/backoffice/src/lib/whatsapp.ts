@@ -21,7 +21,7 @@ function stripMobile15(national: string): string {
 }
 
 /**
- * Deja un teléfono como número internacional de WhatsApp (sólo dígitos).
+ * Deja un teléfono como número internacional de WhatsApp (solo dígitos).
  * Sin código de país se asume argentino móvil: prefijo 549 (A-57). Devuelve
  * null si no queda un número de 10 dígitos nacionales.
  */

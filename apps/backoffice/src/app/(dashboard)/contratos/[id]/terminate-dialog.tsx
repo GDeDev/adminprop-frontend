@@ -73,7 +73,7 @@ export function TerminateDialog({
           <ResponsiveDialogTitle>Rescindir el contrato</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
             La propiedad vuelve a estar disponible y el inquilino queda libre.
-            La multa es el 10 % del alquiler que faltaba hasta el{" "}
+            La multa se calcula sobre el alquiler que faltaba hasta el{" "}
             {formatDate(contract.endDate)}, con el alquiler vigente.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
@@ -133,7 +133,7 @@ export function TerminateDialog({
               </dd>
               <dt className="text-muted-foreground">Alquiler futuro</dt>
               <dd className="tabular-nums">{money(preview.data.futureRent)}</dd>
-              <dt className="text-muted-foreground">Multa (10 %)</dt>
+              <dt className="text-muted-foreground">Multa</dt>
               <dd className="font-display text-lg font-semibold tabular-nums">
                 {money(preview.data.penalty)}
               </dd>

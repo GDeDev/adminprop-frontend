@@ -24,7 +24,7 @@ describe("formatPeriod", () => {
 })
 
 describe("isIsoDate", () => {
-  it("acepta sólo AAAA-MM-DD", () => {
+  it("acepta solo AAAA-MM-DD", () => {
     expect(isIsoDate("2026-03-01")).toBe(true)
     expect(isIsoDate("01/03/2026")).toBe(false)
     expect(isIsoDate("")).toBe(false)

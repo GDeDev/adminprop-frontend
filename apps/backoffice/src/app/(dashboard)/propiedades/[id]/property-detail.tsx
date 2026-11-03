@@ -359,7 +359,7 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
     const files = [...list].slice(0, remaining)
     if (list.length > remaining) {
       toast.warning(
-        `Sólo entran ${remaining} fotos más (máximo ${MAX_PHOTOS}).`
+        `Solo entran ${remaining} fotos más (máximo ${MAX_PHOTOS}).`
       )
     }
     try {

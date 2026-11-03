@@ -56,8 +56,8 @@ describe("contractStatusMeta", () => {
 
 describe("formatMoney", () => {
   it("formatea el string de la API en es-AR sin calcular nada", () => {
-    expect(formatMoney("480000.00", "ARS")).toBe("$ 480.000,00")
-    expect(formatMoney("700.50", "USD")).toBe("US$ 700,50")
+    expect(formatMoney("480000.00", "ARS")).toBe("$\u00a0480.000,00")
+    expect(formatMoney("700.50", "USD")).toBe("US$\u00a0700,50")
   })
 
   it("deja pasar lo que no es un número", () => {
@@ -180,7 +180,7 @@ describe("policyExpiryMeta", () => {
 })
 
 describe("documentProblem", () => {
-  it("sólo PDFs de hasta 10 MB", () => {
+  it("solo PDFs de hasta 10 MB", () => {
     expect(
       documentProblem(new File(["x"], "c.pdf", { type: "application/pdf" }))
     ).toBeNull()
