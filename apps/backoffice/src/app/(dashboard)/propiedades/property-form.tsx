@@ -27,12 +27,35 @@ import { cn } from "@adminprop/ui/lib/utils"
 import { LocationCascadeSelect } from "@/components/location-cascade-select"
 import { MasterDataSelect } from "@/components/master-data-select"
 import { OwnerSelect } from "@/components/owner-select"
-import { MAX_PHOTOS } from "@/lib/properties"
+import {
+  LISTING_LIMITS,
+  MAX_PHOTOS,
+  MAX_PUBLIC_DESCRIPTION,
+  OPERATION_LABELS,
+  numberToInput,
+  parseArea,
+  parseListingPrice,
+  parseWholeNumber,
+} from "@/lib/properties"
 import {
   useCreateProperty,
   useUpdateProperty,
   useUploadPropertyPhotos,
 } from "@/lib/properties-api"
+
+const countField = (max: number) =>
+  z
+    .string()
+    .refine(
+      (value) => parseWholeNumber(value, max).ok,
+      `Ingresá un número entero de 0 a ${max}.`
+    )
+const areaField = z
+  .string()
+  .refine(
+    (value) => parseArea(value).ok,
+    "Ingresá los m² con hasta 2 decimales."
+  )
 
 const schema = z.object({
   address: z.string().trim().min(1, "Ingresá la dirección.").max(200),
@@ -41,6 +64,21 @@ const schema = z.object({
   ownerId: z.string().nullable(),
   amenityIds: z.array(z.string()),
   notes: z.string().max(5000),
+  listingOperation: z.enum(["RENT", "SALE"]),
+  listingPrice: z
+    .string()
+    .refine(
+      (value) => parseListingPrice(value).ok,
+      "Ingresá un precio válido, por ejemplo 150000 o 150.000,50."
+    ),
+  listingCurrency: z.enum(["ARS", "USD"]),
+  publicDescription: z.string().max(MAX_PUBLIC_DESCRIPTION),
+  rooms: countField(LISTING_LIMITS.count.max),
+  bedrooms: countField(LISTING_LIMITS.count.max),
+  bathrooms: countField(LISTING_LIMITS.count.max),
+  totalAreaM2: areaField,
+  coveredAreaM2: areaField,
+  ageYears: countField(LISTING_LIMITS.ageYears.max),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -49,6 +87,21 @@ const STEPS = [
   { title: "Datos", fields: ["address", "locationId", "propertyTypeId"] },
   { title: "Propietario", fields: ["ownerId"] },
   { title: "Amenities", fields: ["amenityIds", "notes"] },
+  {
+    title: "Publicación",
+    fields: [
+      "listingOperation",
+      "listingPrice",
+      "listingCurrency",
+      "publicDescription",
+      "rooms",
+      "bedrooms",
+      "bathrooms",
+      "totalAreaM2",
+      "coveredAreaM2",
+      "ageYears",
+    ],
+  },
   { title: "Fotos", fields: [] },
 ] as const
 
@@ -67,6 +120,16 @@ const draftSchema = z
     ownerId: z.string().nullable(),
     amenityIds: z.array(z.string()),
     notes: z.string(),
+    listingOperation: z.enum(["RENT", "SALE"]),
+    listingPrice: z.string(),
+    listingCurrency: z.enum(["ARS", "USD"]),
+    publicDescription: z.string(),
+    rooms: z.string(),
+    bedrooms: z.string(),
+    bathrooms: z.string(),
+    totalAreaM2: z.string(),
+    coveredAreaM2: z.string(),
+    ageYears: z.string(),
   })
   .partial()
 
@@ -77,6 +140,46 @@ const EMPTY: FormValues = {
   ownerId: null,
   amenityIds: [],
   notes: "",
+  listingOperation: "RENT",
+  listingPrice: "",
+  listingCurrency: "ARS",
+  publicDescription: "",
+  rooms: "",
+  bedrooms: "",
+  bathrooms: "",
+  totalAreaM2: "",
+  coveredAreaM2: "",
+  ageYears: "",
+}
+
+/**
+ * Campos de publicación para la API. Al editar, un campo vacío se manda como
+ * `null` (así se borra); al crear, simplemente se omite.
+ */
+export function listingBody(data: FormValues, editing: boolean) {
+  const clear = editing ? null : undefined
+  const count = (input: string, max: number) => {
+    const parsed = parseWholeNumber(input, max)
+    return (parsed.ok ? parsed.value : null) ?? clear
+  }
+  const area = (input: string) => {
+    const parsed = parseArea(input)
+    return (parsed.ok ? parsed.value : null) ?? clear
+  }
+  const price = parseListingPrice(data.listingPrice)
+  const countMax = LISTING_LIMITS.count.max
+  return {
+    listingOperation: data.listingOperation,
+    listingPrice: (price.ok ? price.value : null) ?? clear,
+    listingCurrency: data.listingCurrency,
+    publicDescription: data.publicDescription.trim() || clear,
+    rooms: count(data.rooms, countMax),
+    bedrooms: count(data.bedrooms, countMax),
+    bathrooms: count(data.bathrooms, countMax),
+    totalAreaM2: area(data.totalAreaM2),
+    coveredAreaM2: area(data.coveredAreaM2),
+    ageYears: count(data.ageYears, LISTING_LIMITS.ageYears.max),
+  }
 }
 
 function readDraft(): FormValues | null {
@@ -99,7 +202,7 @@ function readDraft(): FormValues | null {
 export function PropertyForm({ property }: { property?: PropertyDetail }) {
   const router = useRouter()
   const editing = property !== undefined
-  const steps = editing ? STEPS.slice(0, 3) : STEPS
+  const steps = editing ? STEPS.slice(0, 4) : STEPS
   const [step, setStep] = React.useState(0)
   const [photos, setPhotos] = React.useState<File[]>([])
   const [error, setError] = React.useState<string | null>(null)
@@ -126,6 +229,16 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
           ownerId: property.ownerId,
           amenityIds: property.amenityIds,
           notes: property.notes ?? "",
+          listingOperation: property.listingOperation,
+          listingPrice: property.listingPrice ?? "",
+          listingCurrency: property.listingCurrency,
+          publicDescription: property.publicDescription ?? "",
+          rooms: numberToInput(property.rooms),
+          bedrooms: numberToInput(property.bedrooms),
+          bathrooms: numberToInput(property.bathrooms),
+          totalAreaM2: numberToInput(property.totalAreaM2),
+          coveredAreaM2: numberToInput(property.coveredAreaM2),
+          ageYears: numberToInput(property.ageYears),
         }
       : (initialDraft ?? EMPTY),
   })
@@ -165,6 +278,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
       ownerId: data.ownerId,
       amenityIds: data.amenityIds,
       notes: data.notes.trim() || null,
+      ...listingBody(data, editing),
     }
     try {
       const saved = editing
@@ -400,7 +514,11 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
           />
         </FieldGroup>
 
-        {step === 3 && !editing && (
+        <FieldGroup className={step === 3 ? "" : "hidden"}>
+          <ListingStep form={form} />
+        </FieldGroup>
+
+        {step === 4 && !editing && (
           <PhotoPicker files={photos} onChange={setPhotos} />
         )}
 
@@ -428,7 +546,174 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
   )
 }
 
-/** Paso 4: fotos con vista previa. Se suben al crear la propiedad. */
+type FormApi = ReturnType<typeof useForm<FormValues>>
+
+const COUNT_FIELDS = [
+  { name: "rooms", label: "Ambientes" },
+  { name: "bedrooms", label: "Dormitorios" },
+  { name: "bathrooms", label: "Baños" },
+] as const
+
+const AREA_FIELDS = [
+  { name: "totalAreaM2", label: "Superficie total (m²)" },
+  { name: "coveredAreaM2", label: "Superficie cubierta (m²)" },
+] as const
+
+/** Paso 4: operación, precio y características que ve el público. */
+function ListingStep({ form }: { form: FormApi }) {
+  return (
+    <>
+      <Controller
+        name="listingOperation"
+        control={form.control}
+        render={({ field }) => (
+          <Field>
+            <FieldLabel>Operación</FieldLabel>
+            <div
+              role="radiogroup"
+              aria-label="Operación"
+              className="grid grid-cols-2 gap-2"
+            >
+              {(["RENT", "SALE"] as const).map((operation) => (
+                <Button
+                  key={operation}
+                  type="button"
+                  role="radio"
+                  aria-checked={field.value === operation}
+                  variant={field.value === operation ? "default" : "outline"}
+                  className="min-h-11"
+                  onClick={() => field.onChange(operation)}
+                >
+                  {OPERATION_LABELS[operation]}
+                </Button>
+              ))}
+            </div>
+          </Field>
+        )}
+      />
+      <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
+        <Controller
+          name="listingPrice"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="property-price">Precio</FieldLabel>
+              <Input
+                {...field}
+                id="property-price"
+                inputMode="decimal"
+                placeholder="Consultar"
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldDescription>
+                Sin precio, el público ve «Consultar».
+              </FieldDescription>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="listingCurrency"
+          control={form.control}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor="property-currency">Moneda</FieldLabel>
+              <select
+                id="property-currency"
+                value={field.value}
+                onChange={(event) => field.onChange(event.target.value)}
+                className="h-11 rounded-md border bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:h-9"
+              >
+                <option value="ARS">ARS</option>
+                <option value="USD">USD</option>
+              </select>
+            </Field>
+          )}
+        />
+      </div>
+      <Controller
+        name="publicDescription"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor="property-public-description">
+              Descripción pública
+            </FieldLabel>
+            <Textarea {...field} id="property-public-description" rows={4} />
+            <FieldDescription>
+              Es el texto que ve el público en el portal y en el sitio web.
+            </FieldDescription>
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
+      <div className="grid gap-4 sm:grid-cols-3">
+        {COUNT_FIELDS.map(({ name, label }) => (
+          <Controller
+            key={name}
+            name={name}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`property-${name}`}>{label}</FieldLabel>
+                <Input
+                  {...field}
+                  id={`property-${name}`}
+                  inputMode="numeric"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        ))}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {AREA_FIELDS.map(({ name, label }) => (
+          <Controller
+            key={name}
+            name={name}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={`property-${name}`}>{label}</FieldLabel>
+                <Input
+                  {...field}
+                  id={`property-${name}`}
+                  inputMode="decimal"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        ))}
+        <Controller
+          name="ageYears"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="property-age">Antigüedad (años)</FieldLabel>
+              <Input
+                {...field}
+                id="property-age"
+                inputMode="numeric"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </div>
+    </>
+  )
+}
+
+/** Paso 5: fotos con vista previa. Se suben al crear la propiedad. */
 function PhotoPicker({
   files,
   onChange,

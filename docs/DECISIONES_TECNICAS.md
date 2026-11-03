@@ -555,3 +555,35 @@ Ni el formulario de propiedad ni `PropertyDetail` tienen hoy `listingPrice`/`lis
 ### DT-106 — Superficie, barra de rango y permisos
 
 La ficha no guarda superficie ni ambientes (A-69), así que el sheet siempre los ofrece (superficie con la aclaración de que sin ella la sugerencia es menos precisa; moneda: la de la propiedad, ARS o USD). La superficie se normaliza con `normalizeAmount` y se manda como string. La posición del sugerido en la barra (`markerPosition`) es sólo layout, calculada con `Number` y acotada a 0–100: ningún monto se calcula en pantalla. `GET /valuation/market-coverage` se pide al abrir el sheet; si `enoughData` es falso se avisa pero el botón «Calcular» sigue activo. No hay entrada nueva de menú: la tasación está disponible para administrador y empleado en la ficha, y la tarjeta «Datos de mercado» (estado por fuente) está en Configuración → Automatizaciones, que ya es sólo de administradores.
+
+### DT-107 — «Mi sitio web»: una copia local del borrador y un PUT con solo lo que cambió
+
+El editor guarda una copia local del `draft` (`null` mientras no se toca nada) y «Guardar borrador» manda `buildDraftPatch(guardado, local)`: `template` si cambió, los campos del tema que cambiaron (la API los mezcla campo a campo) y cada bloque de `content` tocado **entero** (la API reemplaza el bloque completo, D-158). Tras guardar se descarta la copia y se vuelve a leer lo que devolvió la API. La consulta de `/site/settings` no se refresca al volver a la pestaña para que el borrador local no se pise solo.
+
+### DT-108 — Errores 422: del `field` de la API al input, y el resto en un resumen
+
+`resolveFieldPath` lleva `content.faqs[2].answer` al propio input; si el `field` no es un input (`content.faqs`, `content.faqs[3]`, `content.sections[1].key`) cae en el bloque que lo contiene, y lo que no se reconoce va a un resumen arriba. Al llegar errores se abren los acordeones afectados y se cambia a la pestaña que corresponde; el error de un campo se borra al editarlo y los de una lista al agregar, quitar o mover (las posiciones cambian). Los problemas de «Publicar» (422) se listan en el diálogo y además se marcan en los campos.
+
+### DT-109 — Cambio de template: guarda lo pendiente y después restaura (o no) el tema
+
+El contrato dice «PUT template y, si acepta, POST reset-template con `keepContent: true`». Se implementó tal cual y, como el PUT sale con `buildDraftPatch`, **también guarda los cambios sin guardar** que hubiera (el diálogo lo avisa). Si se restaura el tema, lo editado en el tema local se pierde por diseño. La API corrige sola la `fontKey` si el template nuevo no la tiene (D-158).
+
+### DT-110 — Vista previa: iframe escalado, token renovado y recarga por guardado
+
+URL: `${NEXT_PUBLIC_SITES_URL ?? "http://localhost:3003"}/_s/${slug}?preview=${token}`; el slug sale de `GET /tenants/current/settings` (`useTenantSettings`). El iframe se monta al ancho real del dispositivo (375/768/1280) y se escala con `transform: scale()` según el ancho medido del panel. El token se pide de nuevo un minuto antes de `expiresAt` (`refetchInterval`); como el `src` cambia con él, el iframe se recarga una vez cada ~14 minutos (se prefirió a congelar el token en un efecto). Cada guardado cambia la `key` del iframe y lo recarga. El iframe lleva `sandbox` y `referrerPolicy="no-referrer"`. En pantallas de 1536 px o más el panel va al costado; debajo, en la pestaña «Vista previa». No hay CSP propia en el backoffice que bloquee el iframe; `apps/sites` tiene que permitir ser embebida desde el origen del backoffice (`frame-ancestors`), cosa que no se pudo verificar acá.
+
+### DT-111 — Aviso al salir con cambios: `beforeunload` y click en links internos
+
+El App Router no expone un evento «antes de navegar». Con cambios sin guardar se escucha `beforeunload` (cerrar o recargar) y, en captura, el click en cualquier `<a>` interno (menú, «Volver», etc.), que se frena y abre el diálogo «¿Salir sin guardar?». **No se puede frenar el botón «atrás» del navegador** ni un `router.push` hecho por otro componente.
+
+### DT-112 — Dominio propio: instrucciones genéricas; destino del CNAME por variable
+
+La spec pide «instrucciones DNS» pero el destino del CNAME depende del despliegue de `apps/sites` y no está en el contrato. Las instrucciones son pasos genéricos (CNAME de `www`, redirección del dominio pelado, demora de hasta 24 h) y el destino se muestra si existe `NEXT_PUBLIC_SITES_DNS_TARGET`; si no, dice que lo pasa el equipo de Adminprop. Guardar el dominio no verifica el DNS (A-127 del backend). Subdominio y dominio se guardan al instante con su propio botón y su propio `PUT` (`{ subdomain }` / `{ customDomain }`), fuera del borrador; los conflictos 409 se distinguen por `code` (`SUBDOMAIN_TAKEN`, `DOMAIN_TAKEN`). La disponibilidad se consulta con debounce de 400 ms y solo si el formato es válido.
+
+### DT-113 — Campos de publicación de la propiedad: paso propio del wizard y `null` para borrar
+
+El wizard suma el paso «Publicación» (operación con Alquiler por defecto, precio y moneda, descripción pública, ambientes, dormitorios, baños, superficie total y cubierta, antigüedad); el formulario no tenía precio, moneda ni descripción pública, así que se agregaron junto con los demás (la API ya los aceptaba). Rangos del backend: enteros 0–99, superficies 0–99.999.999 con hasta 2 decimales, antigüedad 0–500, precio `\d{1,12}(\.\d{1,2})?` (se acepta «150.000,50»); descripción hasta 2000. Vacío = no cargado: al crear se omite y al editar se manda `null` para borrarlo. Latitud y longitud no se muestran ni se mandan (la edición manda `UpdatePropertyDto` sin ellas, así que se conservan). `DT-105` queda cubierta en lo que pedía: ya existen precio y moneda en el formulario; «Usar este precio» de la tasación sigue siendo opcional y no se conectó.
+
+### DT-114 — Accordion en `packages/ui` y un componente nuevo de menú
+
+`Accordion` se agregó con el patrón de shadcn sobre `radix-ui` (disparador de 44 px, solo tokens). «Mi sitio web» es una entrada de menú solo para administradores (`visibleNavItems`; hasta ahora ninguna entrada se filtraba por rol), también dentro de «Más» en mobile. Las pantallas siguen comprobando el rol además de ocultar el menú.

@@ -38,7 +38,14 @@ import {
 } from "@adminprop/ui/components/responsive-dialog"
 
 import { AmenityIcon } from "@/components/amenity-icon"
-import { MANUAL_TRANSITIONS, MAX_PHOTOS, STATUS_META } from "@/lib/properties"
+import { formatMoney } from "@/lib/contracts"
+import {
+  MANUAL_TRANSITIONS,
+  MAX_PHOTOS,
+  OPERATION_LABELS,
+  STATUS_META,
+  listingFacts,
+} from "@/lib/properties"
 import {
   useChangePropertyStatus,
   useDeleteProperty,
@@ -132,6 +139,30 @@ function Detail({ property }: { property: PropertyDetail }) {
               <StatusBadge status={property.status} />
             </dd>
           </dl>
+          <h3 className="mt-4 mb-2 text-xs font-medium text-muted-foreground">
+            Publicación
+          </h3>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-muted-foreground">Operación</dt>
+            <dd>{OPERATION_LABELS[property.listingOperation]}</dd>
+            <dt className="text-muted-foreground">Precio</dt>
+            <dd>
+              {property.listingPrice
+                ? formatMoney(property.listingPrice, property.listingCurrency)
+                : "Consultar"}
+            </dd>
+            {listingFacts(property).map(([label, value]) => (
+              <React.Fragment key={label}>
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd>{value}</dd>
+              </React.Fragment>
+            ))}
+          </dl>
+          {property.publicDescription && (
+            <p className="mt-3 text-sm whitespace-pre-line">
+              {property.publicDescription}
+            </p>
+          )}
           {property.notes && (
             <div className="mt-4 rounded-lg bg-muted p-3 text-sm whitespace-pre-line">
               <p className="mb-1 text-xs font-medium text-muted-foreground">
