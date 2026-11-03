@@ -68,7 +68,8 @@ type StatusFilter = JobExecutionStatus | "ALL"
 /** Configuración → Automatizaciones (rediseño Fase 13, sección 6). Sólo admin. */
 export function AutomationsScreen() {
   const { user } = useSession()
-  const jobs = useJobs()
+  // Un empleado no consulta lo que la API le va a rechazar con 403.
+  const jobs = useJobs(user?.role === "ADMIN")
   const [running, setRunning] = React.useState<Job | null>(null)
 
   if (user && user.role !== "ADMIN") {

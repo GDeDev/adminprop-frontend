@@ -29,9 +29,10 @@ async function unwrap<T>(
   return (await request).data.data
 }
 
-export function useJobs() {
+export function useJobs(enabled = true) {
   return useQuery({
     queryKey: [...automationsKey, "jobs"],
+    enabled,
     queryFn: () => unwrap<Job[]>(apiClient.get("/automations/jobs")),
     // Una ejecución en curso cambia de estado sola: se refresca cada medio minuto.
     refetchInterval: 30_000,

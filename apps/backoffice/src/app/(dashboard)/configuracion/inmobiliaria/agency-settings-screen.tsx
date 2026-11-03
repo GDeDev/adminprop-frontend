@@ -77,7 +77,7 @@ const TEXT_FIELDS: {
 /** Configuración → Inmobiliaria (rediseño Fase 15, sección 5). Sólo administradores. */
 export function AgencySettingsScreen() {
   const { user } = useSession()
-  const settings = useTenantSettings()
+  const settings = useTenantSettings(user?.role === "ADMIN")
 
   if (user?.role !== "ADMIN") {
     return (

@@ -19,7 +19,13 @@ const inOneWeek = () => Math.floor(Date.now() / 1000) + 7 * 24 * 3600
 
 function request(
   path: string,
-  init: { method: string; body?: unknown; cookie?: string; origin?: string }
+  init: {
+    method: string
+    body?: unknown
+    cookie?: string
+    origin?: string
+    headers?: Record<string, string>
+  }
 ) {
   return new NextRequest(`${ORIGIN}${path}`, {
     method: init.method,
@@ -27,6 +33,7 @@ function request(
       origin: init.origin ?? ORIGIN,
       ...(init.cookie ? { cookie: init.cookie } : {}),
       "content-type": "application/json",
+      ...init.headers,
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   })
@@ -106,6 +113,71 @@ describe("POST /api/session (guardar la sesión del login)", () => {
 
     expect(response.status).toBe(403)
     expect(response.cookies.get("bo_rt")).toBeUndefined()
+  })
+
+  describe("detrás de un proxy reverso", () => {
+    const body = { accessToken: "a", refreshToken: "r" }
+    const PUBLIC = "https://app.ejemplo.com"
+
+    it("acepta el origen público que declara el proxy (X-Forwarded-*)", async () => {
+      fetchMock.mockResolvedValue(apiResponds(200, {}))
+      const response = await routes.start(
+        request("/api/session", {
+          method: "POST",
+          origin: PUBLIC,
+          headers: {
+            "x-forwarded-host": "app.ejemplo.com",
+            "x-forwarded-proto": "https",
+          },
+          body,
+        })
+      )
+      expect(response.status).toBe(200)
+    })
+
+    it("sigue rechazando un Origin ajeno aunque haya X-Forwarded-*", async () => {
+      const response = await routes.start(
+        request("/api/session", {
+          method: "POST",
+          origin: "https://evil.example",
+          headers: {
+            "x-forwarded-host": "app.ejemplo.com",
+            "x-forwarded-proto": "https",
+          },
+          body,
+        })
+      )
+      expect(response.status).toBe(403)
+    })
+
+    it("acepta los orígenes configurados y descarta valores inválidos", async () => {
+      fetchMock.mockResolvedValue(apiResponds(200, {}))
+      const configured = createSessionRoutes({
+        cookiePrefix: "bo",
+        apiUrl: API,
+        allowedOrigins: [PUBLIC, "no-es-una-url", "javascript:alert(1)"],
+      })
+      const ok = await configured.start(
+        request("/api/session", { method: "POST", origin: PUBLIC, body })
+      )
+      expect(ok.status).toBe(200)
+
+      const other = await configured.start(
+        request("/api/session", {
+          method: "POST",
+          origin: "https://evil.example",
+          body,
+        })
+      )
+      expect(other.status).toBe(403)
+    })
+
+    it("sin Origin (o con Origin null) se rechaza", async () => {
+      const response = await routes.start(
+        request("/api/session", { method: "POST", origin: "null", body })
+      )
+      expect(response.status).toBe(403)
+    })
   })
 
   it("rechaza un cuerpo sin tokens", async () => {

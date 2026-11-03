@@ -19,9 +19,10 @@ async function unwrap<T>(
 }
 
 /** Datos de la inmobiliaria para los PDF y la marca (`GET /tenants/current/settings`, admin). */
-export function useTenantSettings() {
+export function useTenantSettings(enabled = true) {
   return useQuery({
     queryKey: settingsKey,
+    enabled,
     queryFn: () =>
       unwrap<TenantSettings>(apiClient.get("/tenants/current/settings")),
   })

@@ -34,6 +34,14 @@ export interface SessionRouteOptions {
    * portal la toma de su slug.
    */
   storeBranding?: boolean
+  /**
+   * Orígenes públicos de la app (`https://app.ejemplo.com`) que se aceptan en
+   * el `Origin` de las mutaciones de sesión, además del que ve Next. Detrás de
+   * un proxy que termina TLS o reescribe el `Host`, Next ve `http://interno:3000`
+   * y el navegador manda `https://app.ejemplo.com`. Por defecto sale de la
+   * variable opcional `APP_ORIGINS` (separados por coma).
+   */
+  allowedOrigins?: string[]
 }
 
 /** Lo que recibe `POST /api/session` justo después de un login exitoso. */
@@ -51,6 +59,9 @@ export interface RefreshedSession {
 const API_TIMEOUT_MS = 10_000
 
 export function createSessionRoutes(options: SessionRouteOptions) {
+  const allowedOrigins = normalizeOrigins(
+    options.allowedOrigins ?? parseOriginList(process.env.APP_ORIGINS)
+  )
   const refreshName = refreshCookieName(options.cookiePrefix)
   const brandingName = brandingCookieName(options.cookiePrefix)
 
@@ -74,7 +85,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
 
   /** `POST /api/session`: guarda el refresh token del login recién hecho. */
   async function start(request: NextRequest): Promise<NextResponse> {
-    const rejected = rejectCrossSite(request)
+    const rejected = rejectCrossSite(request, allowedOrigins)
     if (rejected) return rejected
 
     const body = (await request.json().catch(() => null)) as unknown
@@ -111,7 +122,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
 
   /** `POST /api/session/refresh`: rota el refresh token y devuelve un access token. */
   async function refresh(request: NextRequest): Promise<NextResponse> {
-    const rejected = rejectCrossSite(request)
+    const rejected = rejectCrossSite(request, allowedOrigins)
     if (rejected) return rejected
 
     const refreshToken = request.cookies.get(refreshName)?.value
@@ -158,7 +169,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
 
   /** `DELETE /api/session`: revoca el refresh token en la API y borra las cookies. */
   async function end(request: NextRequest): Promise<NextResponse> {
-    const rejected = rejectCrossSite(request)
+    const rejected = rejectCrossSite(request, allowedOrigins)
     if (rejected) return rejected
 
     const refreshToken = request.cookies.get(refreshName)?.value
@@ -182,10 +193,63 @@ export function createSessionRoutes(options: SessionRouteOptions) {
  * podría, con un formulario, guardar su propia sesión en el navegador de la
  * víctima (login CSRF). Los navegadores mandan `Origin` en todo POST y DELETE.
  */
-function rejectCrossSite(request: NextRequest): NextResponse | null {
+function rejectCrossSite(
+  request: NextRequest,
+  allowedOrigins: string[]
+): NextResponse | null {
   const origin = request.headers.get("origin")
-  if (origin && origin === request.nextUrl.origin) return null
+  if (origin && requestOrigins(request, allowedOrigins).includes(origin)) {
+    return null
+  }
   return error(403, "FORBIDDEN_ORIGIN", "Origen no permitido")
+}
+
+/**
+ * Orígenes que se consideran "la propia app": el que ve Next, el que declara el
+ * proxy (`X-Forwarded-Host`/`-Proto`; un sitio ajeno no puede fijar headers en
+ * el navegador de la víctima) y los configurados a mano.
+ */
+function requestOrigins(
+  request: NextRequest,
+  allowedOrigins: string[]
+): string[] {
+  const origins = [request.nextUrl.origin, ...allowedOrigins]
+  const host = firstValue(request.headers.get("x-forwarded-host"))
+  if (host) {
+    const proto =
+      firstValue(request.headers.get("x-forwarded-proto")) ??
+      request.nextUrl.protocol.replace(":", "")
+    origins.push(...normalizeOrigins([`${proto}://${host}`]))
+  }
+  return origins
+}
+
+function firstValue(header: string | null): string | null {
+  const value = header?.split(",")[0]?.trim()
+  return value ? value : null
+}
+
+function parseOriginList(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+/** Deja sólo `esquema://host[:puerto]` de http(s); descarta lo que no parsea. */
+function normalizeOrigins(values: string[]): string[] {
+  const origins: string[] = []
+  for (const value of values) {
+    try {
+      const url = new URL(value)
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        origins.push(url.origin)
+      }
+    } catch {
+      // Valor mal escrito: se ignora (nunca ensancha lo permitido).
+    }
+  }
+  return origins
 }
 
 function isStartSessionBody(body: unknown): body is StartSessionBody {
