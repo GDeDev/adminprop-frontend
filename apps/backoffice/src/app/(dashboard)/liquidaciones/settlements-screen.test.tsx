@@ -66,6 +66,7 @@ function makeSettlement(
 ): SettlementSummary {
   return {
     id: "s1",
+    pdfUrl: null,
     period: "2026-10",
     sequence: 1,
     status: "PENDING",
@@ -129,6 +130,7 @@ describe("SettlementsScreen", () => {
     statements = [
       {
         id: "st1",
+        pdfUrl: null,
         owner: { id: "o1", fullName: "Juan Pérez" },
         period: "2026-10",
         status: "CLOSED",

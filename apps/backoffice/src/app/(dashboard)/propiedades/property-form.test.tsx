@@ -130,6 +130,9 @@ describe("PropertyForm (alta)", () => {
       ownerId: null,
       amenityIds: ["a1"],
       notes: null,
+      listingPrice: null,
+      listingCurrency: "ARS",
+      publicDescription: null,
     })
     expect(upload).toHaveBeenCalledWith({ id: "p1", files: [photo] })
     // El borrador se descarta al guardar.

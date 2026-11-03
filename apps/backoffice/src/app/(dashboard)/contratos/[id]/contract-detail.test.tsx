@@ -21,6 +21,7 @@ const previewHook = vi.fn()
 function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
   return {
     id: "c1",
+    terminationPdfUrl: null,
     property: { id: "p1", address: "Calle 7 1234" },
     owner: { id: "o1", fullName: "María Fernández" },
     renter: { id: "r1", fullName: "Lucía Gómez" },

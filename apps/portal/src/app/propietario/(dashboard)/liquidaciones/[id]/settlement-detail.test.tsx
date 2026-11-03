@@ -34,6 +34,7 @@ describe("OwnerSettlementDetailScreen", () => {
       period: "2026-10",
       sequence: 1,
       status: "TRANSFERRED",
+      pdfUrl: null,
       contract: { id: "c1" },
       property: { id: "p1", address: "Calle 1 100" },
       owner: { id: "o1", fullName: "Juan Pérez" },

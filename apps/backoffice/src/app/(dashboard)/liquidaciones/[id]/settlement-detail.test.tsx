@@ -43,6 +43,8 @@ function makeSettlement(
 ): SettlementDetail {
   return {
     id: "s1",
+    pdfUrl: null,
+    acknowledgedAt: null,
     period: "2026-10",
     sequence: 1,
     status: "PENDING",

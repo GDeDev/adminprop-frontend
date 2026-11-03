@@ -43,6 +43,9 @@ vi.mock("./publication-section", () => ({ PublicationSection: () => null }))
 function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
   return {
     id: "p1",
+    listingPrice: null,
+    listingCurrency: "ARS",
+    publicDescription: null,
     address: "Calle 7 1234",
     status: "AVAILABLE",
     ownerId: null,

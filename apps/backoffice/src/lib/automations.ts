@@ -40,6 +40,7 @@ export const ALERT_TYPE_LABELS: Record<AlertType, string> = {
   JOB_FAILED: "Automatización fallida",
   NOTIFICATION_FAILED: "Notificación no enviada",
   EMAIL_BOUNCED: "Email rebotado",
+  PUBLIC_INQUIRY: "Consulta del portal",
 }
 
 export type AlertIconKind = "delivery-failed" | "email-bounced" | "default"
