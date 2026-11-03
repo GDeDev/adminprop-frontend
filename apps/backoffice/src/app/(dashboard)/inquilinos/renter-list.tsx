@@ -8,15 +8,9 @@ import { apiErrorMessage } from "@adminprop/session/client"
 import type { RenterArrears, RenterSummary } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@adminprop/ui/components/select"
 import {
   Table,
   TableBody,
@@ -68,7 +62,7 @@ export function RenterList() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+      <div className="grid gap-3">
         <div className="relative">
           <Search
             aria-hidden
@@ -83,34 +77,21 @@ export function RenterList() {
             className="pl-9"
           />
         </div>
-        {/* El filtro por estado de pago sigue sin efecto en la API (D-46):
-            el badge ya es real (/billing/arrears), el filtro llega con el
-            listado de inquilinos con deuda de la Fase 19. */}
-        <Select value="ALL" disabled>
-          <SelectTrigger
-            className="w-full sm:w-52"
-            aria-label="Filtrar por estado de pago (pronto)"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Estado de pago: todos</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Filtros por estado de pago y por propiedad: la API los valida pero
+            todavía no filtra (RentersController, D-46 / D-51). Se agregan
+            cuando el backend los resuelva; no se deja un control muerto. */}
       </div>
 
       {query.isPending ? (
         <PageSkeleton cards={3} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los inquilinos"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : renters.length === 0 ? (
         <EmptyState
@@ -133,7 +114,7 @@ export function RenterList() {
         />
       ) : (
         <>
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {renters.map((renter) => (
               <li key={renter.id}>
                 <RenterCard

@@ -8,6 +8,7 @@ import { apiErrorMessage } from "@adminprop/session/client"
 import type { PaymentListItem } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
   Table,
@@ -49,12 +50,10 @@ export function PendingPayments() {
   if (query.isPending) return <PageSkeleton cards={2} />
   if (query.isError) {
     return (
-      <EmptyState
+      <ErrorState
         title="No se pudieron cargar los pagos"
         description={apiErrorMessage(query.error, "Probá de nuevo en un rato.")}
-        action={
-          <Button onClick={() => void query.refetch()}>Reintentar</Button>
-        }
+        onRetry={() => void query.refetch()}
       />
     )
   }
@@ -70,7 +69,7 @@ export function PendingPayments() {
 
   return (
     <div className="flex flex-col gap-3">
-      <ul className="flex flex-col gap-3 md:hidden">
+      <ul className="flex flex-col gap-3 lg:hidden">
         {payments.map((payment) => (
           <li
             key={payment.id}
@@ -111,7 +110,7 @@ export function PendingPayments() {
           </li>
         ))}
       </ul>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <Table>
           <TableHeader>
             <TableRow>

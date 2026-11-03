@@ -11,7 +11,6 @@ import {
   Pencil,
   Trash2,
   UserRound,
-  Wallet,
   X,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -205,11 +204,6 @@ function Detail({ property }: { property: PropertyDetail }) {
           )}
         </Section>
         <ServicesSection propertyId={property.id} query={services} />
-        <Placeholder
-          icon={Wallet}
-          title="Historial de pagos"
-          text="Aparece cuando existan contratos y cobros."
-        />
       </div>
 
       <AppraisalSection
@@ -235,27 +229,6 @@ function Section({
     <section className="rounded-xl border bg-card p-4">
       <h2 className="mb-3 font-display text-lg font-semibold">{title}</h2>
       {children}
-    </section>
-  )
-}
-
-/** Espacio reservado para lo que llega en otras fases (spec 5.2). */
-function Placeholder({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: typeof UserRound
-  title: string
-  text: string
-}) {
-  return (
-    <section className="flex items-start gap-3 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-      <Icon aria-hidden className="mt-0.5 size-5 shrink-0" />
-      <div>
-        <h2 className="font-medium text-foreground">{title}</h2>
-        <p>{text}</p>
-      </div>
     </section>
   )
 }

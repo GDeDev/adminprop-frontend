@@ -1,8 +1,7 @@
 "use client"
 
 import { apiErrorMessage } from "@adminprop/session/client"
-import { Button } from "@adminprop/ui/components/button"
-import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 
 import { AgencyContact } from "@/components/agency-contact"
@@ -13,10 +12,10 @@ export function RenterContactScreen() {
   if (me.isPending) return <PageSkeleton cards={1} />
   if (me.isError) {
     return (
-      <EmptyState
+      <ErrorState
         title="No pudimos cargar el contacto"
         description={apiErrorMessage(me.error, "Probá de nuevo en un rato.")}
-        action={<Button onClick={() => void me.refetch()}>Reintentar</Button>}
+        onRetry={() => void me.refetch()}
       />
     )
   }

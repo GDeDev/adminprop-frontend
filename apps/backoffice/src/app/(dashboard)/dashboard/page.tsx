@@ -2,11 +2,10 @@ import type { Metadata } from "next"
 
 import { DashboardOverview } from "./dashboard-overview"
 import { InternalAlerts } from "./internal-alerts"
-import { MockDataCheck } from "./mock-data-check"
 import { OverdueServices } from "./overdue-services"
 import { UnattendedInquiries } from "./unattended-inquiries"
 
-export const metadata: Metadata = { title: "Dashboard" }
+export const metadata: Metadata = { title: "Inicio" }
 
 export default function Page() {
   return (
@@ -18,7 +17,6 @@ export default function Page() {
       <UnattendedInquiries />
       <InternalAlerts />
       <OverdueServices />
-      <MockDataCheck />
     </div>
   )
 }

@@ -24,6 +24,7 @@ export function ResultStep({ batch }: { batch: ImportBatchDetail }) {
   const [retryJobId, setRetryJobId] = React.useState<string | null>(null)
   const retryStatus = useJobStatus(retryJobId)
   const [reporting, setReporting] = React.useState(false)
+  const [reviewOnly, setReviewOnly] = React.useState(false)
   const { counts, assets } = batch
 
   const retrying =
@@ -118,10 +119,15 @@ export function ResultStep({ batch }: { batch: ImportBatchDetail }) {
 
       <div className="flex flex-col gap-2 sm:flex-row">
         {counts.needsReview > 0 && (
-          <Button asChild>
-            <Link href="/propiedades?needsReview=true">
-              Ver propiedades a revisar ({counts.needsReview})
-            </Link>
+          <Button
+            onClick={() => {
+              setReviewOnly(true)
+              document
+                .getElementById("rows-title")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }}
+          >
+            Ver filas a revisar ({counts.needsReview})
           </Button>
         )}
         <Button
@@ -146,9 +152,11 @@ export function ResultStep({ batch }: { batch: ImportBatchDetail }) {
           Detalle por fila
         </h2>
         <RowsList
+          key={reviewOnly ? "review" : "all"}
           batchId={batch.id}
           editable={false}
           defaultResolution="SKIP"
+          initialFilters={reviewOnly ? { needsReview: true } : undefined}
         />
       </section>
     </div>

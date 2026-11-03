@@ -255,7 +255,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
         </Alert>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Desglose">
           <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 text-sm">
             <Row label="Alquiler cobrado" value={money(settlement.rentTotal)} />
@@ -439,7 +439,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
 
         <Section
           title="Transferencias al propietario"
-          className="md:col-span-2"
+          className="lg:col-span-2"
         >
           {settlement.transfers.length === 0 ? (
             <p className="text-sm text-muted-foreground">

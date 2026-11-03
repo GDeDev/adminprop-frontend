@@ -14,6 +14,7 @@ import type {
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -109,18 +110,16 @@ export function AutomationsScreen() {
       {jobs.isPending ? (
         <PageSkeleton cards={3} />
       ) : jobs.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar las automatizaciones"
           description={apiErrorMessage(
             jobs.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void jobs.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void jobs.refetch()}
         />
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {jobs.data.map((job) => (
             <li key={job.name}>
               <JobCard job={job} onRun={() => setRunning(job)} />

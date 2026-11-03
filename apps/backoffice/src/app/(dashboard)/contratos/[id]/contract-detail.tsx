@@ -153,7 +153,7 @@ function Detail({ contract }: { contract: ContractDetail }) {
 
       <Timeline contract={contract} today={today} />
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Section title="Partes">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Propiedad</dt>
@@ -314,11 +314,11 @@ function Detail({ contract }: { contract: ContractDetail }) {
           </Section>
         )}
 
-        <Section title="Inventario del inmueble" className="md:col-span-2">
+        <Section title="Inventario del inmueble" className="lg:col-span-2">
           <InventorySection contractId={contract.id} />
         </Section>
 
-        <Section title="Historial de aumentos" className="md:col-span-2">
+        <Section title="Historial de aumentos" className="lg:col-span-2">
           <RentHistory contract={contract} />
         </Section>
 
@@ -460,7 +460,7 @@ function RentHistory({ contract }: { contract: ContractDetail }) {
   }
   return (
     <>
-      <ul className="flex flex-col gap-2 md:hidden">
+      <ul className="flex flex-col gap-2 lg:hidden">
         {contract.rentUpdates.map((update) => (
           <li key={update.id} className="rounded-lg border p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
@@ -485,7 +485,7 @@ function RentHistory({ contract }: { contract: ContractDetail }) {
           </li>
         ))}
       </ul>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <Table>
           <TableHeader>
             <TableRow>

@@ -6,8 +6,8 @@ import { ChevronRight } from "lucide-react"
 import { apiErrorMessage } from "@adminprop/session/client"
 import type { PortalOwnerProperty } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
-import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 
 import {
@@ -26,15 +26,13 @@ export function OwnerPropertiesScreen() {
   if (me.isPending || query.isPending) return <PageSkeleton cards={3} />
   if (me.isError || query.isError) {
     return (
-      <EmptyState
+      <ErrorState
         title="No pudimos cargar tus propiedades"
         description={apiErrorMessage(
           me.error ?? query.error,
           "Probá de nuevo en un rato."
         )}
-        action={
-          <Button onClick={() => void query.refetch()}>Reintentar</Button>
-        }
+        onRetry={() => void query.refetch()}
       />
     )
   }

@@ -12,6 +12,7 @@ import type {
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@adminprop/ui/components/tabs"
 
@@ -62,12 +63,10 @@ function SettlementList() {
   if (query.isPending) return <PageSkeleton cards={3} />
   if (query.isError) {
     return (
-      <EmptyState
+      <ErrorState
         title="No pudimos cargar tus liquidaciones"
         description={apiErrorMessage(query.error, "Probá de nuevo en un rato.")}
-        action={
-          <Button onClick={() => void query.refetch()}>Reintentar</Button>
-        }
+        onRetry={() => void query.refetch()}
       />
     )
   }
@@ -139,12 +138,10 @@ function StatementList() {
   if (query.isPending) return <PageSkeleton cards={2} />
   if (query.isError) {
     return (
-      <EmptyState
+      <ErrorState
         title="No pudimos cargar los resúmenes"
         description={apiErrorMessage(query.error, "Probá de nuevo en un rato.")}
-        action={
-          <Button onClick={() => void query.refetch()}>Reintentar</Button>
-        }
+        onRetry={() => void query.refetch()}
       />
     )
   }

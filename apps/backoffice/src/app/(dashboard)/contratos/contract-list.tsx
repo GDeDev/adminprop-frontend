@@ -9,6 +9,7 @@ import type { ContractStatus, ContractSummary } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Label } from "@adminprop/ui/components/label"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -123,15 +124,13 @@ export function ContractList() {
       {query.isPending ? (
         <PageSkeleton cards={3} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los contratos"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : contracts.length === 0 ? (
         <EmptyState
@@ -156,7 +155,7 @@ export function ContractList() {
         />
       ) : (
         <>
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {contracts.map((contract) => (
               <li key={contract.id}>
                 <ContractCard contract={contract} />

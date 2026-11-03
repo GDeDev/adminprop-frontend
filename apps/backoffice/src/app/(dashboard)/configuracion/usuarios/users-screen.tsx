@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@adminprop/ui/components/dropdown-menu"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
   Select,
@@ -183,15 +184,13 @@ function UsersManager({ meId }: { meId: string }) {
       {users.isPending ? (
         <PageSkeleton cards={2} />
       ) : users.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los usuarios"
           description={apiErrorMessage(
             users.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void users.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void users.refetch()}
         />
       ) : users.data.data.length === 0 ? (
         <EmptyState
@@ -201,7 +200,7 @@ function UsersManager({ meId }: { meId: string }) {
       ) : (
         <>
           {/* Mobile: tarjetas. Desktop: tabla. */}
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {users.data.data.map((user) => (
               <li key={user.id} className="rounded-xl border bg-card p-4">
                 <div className="flex items-start justify-between gap-3">

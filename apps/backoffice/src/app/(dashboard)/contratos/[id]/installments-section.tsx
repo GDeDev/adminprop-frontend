@@ -36,7 +36,7 @@ export function InstallmentsSection({
 
   return (
     <section
-      className="rounded-xl border bg-card p-4 md:col-span-2"
+      className="rounded-xl border bg-card p-4 lg:col-span-2"
       aria-labelledby="contract-installments-title"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -65,7 +65,7 @@ export function InstallmentsSection({
         </p>
       ) : (
         <>
-          <ul className="flex flex-col divide-y text-sm md:hidden">
+          <ul className="flex flex-col divide-y text-sm lg:hidden">
             {query.data.data.map((installment) => (
               <li key={installment.id} className="flex flex-col gap-1 py-2">
                 <div className="flex items-center justify-between gap-2">
@@ -85,7 +85,7 @@ export function InstallmentsSection({
               </li>
             ))}
           </ul>
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <Table>
               <TableHeader>
                 <TableRow>
