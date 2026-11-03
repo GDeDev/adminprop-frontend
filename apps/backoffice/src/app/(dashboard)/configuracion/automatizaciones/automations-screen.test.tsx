@@ -17,6 +17,7 @@ vi.mock("@adminprop/session/client", async (importOriginal) => {
   return { ...actual, useSession: () => ({ user: { id: "u1", role } }) }
 })
 
+vi.mock("./market-status-card", () => ({ MarketStatusCard: () => null }))
 vi.mock("@/lib/automations-api", () => ({
   useJobs: () => ({ isPending: false, isError: false, data: jobs }),
   useInfiniteExecutions: () => ({

@@ -54,6 +54,8 @@ import {
 } from "@/lib/automations-api"
 import { currentPeriod } from "@/lib/billing"
 
+import { MarketStatusCard } from "./market-status-card"
+
 const PERIOD = /^\d{4}-(0[1-9]|1[0-2])$/
 /** Los jobs que aceptan un mes al correrlos a mano. */
 const PERIOD_JOBS = new Set([
@@ -126,6 +128,8 @@ export function AutomationsScreen() {
           ))}
         </ul>
       )}
+
+      <MarketStatusCard />
 
       <ExecutionHistory jobs={jobs.data ?? []} />
 
