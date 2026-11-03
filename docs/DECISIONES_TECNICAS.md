@@ -503,3 +503,19 @@ Los interruptores de Eventos y canales y de Mis notificaciones guardan en el mom
 ### DT-93 — Campana y botones de WhatsApp
 
 `NOTIFICATION_FAILED` y `EMAIL_BOUNCED` se suman a los tipos de aviso (`AlertType`) con ícono y color de error propios, sin tocar el tipo generado. El botón de WhatsApp (ficha de inquilino y de cuota) abre un menú con las plantillas elegibles y rellena `{{variables}}` en el cliente (monto ya formateado, sin calcular dinero); `agencyName` sale de un contexto con el nombre de la inmobiliaria. Sin teléfono utilizable no se muestra; si las plantillas no cargan queda el link directo.
+
+### DT-94 — Contrato de la Fase 21 escrito a mano
+
+Los DTOs de la migración salen de `REDISENO_FASE_21.md` (secciones 5 y 6) y viven en `shared-types/src/migration.ts` hasta regenerar desde el OpenAPI. Se agregaron `ImportMastersCount`, `ImportRowError`, `ImportRowConflict`, `ImportEntityCounts` y `RetryAssetsResult` para nombrar sub-objetos que el rediseño describe en línea. Rutas, nombres y campos son exactamente los del rediseño.
+
+### DT-95 — Cada lote es una ruta y el paso se deduce de su estado
+
+El flujo de cinco pasos no guarda estado propio: `/configuracion/migracion/[id]` consulta el lote (cada 2 s mientras está `ANALYZING` o `IMPORTING`) y muestra el paso que corresponde (`batchPhase`): progreso, revisión, progreso de importación o resultado. Así se puede cerrar la pestaña y retomar desde el historial. El `jobId` que devuelve el 202 viaja en `?job=` sólo para mostrar el avance con `useJobStatus`; sin él (lote reabierto) el panel muestra un avance indeterminado y la transición la marca el estado del lote. "Confirmar" (paso 4) es el diálogo de la revisión. La confirmación es imposible de saltear: el botón depende de `canConfirm` y la confirmación sólo existe desde `READY`.
+
+### DT-96 — Revisión: cambios por fila al instante y resolución por defecto en el cliente
+
+Excluir una fila o elegir su resolución (`PATCH /rows/:rowId`) se guarda en el momento; la resolución por defecto del lote (Saltear / Completar vacíos) es un estado del cliente que se manda como `defaultConflictResolution` al confirmar, y las filas sin resolución propia la muestran. Las filas `ERROR` no se pueden excluir (nunca se importan) y `excludeRowIds` no se manda: la exclusión ya está en el servidor. El resumen del diálogo ("Se crearán 2 propietarios y 3 propiedades") sale de `counts.byEntity[*].valid` y supone que el backend no cuenta las excluidas como `valid`.
+
+### DT-97 — Descargas por blob, fotos y propiedades a revisar
+
+La plantilla y el reporte `.xlsx` se bajan con `responseType: "blob"` (mismo patrón que los reportes) para mandar el token. "Reintentar fotos" lanza `assets/retry` y muestra su job. "Ver propiedades a revisar" enlaza a `/propiedades?needsReview=true`; el listado de propiedades todavía no lee ese filtro (queda para cuando el backend lo exponga).
