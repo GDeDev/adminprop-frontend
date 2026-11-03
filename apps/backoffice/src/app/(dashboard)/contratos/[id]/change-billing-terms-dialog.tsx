@@ -276,7 +276,7 @@ export function ChangeBillingTermsDialog({
 
 /**
  * Los campos de los términos, compartidos con el paso "Condiciones" del
- * wizard de contratos. El formulario que los usa tiene más campos; acá sólo
+ * wizard de contratos. El formulario que los usa tiene más campos; acá solo
  * importan los de `billingTermsSchema`.
  */
 export function BillingTermsFields<T extends BillingTermsValues>({

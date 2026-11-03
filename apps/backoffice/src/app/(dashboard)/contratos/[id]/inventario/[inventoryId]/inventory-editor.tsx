@@ -65,7 +65,7 @@ function toDraft(item: InventoryItem): DraftItem {
 /**
  * Checklist guiado por categoría (spec Fase 25, 5.1): estado, observaciones y
  * fotos de cada ítem, pensado para el celular. Un inventario confirmado es
- * de sólo lectura; para corregirlo se crea uno nuevo con motivo.
+ * de solo lectura; para corregirlo se crea uno nuevo con motivo.
  */
 export function InventoryEditor({
   contractId,

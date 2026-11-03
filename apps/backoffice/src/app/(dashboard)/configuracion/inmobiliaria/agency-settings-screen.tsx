@@ -61,7 +61,7 @@ const TEXT_FIELDS: {
   {
     key: "whatsapp",
     label: "WhatsApp",
-    hint: "Sólo dígitos con código de país, ej. 5491155551234. Lo ven inquilinos y propietarios en el portal.",
+    hint: "Solo dígitos con código de país, ej. 5491155551234. Lo ven inquilinos y propietarios en el portal.",
   },
   { key: "bankAccountHolder", label: "Titular de la cuenta" },
   { key: "bankName", label: "Banco" },
@@ -75,7 +75,7 @@ const TEXT_FIELDS: {
   },
 ]
 
-/** Configuración → Inmobiliaria (rediseño Fase 15, sección 5). Sólo administradores. */
+/** Configuración → Inmobiliaria (rediseño Fase 15, sección 5). Solo administradores. */
 export function AgencySettingsScreen() {
   const { user } = useSession()
   const settings = useTenantSettings(user?.role === "ADMIN")
@@ -83,7 +83,7 @@ export function AgencySettingsScreen() {
   if (user?.role !== "ADMIN") {
     return (
       <EmptyState
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="Los datos de la inmobiliaria los edita un administrador."
       />
     )
@@ -114,7 +114,7 @@ function SettingsForm({ settings }: { settings: TenantSettings }) {
   async function save(event: React.FormEvent) {
     event.preventDefault()
     if (values.primaryColor && !HEX_COLOR.test(color)) {
-      setColorError("Usá el formato #rrggbb, por ejemplo #c2410c.")
+      setColorError("Usá el formato #rrggbb, por ejemplo #c2703a.")
       return
     }
     setColorError(null)
@@ -167,15 +167,15 @@ function SettingsForm({ settings }: { settings: TenantSettings }) {
             <div className="flex items-center gap-3">
               <input
                 type="color"
-                aria-label="Elegir color"
+                aria-label="Elegí el color de la marca"
                 className="h-9 w-12 cursor-pointer rounded-md border bg-transparent"
-                value={HEX_COLOR.test(color) ? color : "#c2410c"}
+                value={HEX_COLOR.test(color) ? color : "#c2703a"}
                 onChange={(event) => set("primaryColor", event.target.value)}
               />
               <Input
                 id="agency-color"
                 value={color}
-                placeholder="#c2410c"
+                placeholder="#c2703a"
                 aria-invalid={colorError !== null}
                 onChange={(event) => set("primaryColor", event.target.value)}
               />

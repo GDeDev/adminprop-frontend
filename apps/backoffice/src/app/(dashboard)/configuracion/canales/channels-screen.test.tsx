@@ -83,10 +83,10 @@ describe("ChannelsScreen", () => {
     expect(disconnect).toHaveBeenCalledWith("MERCADOLIBRE")
   })
 
-  it("sólo para administradores", () => {
+  it("solo para administradores", () => {
     role = "EMPLOYEE"
     channels = []
     render(<ChannelsScreen />)
-    expect(screen.getByText("Sólo para administradores")).toBeInTheDocument()
+    expect(screen.getByText("Solo para administradores")).toBeInTheDocument()
   })
 })

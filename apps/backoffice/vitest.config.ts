@@ -23,15 +23,8 @@ export default defineConfig({
     setupFiles: ["./test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     // El wizard de contratos recorre cinco pasos con userEvent: con la suite
-<<<<<<< HEAD
     // entera en paralelo supera los 5 s por defecto (y en máquinas lentas los 15 s) y arrastra a los tests
     // siguientes del archivo (borrador compartido en localStorage).
     testTimeout: 45_000,
-=======
-    // entera en paralelo supera los 5 s por defecto y arrastra a los tests
-    // siguientes del archivo (borrador compartido en localStorage). 60 s: en el
-    // pre-commit un cambio en packages/ corre todas las pruebas de la app a la vez.
-    testTimeout: 60_000,
->>>>>>> 60cc7df (feat(ui): add ErrorState and ConfirmDialog; raise touch targets to 44 px on mobile; never surface raw server errors)
   },
 })

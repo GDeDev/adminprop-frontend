@@ -66,7 +66,7 @@ const PERIOD_JOBS = new Set([
 
 type StatusFilter = JobExecutionStatus | "ALL"
 
-/** Configuración → Automatizaciones (rediseño Fase 13, sección 6). Sólo admin. */
+/** Configuración → Automatizaciones (rediseño Fase 13, sección 6). Solo admin. */
 export function AutomationsScreen() {
   const { user } = useSession()
   // Un empleado no consulta lo que la API le va a rechazar con 403.
@@ -76,7 +76,7 @@ export function AutomationsScreen() {
   if (user && user.role !== "ADMIN") {
     return (
       <EmptyState
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="Las automatizaciones las configura y controla un administrador."
         action={
           <Button variant="outline" asChild>

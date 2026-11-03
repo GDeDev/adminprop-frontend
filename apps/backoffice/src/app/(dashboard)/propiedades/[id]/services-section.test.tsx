@@ -133,7 +133,7 @@ describe("ServicesSection", () => {
     ).toBeNull()
   })
 
-  it("el alta pide la fecha sólo con vencimiento y la frecuencia sólo con aumentos", async () => {
+  it("el alta pide la fecha solo con vencimiento y la frecuencia solo con aumentos", async () => {
     createService.mockResolvedValue(makeService())
     render(
       <ServicesSection

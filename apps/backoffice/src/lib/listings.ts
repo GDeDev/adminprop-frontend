@@ -57,7 +57,7 @@ export const LISTING_ACTION_LABELS: Record<ListingAction, string> = {
 
 /**
  * Acciones disponibles según el estado. «Actualizar» usa el mismo endpoint de
- * publicar (DT-100) y sólo aparece con cambios sin publicar.
+ * publicar (DT-100) y solo aparece con cambios sin publicar.
  */
 export function listingActions(listing: PropertyListingDto): ListingAction[] {
   switch (listing.status) {

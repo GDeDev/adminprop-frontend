@@ -310,7 +310,7 @@ export function SuretyFields<T extends SuretyValues>({
   form: ReturnType<typeof useForm<T>>
   prefix: string
 }) {
-  // El formulario que lo usa tiene más campos; acá sólo importan los de `surety`.
+  // El formulario que lo usa tiene más campos; acá solo importan los de `surety`.
   const control = form.control as unknown as ReturnType<
     typeof useForm<SuretyValues>
   >["control"]

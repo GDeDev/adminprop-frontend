@@ -109,7 +109,7 @@ describe("AdvanceExpensesSection", () => {
     expect(within(totals).getByText("$ 8.000,00")).toBeInTheDocument()
   })
 
-  it("edita sólo los pendientes y eliminar es sólo para admin", () => {
+  it("edita solo los pendientes y eliminar es solo para admin", () => {
     list = {
       items: [
         makeExpense(),
@@ -160,7 +160,7 @@ describe("AdvanceExpensesSection", () => {
     list = { items: [], pendingTotal: "0.00", settledTotal: "0.00" }
     createExpense.mockResolvedValue(makeExpense())
     render(<AdvanceExpensesSection contract={contract} />)
-    // Sin `applyAccept`, user-event dejaría pasar sólo lo que admite el
+    // Sin `applyAccept`, user-event dejaría pasar solo lo que admite el
     // input: acá interesa que el chequeo propio rechace lo que no es foto ni PDF.
     const user = userEvent.setup({ applyAccept: false })
 

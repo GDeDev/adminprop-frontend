@@ -18,14 +18,14 @@ import { SettingsTab } from "./settings-tab"
 import { TemplatesTab } from "./templates-tab"
 import { WhatsAppTab } from "./whatsapp-tab"
 
-/** Configuración → Notificaciones (rediseño Fase 14, sección 7). Sólo administradores. */
+/** Configuración → Notificaciones (rediseño Fase 14, sección 7). Solo administradores. */
 export function NotificationsScreen() {
   const { user } = useSession()
 
   if (user?.role !== "ADMIN") {
     return (
       <EmptyState
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="Las notificaciones las configuran los administradores."
       />
     )

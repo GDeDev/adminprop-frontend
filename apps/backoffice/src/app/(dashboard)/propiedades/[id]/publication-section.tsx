@@ -178,9 +178,7 @@ function ListingCard({
         </p>
       )}
       {listing.hasUnpublishedChanges && (
-        <p className="font-medium text-amber-700 dark:text-amber-400">
-          Hay cambios sin publicar.
-        </p>
+        <p className="font-medium text-warning">Hay cambios sin publicar.</p>
       )}
       {listing.status === "ERROR" && listing.lastError && (
         <Alert variant="destructive" role="alert">

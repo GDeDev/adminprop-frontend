@@ -66,7 +66,7 @@ export function ResetPasswordDialog({
     <ResponsiveDialog open={user !== null} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent className="sm:max-w-md">
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Resetear contraseña</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Restablecer contraseña</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
             {user &&
               `Nueva contraseña para ${displayName(user)}. Se le cierran todas las sesiones y se le desbloquea la cuenta.`}

@@ -140,7 +140,7 @@ export function ReviewStep({
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            «Completar vacíos» sólo rellena campos que están vacíos; nunca pisa
+            «Completar vacíos» solo rellena campos que están vacíos; nunca pisa
             un dato ya cargado. Podés elegir otra opción fila por fila.
           </p>
         </div>

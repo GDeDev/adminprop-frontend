@@ -156,6 +156,6 @@ describe("AutomationsScreen", () => {
     jobs = []
     executions = []
     render(<AutomationsScreen />)
-    expect(screen.getByText("Sólo para administradores")).toBeInTheDocument()
+    expect(screen.getByText("Solo para administradores")).toBeInTheDocument()
   })
 })

@@ -183,7 +183,7 @@ export function useCreateAdvanceExpense() {
   )
 }
 
-/** Sólo mientras está pendiente (409 si ya se descontó). */
+/** Solo mientras está pendiente (409 si ya se descontó). */
 export function useUpdateAdvanceExpense() {
   return useExpenseMutation(
     ({
@@ -202,7 +202,7 @@ export function useUpdateAdvanceExpense() {
   )
 }
 
-/** Sólo admin y sólo pendiente (409 si ya se descontó). */
+/** Solo admin y solo pendiente (409 si ya se descontó). */
 export function useDeleteAdvanceExpense() {
   return useExpenseMutation(
     async ({ id }: { id: string; contractId: string }) => {

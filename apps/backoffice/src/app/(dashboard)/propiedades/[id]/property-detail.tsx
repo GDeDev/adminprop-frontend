@@ -365,7 +365,7 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
     if (files.length === 0) return
     if (accepted.length > remaining) {
       toast.warning(
-        `Sólo entran ${remaining} fotos más (máximo ${MAX_PHOTOS}).`
+        `Solo entran ${remaining} fotos más (máximo ${MAX_PHOTOS}).`
       )
     }
     try {

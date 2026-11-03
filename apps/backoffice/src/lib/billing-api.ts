@@ -257,7 +257,7 @@ export function useVoidCharge() {
   )
 }
 
-/** Reducir o condonar el punitorio (sólo admin). */
+/** Reducir o condonar el punitorio (solo admin). */
 export function useAdjustLateFee() {
   return useBillingMutation(
     ({

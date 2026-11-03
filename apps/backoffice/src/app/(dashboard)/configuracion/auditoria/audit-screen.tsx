@@ -56,7 +56,7 @@ function formatDateTime(iso: string): string {
   }).format(new Date(iso))
 }
 
-/** Configuración → Auditoría (rediseño Fase 20, sección 6). Sólo administradores. */
+/** Configuración → Auditoría (rediseño Fase 20, sección 6). Solo administradores. */
 export function AuditScreen() {
   const { user } = useSession()
   // "Ver todo" del historial de una ficha llega con ?entity=…&entityId=…
@@ -78,7 +78,7 @@ export function AuditScreen() {
   if (user?.role !== "ADMIN") {
     return (
       <EmptyState
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="La auditoría la consultan los administradores."
       />
     )

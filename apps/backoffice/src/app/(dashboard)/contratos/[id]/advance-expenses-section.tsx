@@ -309,7 +309,7 @@ function ReceiptLink({ expense }: { expense: AdvanceExpense }) {
   )
 }
 
-/** Editar y eliminar sólo mientras está pendiente; eliminar, sólo admin. */
+/** Editar y eliminar solo mientras está pendiente; eliminar, solo admin. */
 function ExpenseActions({
   expense,
   canDelete,

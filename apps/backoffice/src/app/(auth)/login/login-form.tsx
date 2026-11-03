@@ -26,7 +26,7 @@ import { apiClient } from "@/lib/api-client"
 import { HOME_PATH } from "@/lib/session"
 
 /**
- * En el login sólo se valida que haya algo: las reglas de contraseña son para
+ * En el login solo se valida que haya algo: las reglas de contraseña son para
  * cuando se define una. Aplicarlas acá le contaría a cualquiera cómo son las
  * contraseñas válidas.
  */

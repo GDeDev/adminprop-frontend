@@ -54,7 +54,7 @@ describe("batchPhase", () => {
     expect(batchPhase("DISCARDED")).toBe("discarded")
   })
 
-  it("sólo sigue consultando mientras analiza o importa", () => {
+  it("solo sigue consultando mientras analiza o importa", () => {
     expect(isBatchRunning("ANALYZING")).toBe(true)
     expect(isBatchRunning("IMPORTING")).toBe(true)
     expect(isBatchRunning("READY")).toBe(false)

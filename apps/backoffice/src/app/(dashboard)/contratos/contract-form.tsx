@@ -184,7 +184,7 @@ function stepOf(field: string): number {
   return STEPS.findIndex((step) => step.fields.includes(root))
 }
 
-/** Borrador del alta en el navegador (DT-36). Sólo datos, no el PDF. */
+/** Borrador del alta en el navegador (DT-36). Solo datos, no el PDF. */
 
 const EMPTY: FormValues = {
   propertyId: "",
@@ -646,7 +646,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
                     <FieldError errors={[fieldState.error]} />
                   ) : (
                     <FieldDescription>
-                      Sólo las que no tienen un contrato activo.{" "}
+                      Solo las que no tienen un contrato activo.{" "}
                       <Link href="/propiedades/nueva" className="underline">
                         Cargar una propiedad nueva
                       </Link>
@@ -687,7 +687,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
                   <FieldError errors={[fieldState.error]} />
                 ) : (
                   <FieldDescription>
-                    Sólo los que no son titulares de otro contrato activo.{" "}
+                    Solo los que no son titulares de otro contrato activo.{" "}
                     <Link href="/inquilinos/nuevo" className="underline">
                       Cargar un inquilino nuevo
                     </Link>

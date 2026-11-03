@@ -57,7 +57,7 @@ const dateFormat = new Intl.DateTimeFormat("es-AR", {
   timeStyle: "short",
 })
 
-/** Gestión de usuarios internos (spec Fase 4, 3.6). Sólo admins. */
+/** Gestión de usuarios internos (spec Fase 4, 3.6). Solo admins. */
 export function UsersScreen() {
   const { user: me } = useSession()
 
@@ -65,7 +65,7 @@ export function UsersScreen() {
     return (
       <EmptyState
         icon={ShieldOff}
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="Pedile a un administrador de la inmobiliaria que gestione los usuarios."
         action={
           <Button variant="outline" asChild>
@@ -385,7 +385,7 @@ function UserActions({
           <>
             <DropdownMenuItem onSelect={() => onReset(user)}>
               <KeyRound aria-hidden />
-              Resetear contraseña
+              Restablecer contraseña
             </DropdownMenuItem>
             <DropdownMenuItem
               variant={user.isActive ? "destructive" : "default"}

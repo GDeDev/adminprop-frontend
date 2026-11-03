@@ -61,7 +61,7 @@ describe("formatMoneyList", () => {
         { currency: "ARS", amount: "1000.00" },
         { currency: "USD", amount: "0.00" },
       ])
-    ).toBe("$ 1.000,00")
+    ).toBe("$\u00a01.000,00")
     expect(formatMoneyList([{ currency: "USD", amount: "0" }])).toBe("—")
     expect(isZero("-0.00")).toBe(true)
     expect(isZero("0.01")).toBe(false)
@@ -80,7 +80,7 @@ describe("exchangeRateLabel", () => {
         },
         formatDate
       )
-    ).toBe("1 USD = $ 1.250,50 (MEP, [2026-10-12])")
+    ).toBe("1 USD = $\u00a01.250,50 (MEP, [2026-10-12])")
     expect(
       exchangeRateLabel(
         {

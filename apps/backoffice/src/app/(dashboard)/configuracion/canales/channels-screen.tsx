@@ -42,7 +42,7 @@ export function ChannelsScreen() {
   if (user?.role !== "ADMIN") {
     return (
       <EmptyState
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="Los canales de publicación los gestiona un administrador."
       />
     )

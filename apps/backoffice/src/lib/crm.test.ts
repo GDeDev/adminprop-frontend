@@ -112,7 +112,7 @@ describe("textos", () => {
     expect(ageLabel(50)).toBe("Hace 2 d")
   })
 
-  it("seguimiento vencido sólo en consultas abiertas", () => {
+  it("seguimiento vencido solo en consultas abiertas", () => {
     const today = "2026-11-03"
     expect(
       isFollowUpDue({ nextActionAt: "2026-11-03", stage: "NEW" }, today)

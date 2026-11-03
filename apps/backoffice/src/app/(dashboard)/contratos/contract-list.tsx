@@ -117,7 +117,7 @@ export function ContractList() {
             checked={expiringSoon}
             onCheckedChange={setExpiringSoon}
           />
-          <Label htmlFor="contracts-expiring-soon">Sólo por vencer</Label>
+          <Label htmlFor="contracts-expiring-soon">Solo por vencer</Label>
         </div>
       </div>
 

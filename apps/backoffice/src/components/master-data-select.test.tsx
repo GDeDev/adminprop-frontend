@@ -82,7 +82,7 @@ describe("MasterDataSelect", () => {
     expect(onChange).toHaveBeenCalledWith(["a1", "a2"])
   })
 
-  it("un desactivado sólo aparece si ya estaba elegido, y no se puede volver a elegir", async () => {
+  it("un desactivado solo aparece si ya estaba elegido, y no se puede volver a elegir", async () => {
     apiReturns([
       item("a1", "Pileta"),
       item("a2", "Solárium", false),

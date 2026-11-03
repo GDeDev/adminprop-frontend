@@ -8,7 +8,7 @@ import { LOGIN_PATH, SESSION_COOKIE_PREFIX } from "@/lib/session"
  * Corta antes de renderizar a quien no tiene cookie de sesión: va directo al
  * login, sin mostrar un instante la pantalla protegida.
  *
- * Sólo mira que la cookie exista, no si es válida: eso lo resuelve
+ * Solo mira que la cookie exista, no si es válida: eso lo resuelve
  * `ProtectedRoute` en el cliente, que la usa para pedir un access token.
  *
  * NO es una barrera de autorización: una cookie falsa pasa este chequeo. Los

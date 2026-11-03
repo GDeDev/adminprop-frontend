@@ -22,7 +22,7 @@ export function currentStep(phase: BatchPhase, confirming = false): number {
   }
 }
 
-/** Pasos del flujo; en mobile sólo se nombra el actual para no apretar. */
+/** Pasos del flujo; en mobile solo se nombra el actual para no apretar. */
 export function Stepper({ current }: { current: number }) {
   return (
     <nav aria-label="Pasos de la migración">

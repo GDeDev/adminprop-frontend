@@ -90,7 +90,7 @@ export function IndicesScreen() {
           Valores mensuales de ICL e IPC: con ellos se calculan los aumentos de
           los contratos. Son los mismos para todas las inmobiliarias. Se traen
           solos del BCRA y del INDEC; si la fuente falla, se cargan a mano.
-          {!canRegister && " Sólo un administrador puede cargarlos."}
+          {!canRegister && " Solo un administrador puede cargarlos."}
         </p>
       </div>
 

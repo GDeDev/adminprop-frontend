@@ -21,7 +21,7 @@ import { apiClient } from "./api-client"
 const MASTER_DATA_STALE_MS = 5 * 60 * 1000
 const masterDataKey = ["master-data"] as const
 
-/** `true` (por defecto en la API): sólo activos. `all`: todos. */
+/** `true` (por defecto en la API): solo activos. `all`: todos. */
 export type ActiveParam = "true" | "false" | "all"
 
 export function useCatalog(
