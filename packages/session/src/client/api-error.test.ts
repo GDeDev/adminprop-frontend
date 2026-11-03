@@ -33,6 +33,26 @@ describe("apiErrorMessage", () => {
     expect(apiErrorMessage(error, "Algo falló")).toMatch(/conectar/)
   })
 
+  it("nunca muestra errores crudos del servidor", () => {
+    expect(
+      apiErrorMessage(
+        apiError(404, {
+          message: "Cannot GET /api/v1/valuation/market-status",
+        }),
+        "No se pudo cargar."
+      )
+    ).toBe("No se pudo cargar.")
+    expect(
+      apiErrorMessage(
+        apiError(500, { message: "Internal server error" }),
+        "No se pudo cargar."
+      )
+    ).toBe("No se pudo cargar.")
+    expect(
+      apiErrorMessage(apiError(502, { message: "Algo raro" }), "Falló")
+    ).toBe("Falló")
+  })
+
   it("con cualquier otra cosa usa el mensaje por defecto", () => {
     expect(apiErrorMessage(new Error("x"), "Algo falló")).toBe("Algo falló")
     expect(apiErrorCode(new Error("x"))).toBeNull()

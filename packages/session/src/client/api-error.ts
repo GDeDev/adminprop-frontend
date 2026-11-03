@@ -16,7 +16,24 @@ export function apiErrorMessage(error: unknown, fallback: string): string {
   if (!isAxiosError<ApiError>(error)) return fallback
   if (!error.response) return NETWORK_MESSAGE
   const message = error.response.data?.message
-  return typeof message === "string" && message.length > 0 ? message : fallback
+  if (typeof message !== "string" || message.length === 0) return fallback
+  // Nunca mostrar errores crudos del servidor ("Cannot GET /api/v1/...").
+  if (isRawServerMessage(message)) return fallback
+  // Un 5xx sin código estable es un fallo inesperado: texto de respaldo.
+  if (error.response.status >= 500 && !error.response.data?.code)
+    return fallback
+  return message
+}
+
+/** Mensajes técnicos del framework que el usuario no debería ver. */
+function isRawServerMessage(message: string): boolean {
+  return (
+    /^Cannot (GET|POST|PUT|PATCH|DELETE|HEAD)\b/.test(message) ||
+    /\/api\/v\d/.test(message) ||
+    /^(Internal server error|Bad Gateway|Service Unavailable|Not Found)$/i.test(
+      message
+    )
+  )
 }
 
 /** El `code` estable del error de la API (`INVALID_CREDENTIALS`, ...). */
