@@ -27,14 +27,7 @@ import {
 } from "@adminprop/ui/components/dropdown-menu"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { AmenityIcon } from "@/components/amenity-icon"
 import { MANUAL_TRANSITIONS, MAX_PHOTOS, STATUS_META } from "@/lib/properties"
@@ -331,31 +324,20 @@ function DeleteButton({ property }: { property: PropertyDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>
-              ¿Eliminar la propiedad?
-            </ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {property.address} deja de aparecer en el sistema. Si tiene
-              contratos, no se puede eliminar: pasala a mantenimiento.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar la propiedad?"
+        description={
+          <>
+            {property.address} deja de aparecer en el sistema. Si tiene
+            contratos, no se puede eliminar: pasala a mantenimiento.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }
@@ -382,12 +364,17 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
     }
   }
 
+  const [deleting, setDeleting] = React.useState<string | null>(null)
+
   async function removePhoto(photoId: string) {
     try {
       await remove.mutateAsync({ id: property.id, photoId })
     } catch (cause) {
-      toast.error(apiErrorMessage(cause, "No se pudo borrar la foto."))
+      toast.error(
+        apiErrorMessage(cause, "No se pudo borrar la foto de la propiedad.")
+      )
     }
+    setDeleting(null)
   }
 
   return (
@@ -412,7 +399,7 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
               className="absolute top-1 right-1"
               aria-label={`Borrar foto ${index + 1}`}
               disabled={remove.isPending}
-              onClick={() => void removePhoto(photo.id)}
+              onClick={() => setDeleting(photo.id)}
             >
               <X aria-hidden />
             </Button>
@@ -442,6 +429,15 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
           </li>
         )}
       </ul>
+      <ConfirmDialog
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title="¿Borrar la foto?"
+        description="La foto se borra de la propiedad y no se puede recuperar."
+        confirmLabel="Borrar foto"
+        pending={remove.isPending}
+        onConfirm={() => (deleting ? removePhoto(deleting) : undefined)}
+      />
     </Section>
   )
 }

@@ -21,6 +21,7 @@ import {
   formatMoney,
   isZero,
   periodLabel,
+  periodTitle,
   SETTLEMENT_STATUS_META,
 } from "@/lib/format"
 import { PortalPdfButton } from "@/components/portal-pdf-button"
@@ -115,7 +116,7 @@ export function SettlementRow({
       <div className="min-w-0">
         <p className="font-medium">
           {settlement.property?.address ?? "Propiedad"} ·{" "}
-          <span className="capitalize">{periodLabel(settlement.period)}</span>
+          {periodLabel(settlement.period)}
           {settlement.sequence > 1 && ` (${settlement.sequence})`}
         </p>
         <p className="text-sm text-muted-foreground tabular-nums">
@@ -168,9 +169,7 @@ function StatementRow({ statement }: { statement: OwnerStatementSummary }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4">
       <div>
-        <p className="font-medium capitalize">
-          {periodLabel(statement.period)}
-        </p>
+        <p className="font-medium">{periodTitle(statement.period)}</p>
         <p className="text-sm text-muted-foreground">
           {statement.settlementsCount}{" "}
           {statement.settlementsCount === 1 ? "liquidación" : "liquidaciones"}

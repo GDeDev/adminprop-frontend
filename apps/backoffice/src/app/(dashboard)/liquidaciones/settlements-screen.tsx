@@ -47,7 +47,7 @@ import { Tabs, TabsList, TabsTrigger } from "@adminprop/ui/components/tabs"
 import { LoadMore } from "@/components/load-more"
 import { OwnerSelect } from "@/components/owner-select"
 import { PropertySelect } from "@/components/property-select"
-import { currentPeriod, isZero, periodLabel } from "@/lib/billing"
+import { currentPeriod, isZero, periodTitle } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 import {
@@ -283,7 +283,7 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
       <TableCell>
         {settlement.property?.address ?? "Propiedad eliminada"}
       </TableCell>
-      <TableCell className="capitalize tabular-nums">
+      <TableCell className="tabular-nums">
         {settlementLabel(settlement)}
       </TableCell>
       <TableCell className="text-right tabular-nums">
@@ -404,7 +404,7 @@ function StatementCard({ statement }: { statement: OwnerStatementSummary }) {
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">
           {statement.owner?.fullName ?? "Sin propietario"} ·{" "}
-          <span className="capitalize">{periodLabel(statement.period)}</span>
+          {periodTitle(statement.period)}
         </p>
         <Badge variant={meta.badge}>{meta.label}</Badge>
       </div>

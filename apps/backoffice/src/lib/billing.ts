@@ -173,16 +173,8 @@ export function exchangeRateLabel(
   return `1 USD = ${formatMoney(payment.exchangeRate, "ARS")} (${parts.join(", ")})`
 }
 
-/** Mes `AAAA-MM` → "octubre de 2026". */
-export function periodLabel(period: string): string {
-  const [year, month] = period.split("-").map(Number)
-  if (!year || !month) return period
-  return new Intl.DateTimeFormat("es-AR", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, 1)))
-}
+// `periodLabel` y `periodTitle` viven en @adminprop/ui/lib/format.
+export { periodLabel, periodTitle } from "@adminprop/ui/lib/format"
 
 /** El mes de hoy como `AAAA-MM`. */
 export function currentPeriod(today = new Date()): string {
