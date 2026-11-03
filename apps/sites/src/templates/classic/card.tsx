@@ -14,11 +14,7 @@ export function ClassicPropertyCard({
 }: SiteProps & { property: PublicPropertySummary; priority?: boolean }) {
   return (
     <article className="group rounded-site border-site-border bg-site-surface overflow-hidden border">
-      <a
-        href={hrefFor(route, `/propiedades/${property.id}`)}
-        className="block"
-        aria-label={`${property.title}, ${formatPrice(property.price, property.currency)}`}
-      >
+      <a href={hrefFor(route, `/propiedades/${property.id}`)} className="block">
         <div className="relative aspect-[4/3] overflow-hidden">
           <CoverImage
             property={property}

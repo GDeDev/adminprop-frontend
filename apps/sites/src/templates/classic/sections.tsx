@@ -67,9 +67,9 @@ export function ClassicSteps({ site }: SectionProps) {
             <span className="border-site-primary text-site-primary mx-auto flex size-16 items-center justify-center rounded-full border-2">
               <StepIcon name={step.icon} className="size-7" />
             </span>
-            <h3 className="mt-4 text-lg font-semibold tracking-widest uppercase">
+            <h2 className="mt-4 text-lg font-semibold tracking-widest uppercase">
               {step.title}
-            </h3>
+            </h2>
             <p className="text-site-muted mt-2">{step.description}</p>
           </li>
         ))}

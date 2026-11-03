@@ -61,10 +61,6 @@ export default async function SiteLayout({
       style={themeStyle(site.theme)}
       className="bg-site-bg font-site text-site-text flex min-h-dvh flex-col"
     >
-      <noscript>
-        {/* Sin JS las secciones no pueden "aparecer": se muestran de entrada. */}
-        <style>{".reveal{opacity:1!important;transform:none!important}"}</style>
-      </noscript>
       <a href="#contenido" className="skip-link">
         Saltar al contenido
       </a>

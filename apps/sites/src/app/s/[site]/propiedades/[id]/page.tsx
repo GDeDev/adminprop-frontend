@@ -14,6 +14,11 @@ import { templateKit } from "@/templates"
 
 export const revalidate = 60
 
+// Se genera al primer pedido y se cachea (ISR), como la home.
+export function generateStaticParams() {
+  return []
+}
+
 type Props = { params: Promise<{ site: string; id: string }> }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

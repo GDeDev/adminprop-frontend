@@ -76,7 +76,7 @@ export function ModernSteps({ site }: SectionProps) {
                 {String(i + 1).padStart(2, "0")}
               </span>
             </div>
-            <h3 className="mt-4 text-xl font-semibold">{step.title}</h3>
+            <h2 className="mt-4 text-xl font-semibold">{step.title}</h2>
             <p className="text-site-muted mt-2">{step.description}</p>
           </li>
         ))}

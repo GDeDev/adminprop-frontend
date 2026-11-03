@@ -17,7 +17,6 @@ export function ModernPropertyCard({
       <a
         href={hrefFor(route, `/propiedades/${property.id}`)}
         className="flex h-full flex-col"
-        aria-label={`${property.title}, ${formatPrice(property.price, property.currency)}`}
       >
         <div className="rounded-site relative aspect-[4/3] overflow-hidden">
           <CoverImage
