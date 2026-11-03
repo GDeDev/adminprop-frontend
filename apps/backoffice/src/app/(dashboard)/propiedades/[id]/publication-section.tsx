@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
+import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 
 import { conversionLabel, crmApiError, STAGE_LABELS, STAGES } from "@/lib/crm"
 import { usePropertyAnalytics } from "@/lib/crm-api"
@@ -161,7 +162,7 @@ function ListingCard({
       )}
       {listing.externalUrl && (
         <a
-          href={listing.externalUrl}
+          href={safeHttpUrl(listing.externalUrl) ?? undefined}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-primary underline"

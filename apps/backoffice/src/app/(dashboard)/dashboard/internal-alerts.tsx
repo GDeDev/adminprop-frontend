@@ -9,6 +9,7 @@ import type { InternalAlert } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
+import { safeInternalPath } from "@adminprop/ui/lib/safe-url"
 
 import { LoadMore } from "@/components/load-more"
 import {
@@ -126,8 +127,11 @@ export function InternalAlerts() {
                   <AlertTypeIcon type={alert.type} />
                   <div className="min-w-0">
                     <p className="font-medium">
-                      {alert.link ? (
-                        <Link href={alert.link} className="hover:underline">
+                      {safeInternalPath(alert.link) ? (
+                        <Link
+                          href={safeInternalPath(alert.link) ?? "/"}
+                          className="hover:underline"
+                        >
                           {alert.title}
                         </Link>
                       ) : (

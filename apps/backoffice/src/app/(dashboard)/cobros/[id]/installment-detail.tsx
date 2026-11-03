@@ -23,6 +23,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
+import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 import {
   Table,
   TableBody,
@@ -604,7 +605,7 @@ function PaymentRows({
                 {payment.receiptUrl && (
                   <Button variant="ghost" size="sm" asChild>
                     <a
-                      href={payment.receiptUrl}
+                      href={safeHttpUrl(payment.receiptUrl) ?? undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

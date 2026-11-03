@@ -21,6 +21,7 @@ import {
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
+import { safeHttpsUrl } from "@adminprop/ui/lib/safe-url"
 
 import { formatDateTime } from "@/lib/automations"
 import { crmApiError } from "@/lib/crm"
@@ -139,6 +140,8 @@ function ChannelCard({ channel }: { channel: ListingChannelDto }) {
   )
 }
 
+const ML_AUTH_HOSTS = ["auth.mercadolibre.com.ar", "auth.mercadolibre.com"]
+
 function MercadoLibreActions({ channel }: { channel: ListingChannelDto }) {
   const router = useRouter()
   const connect = useConnectMercadoLibre()
@@ -148,7 +151,12 @@ function MercadoLibreActions({ channel }: { channel: ListingChannelDto }) {
   async function start() {
     try {
       const { authorizeUrl } = await connect.mutateAsync()
-      window.location.assign(authorizeUrl)
+      const target = safeHttpsUrl(authorizeUrl, ML_AUTH_HOSTS)
+      if (!target) {
+        toast.error("La dirección de conexión no es válida. Probá de nuevo.")
+        return
+      }
+      window.location.assign(target)
     } catch (error) {
       toast.error(crmApiError(error, "No se pudo iniciar la conexión."))
     }

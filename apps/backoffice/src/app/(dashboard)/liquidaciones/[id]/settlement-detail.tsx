@@ -23,6 +23,7 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
+import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 
 import { DownloadPdfButton } from "@/components/download-pdf-button"
 import { FEE_MODE_LABELS, isZero, periodLabel } from "@/lib/billing"
@@ -474,7 +475,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                     {transfer.receiptUrl && (
                       <Button variant="ghost" size="sm" asChild>
                         <a
-                          href={transfer.receiptUrl}
+                          href={safeHttpUrl(transfer.receiptUrl) ?? undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

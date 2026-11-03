@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 import { Tabs, TabsList, TabsTrigger } from "@adminprop/ui/components/tabs"
+import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -303,7 +304,11 @@ function ExpenseStatus({ expense }: { expense: AdvanceExpense }) {
 function ReceiptLink({ expense }: { expense: AdvanceExpense }) {
   return (
     <Button variant="ghost" size="sm" asChild>
-      <a href={expense.receiptUrl} target="_blank" rel="noopener noreferrer">
+      <a
+        href={safeHttpUrl(expense.receiptUrl) ?? undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <ExternalLink aria-hidden />
         Ver comprobante
       </a>
