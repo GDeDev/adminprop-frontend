@@ -9,7 +9,7 @@ import {
   type SiteRoute,
 } from "@/lib/site-route"
 
-/** Ruta interna que responde 404: ningún pedido externo entra a `/s/…`. */
+/** Ruta interna que responde 404: ningún pedido externo entra a `/s/…` ni a `/p/…`. */
 const NOT_FOUND = "/s/nf"
 
 const DEV_PATH = /^\/_s\/([^/]+)(\/.*)?$/
@@ -36,7 +36,7 @@ function slugPathAllowed(hasPreview: boolean): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
-  if (pathname === "/s" || pathname.startsWith("/s/")) {
+  if (/^\/[sp](\/|$)/.test(pathname)) {
     return NextResponse.rewrite(new URL(NOT_FOUND, request.url))
   }
 
@@ -71,7 +71,12 @@ export async function proxy(request: NextRequest) {
 
   if (!route) return NextResponse.rewrite(new URL(NOT_FOUND, request.url))
 
-  const target = new URL(`/s/${encodeSiteRoute(route)}${rest}`, request.url)
+  // El borrador tiene su propio árbol (`/p`), que no se cachea.
+  const tree = route.previewToken ? "/p" : "/s"
+  const target = new URL(
+    `${tree}/${encodeSiteRoute(route)}${rest}`,
+    request.url
+  )
   searchParams.forEach((value, key) => {
     if (key !== "preview") target.searchParams.append(key, value)
   })

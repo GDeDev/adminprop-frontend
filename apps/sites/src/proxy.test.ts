@@ -61,7 +61,7 @@ describe("proxy", () => {
     const preview = await proxy(
       request(`/_s/mi-inmo/propiedades?preview=${TOKEN}&x=1`)
     )
-    expect(rewriteOf(preview)).toBe(`/s/dp~mi-inmo~${TOKEN}/propiedades?x=1`)
+    expect(rewriteOf(preview)).toBe(`/p/dp~mi-inmo~${TOKEN}/propiedades?x=1`)
 
     vi.stubEnv("SITES_ALLOW_SLUG_PATH", "true")
     expect(rewriteOf(await proxy(request("/_s/mi-inmo")))).toBe("/s/d~mi-inmo")
@@ -72,7 +72,7 @@ describe("proxy", () => {
     const response = await proxy(
       request(`/?preview=${TOKEN}`, "mi-inmo.sites.test")
     )
-    expect(rewriteOf(response)).toBe(`/s/hp~mi-inmo~${TOKEN}`)
+    expect(rewriteOf(response)).toBe(`/p/hp~mi-inmo~${TOKEN}`)
   })
 
   it("un token con formato inválido se ignora", async () => {
@@ -84,7 +84,13 @@ describe("proxy", () => {
   })
 
   it("nadie entra directo al árbol interno /s/…", async () => {
-    for (const path of ["/s", "/s/h~mi-inmo", "/s/d~mi-inmo/propiedades"]) {
+    for (const path of [
+      "/s",
+      "/s/h~mi-inmo",
+      "/s/d~mi-inmo/propiedades",
+      "/p/hp~x",
+      "/p",
+    ]) {
       expect(rewriteOf(await proxy(request(path, "mi-inmo.sites.test")))).toBe(
         "/s/nf"
       )
