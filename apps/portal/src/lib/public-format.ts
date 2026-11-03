@@ -1,3 +1,4 @@
+import { formatMoney } from "@adminprop/ui/lib/format"
 import type {
   Currency,
   Money,
@@ -10,15 +11,8 @@ export function priceLabel(
   currency: Currency | null
 ): string {
   if (price === null || currency === null) return "Consultar"
-  const value = Number(price)
-  if (Number.isNaN(value)) return "Consultar"
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  })
-    .format(value)
-    .replace(/\s/g, " ")
+  if (Number.isNaN(Number(price))) return "Consultar"
+  return formatMoney(price, currency, { maximumFractionDigits: 0 })
 }
 
 /** Lee los filtros de la URL del listado; ignora lo que no tenga forma válida. */

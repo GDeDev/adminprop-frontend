@@ -92,7 +92,7 @@ function Account({
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <p className="text-sm text-muted-foreground capitalize">
+            <p className="text-sm text-muted-foreground">
               Cuota de {periodLabel(installment.period)}
             </p>
             <h2

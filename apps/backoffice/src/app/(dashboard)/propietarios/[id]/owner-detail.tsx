@@ -19,14 +19,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
 import { formatCbu, formatNationalId, portfolioLabel } from "@/lib/owners"
@@ -310,32 +303,21 @@ function DeleteButton({ owner }: { owner: OwnerDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>
-              ¿Eliminar al propietario?
-            </ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {owner.fullName} deja de aparecer en el sistema y pierde el acceso
-              al portal. Si tiene propiedades asignadas, no se puede eliminar:
-              primero reasignalas.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar al propietario?"
+        description={
+          <>
+            {owner.fullName} deja de aparecer en el sistema y pierde el acceso
+            al portal. Si tiene propiedades asignadas, no se puede eliminar:
+            primero reasignalas.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }
