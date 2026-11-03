@@ -15,6 +15,9 @@ let propertyOwner: { id: string; fullName: string } | null = {
   fullName: "María Fernández",
 }
 
+vi.mock("@adminprop/session/client", () => ({
+  useSession: () => ({ user: { id: "u1", tenantId: "t1" } }),
+}))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
@@ -74,7 +77,7 @@ vi.mock("@/components/guarantor-select", () => ({
   GuarantorSelect: mockSelect("guarantor"),
 }))
 
-const DRAFT_KEY = "adminprop:contract-draft"
+const DRAFT_KEY = "adminprop:contract-draft:t1:u1"
 
 beforeEach(() => {
   window.localStorage.clear()

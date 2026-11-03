@@ -9,6 +9,7 @@ import { Toaster } from "@adminprop/ui/components/sonner"
 import { TooltipProvider } from "@adminprop/ui/components/tooltip"
 
 import { apiClient } from "@/lib/api-client"
+import { clearDrafts } from "@/lib/drafts"
 import { LOGIN_PATH } from "@/lib/session"
 
 function makeQueryClient() {
@@ -38,8 +39,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <SessionProvider
           apiClient={apiClient}
           loginPath={LOGIN_PATH}
-          // Que el próximo usuario en esta pestaña no vea datos cacheados del anterior.
-          onSignOut={() => queryClient.clear()}
+          // Que el próximo usuario en esta pestaña no vea datos cacheados ni borradores del anterior.
+          onSignOut={() => {
+            queryClient.clear()
+            clearDrafts()
+          }}
         >
           <TooltipProvider>
             {children}

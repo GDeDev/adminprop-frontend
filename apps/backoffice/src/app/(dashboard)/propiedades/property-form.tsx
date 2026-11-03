@@ -36,6 +36,7 @@ import { LocationCascadeSelect } from "@/components/location-cascade-select"
 import { MasterDataSelect } from "@/components/master-data-select"
 import { OwnerSelect } from "@/components/owner-select"
 import { CURRENCY_LABELS, normalizeAmount } from "@/lib/contracts"
+import { useDraftKey } from "@/lib/drafts"
 import { MAX_PHOTOS } from "@/lib/properties"
 import {
   useCreateProperty,
@@ -72,7 +73,6 @@ const STEPS = [
 ] as const
 
 /** Borrador del alta en el navegador (spec 5.3). Sólo datos, no fotos. */
-const DRAFT_KEY = "adminprop:property-draft"
 
 /**
  * Un borrador está a medio cargar: se validan los tipos, no las reglas del
@@ -104,9 +104,10 @@ const EMPTY: FormValues = {
   publicDescription: "",
 }
 
-function readDraft(): FormValues | null {
+function readDraft(key: string | null): FormValues | null {
+  if (!key) return null
   try {
-    const raw = window.localStorage.getItem(DRAFT_KEY)
+    const raw = window.localStorage.getItem(key)
     if (!raw) return null
     const parsed = draftSchema.safeParse(JSON.parse(raw))
     return parsed.success ? { ...EMPTY, ...parsed.data } : null
@@ -122,6 +123,7 @@ function readDraft(): FormValues | null {
  * la edición se manejan desde la ficha.
  */
 export function PropertyForm({ property }: { property?: PropertyDetail }) {
+  const draftKey = useDraftKey("property")
   const router = useRouter()
   const editing = property !== undefined
   const steps = editing ? STEPS.slice(0, 3) : STEPS
@@ -131,7 +133,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
   // El formulario sólo se renderiza en el navegador (detrás de SessionGate),
   // así que el borrador se lee al montar, sin un efecto.
   const [initialDraft] = React.useState(() =>
-    editing || typeof window === "undefined" ? null : readDraft()
+    editing || typeof window === "undefined" ? null : readDraft(draftKey)
   )
   const [draftRestored, setDraftRestored] = React.useState(
     initialDraft !== null
@@ -161,16 +163,17 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
   const values = useWatch({ control: form.control })
   React.useEffect(() => {
     if (editing) return
+    if (!draftKey) return
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(values))
+      window.localStorage.setItem(draftKey, JSON.stringify(values))
     } catch {
       // Sin storage (modo privado): el wizard funciona igual, sin borrador.
     }
-  }, [editing, values])
+  }, [editing, values, draftKey])
 
   function discardDraft() {
     try {
-      window.localStorage.removeItem(DRAFT_KEY)
+      if (draftKey) window.localStorage.removeItem(draftKey)
     } catch {
       // nada que borrar
     }
@@ -206,7 +209,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
 
       if (!editing) {
         try {
-          window.localStorage.removeItem(DRAFT_KEY)
+          if (draftKey) window.localStorage.removeItem(draftKey)
         } catch {
           // ignorado
         }

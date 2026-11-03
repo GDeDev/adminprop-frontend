@@ -8,6 +8,9 @@ const push = vi.fn()
 const create = vi.fn()
 const upload = vi.fn()
 
+vi.mock("@adminprop/session/client", () => ({
+  useSession: () => ({ user: { id: "u1", tenantId: "t1" } }),
+}))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
@@ -72,7 +75,7 @@ vi.mock("@/components/location-cascade-select", () => ({
   ),
 }))
 
-const DRAFT_KEY = "adminprop:property-draft"
+const DRAFT_KEY = "adminprop:property-draft:t1:u1"
 
 beforeEach(() => {
   window.localStorage.clear()

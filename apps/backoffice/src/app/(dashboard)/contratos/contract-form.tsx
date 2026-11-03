@@ -66,6 +66,7 @@ import {
   useUploadContractDocument,
 } from "@/lib/contracts-api"
 import { addDays, formatDate } from "@/lib/dates"
+import { useDraftKey } from "@/lib/drafts"
 import { useProperty } from "@/lib/properties-api"
 import { useRenter } from "@/lib/renters-api"
 
@@ -184,7 +185,6 @@ function stepOf(field: string): number {
 }
 
 /** Borrador del alta en el navegador (DT-36). Sólo datos, no el PDF. */
-const DRAFT_KEY = "adminprop:contract-draft"
 
 const EMPTY: FormValues = {
   propertyId: "",
@@ -261,9 +261,10 @@ const draftSchema = z
   })
   .partial()
 
-function readDraft(): FormValues | null {
+function readDraft(key: string | null): FormValues | null {
+  if (!key) return null
   try {
-    const raw = window.localStorage.getItem(DRAFT_KEY)
+    const raw = window.localStorage.getItem(key)
     if (!raw) return null
     const parsed = draftSchema.safeParse(JSON.parse(raw))
     if (!parsed.success) return null
@@ -388,13 +389,14 @@ function applyApiErrors(
  * confirmar el original queda finalizado.
  */
 export function ContractForm({ original }: { original?: ContractDetail }) {
+  const draftKey = useDraftKey("contract")
   const router = useRouter()
   const renewing = original !== undefined
   const [step, setStep] = React.useState(0)
   const [pdf, setPdf] = React.useState<File | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const [initialDraft] = React.useState(() =>
-    renewing || typeof window === "undefined" ? null : readDraft()
+    renewing || typeof window === "undefined" ? null : readDraft(draftKey)
   )
   const [draftRestored, setDraftRestored] = React.useState(
     initialDraft !== null
@@ -412,12 +414,13 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
   const values = useWatch({ control: form.control })
   React.useEffect(() => {
     if (renewing) return
+    if (!draftKey) return
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(values))
+      window.localStorage.setItem(draftKey, JSON.stringify(values))
     } catch {
       // Sin storage (modo privado): el wizard funciona igual, sin borrador.
     }
-  }, [renewing, values])
+  }, [renewing, values, draftKey])
 
   const propertyId = values.propertyId ?? ""
   const renterId = values.renterId ?? ""
@@ -440,7 +443,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
 
   function discardDraft() {
     try {
-      window.localStorage.removeItem(DRAFT_KEY)
+      if (draftKey) window.localStorage.removeItem(draftKey)
     } catch {
       // nada que borrar
     }
@@ -504,7 +507,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
 
       if (!renewing) {
         try {
-          window.localStorage.removeItem(DRAFT_KEY)
+          if (draftKey) window.localStorage.removeItem(draftKey)
         } catch {
           // ignorado
         }
