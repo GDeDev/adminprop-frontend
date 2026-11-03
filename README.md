@@ -95,3 +95,11 @@ Detalle y decisiones: `docs/tecnica/fase-04.md` y `docs/DECISIONES_TECNICAS.md` 
 Mientras la API (`adminprop-backend`) no tenga el endpoint, las pantallas leen de `@adminprop/mocks` (`withLatency()` simula la red). Cuando un módulo tenga su endpoint, su `queryFn` pasa a usar `apiClient` (`src/lib/api-client.ts`) y el mock correspondiente se borra.
 
 Decisiones técnicas: `docs/DECISIONES_TECNICAS.md`. Fases cerradas: `docs/tecnica/` y `docs/funcional/`.
+
+## Sitios web de las inmobiliarias (`apps/sites`)
+
+App pública (puerto 3003) que sirve el sitio de cada inmobiliaria por subdominio, dominio propio o, en desarrollo, `http://localhost:3003/_s/<slug>`. Dos templates (`CLASSIC` y `MODERN`), tema por variables CSS, ISR, SEO y formulario de contacto. Se configura desde «Mi sitio web» en el backoffice. Detalle: `docs/tecnica/web-inmobiliaria.md`.
+
+```bash
+API_URL=http://localhost:3000/api/v1 npm run dev -w @adminprop/sites
+```

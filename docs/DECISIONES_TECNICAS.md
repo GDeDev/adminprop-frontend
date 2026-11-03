@@ -587,3 +587,61 @@ El wizard suma el paso «Publicación» (operación con Alquiler por defecto, pr
 ### DT-114 — Accordion en `packages/ui` y un componente nuevo de menú
 
 `Accordion` se agregó con el patrón de shadcn sobre `radix-ui` (disparador de 44 px, solo tokens). «Mi sitio web» es una entrada de menú solo para administradores (`visibleNavItems`; hasta ahora ninguna entrada se filtraba por rol), también dentro de «Más» en mobile. Las pantallas siguen comprobando el rol además de ocultar el menú.
+
+## Sitios web de las inmobiliarias (`apps/sites`)
+
+### DT-115 — Un solo segmento `[site]` que codifica modo, slug y token
+
+El `proxy` (Next 16 lo llama así) reescribe cada pedido a `/s/<sitio>/…`, donde `<sitio>` es `h~slug` (por host), `d~slug` (por `/_s/slug`) o, con vista previa, `hp~slug~token` / `dp~slug~token`. Un solo segmento permite que cada combinación tenga su propia entrada de caché y que los links sepan su prefijo (`/_s/slug` solo en el modo `d`). Nada externo entra a `/s/…` ni a `/p/…`: el proxy lo manda a un 404 interno.
+
+### DT-116 — La vista previa vive en su propio árbol `/p/…`
+
+El borrador no puede cachearse y un `fetch` sin caché dentro de una ruta con ISR hace que Next falle en runtime («Page changed from static to dynamic»; lo vi en la primera prueba). La vista previa se reescribe a `/p/…`, un árbol `force-dynamic` que **reexporta las mismas páginas** de `/s/…`. Lo publicado conserva ISR; el borrador nunca se cachea ni se indexa (`noindex`, `robots` con `Disallow: /`).
+
+### DT-117 — ISR en home y ficha; listado dinámico
+
+Home, ficha, contacto y «nosotros» usan `revalidate = 60` con `generateStaticParams() => []` (se arman al primer pedido). El listado depende de la query (filtros y página) y es `force-dynamic`: la API cachea el listado un minuto, así que el costo es bajo. **Desvío leve de la spec** («render con ISR»): el listado no es ISR.
+
+### DT-118 — Tema por variables CSS, validado otra vez en el sitio
+
+`--site-primary/-secondary/-background/-surface/-text/-radius/-font` (+ `on-primary` y `on-secondary`, calculados por luminancia para que el texto de los botones siempre contraste). Tailwind las expone como `bg-site-primary`, `text-site-text`, `rounded-site`, `font-site`. Aunque la API ya valida, `themeStyle` revalida (hex, radio de la lista, fuente de la lista): a un atributo `style` nunca llega texto libre. El foco usa el color del texto, que siempre contrasta con el fondo.
+
+### DT-119 — Fuentes del sistema, sin `next/font`
+
+Las cuatro opciones (`system`, `serif`, `humanist`, `rounded`) son pilas de fuentes del sistema (D-165 del backend): cero descargas, mejor rendimiento y nada que falle en el build sin red.
+
+### DT-120 — `<img>` y no `next/image`
+
+Las fotos vienen del storage de cada inmobiliaria o de hosts permitidos; el optimizador de Next obligaría a listar todos los dominios y sería un proxy abierto. `SiteImage` es un `<img>` con `alt` obligatorio, `loading`, `fetchpriority` y `referrerpolicy="no-referrer"`, con un único `eslint-disable` comentado.
+
+### DT-121 — CSP con `'unsafe-inline'` en scripts
+
+Next inyecta scripts en línea para hidratar y un nonce por pedido obligaría a renderizar todo en cada visita (adiós ISR). A cambio: nada del usuario llega al DOM como HTML (todo es texto de React; el JSON-LD va como texto con `<` escapado), no hay cookies ni sesión, y el resto de las directivas queda cerrado (`default-src 'self'`, `connect-src 'self'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'`). Las imágenes admiten `https:`; en desarrollo `SITES_IMAGE_SOURCES` habilita `http://localhost:3000` (storage local).
+
+### DT-122 — `frame-ancestors` solo para la vista previa
+
+La regla general prohíbe embeber el sitio. Un segundo `headers()` con `has: query preview` (la última regla gana para la misma clave) lo permite para `SITES_PREVIEW_ANCESTORS` (default de desarrollo: `http://localhost:3001`, el backoffice). En producción **hay que cargar el origen del backoffice** o el iframe de la vista previa queda bloqueado.
+
+### DT-123 — El contacto pasa por el propio sitio
+
+`POST <base>/api/contacto` reenvía a `POST /public/:slug/contact` desde el servidor. Así el navegador nunca habla con la API desde un dominio propio (sin CORS que mantener por cada dominio) y se puede comprobar el `Origin`. Reenvía `X-Forwarded-For` con la IP del visitante para que el límite de 5 por hora de la API cuente personas y no al servidor (A-130 del backend: requiere `TRUST_PROXY=true`). En la vista previa no envía.
+
+### DT-124 — Resolución del host con caché en el proxy
+
+`resolveHost` (`GET /public/site-by-host`) con caché en memoria de 30 s (10 s los fallos). El `Host` se toma de `x-forwarded-host` si existe.
+
+### DT-125 — Aparición de secciones solo con CSS
+
+Las secciones aparecen con `animation-timeline: view()`: cero JavaScript, y sin soporte o con `prefers-reduced-motion` el contenido se ve de entrada (un primer intento con `IntersectionObserver` dejaba secciones invisibles hasta hidratar y costaba TBT). El buscador es un `<form method="get">` de servidor: funciona sin JS y cada búsqueda es una URL compartible.
+
+### DT-126 — Ampliaciones de `shared-types/public-listing.ts`
+
+`PublicPropertySummary` suma `operation`, `rooms`, `coveredAreaM2` y `ageYears`; `PublicListingQuery` suma `operation`, `bedrooms`, `bathrooms` e `ids`. Son aditivos y coinciden con el backend (D-167). `site.ts` es la spec verbatim y `site.contract.ts` falla el `tsc` si el OpenAPI deja de ser asignable al contrato (la comprobación es de un solo sentido: la API es más estrecha, p. ej. `radius: 0|8|16|24`).
+
+### Supuestos (sitios)
+
+- **A-SITES-1** · Los textos por defecto del sitio (pasos, servicios, preguntas) los fija el backend (D-166); `apps/sites` no inventa contenido.
+- **A-SITES-2** · Selector de ubicación como `<select>` (no autocompletado como en el sitio de referencia): es accesible y funciona sin JS; con cientos de zonas habría que pasar a un combobox.
+- **A-SITES-3** · Redes sociales con glifos propios en SVG (lucide ya no trae logos de marcas).
+- **A-SITES-4** · «Propiedades parecidas» = misma operación, sin la actual (la ficha pública no expone el id del tipo).
+- **A-SITES-5** · Variables de entorno nuevas de `apps/sites`: `API_URL` (o `NEXT_PUBLIC_API_URL`), `SITES_PREVIEW_ANCESTORS`, `SITES_ALLOW_SLUG_PATH`, `SITES_IMAGE_SOURCES`. **Pendiente de Giuliano**: crearlas en Doppler (config nueva para `sites`) y cargar `SITES_BASE_DOMAIN` en el backend.
