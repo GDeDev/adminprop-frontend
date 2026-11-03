@@ -243,12 +243,57 @@ export interface paths {
     }
     /**
      * Inmobiliaria del usuario logueado
-     * @description Nombre y marca, para el layout del backoffice y del portal.
+     * @description Nombre, marca y datos de contacto, para el layout del backoffice y de los portales.
      */
     get: operations["TenantsController_current_api/v1"]
     put?: never
     post?: never
     delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/tenants/current/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Configuración de la inmobiliaria (admin)
+     * @description Datos legales, bancarios y de marca, y el último número de recibo emitido.
+     */
+    get: operations["TenantsController_settings_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Editar la configuración de la inmobiliaria (admin)
+     * @description Todos los campos son opcionales: lo que no viene no se toca; null o vacío borra el dato.
+     */
+    patch: operations["TenantsController_updateSettings_api/v1"]
+    trace?: never
+  }
+  "/api/v1/tenants/current/logo": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Subir el logo (admin)
+     * @description Reemplaza al anterior. Los PDFs nuevos lo usan en el encabezado.
+     */
+    post: operations["TenantsController_uploadLogo_api/v1"]
+    /** Quitar el logo (admin) */
+    delete: operations["TenantsController_deleteLogo_api/v1"]
     options?: never
     head?: never
     patch?: never
@@ -263,7 +308,7 @@ export interface paths {
     }
     /**
      * Marca de una inmobiliaria por su slug (sin sesión)
-     * @description La usa el portal para mostrar el login con el logo y el color de la inmobiliaria.
+     * @description La usa el portal para mostrar el login con el logo, el color y el contacto de la inmobiliaria.
      */
     get: operations["TenantsController_bySlug_api/v1"]
     put?: never
@@ -2414,6 +2459,1365 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/documents": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar documentos generados
+     * @description Todas las versiones, más nuevas primero.
+     */
+    get: operations["DocumentsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/documents/{kind}/{entityId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Documento vigente de una entidad
+     * @description El PDF vigente (`READY`) de la liquidación, el consolidado, el pago o el contrato. 200 si está listo; 202 con `status: PENDING` si todavía se está generando (volver a consultar); 200 con `FAILED` si el último intento falló. 404 `DOCUMENT_NOT_FOUND` si nunca se pidió o no es del usuario (portales).
+     */
+    get: operations["DocumentsController_get_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/documents/{kind}/{entityId}/regenerate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Regenerar el PDF
+     * @description Encola una versión nueva (por ejemplo después de cambiar el logo) y responde 202 con la versión en `PENDING`. La anterior no se pisa.
+     */
+    post: operations["DocumentsController_regenerate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mis datos y los de la inmobiliaria
+     * @description Nombre, email y teléfono del inquilino; la inmobiliaria con logo, color, contacto, WhatsApp y datos bancarios para pagar.
+     */
+    get: operations["PortalRenterController_me_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/contract": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mi contrato
+     * @description El contrato activo o, si no tiene, el último (A-35). `data: null` si nunca tuvo uno. Los honorarios sólo se muestran si los paga él por cuenta del propietario (A-38).
+     */
+    get: operations["PortalRenterController_contract_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de cuenta
+     * @description La cuota del mes con el punitorio a hoy día por día, el saldo a favor disponible, la mora y cómo pagar (datos de la inmobiliaria o pago directo al propietario).
+     */
+    get: operations["PortalRenterController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/installments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de cuotas
+     * @description Todas sus cuotas, de todos sus contratos, las más nuevas primero.
+     */
+    get: operations["PortalRenterController_installments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/installments/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de una cuota
+     * @description Con sus pagos y el punitorio día por día. Sin quién registró, notas internas ni la liquidación al propietario. Una cuota de otro inquilino es un 404.
+     */
+    get: operations["PortalRenterController_installment_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/payments/{id}/receipt": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Recibo PDF de un pago
+     * @description Redirige (302) al PDF del recibo. 404 `DOCUMENT_NOT_READY` si todavía no se generó; 404 `PAYMENT_NOT_FOUND` si el pago no es suyo. Con `?format=json` responde `{ url }` en lugar de redirigir.
+     */
+    get: operations["PortalRenterController_receipt_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mis datos y los de la inmobiliaria
+     * @description Nombre, email, su cuenta bancaria registrada (para que confirme que es correcta), el modo de envío de resúmenes y los datos de la inmobiliaria.
+     */
+    get: operations["PortalOwnerController_me_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/properties": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mis propiedades
+     * @description Con el contrato activo (inquilino, fechas, alquiler vigente) y el estado de pago de la cuota del mes.
+     */
+    get: operations["PortalOwnerController_properties_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/properties/{propertyId}/installments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Pagos del inquilino de una propiedad
+     * @description Las cuotas de la propiedad con estado, pagado y fecha. Sin el detalle de medios de pago ni quién registró. Una propiedad ajena es un 404.
+     */
+    get: operations["PortalOwnerController_propertyInstallments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de cuenta del mes
+     * @description Por propiedad: alquiler devengado, cobrado, pendiente, punitorio y las liquidaciones del mes. Más los totales por moneda y su cuenta de honorarios con la inmobiliaria. Sin honorarios de otros propietarios ni totales de la inmobiliaria.
+     */
+    get: operations["PortalOwnerController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de liquidaciones
+     * @description Sólo las confirmadas o transferidas (A-36), las más nuevas primero. Filtros por propiedad y mes.
+     */
+    get: operations["PortalOwnerController_settlements_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de una liquidación
+     * @description Con pagos, honorarios, gastos, ajustes y transferencias; `acknowledgedAt` si ya acusó recibo. Sin quién registró cada cosa ni notas internas.
+     */
+    get: operations["PortalOwnerController_settlement_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements/{id}/pdf": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * PDF de una liquidación
+     * @description Redirige (302) al PDF vigente. 404 `DOCUMENT_NOT_READY` si todavía no se generó. Con `?format=json` responde `{ url }` en lugar de redirigir.
+     */
+    get: operations["PortalOwnerController_settlementPdf_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements/{id}/acknowledge": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Recibí la transferencia
+     * @description La única escritura del portal (A-37): deja constancia de cuándo el propietario confirmó que recibió la transferencia. Idempotente. 422 `SETTLEMENT_NOTHING_TO_ACKNOWLEDGE` si todavía no se le transfirió nada.
+     */
+    post: operations["PortalOwnerController_acknowledge_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/statements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Resúmenes mensuales
+     * @description Los consolidados cerrados, los más nuevos primero.
+     */
+    get: operations["PortalOwnerController_statements_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/statements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Detalle de un resumen mensual */
+    get: operations["PortalOwnerController_statement_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/statements/{id}/pdf": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * PDF de un resumen mensual
+     * @description Redirige (302) al PDF vigente. 404 `DOCUMENT_NOT_READY` si todavía no se generó. Con `?format=json` responde `{ url }` en lugar de redirigir.
+     */
+    get: operations["PortalOwnerController_statementPdf_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar los movimientos de auditoría
+     * @description Más nuevos primero. Filtra por entidad, acción, usuario, tipo de actor, fechas y texto.
+     */
+    get: operations["AuditController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/entities": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Catálogo de entidades y acciones
+     * @description Para armar los filtros de la pantalla.
+     */
+    get: operations["AuditController_catalog_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/export": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Exportar la auditoría filtrada
+     * @description Devuelve el archivo (Content-Disposition). Hasta 5.000 movimientos; con más, acotar por fecha. La exportación queda auditada.
+     */
+    get: operations["AuditController_export_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/entity/{entity}/{entityId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de una ficha
+     * @description Los últimos cambios de una entidad (pestaña "Historial"), más nuevos primero.
+     */
+    get: operations["AuditController_history_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de un movimiento
+     * @description Con el diff campo por campo; si el valor es un id (propiedad, inquilino…), también su nombre.
+     */
+    get: operations["AuditController_detail_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/dashboard": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Dashboard del mes
+     * @description Cuotas por estado, punitorios y honorarios del mes (por moneda), pendientes del día, contratos por vencer y los últimos 6 meses.
+     */
+    get: operations["ReportsController_dashboard_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/financial/income": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ingresos, honorarios y punitorios por mes
+     * @description Una fila por mes y moneda. Lo cobrado se cuenta por fecha de pago; honorarios y neto, por el mes de la liquidación.
+     */
+    get: operations["ReportsController_income_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/financial/payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Pagos recibidos
+     * @description Pagos confirmados del período, más nuevos primero, con cuota, inquilino, propiedad, propietario, medio y quién recibió. Paginado; con `format`, todos.
+     */
+    get: operations["ReportsController_payments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/financial/arrears": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Alquileres vencidos
+     * @description Inquilinos con deuda a la fecha: cuotas vencidas, días de atraso, saldo y punitorio por moneda, y teléfono.
+     */
+    get: operations["ReportsController_arrears_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/operations/properties": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Propiedades alquiladas o disponibles
+     * @description Las alquiladas con inquilino, alquiler y fin del contrato; las disponibles con los días sin alquilar.
+     */
+    get: operations["ReportsController_properties_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/operations/expiring-contracts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Contratos por vencer
+     * @description Los activos que terminan dentro de `withinDays` (default: los días de aviso de la inmobiliaria), con si hay renovación en curso.
+     */
+    get: operations["ReportsController_expiring_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/operations/services": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios vencidos
+     * @description Servicios de propiedades con vencimiento pasado y sus días de atraso.
+     */
+    get: operations["ReportsController_services_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/inventories": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Inventarios vigentes de un contrato
+     * @description Los no reemplazados, con si se puede crear el de entrega y el de devolución.
+     */
+    get: operations["InventoryController_list_api/v1"]
+    put?: never
+    /**
+     * Crear un inventario en borrador
+     * @description Sin `items` se precarga la plantilla estándar con todo en "No aplica". Un solo vigente por tipo (409 `INVENTORY_ALREADY_EXISTS`); la devolución sólo con el contrato no activo o a 30 días o menos de su fin (422 `INVENTORY_RETURN_NOT_ALLOWED`).
+     */
+    post: operations["InventoryController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/inventories/compare": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Comparar la entrega con la devolución
+     * @description Usa los inventarios vigentes y confirmados. Si falta uno, `hasDelivery`/`hasReturn` lo avisa.
+     */
+    get: operations["InventoryController_compare_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Detalle de un inventario, con ítems y fotos */
+    get: operations["InventoryController_get_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Editar un borrador
+     * @description Fecha, notas, conformidad del inquilino y la lista de ítems (la reemplaza). Confirmado no se edita (409 `INVENTORY_CONFIRMED`).
+     */
+    patch: operations["InventoryController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/items/{itemId}/photos": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Subir fotos a un ítem (hasta 5 por pedido y 15 por ítem)
+     * @description Multipart: `files`. JPG, PNG, WebP o HEIC reconocidos por su contenido, hasta 10 MB cada una. Sólo en borrador.
+     */
+    post: operations["InventoryController_addPhotos_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/photos/{photoId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Borrar una foto de un borrador */
+    delete: operations["InventoryController_deletePhoto_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar el inventario
+     * @description Lo cierra para siempre. Exige al menos un ítem evaluado (422 `INVENTORY_EMPTY`). `warnings` lista los ítems en mal estado sin fotos.
+     */
+    post: operations["InventoryController_confirm_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/correct": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Crear una corrección de un inventario confirmado
+     * @description Copia el inventario en un borrador nuevo con el motivo. Al confirmarla reemplaza al original.
+     */
+    post: operations["InventoryController_correct_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/properties": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Propiedades disponibles, con filtros */
+    get: operations["PublicController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/properties/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Ficha pública de una propiedad disponible */
+    get: operations["PublicController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/filters": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Tipos y ubicaciones en uso por propiedades disponibles */
+    get: operations["PublicController_filters_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/contact": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Enviar una consulta
+     * @description Anti-spam: honeypot (`website` vacío) y 5 consultas por hora por IP y por email. Con el honeypot lleno responde 201 igual y no guarda nada.
+     */
+    post: operations["PublicController_contact_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inquiries": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Listar las consultas del portal */
+    get: operations["InquiriesController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inquiries/{id}/status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Cambiar el estado de una consulta */
+    patch: operations["InquiriesController_updateStatus_api/v1"]
+    trace?: never
+  }
+  "/api/v1/site/templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Templates disponibles, con su tema por defecto */
+    get: operations["SiteController_templates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Configuración del sitio
+     * @description La primera vez la crea con el template CLASSIC y los datos de la inmobiliaria, deshabilitada.
+     */
+    get: operations["SiteController_settings_api/v1"]
+    /**
+     * Guardar el borrador (parcial)
+     * @description Cambia el borrador, no el sitio publicado. `subdomain` y `customDomain` se aplican al instante.
+     */
+    put: operations["SiteController_update_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/settings/reset-template": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Restaurar el tema (y opcionalmente el contenido) del template */
+    post: operations["SiteController_reset_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/publish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Publicar
+     * @description Valida el borrador completo, lo copia a lo publicado y prende el sitio.
+     */
+    post: operations["SiteController_publish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/unpublish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Despublicar
+     * @description El sitio pasa a 404. No se pierde nada de lo configurado.
+     */
+    post: operations["SiteController_unpublish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/assets": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Subir una imagen
+     * @description JPG, PNG o WebP de hasta 5 MB, validada por contenido. No se admite SVG.
+     */
+    post: operations["SiteController_upload_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/preview-token": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Token de vista previa
+     * @description JWT de 15 minutos que abre el borrador en el sitio con `?preview=<token>`.
+     */
+    get: operations["SiteController_previewToken_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/subdomain-availability": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Verifica si un subdominio es válido y está libre */
+    get: operations["SiteController_subdomainAvailability_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/site-by-host": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Resuelve el slug a partir del host
+     * @description `<subdominio>.<SITES_BASE_DOMAIN>` o un dominio propio. Lo usa el middleware de apps/sites.
+     */
+    get: operations["PublicSiteController_byHost_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/site": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * El sitio publicado de una inmobiliaria
+     * @description Con `?preview=<token>` (de GET /site/preview-token) devuelve el borrador, sin caché.
+     */
+    get: operations["PublicSiteController_site_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de notificaciones
+     * @description Los envíos de la inmobiliaria, más nuevos primero (los avisos internos de la campana no figuran: están en `/automations/alerts`).
+     */
+    get: operations["NotificationsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/resend-failed": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reintentar todas las notificaciones fallidas
+     * @description Encola un trabajo (`notifications-resend-failed`) y responde 202 con su id. El avance se consulta en `GET /jobs/:id/status`.
+     */
+    post: operations["NotificationsController_resendFailed_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Tipos de aviso y sus canales
+     * @description El catálogo con el estado de la inmobiliaria.
+     */
+    get: operations["NotificationsController_settings_api/v1"]
+    /**
+     * Habilitar tipos de aviso y elegir canales
+     * @description Un tipo obligatorio no se puede deshabilitar ni sacarle sus canales originales (422 `NOTIFICATION_MANDATORY`).
+     */
+    put: operations["NotificationsController_updateSettings_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Plantillas de email */
+    get: operations["NotificationsController_templates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Editar una plantilla
+     * @description Usar una variable que el tipo no declara da 422 `TEMPLATE_UNKNOWN_VARIABLE`.
+     */
+    put: operations["NotificationsController_updateTemplate_api/v1"]
+    post?: never
+    /** Restaurar el texto original de una plantilla */
+    delete: operations["NotificationsController_resetTemplate_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}/preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Vista previa de una plantilla
+     * @description Con datos de ejemplo del tipo. No envía nada.
+     */
+    post: operations["NotificationsController_preview_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}/test": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Enviarme una prueba
+     * @description Manda la plantilla vigente con datos de ejemplo al email del usuario logueado, por el mismo camino de entrega que un aviso real.
+     */
+    post: operations["NotificationsController_test_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/me/preferences": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Mis preferencias de notificación */
+    get: operations["NotificationsController_myPreferences_api/v1"]
+    /**
+     * Actualizar mis preferencias de notificación
+     * @description Sólo aplican a los avisos al personal que no son obligatorios. Apagar uno obligatorio da 422 `NOTIFICATION_MANDATORY`.
+     */
+    put: operations["NotificationsController_updateMyPreferences_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/whatsapp-templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Plantillas de WhatsApp
+     * @description Los textos con los que el backoffice arma los links `wa.me` (recordatorio, mora, primer contacto de una consulta).
+     */
+    get: operations["NotificationsController_whatsapp_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/whatsapp-templates/{key}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Editar una plantilla de WhatsApp */
+    put: operations["NotificationsController_updateWhatsapp_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/dev/events": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Simular un evento del proveedor de email (sólo desarrollo)
+     * @description Registra un evento (entregado, abierto, rebotó...) sobre una notificación ya enviada. Sólo con `EMAIL_PROVIDER=console` y fuera de producción; si no, 404.
+     */
+    post: operations["NotificationsController_devEvent_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de una notificación
+     * @description Con el asunto, el texto enviado y la cronología de entregas, aperturas y rebotes.
+     */
+    get: operations["NotificationsController_detail_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/{id}/resend": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reenviar una notificación fallida
+     * @description Vuelve a encolarla con los intentos en cero. Queda en la auditoría.
+     */
+    post: operations["NotificationsController_resend_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/webhooks/resend": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Webhook de Resend
+     * @description Público, con firma Svix (`svix-id`, `svix-timestamp`, `svix-signature`) y tolerancia de 5 minutos. Firma inválida: 401. Un evento repetido o de un mensaje desconocido responde 200 sin duplicar nada.
+     */
+    post: operations["WebhooksController_resendEvent_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/examples": {
     parameters: {
       query?: never
@@ -2782,6 +4186,76 @@ export interface components {
        * @example #1f4e79
        */
       primaryColor: string | null
+      /**
+       * @description Sólo dígitos con código de país
+       * @example 5491122334455
+       */
+      whatsapp: string | null
+      phone: string | null
+      email: string | null
+      address: string | null
+    }
+    TenantSettingsDto: {
+      id: string
+      /** @example Inmobiliaria Demo */
+      name: string
+      /** @example demo */
+      slug: string
+      logoUrl: string | null
+      /** @example #1f4e79 */
+      primaryColor: string | null
+      legalName: string | null
+      taxId: string | null
+      address: string | null
+      phone: string | null
+      email: string | null
+      /** @description Sólo dígitos con código de país */
+      whatsapp: string | null
+      bankAccountHolder: string | null
+      bankName: string | null
+      bankCbu: string | null
+      bankAlias: string | null
+      documentFooter: string | null
+      /** @description Último número de recibo emitido */
+      receiptSequence: number
+    }
+    UpdateTenantSettingsDto: {
+      /**
+       * @description Color de marca en hex (#rrggbb)
+       * @example #1f4e79
+       */
+      primaryColor?: string | null
+      /** @description Razón social */
+      legalName?: string | null
+      /**
+       * @description CUIT
+       * @example 30-12345678-9
+       */
+      taxId?: string | null
+      /** @description Domicilio comercial */
+      address?: string | null
+      /** @description Teléfono */
+      phone?: string | null
+      /** @description Email de contacto */
+      email?: string | null
+      /**
+       * @description WhatsApp: sólo dígitos con código de país
+       * @example 5491122334455
+       */
+      whatsapp?: string | null
+      /** @description Titular de la cuenta bancaria */
+      bankAccountHolder?: string | null
+      /** @description Banco */
+      bankName?: string | null
+      /**
+       * @description CBU (22 dígitos)
+       * @example 0110599552000000123456
+       */
+      bankCbu?: string | null
+      /** @description Alias */
+      bankAlias?: string | null
+      /** @description Leyenda al pie de los PDFs */
+      documentFooter?: string | null
     }
     AsyncJobStatusDto: {
       /** @example 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d */
@@ -2978,6 +4452,16 @@ export interface components {
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
       mainPhotoUrl: string | null
+      /**
+       * @description Precio de publicación; null = "Consultar"
+       * @example 150000.00
+       */
+      listingPrice: string | null
+      /** @enum {string} */
+      listingCurrency: "ARS" | "USD"
+      publicDescription: string | null
+      /** @enum {string} */
+      listingOperation: "SALE" | "RENT"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
@@ -3008,6 +4492,16 @@ export interface components {
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
       mainPhotoUrl: string | null
+      /**
+       * @description Precio de publicación; null = "Consultar"
+       * @example 150000.00
+       */
+      listingPrice: string | null
+      /** @enum {string} */
+      listingCurrency: "ARS" | "USD"
+      publicDescription: string | null
+      /** @enum {string} */
+      listingOperation: "SALE" | "RENT"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
@@ -3018,6 +4512,14 @@ export interface components {
       amenities: components["schemas"]["AmenityRefDto"][]
       notes: string | null
       photos: components["schemas"]["PropertyPhotoDto"][]
+      bedrooms: number | null
+      bathrooms: number | null
+      rooms: number | null
+      totalAreaM2: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
+      latitude: number | null
+      longitude: number | null
     }
     CreatePropertyDto: {
       /** @example Av. Corrientes 1234, 5° B */
@@ -3032,6 +4534,39 @@ export interface components {
       amenityIds: string[]
       /** @description Notas internas. Nunca se muestran en el portal. */
       notes?: string | null
+      /**
+       * @description Precio de publicación en el portal, como string. Sin precio (o null) se publica como "Consultar".
+       * @example 150000.00
+       */
+      listingPrice?: string | null
+      /**
+       * @description Moneda del precio. Por defecto, la de la inmobiliaria.
+       * @enum {string}
+       */
+      listingCurrency?: "ARS" | "USD"
+      /** @description Texto que ve el público en el portal. */
+      publicDescription?: string | null
+      /**
+       * @description Venta o alquiler. Por defecto, alquiler.
+       * @enum {string}
+       */
+      listingOperation?: "SALE" | "RENT"
+      /** @example 3 */
+      bedrooms?: number | null
+      /** @example 2 */
+      bathrooms?: number | null
+      /** @example 4 */
+      rooms?: number | null
+      /** @example 85.5 */
+      totalAreaM2?: number | null
+      /** @example 70 */
+      coveredAreaM2?: number | null
+      /** @example 12 */
+      ageYears?: number | null
+      /** @example -34.6037 */
+      latitude?: number | null
+      /** @example -58.3816 */
+      longitude?: number | null
     }
     UpdatePropertyDto: {
       /** @example Av. Corrientes 1234, 5° B */
@@ -3046,6 +4581,39 @@ export interface components {
       amenityIds: string[]
       /** @description Notas internas. Nunca se muestran en el portal. */
       notes?: string | null
+      /**
+       * @description Precio de publicación en el portal, como string. Sin precio (o null) se publica como "Consultar".
+       * @example 150000.00
+       */
+      listingPrice?: string | null
+      /**
+       * @description Moneda del precio. Por defecto, la de la inmobiliaria.
+       * @enum {string}
+       */
+      listingCurrency?: "ARS" | "USD"
+      /** @description Texto que ve el público en el portal. */
+      publicDescription?: string | null
+      /**
+       * @description Venta o alquiler. Por defecto, alquiler.
+       * @enum {string}
+       */
+      listingOperation?: "SALE" | "RENT"
+      /** @example 3 */
+      bedrooms?: number | null
+      /** @example 2 */
+      bathrooms?: number | null
+      /** @example 4 */
+      rooms?: number | null
+      /** @example 85.5 */
+      totalAreaM2?: number | null
+      /** @example 70 */
+      coveredAreaM2?: number | null
+      /** @example 12 */
+      ageYears?: number | null
+      /** @example -34.6037 */
+      latitude?: number | null
+      /** @example -58.3816 */
+      longitude?: number | null
     }
     ChangePropertyStatusDto: {
       /**
@@ -3657,6 +5225,8 @@ export interface components {
       contractPdfUrl: string | null
       surety: components["schemas"]["ContractSuretyDto"] | null
       termination: components["schemas"]["ContractTerminationDto"] | null
+      /** @description PDF del cálculo de la rescisión (Fase 15) */
+      terminationPdfUrl: string | null
       renewedFromId: string | null
       /** @description Historial del alquiler, del más reciente al más viejo */
       rentUpdates: components["schemas"]["ContractRentUpdateDto"][]
@@ -4338,6 +5908,10 @@ export interface components {
       creditGenerated: string
       creditId: string | null
       receiptUrl: string | null
+      /** @example R-00000042 */
+      receiptNumber: string | null
+      /** @description PDF del recibo emitido por la inmobiliaria (Fase 15) */
+      receiptPdfUrl: string | null
       notes: string | null
       registeredBy: components["schemas"]["UserRefDto"] | null
       /** Format: date-time */
@@ -4665,6 +6239,10 @@ export interface components {
       creditGenerated: string
       creditId: string | null
       receiptUrl: string | null
+      /** @example R-00000042 */
+      receiptNumber: string | null
+      /** @description PDF del recibo emitido por la inmobiliaria (Fase 15) */
+      receiptPdfUrl: string | null
       notes: string | null
       registeredBy: components["schemas"]["UserRefDto"] | null
       /** Format: date-time */
@@ -4837,6 +6415,8 @@ export interface components {
       hasVoidedPayments: boolean
       /** Format: date-time */
       confirmedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
       /** Format: date-time */
       createdAt: string
       /**
@@ -4864,6 +6444,11 @@ export interface components {
       cancelledAt: string | null
       cancelReason: string | null
       notes: string | null
+      /**
+       * Format: date-time
+       * @description Cuándo el propietario acusó recibo de la transferencia desde el portal (A-37)
+       */
+      acknowledgedAt: string | null
       /** Format: date-time */
       updatedAt: string
     }
@@ -4903,6 +6488,8 @@ export interface components {
       hasVoidedPayments: boolean
       /** Format: date-time */
       confirmedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
       /** Format: date-time */
       createdAt: string
     }
@@ -4951,6 +6538,8 @@ export interface components {
       totals: components["schemas"]["OwnerStatementTotalsDto"][]
       /** Format: date-time */
       closedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
       /** Format: date-time */
       createdAt: string
       settlements: components["schemas"]["SettlementSummaryDto"][]
@@ -4971,6 +6560,8 @@ export interface components {
       totals: components["schemas"]["OwnerStatementTotalsDto"][]
       /** Format: date-time */
       closedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
       /** Format: date-time */
       createdAt: string
     }
@@ -5133,6 +6724,9 @@ export interface components {
         | "STATEMENT_PENDING"
         | "DOCUMENT_FAILED"
         | "JOB_FAILED"
+        | "PUBLIC_INQUIRY"
+        | "NOTIFICATION_FAILED"
+        | "EMAIL_BOUNCED"
       title: string
       body: string
       /** @example CONTRACT */
@@ -5169,6 +6763,1345 @@ export interface components {
        * @example bcra-indec
        */
       provider: string
+    }
+    /** @enum {string} */
+    DocumentKind:
+      | "SETTLEMENT"
+      | "OWNER_STATEMENT"
+      | "PAYMENT_RECEIPT"
+      | "TERMINATION_NOTICE"
+    /** @enum {string} */
+    DocumentStatus: "PENDING" | "READY" | "FAILED"
+    GeneratedDocumentDto: {
+      id: string
+      kind: components["schemas"]["DocumentKind"]
+      /** @description La liquidación, el consolidado, el pago o el contrato */
+      entityId: string
+      /** @description Incremental: regenerar suma una versión */
+      version: number
+      status: components["schemas"]["DocumentStatus"]
+      url: string | null
+      sizeBytes: number | null
+      /** @description Sólo para el personal */
+      error: string | null
+      /** Format: date-time */
+      generatedAt: string | null
+      requestedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    PortalPdfUrlDto: {
+      /** @description URL del PDF vigente */
+      url: string
+    }
+    PortalBankAccountDto: {
+      holder: string | null
+      bank: string | null
+      cbu: string | null
+      alias: string | null
+    }
+    PortalAgencyDto: {
+      name: string
+      slug: string
+      logoUrl: string | null
+      /** @example #c2410c */
+      primaryColor: string | null
+      phone: string | null
+      email: string | null
+      /**
+       * @description Sólo dígitos, con código de país
+       * @example 5492215550000
+       */
+      whatsapp: string | null
+      address: string | null
+      /** @description Null hasta que la inmobiliaria cargue sus datos bancarios */
+      bankAccount: components["schemas"]["PortalBankAccountDto"] | null
+    }
+    PortalRenterMeDto: {
+      id: string
+      fullName: string
+      email: string | null
+      phone: string | null
+      agency: components["schemas"]["PortalAgencyDto"]
+    }
+    PortalContractPropertyDto: {
+      id: string
+      address: string
+      propertyType: string | null
+    }
+    PortalGuarantorDto: {
+      fullName: string
+    }
+    PortalSuretyDto: {
+      hasSurety: boolean
+      policyExpiresAt: string | null
+    }
+    PortalFeePaidByRenterDto: {
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+    }
+    PortalRenterContractDto: {
+      id: string
+      /** @example ACTIVE */
+      status: string
+      property: components["schemas"]["PortalContractPropertyDto"]
+      /** @example 2026-01-01 */
+      startDate: string
+      /** @example 2027-12-31 */
+      endDate: string
+      /** @example 350000.00 */
+      currentRent: string
+      /** @example ARS */
+      currency: string
+      /** @example ICL */
+      rentUpdateType: string
+      /** @example QUARTERLY */
+      rentUpdateFrequency: string
+      nextRentUpdateOn: string | null
+      /** @example 350000.00 */
+      deposit: string
+      /** @example ARS */
+      depositCurrency: string
+      /** @example NOMINAL */
+      depositReturnMode: string
+      guarantor: components["schemas"]["PortalGuarantorDto"] | null
+      surety: components["schemas"]["PortalSuretyDto"]
+      /** @description Sin las notas internas */
+      services: components["schemas"]["ContractServiceDto"][]
+      /** @example AGENCY */
+      collectionMode: string
+      /** @description Sólo con honorarios a cargo del inquilino por cuenta del propietario (A-38); en otro caso es null */
+      feePaidByRenter: components["schemas"]["PortalFeePaidByRenterDto"] | null
+      timeline: components["schemas"]["ContractTimelineDto"]
+    }
+    PortalContractRefDto: {
+      id: string
+      /** @example ACTIVE */
+      status: string
+    }
+    PortalPaymentInstructionsDto: {
+      /**
+       * @description AGENCY: se paga a la inmobiliaria (con sus datos bancarios); OWNER_DIRECT: se paga directamente al propietario
+       * @enum {string}
+       */
+      kind: "AGENCY" | "OWNER_DIRECT"
+      bankAccount: components["schemas"]["PortalBankAccountDto"] | null
+    }
+    PortalRenterAccountDto: {
+      contract: components["schemas"]["PortalContractRefDto"] | null
+      /** @description La cuota del mes (o la última si el contrato terminó). Sin quién registró, confirmó o anuló, ni notas internas ni la liquidación al propietario */
+      currentInstallment: components["schemas"]["InstallmentDetailDto"] | null
+      creditsAvailable: components["schemas"]["MoneyByCurrencyDto"][]
+      arrears: components["schemas"]["RenterArrearsDto"]
+      paymentInstructions: components["schemas"]["PortalPaymentInstructionsDto"]
+    }
+    PortalOwnerBankAccountDto: {
+      cbu: string | null
+      alias: string | null
+      bankName: string | null
+      holder: string | null
+    }
+    PortalOwnerMeDto: {
+      id: string
+      fullName: string
+      email: string | null
+      /** @description Su cuenta registrada, para que confirme que es correcta */
+      bankAccount: components["schemas"]["PortalOwnerBankAccountDto"] | null
+      /** @enum {string} */
+      statementSendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+      agency: components["schemas"]["PortalAgencyDto"]
+    }
+    PortalOwnerPropertyContractDto: {
+      id: string
+      renter: components["schemas"]["PortalGuarantorDto"]
+      /** @example 2026-01-01 */
+      startDate: string
+      /** @example 2027-12-31 */
+      endDate: string
+      /** @example 350000.00 */
+      currentRent: string
+      /** @example ARS */
+      currency: string
+      /** @example AGENCY */
+      collectionMode: string
+    }
+    PortalOwnerPropertyInstallmentDto: {
+      id: string
+      /** @example 2026-10 */
+      period: string
+      /** @example PENDING */
+      status: string
+      /** @example 350000.00 */
+      totalDue: string
+      /** @example 0.00 */
+      paidTotal: string
+    }
+    PortalOwnerPropertyDto: {
+      id: string
+      address: string
+      /** @example RENTED */
+      status: string
+      contract: components["schemas"]["PortalOwnerPropertyContractDto"] | null
+      /** @description La cuota del mes en curso */
+      currentInstallment:
+        components["schemas"]["PortalOwnerPropertyInstallmentDto"] | null
+    }
+    PortalAccountPropertyRefDto: {
+      id: string
+      address: string
+    }
+    PortalOwnerAccountPropertyDto: {
+      property: components["schemas"]["PortalAccountPropertyRefDto"]
+      /** @example ARS */
+      currency: string
+      /**
+       * @description Alquiler del mes
+       * @example 350000.00
+       */
+      accrued: string
+      /**
+       * @description Alquiler cobrado
+       * @example 350000.00
+       */
+      collected: string
+      /**
+       * @description Alquiler pendiente
+       * @example 0.00
+       */
+      pending: string
+      /**
+       * @description Punitorio vigente
+       * @example 0.00
+       */
+      lateFee: string
+      /** @description Liquidaciones del mes (sólo confirmadas o transferidas) */
+      settlements: components["schemas"]["SettlementSummaryDto"][]
+    }
+    PortalOwnerFeesDto: {
+      /** @example ARS */
+      currency: string
+      /** @example 17500.00 */
+      accrued: string
+      /** @example 17500.00 */
+      collected: string
+      /** @example 0.00 */
+      pending: string
+    }
+    PortalOwnerTotalsDto: {
+      /** @example ARS */
+      currency: string
+      /** @example 350000.00 */
+      accrued: string
+      /** @example 350000.00 */
+      collected: string
+      /** @example 0.00 */
+      pending: string
+      /**
+       * @description Neto de las liquidaciones del mes
+       * @example 332500.00
+       */
+      netSettled: string
+      /**
+       * @description Lo transferido de esas liquidaciones
+       * @example 332500.00
+       */
+      transferred: string
+    }
+    PortalOwnerAccountDto: {
+      /** @example 2026-10 */
+      period: string
+      properties: components["schemas"]["PortalOwnerAccountPropertyDto"][]
+      /** @description Su cuenta de honorarios con la inmobiliaria, acumulada (no sólo el mes) */
+      fees: components["schemas"]["PortalOwnerFeesDto"][]
+      totals: components["schemas"]["PortalOwnerTotalsDto"][]
+    }
+    AuditEntryDto: {
+      /** Format: uuid */
+      id: string
+      /** @example Contract */
+      entity: string
+      entityId: string | null
+      /** @enum {string} */
+      action:
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "RESTORE"
+        | "LOGIN"
+        | "LOGIN_FAILED"
+        | "LOGOUT"
+        | "NOTIFICATION_SENT"
+        | "JOB_RUN"
+        | "EXPORT"
+      /**
+       * @description Frase legible; la arma el servidor al leer
+       * @example Registró un pago de $ 100.000,00
+       */
+      summary: string
+      /** @enum {string} */
+      actorKind: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+      /** Format: uuid */
+      userId: string | null
+      userEmail: string | null
+      userName: string | null
+      ip: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    AuditCatalogDto: {
+      entities: string[]
+      actions: (
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "RESTORE"
+        | "LOGIN"
+        | "LOGIN_FAILED"
+        | "LOGOUT"
+        | "NOTIFICATION_SENT"
+        | "JOB_RUN"
+        | "EXPORT"
+      )[]
+    }
+    AuditChangeDto: {
+      /** @example status */
+      field: string
+      /** @description Valor anterior (cualquier tipo JSON) */
+      before: Record<string, never> | null
+      /** @description Valor nuevo (cualquier tipo JSON) */
+      after: Record<string, never> | null
+      /** @description Nombre legible cuando el valor es un id */
+      beforeLabel?: string | null
+      afterLabel?: string | null
+    }
+    AuditEntryDetailDto: {
+      /** Format: uuid */
+      id: string
+      /** @example Contract */
+      entity: string
+      entityId: string | null
+      /** @enum {string} */
+      action:
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "RESTORE"
+        | "LOGIN"
+        | "LOGIN_FAILED"
+        | "LOGOUT"
+        | "NOTIFICATION_SENT"
+        | "JOB_RUN"
+        | "EXPORT"
+      /**
+       * @description Frase legible; la arma el servidor al leer
+       * @example Registró un pago de $ 100.000,00
+       */
+      summary: string
+      /** @enum {string} */
+      actorKind: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+      /** Format: uuid */
+      userId: string | null
+      userEmail: string | null
+      userName: string | null
+      ip: string | null
+      /** Format: date-time */
+      createdAt: string
+      changes: components["schemas"]["AuditChangeDto"][]
+    }
+    CurrencyAmountDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /**
+       * @description Decimal como string
+       * @example 100000.00
+       */
+      amount: string
+    }
+    InstallmentBucketDto: {
+      count: number
+      amounts: components["schemas"]["CurrencyAmountDto"][]
+    }
+    DashboardInstallmentsDto: {
+      paid: components["schemas"]["InstallmentBucketDto"]
+      partial: components["schemas"]["InstallmentBucketDto"]
+      pending: components["schemas"]["InstallmentBucketDto"]
+      overdue: components["schemas"]["InstallmentBucketDto"]
+    }
+    DashboardTodoDto: {
+      paymentsToConfirm: number
+      settlementsToConfirm: number
+      settlementsToTransfer: number
+      openStatements: number
+      pendingIncreases: number
+      unreadAlerts: number
+    }
+    ExpiringContractRowDto: {
+      /** Format: uuid */
+      contractId: string
+      propertyAddress: string
+      renterName: string
+      /** Format: date */
+      endDate: string
+      daysLeft: number
+      renewalInProgress: boolean
+    }
+    DashboardHistoryDto: {
+      /** @example 2026-10 */
+      period: string
+      accrued: components["schemas"]["CurrencyAmountDto"][]
+      collected: components["schemas"]["CurrencyAmountDto"][]
+    }
+    DashboardReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      /** @example 2026-11 */
+      period: string
+      installments: components["schemas"]["DashboardInstallmentsDto"]
+      lateFeesAccrued: components["schemas"]["CurrencyAmountDto"][]
+      lateFeesCollected: components["schemas"]["CurrencyAmountDto"][]
+      feesAccrued: components["schemas"]["CurrencyAmountDto"][]
+      todo: components["schemas"]["DashboardTodoDto"]
+      expiringContracts: components["schemas"]["ExpiringContractRowDto"][]
+      /** @description Últimos 6 meses, el más viejo primero */
+      history: components["schemas"]["DashboardHistoryDto"][]
+    }
+    IncomeReportRowDto: {
+      /** @example 2026-10 */
+      period: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      rentCollected: string
+      lateFeesCollected: string
+      chargesCollected: string
+      feesAccrued: string
+      feesCollected: string
+      netSettled: string
+      netTransferred: string
+    }
+    IncomeReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["IncomeReportRowDto"][]
+    }
+    PaymentReportRowDto: {
+      /** Format: uuid */
+      paymentId: string
+      /** Format: date */
+      paidAt: string
+      /** @example 2026-10 */
+      period: string
+      renterName: string
+      propertyAddress: string
+      ownerName: string
+      /** @description Lo entregado, en la moneda del pago */
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example TRANSFER */
+      method: string
+      /** @enum {string} */
+      receivedBy: "AGENCY" | "OWNER"
+    }
+    ArrearsReportRowDto: {
+      /** Format: uuid */
+      renterId: string
+      renterName: string
+      renterPhone: string | null
+      propertyAddress: string
+      ownerName: string
+      overdueInstallments: number
+      maxDaysOverdue: number
+      balance: components["schemas"]["CurrencyAmountDto"][]
+      lateFee: components["schemas"]["CurrencyAmountDto"][]
+    }
+    ArrearsReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["ArrearsReportRowDto"][]
+      totals: components["schemas"]["CurrencyAmountDto"][]
+    }
+    PropertyReportRowDto: {
+      /** Format: uuid */
+      propertyId: string
+      address: string
+      /** @enum {string} */
+      status: "RENTED" | "AVAILABLE" | "OTHER"
+      renterName: string | null
+      rent: components["schemas"]["CurrencyAmountDto"] | null
+      /** Format: date */
+      contractEndDate: string | null
+      daysVacant: number | null
+    }
+    PropertiesReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["PropertyReportRowDto"][]
+    }
+    ExpiringContractsReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["ExpiringContractRowDto"][]
+    }
+    ServiceReportRowDto: {
+      /** Format: uuid */
+      serviceId: string
+      /** Format: uuid */
+      propertyId: string
+      propertyAddress: string
+      serviceName: string
+      daysOverdue: number
+    }
+    ServicesReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["ServiceReportRowDto"][]
+    }
+    InventoryPerformedByDto: {
+      id: string
+      fullName: string
+    }
+    InventorySummaryDto: {
+      id: string
+      contractId: string
+      /** @enum {string} */
+      type: "DELIVERY" | "RETURN"
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      status: "DRAFT" | "CONFIRMED"
+      tenantAcknowledged: boolean
+      itemCount: number
+      /** @description Ítems en mal estado */
+      poorCount: number
+      photoCount: number
+      performedBy: components["schemas"]["InventoryPerformedByDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      correctsInventoryId: string | null
+    }
+    ContractInventoriesDto: {
+      inventories: components["schemas"]["InventorySummaryDto"][]
+      canCreateDelivery: boolean
+      canCreateReturn: boolean
+    }
+    InventoryPhotoDto: {
+      id: string
+      url: string
+    }
+    InventoryComparisonRowDto: {
+      category: string
+      description: string
+      /** @enum {string|null} */
+      deliveryCondition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE" | null
+      /** @enum {string|null} */
+      returnCondition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE" | null
+      /** @enum {string} */
+      change: "WORSE" | "BETTER" | "SAME" | "ONLY_DELIVERY" | "ONLY_RETURN"
+      deliveryNotes: string | null
+      returnNotes: string | null
+      deliveryPhotos: components["schemas"]["InventoryPhotoDto"][]
+      returnPhotos: components["schemas"]["InventoryPhotoDto"][]
+    }
+    InventoryComparisonDto: {
+      hasDelivery: boolean
+      hasReturn: boolean
+      /** Format: date */
+      deliveryDate: string | null
+      /** Format: date */
+      returnDate: string | null
+      rows: components["schemas"]["InventoryComparisonRowDto"][]
+      worsenedCount: number
+    }
+    InventoryItemInputDto: {
+      /** @description Ausente en un ítem nuevo. Los ítems que falten se borran. */
+      id?: string
+      /** @example Cocina */
+      category: string
+      /** @example Mesada y bacha */
+      description: string
+      /** @enum {string} */
+      condition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE"
+      notes: string | null
+    }
+    CreateInventoryDto: {
+      /** @enum {string} */
+      type: "DELIVERY" | "RETURN"
+      /**
+       * Format: date
+       * @description Por defecto, hoy.
+       */
+      date?: string
+      generalNotes?: string | null
+      /** @description Sin ítems se precarga la plantilla estándar. */
+      items?: components["schemas"]["InventoryItemInputDto"][]
+    }
+    InventoryItemDto: {
+      id: string
+      category: string
+      description: string
+      /** @enum {string} */
+      condition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE"
+      notes: string | null
+      photos: components["schemas"]["InventoryPhotoDto"][]
+    }
+    InventoryDetailDto: {
+      id: string
+      contractId: string
+      /** @enum {string} */
+      type: "DELIVERY" | "RETURN"
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      status: "DRAFT" | "CONFIRMED"
+      tenantAcknowledged: boolean
+      itemCount: number
+      /** @description Ítems en mal estado */
+      poorCount: number
+      photoCount: number
+      performedBy: components["schemas"]["InventoryPerformedByDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      correctsInventoryId: string | null
+      generalNotes: string | null
+      correctionReason: string | null
+      items: components["schemas"]["InventoryItemDto"][]
+      /** @description Ítems en mal estado sin fotos */
+      warnings: string[]
+    }
+    UpdateInventoryDto: {
+      /** Format: date */
+      date?: string
+      generalNotes?: string | null
+      /** @description El inquilino estuvo presente y de acuerdo. */
+      tenantAcknowledged?: boolean
+      /** @description Reemplaza la lista: sin `id` es nuevo, con `id` se actualiza, los que faltan se borran junto a sus fotos. */
+      items?: components["schemas"]["InventoryItemInputDto"][]
+    }
+    CorrectInventoryDto: {
+      /** @example El estado del piso estaba mal cargado */
+      reason: string
+    }
+    PublicPropertySummaryDto: {
+      id: string
+      /** @description Dirección corta */
+      title: string
+      address: string
+      propertyType: string
+      neighborhood: string | null
+      bedrooms: number | null
+      bathrooms: number | null
+      /** @description Superficie total */
+      areaM2: number | null
+      /** @enum {string} */
+      operation: "SALE" | "RENT"
+      rooms: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
+      /**
+       * @description Null = "Consultar"
+       * @example 150000.00
+       */
+      price: string | null
+      /** @enum {string|null} */
+      currency: "ARS" | "USD" | null
+      coverPhotoUrl: string | null
+      amenities: string[]
+    }
+    PublicPhotoDto: {
+      id: string
+      url: string
+    }
+    PublicFeatureDto: {
+      label: string
+      value: string
+    }
+    PublicPropertyDetailDto: {
+      id: string
+      /** @description Dirección corta */
+      title: string
+      address: string
+      propertyType: string
+      neighborhood: string | null
+      bedrooms: number | null
+      bathrooms: number | null
+      /** @description Superficie total */
+      areaM2: number | null
+      /** @enum {string} */
+      operation: "SALE" | "RENT"
+      rooms: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
+      /**
+       * @description Null = "Consultar"
+       * @example 150000.00
+       */
+      price: string | null
+      /** @enum {string|null} */
+      currency: "ARS" | "USD" | null
+      coverPhotoUrl: string | null
+      amenities: string[]
+      publicDescription: string | null
+      photos: components["schemas"]["PublicPhotoDto"][]
+      /** @description Barrio, ciudad */
+      location: string
+      features: components["schemas"]["PublicFeatureDto"][]
+    }
+    PublicFilterOptionDto: {
+      id: string
+      name: string
+    }
+    PublicFiltersDto: {
+      propertyTypes: components["schemas"]["PublicFilterOptionDto"][]
+      locations: components["schemas"]["PublicFilterOptionDto"][]
+    }
+    PublicContactDto: {
+      name: string
+      email: string
+      /** @description Puede ir vacío */
+      phone?: string
+      message: string
+      /** @description Propiedad sobre la que se consulta; tiene que seguir disponible */
+      propertyId?: string | null
+      /** @description Honeypot: tiene que ir vacío. Con texto la consulta se descarta sin avisar. */
+      website?: string
+    }
+    PublicContactResultDto: {
+      id: string
+    }
+    InquiryPropertyDto: {
+      id: string
+      address: string
+    }
+    PublicInquiryDto: {
+      id: string
+      name: string
+      email: string
+      phone: string
+      message: string
+      propertyId: string | null
+      property: components["schemas"]["InquiryPropertyDto"] | null
+      /** @enum {string} */
+      status: "NEW" | "CONTACTED" | "CLOSED"
+      /** @enum {string} */
+      source: "PORTAL"
+      /** Format: date-time */
+      createdAt: string
+    }
+    UpdateInquiryStatusDto: {
+      /** @enum {string} */
+      status: "NEW" | "CONTACTED" | "CLOSED"
+    }
+    SiteThemeDto: {
+      /** @example #B6A28E */
+      primary: string
+      secondary: string
+      background: string
+      surface: string
+      text: string
+      /** @example system */
+      fontKey: string
+      /** @enum {number} */
+      radius: 0 | 8 | 16 | 24
+    }
+    SiteFontOptionDto: {
+      key: string
+      label: string
+    }
+    SiteTemplateInfoDto: {
+      /** @enum {string} */
+      key: "CLASSIC" | "MODERN"
+      name: string
+      description: string
+      previewImageUrl: string | null
+      defaultTheme: components["schemas"]["SiteThemeDto"]
+      supportedSections: (
+        | "hero"
+        | "steps"
+        | "featured"
+        | "metrics"
+        | "services"
+        | "testimonials"
+        | "faqs"
+        | "about"
+        | "contact"
+      )[]
+      fontOptions: components["schemas"]["SiteFontOptionDto"][]
+    }
+    SiteBrandDto: {
+      displayName: string
+      tagline: string | null
+      logoUrl: string | null
+      faviconUrl: string | null
+    }
+    SiteSocialDto: {
+      /** @enum {string} */
+      network:
+        "FACEBOOK" | "INSTAGRAM" | "LINKEDIN" | "YOUTUBE" | "TIKTOK" | "X"
+      url: string
+    }
+    SiteContactDto: {
+      address: string | null
+      hours: string | null
+      phone: string | null
+      /** @description Solo dígitos con código de país */
+      whatsapp: string | null
+      whatsappMessage: string | null
+      email: string | null
+      socials: components["schemas"]["SiteSocialDto"][]
+    }
+    SiteHeroDto: {
+      title: string
+      subtitle: string | null
+      ctaLabel: string | null
+      backgroundImageUrl: string | null
+      showSearch: boolean
+    }
+    SiteStepDto: {
+      title: string
+      description: string
+      /** @enum {string} */
+      icon:
+        | "search"
+        | "home"
+        | "key"
+        | "handshake"
+        | "file-text"
+        | "calendar"
+        | "phone"
+        | "map-pin"
+        | "shield"
+        | "star"
+        | "camera"
+        | "smile"
+    }
+    SiteFeaturedDto: {
+      title: string
+      subtitle: string | null
+      count: number
+      /** @enum {string} */
+      mode: "LATEST" | "MANUAL"
+      propertyIds: string[]
+    }
+    SiteMetricDto: {
+      value: string
+      label: string
+    }
+    SiteServiceDto: {
+      title: string
+      description: string
+      imageUrl: string | null
+    }
+    SiteTestimonialDto: {
+      name: string
+      text: string
+      role: string | null
+      photoUrl: string | null
+    }
+    SiteFaqDto: {
+      question: string
+      answer: string
+    }
+    SiteAboutDto: {
+      title: string
+      body: string | null
+      imageUrl: string | null
+    }
+    SiteSeoDto: {
+      title: string
+      description: string
+      ogImageUrl: string | null
+    }
+    SiteSectionDto: {
+      /** @enum {string} */
+      key:
+        | "hero"
+        | "steps"
+        | "featured"
+        | "metrics"
+        | "services"
+        | "testimonials"
+        | "faqs"
+        | "about"
+        | "contact"
+      visible: boolean
+    }
+    SiteContentDto: {
+      brand: components["schemas"]["SiteBrandDto"]
+      contact: components["schemas"]["SiteContactDto"]
+      hero: components["schemas"]["SiteHeroDto"]
+      steps: components["schemas"]["SiteStepDto"][]
+      featured: components["schemas"]["SiteFeaturedDto"]
+      metrics: components["schemas"]["SiteMetricDto"][]
+      services: components["schemas"]["SiteServiceDto"][]
+      testimonials: components["schemas"]["SiteTestimonialDto"][]
+      faqs: components["schemas"]["SiteFaqDto"][]
+      about: components["schemas"]["SiteAboutDto"]
+      seo: components["schemas"]["SiteSeoDto"]
+      sections: components["schemas"]["SiteSectionDto"][]
+    }
+    SiteSettingsDraftDto: {
+      /** @enum {string} */
+      template: "CLASSIC" | "MODERN"
+      theme: components["schemas"]["SiteThemeDto"]
+      content: components["schemas"]["SiteContentDto"]
+    }
+    SiteSettingsDto: {
+      enabled: boolean
+      subdomain: string | null
+      customDomain: string | null
+      draft: components["schemas"]["SiteSettingsDraftDto"]
+      /** @description null = nunca publicado */
+      publishedAt: string | null
+      /** @description El borrador difiere de lo publicado (o nunca se publicó) */
+      hasUnpublishedChanges: boolean
+      publicUrl: string | null
+    }
+    UpdateSiteSettingsDto: {
+      /** @enum {string} */
+      template?: "CLASSIC" | "MODERN"
+      /** @description Parcial: solo los campos que se mandan cambian. */
+      theme?: components["schemas"]["SiteThemeDto"]
+      /** @description Parcial por bloque: cada bloque que se manda (brand, hero, steps…) reemplaza al anterior entero. */
+      content?: components["schemas"]["SiteContentDto"]
+      /**
+       * @description Único en todo el sistema. `null` lo quita. Se aplica al instante.
+       * @example mi-inmobiliaria
+       */
+      subdomain?: string | null
+      /**
+       * @description Dominio propio, sin https://. Hay que apuntar el DNS a mano. `null` lo quita.
+       * @example www.mi-inmobiliaria.com.ar
+       */
+      customDomain?: string | null
+    }
+    ResetSiteTemplateDto: {
+      /** @description true: conserva textos e imágenes y restaura solo el tema. */
+      keepContent: boolean
+    }
+    SiteAssetDto: {
+      id: string
+      url: string
+      width: number | null
+      height: number | null
+    }
+    SitePreviewTokenDto: {
+      /** @description JWT corto; se manda como ?preview= al sitio */
+      token: string
+      expiresAt: string
+    }
+    SubdomainAvailabilityDto: {
+      value: string
+      available: boolean
+      reason: string | null
+    }
+    SiteHostDto: {
+      slug: string
+    }
+    PublicSiteTenantDto: {
+      slug: string
+      name: string
+      logoUrl: string | null
+    }
+    PublicSiteDto: {
+      /** @enum {string} */
+      template: "CLASSIC" | "MODERN"
+      theme: components["schemas"]["SiteThemeDto"]
+      content: components["schemas"]["SiteContentDto"]
+      tenant: components["schemas"]["PublicSiteTenantDto"]
+      publishedAt: string
+    }
+    NotificationLogItemDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example PAYMENT_REMINDER.EMAIL */
+      templateKey: string | null
+      /** @enum {string} */
+      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+      /** @enum {string} */
+      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+      /** @enum {string|null} */
+      skipReason:
+        | "TYPE_DISABLED"
+        | "CHANNEL_DISABLED"
+        | "USER_OPTED_OUT"
+        | "NO_RECIPIENT_EMAIL"
+        | "NO_PHONE"
+        | null
+      /** @enum {string} */
+      recipientKind:
+        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+      /** @description Nombre o email del destinatario */
+      recipientLabel: string
+      recipientEmail: string | null
+      entityType: string | null
+      entityId: string | null
+      attempts: number
+      /** Format: date-time */
+      nextAttemptAt: string | null
+      lastError: string | null
+      /** Format: date-time */
+      sentAt: string | null
+      /** Format: date-time */
+      deliveredAt: string | null
+      /** Format: date-time */
+      openedAt: string | null
+      /** Format: date-time */
+      bouncedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    ResendFailedDto: {
+      /** @enum {string} */
+      type?:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example 2026-11-01 */
+      from?: string
+      /** @example 2026-11-30 */
+      to?: string
+    }
+    ResendFailedResultDto: {
+      /** @description AsyncJob: GET /jobs/:id/status */
+      jobId: string
+    }
+    NotificationTypeSettingDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      title: string
+      description: string
+      /** @example Inquilino */
+      audience: string
+      enabled: boolean
+      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+      availableChannels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+      mandatory: boolean
+    }
+    NotificationSettingItemDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      enabled: boolean
+      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+    }
+    UpdateNotificationSettingsDto: {
+      settings: components["schemas"]["NotificationSettingItemDto"][]
+    }
+    TemplateVariableDto: {
+      name: string
+      label: string
+      example: string
+    }
+    NotificationTemplateDto: {
+      /** @example PAYMENT_REMINDER.EMAIL */
+      key: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @enum {string} */
+      channel: "EMAIL"
+      title: string
+      subject: string
+      bodyText: string
+      variables: components["schemas"]["TemplateVariableDto"][]
+      isCustomized: boolean
+      /** Format: date-time */
+      updatedAt: string | null
+    }
+    TemplateBodyDto: {
+      subject: string
+      bodyText: string
+    }
+    TemplatePreviewDto: {
+      subject: string
+      text: string
+      html: string
+    }
+    TestTemplateResultDto: {
+      sentTo: string
+    }
+    MyPreferenceItemViewDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      title: string
+      emailEnabled: boolean
+      inAppEnabled: boolean
+      mandatory: boolean
+    }
+    MyNotificationPreferencesDto: {
+      items: components["schemas"]["MyPreferenceItemViewDto"][]
+    }
+    MyPreferenceItemDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      emailEnabled: boolean
+      inAppEnabled: boolean
+    }
+    UpdateMyPreferencesDto: {
+      items: components["schemas"]["MyPreferenceItemDto"][]
+    }
+    WhatsAppVariableDto: {
+      name: string
+      label: string
+    }
+    WhatsAppTemplateDto: {
+      /** @example PAYMENT_REMINDER */
+      key: string
+      title: string
+      body: string
+      variables: components["schemas"]["WhatsAppVariableDto"][]
+      isCustomized: boolean
+    }
+    UpdateWhatsAppTemplateDto: {
+      body: string
+    }
+    DevEventDto: {
+      /** @description Id de la notificación (con providerMessageId) */
+      notificationId: string
+      /** @enum {string} */
+      type:
+        | "SENT"
+        | "DELIVERED"
+        | "OPENED"
+        | "CLICKED"
+        | "BOUNCED"
+        | "COMPLAINED"
+        | "DELAYED"
+    }
+    RecordedEventDto: {
+      recorded: boolean
+    }
+    EmailEventDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "SENT"
+        | "DELIVERED"
+        | "OPENED"
+        | "CLICKED"
+        | "BOUNCED"
+        | "COMPLAINED"
+        | "DELAYED"
+      /** Format: date-time */
+      occurredAt: string
+    }
+    NotificationDetailDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "EMAIL_BOUNCED"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example PAYMENT_REMINDER.EMAIL */
+      templateKey: string | null
+      /** @enum {string} */
+      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+      /** @enum {string} */
+      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+      /** @enum {string|null} */
+      skipReason:
+        | "TYPE_DISABLED"
+        | "CHANNEL_DISABLED"
+        | "USER_OPTED_OUT"
+        | "NO_RECIPIENT_EMAIL"
+        | "NO_PHONE"
+        | null
+      /** @enum {string} */
+      recipientKind:
+        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+      /** @description Nombre o email del destinatario */
+      recipientLabel: string
+      recipientEmail: string | null
+      entityType: string | null
+      entityId: string | null
+      attempts: number
+      /** Format: date-time */
+      nextAttemptAt: string | null
+      lastError: string | null
+      /** Format: date-time */
+      sentAt: string | null
+      /** Format: date-time */
+      deliveredAt: string | null
+      /** Format: date-time */
+      openedAt: string | null
+      /** Format: date-time */
+      bouncedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      subject: string | null
+      bodyText: string | null
+      events: components["schemas"]["EmailEventDto"][]
+      canResend: boolean
     }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
@@ -5795,6 +8728,150 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["TenantBrandingDto"]
+        }
+      }
+    }
+  }
+  "TenantsController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "TenantsController_updateSettings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTenantSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description Datos inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "TenantsController_uploadLogo_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /**
+           * Format: binary
+           * @description PNG, JPG, WebP o SVG de hasta 2 MB
+           */
+          file: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description No es PNG, JPG, WebP o SVG, o pesa más de 2 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "TenantsController_deleteLogo_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
         }
       }
     }
@@ -12033,6 +15110,3042 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["IndexStatusDto"][]
         }
+      }
+    }
+  }
+  "DocumentsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        kind?: components["schemas"]["DocumentKind"]
+        entityId?: string
+        status?: components["schemas"]["DocumentStatus"]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Documentos generados */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["GeneratedDocumentDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "DocumentsController_get_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        kind: components["schemas"]["DocumentKind"]
+        entityId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GeneratedDocumentDto"]
+        }
+      }
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GeneratedDocumentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "DocumentsController_regenerate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        kind: components["schemas"]["DocumentKind"]
+        entityId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GeneratedDocumentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_me_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalRenterMeDto"]
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_contract_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalRenterContractDto"]
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_account_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalRenterAccountDto"]
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_installments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Cuotas del inquilino */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InstallmentSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_installment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Detalle de la cuota */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["InstallmentDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_receipt_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con `json` devuelve `{ url }` en vez de redirigir (302): sirve para pedirlo con el token en el header y abrir la URL después */
+        format?: "json"
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description La URL del PDF (con ?format=json) */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["PortalPdfUrlDto"]
+          }
+        }
+      }
+      /** @description Redirige al PDF */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_me_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalOwnerMeDto"]
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_properties_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalOwnerPropertyDto"][]
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_propertyInstallments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Cuotas de la propiedad */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InstallmentSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_account_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Mes del estado de cuenta; sin él, el mes en curso */
+        period?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalOwnerAccountDto"]
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_settlements_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        propertyId?: string
+        period?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Liquidaciones del propietario */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["SettlementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_settlement_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Detalle de la liquidación */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["SettlementDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_settlementPdf_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con `json` devuelve `{ url }` en vez de redirigir (302): sirve para pedirlo con el token en el header y abrir la URL después */
+        format?: "json"
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Redirige al PDF */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_acknowledge_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description La liquidación con `acknowledgedAt` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["SettlementDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_statements_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Resúmenes del propietario */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["OwnerStatementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_statement_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Detalle del resumen */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["OwnerStatementDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_statementPdf_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con `json` devuelve `{ url }` en vez de redirigir (302): sirve para pedirlo con el token en el header y abrir la URL después */
+        format?: "json"
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Redirige al PDF */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_list_api/v1": {
+    parameters: {
+      query?: {
+        entity?: string
+        entityId?: string
+        action?:
+          | "CREATE"
+          | "UPDATE"
+          | "DELETE"
+          | "RESTORE"
+          | "LOGIN"
+          | "LOGIN_FAILED"
+          | "LOGOUT"
+          | "NOTIFICATION_SENT"
+          | "JOB_RUN"
+          | "EXPORT"
+        userId?: string
+        actorKind?: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+        /** @description Desde el inicio de ese día (hora de Buenos Aires) */
+        from?: string
+        /** @description Hasta el fin de ese día (hora de Buenos Aires) */
+        to?: string
+        /** @description Texto a buscar en el detalle, la entidad, su id y el email */
+        search?: string
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Movimientos de la página */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["AuditEntryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_catalog_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AuditCatalogDto"]
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_export_api/v1": {
+    parameters: {
+      query: {
+        entity?: string
+        entityId?: string
+        action?:
+          | "CREATE"
+          | "UPDATE"
+          | "DELETE"
+          | "RESTORE"
+          | "LOGIN"
+          | "LOGIN_FAILED"
+          | "LOGOUT"
+          | "NOTIFICATION_SENT"
+          | "JOB_RUN"
+          | "EXPORT"
+        userId?: string
+        actorKind?: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+        /** @description Desde el inicio de ese día (hora de Buenos Aires) */
+        from?: string
+        /** @description Hasta el fin de ese día (hora de Buenos Aires) */
+        to?: string
+        /** @description Texto a buscar en el detalle, la entidad, su id y el email */
+        search?: string
+        format: "xlsx" | "csv"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Archivo XLSX o CSV */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_history_api/v1": {
+    parameters: {
+      query?: {
+        limit?: number
+      }
+      header?: never
+      path: {
+        entity: string
+        entityId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AuditEntryDto"][]
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_detail_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AuditEntryDetailDto"]
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_dashboard_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Default: el mes en curso */
+        period?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["DashboardReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_income_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Mes (AAAA-MM, desde su primer día) o día (AAAA-MM-DD). Default: 6 meses atrás. */
+        from?: string
+        /** @description Mes (AAAA-MM, hasta su último día) o día (AAAA-MM-DD). Default: el mes en curso. */
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IncomeReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["IncomeReportDto"]
+          "text/csv": components["schemas"]["IncomeReportDto"]
+          "application/pdf": components["schemas"]["IncomeReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_payments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Mes (AAAA-MM, desde su primer día) o día (AAAA-MM-DD). Default: 6 meses atrás. */
+        from?: string
+        /** @description Mes (AAAA-MM, hasta su último día) o día (AAAA-MM-DD). Default: el mes en curso. */
+        to?: string
+        ownerId?: string
+        propertyId?: string
+        renterId?: string
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+          "text/csv": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+          "application/pdf": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_arrears_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Default: hoy */
+        asOf?: string
+        /** @description Sólo las cuotas con al menos esos días de atraso */
+        minDays?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ArrearsReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ArrearsReportDto"]
+          "text/csv": components["schemas"]["ArrearsReportDto"]
+          "application/pdf": components["schemas"]["ArrearsReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_properties_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        status?: "RENTED" | "AVAILABLE"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertiesReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["PropertiesReportDto"]
+          "text/csv": components["schemas"]["PropertiesReportDto"]
+          "application/pdf": components["schemas"]["PropertiesReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_expiring_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Default: los días de aviso de la inmobiliaria */
+        withinDays?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ExpiringContractsReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ExpiringContractsReportDto"]
+          "text/csv": components["schemas"]["ExpiringContractsReportDto"]
+          "application/pdf": components["schemas"]["ExpiringContractsReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_services_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        status?: "overdue" | "all"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServicesReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ServicesReportDto"]
+          "text/csv": components["schemas"]["ServicesReportDto"]
+          "application/pdf": components["schemas"]["ServicesReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_list_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractInventoriesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateInventoryDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_compare_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryComparisonDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_get_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateInventoryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_addPhotos_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        itemId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[]
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_deletePhoto_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        photoId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_confirm_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_correct_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CorrectInventoryDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        /** @description Ubicación (de `GET /filters`) */
+        locationId?: string
+        /** @description Tipo de propiedad (de `GET /filters`) */
+        propertyTypeId?: string
+        /** @description Precio desde, string */
+        priceFrom?: string
+        /** @description Precio hasta, string */
+        priceTo?: string
+        /** @description Moneda del rango; por defecto, la de la inmobiliaria */
+        currency?: "ARS" | "USD"
+        /** @description Venta (SALE) o alquiler (RENT) */
+        operation?: "SALE" | "RENT"
+        /** @description Dormitorios: este número o más */
+        bedrooms?: number
+        /** @description Baños: este número o más */
+        bathrooms?: number
+        /** @description Sólo estas propiedades (hasta 12, separadas por coma). Las no disponibles no vuelven. Lo usa el sitio web para las destacadas a mano. */
+        ids?: string[]
+      }
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Propiedades disponibles, más nuevas primero */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PublicPropertySummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description La inmobiliaria no existe o está deshabilitada */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        slug: string
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicPropertyDetailDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_AVAILABLE: no existe o ya no está disponible */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_filters_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicFiltersDto"]
+        }
+      }
+      /** @description La inmobiliaria no existe o está deshabilitada */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_contact_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicContactDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicContactResultDto"]
+        }
+      }
+      /** @description La inmobiliaria no existe o está deshabilitada */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_AVAILABLE: la propiedad ya no está disponible */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InquiriesController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        status?: "NEW" | "CONTACTED" | "CLOSED"
+        propertyId?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Consultas, más nuevas primero */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PublicInquiryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InquiriesController_updateStatus_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateInquiryStatusDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicInquiryDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_templates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteTemplateInfoDto"][]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSiteSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description SUBDOMAIN_TAKEN o DOMAIN_TAKEN */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Errores por campo en `errors` */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_reset_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetSiteTemplateDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_publish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El borrador está incompleto o inválido */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_unpublish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_upload_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteAssetDto"]
+        }
+      }
+      /** @description No es una imagen válida o pesa más de 5 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_previewToken_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SitePreviewTokenDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_subdomainAvailability_api/v1": {
+    parameters: {
+      query: {
+        value: unknown
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SubdomainAvailabilityDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicSiteController_byHost_api/v1": {
+    parameters: {
+      query: {
+        host: unknown
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteHostDto"]
+        }
+      }
+      /** @description SITE_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicSiteController_site_api/v1": {
+    parameters: {
+      query?: {
+        preview?: unknown
+      }
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicSiteDto"]
+        }
+      }
+      /** @description SITE_NOT_FOUND: no existe, no está publicado o el token no corresponde */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        type?:
+          | "PAYMENT_REMINDER"
+          | "ARREARS_NOTICE"
+          | "INSURER_ALERT"
+          | "CONTRACT_EXPIRING"
+          | "POLICY_EXPIRING"
+          | "POLICY_EXPIRED"
+          | "SERVICE_OVERDUE"
+          | "STATEMENT_PENDING"
+          | "SETTLEMENT_CONFIRMED"
+          | "OWNER_STATEMENT_CLOSED"
+          | "PAYMENT_RECEIVED"
+          | "PUBLIC_INQUIRY"
+          | "EMAIL_BOUNCED"
+          | "NOTIFICATION_FAILED"
+          | "RENT_UPDATE_PENDING"
+          | "INDEX_FETCH_FAILED"
+          | "INSTALLMENT_BASE_OUTDATED"
+          | "JOB_FAILED"
+          | "DOCUMENT_FAILED"
+        status?: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+        channel?: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+        recipientKind?:
+          "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+        /** @description Id de la entidad a la que cuelga */
+        entityId?: string
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Historial de notificaciones */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["NotificationLogItemDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resendFailed_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResendFailedDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ResendFailedResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateSettings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateNotificationSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_templates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateTemplate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateBodyDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resetTemplate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_preview_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateBodyDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TemplatePreviewDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_test_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TestTemplateResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_myPreferences_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateMyPreferences_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMyPreferencesDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_whatsapp_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplateDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateWhatsapp_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateWhatsAppTemplateDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_devEvent_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DevEventDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RecordedEventDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_detail_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No existe, o es de otra inmobiliaria */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resend_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationLogItemDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description La notificación no está fallida (`NOTIFICATION_NOT_RESENDABLE`) */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "WebhooksController_resendEvent_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
     }
   }
