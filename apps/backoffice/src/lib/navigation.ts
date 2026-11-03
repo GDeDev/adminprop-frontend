@@ -2,6 +2,7 @@ import {
   BarChart3,
   Building2,
   FileText,
+  Inbox,
   KeyRound,
   LayoutDashboard,
   Receipt,
@@ -17,6 +18,7 @@ import type { NavItem } from "@adminprop/ui/lib/navigation"
 export const navItems: NavItem[] = [
   { href: "/dashboard", label: "Inicio", icon: LayoutDashboard },
   { href: "/propiedades", label: "Propiedades", icon: Building2 },
+  { href: "/crm", label: "Consultas", icon: Inbox },
   { href: "/propietarios", label: "Propietarios", icon: KeyRound },
   { href: "/inquilinos", label: "Inquilinos", icon: Users },
   { href: "/garantes", label: "Garantes", icon: ShieldCheck },
