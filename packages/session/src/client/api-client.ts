@@ -93,7 +93,23 @@ export function safeNextPath(
   fallback: string
 ): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) return fallback
+  // El estándar WHATWG trata `\` como `/` y descarta tab/saltos de línea
+  // dentro de la URL: `/\evil.com` y `/<TAB>/evil.com` terminan en `//evil.com`.
+  // eslint-disable-next-line no-control-regex
+  if (/[\\\u0000-\u001f\u007f\s]/.test(next)) return fallback
   if (next.startsWith("/api/")) return fallback
+  // Defensa en profundidad: resolver como lo hace el navegador y exigir el
+  // mismo origen.
+  const base = "http://adminprop.invalid"
+  try {
+    const url = new URL(next, base)
+    if (url.origin !== base) return fallback
+    if (url.pathname.startsWith("//") || url.pathname.startsWith("/api/")) {
+      return fallback
+    }
+  } catch {
+    return fallback
+  }
   return next
 }
 
