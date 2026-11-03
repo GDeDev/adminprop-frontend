@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { resolveHost } from "@/lib/api"
-import { cachedHostLookup } from "@/lib/host-cache"
+import { cachedHostLookup, HostLookupError } from "@/lib/host-cache"
 import {
   encodeSiteRoute,
   isValidPreviewToken,
@@ -63,7 +63,25 @@ export async function proxy(request: NextRequest) {
       )
         .split(",")[0]
         ?.trim() ?? ""
-    const slug = host ? await cachedHostLookup(host, resolveHost) : null
+    let slug: string | null = null
+    if (host) {
+      try {
+        slug = await cachedHostLookup(host, resolveHost)
+      } catch (error) {
+        if (!(error instanceof HostLookupError)) throw error
+        // La API no pudo decir si el sitio existe: no es un 404, es un 503.
+        return new NextResponse(
+          "Servicio no disponible. Probá de nuevo en un momento.",
+          {
+            status: 503,
+            headers: {
+              "Retry-After": "10",
+              "Content-Type": "text/plain; charset=utf-8",
+            },
+          }
+        )
+      }
+    }
     if (slug && isValidSlug(slug)) {
       route = { mode: "host", slug, previewToken }
     }
@@ -86,5 +104,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Se saltean los estáticos de Next y los archivos con extensión (favicon,
   // imágenes…), salvo `sitemap.xml` y `robots.txt`, que son del sitio.
-  matcher: ["/((?!_next/)(?!.*\\.(?!xml$|txt$)[a-zA-Z0-9]+$).*)"],
+  matcher: [
+    "/((?!_next/|api/revalidate$)(?!.*\\.(?!xml$|txt$)[a-zA-Z0-9]+$).*)",
+  ],
 }

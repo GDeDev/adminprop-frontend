@@ -1,9 +1,9 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
 
 import { WhatsAppFloat } from "@/components/whatsapp-float"
 import { loadSite } from "@/lib/load-site"
-import { themeStyle } from "@/lib/theme"
+import { themeCss } from "@/lib/theme"
 import { whatsappLink } from "@/lib/whatsapp"
 import { templateKit } from "@/templates"
 
@@ -43,6 +43,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 }
 
+export async function generateViewport({ params }: Params): Promise<Viewport> {
+  const loaded = await loadSite((await params).site)
+  return {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+    // Barra del navegador del celular con el color del sitio.
+    themeColor: loaded?.site.theme.background,
+  }
+}
+
 export default async function SiteLayout({
   children,
   params,
@@ -57,10 +68,9 @@ export default async function SiteLayout({
   )
 
   return (
-    <div
-      style={themeStyle(site.theme)}
-      className="bg-site-bg font-site text-site-text flex min-h-dvh flex-col"
-    >
+    <div className="bg-site-bg font-site text-site-text flex min-h-dvh flex-col">
+      {/* Las variables van en :root para que el fondo llegue hasta el <html>. */}
+      <style>{themeCss(site.theme)}</style>
       <a href="#contenido" className="skip-link">
         Saltar al contenido
       </a>

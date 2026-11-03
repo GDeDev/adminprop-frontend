@@ -25,6 +25,14 @@ export function parseListingQuery(params: RawParams): ListingQuery {
   if (from && MONEY.test(from)) query.priceFrom = from
   const to = first(params.priceTo)
   if (to && MONEY.test(to)) query.priceTo = to
+  // "Desde" mayor que "hasta": se invierten (si no, el listado sale vacío sin explicación).
+  if (
+    query.priceFrom !== undefined &&
+    query.priceTo !== undefined &&
+    Number(query.priceFrom) > Number(query.priceTo)
+  ) {
+    ;[query.priceFrom, query.priceTo] = [query.priceTo, query.priceFrom]
+  }
   const currency = first(params.currency)
   if (currency === "ARS" || currency === "USD") query.currency = currency
   const bedrooms = Number(first(params.bedrooms))
@@ -57,4 +65,24 @@ export function listingSearch(
   }
   const text = search.toString()
   return text ? `?${text}` : ""
+}
+
+/**
+ * Páginas a mostrar en la paginación: siempre la primera y la última, la actual
+ * y una vecina a cada lado; `null` marca un salto ("…").
+ */
+export function pageWindow(current: number, total: number): (number | null)[] {
+  const wanted = new Set(
+    [1, total, current - 1, current, current + 1].filter(
+      (n) => n >= 1 && n <= total
+    )
+  )
+  const pages = [...wanted].sort((a, b) => a - b)
+  const result: (number | null)[] = []
+  pages.forEach((page, i) => {
+    const previous = pages[i - 1]
+    if (previous !== undefined && page - previous > 1) result.push(null)
+    result.push(page)
+  })
+  return result
 }

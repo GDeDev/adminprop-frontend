@@ -23,11 +23,21 @@ export async function GET(
     urls.push("/nosotros")
   }
 
-  for (let page = 1; page <= MAX_PAGES; page += 1) {
-    const result = await getProperties(route, { page, limit: 100 })
-    if (!result) break
-    for (const property of result.data) urls.push(`/propiedades/${property.id}`)
-    if (!result.pagination.hasNextPage) break
+  // Primera página para saber cuántas hay; el resto se pide en paralelo.
+  const first = await getProperties(route, { page: 1, limit: 100 }).catch(
+    () => null
+  )
+  if (first) {
+    const rest = Array.from(
+      { length: Math.min(first.pagination.totalPages, MAX_PAGES) - 1 },
+      (_, i) =>
+        getProperties(route, { page: i + 2, limit: 100 }).catch(() => null)
+    )
+    for (const result of [first, ...(await Promise.all(rest))]) {
+      for (const property of result?.data ?? []) {
+        urls.push(`/propiedades/${property.id}`)
+      }
+    }
   }
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls

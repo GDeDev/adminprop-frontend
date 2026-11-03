@@ -31,7 +31,7 @@ describe("proxy", () => {
   })
 
   it("por host reescribe a /s/h~slug y conserva el resto de la ruta y la query", async () => {
-    resolveHost.mockResolvedValue("mi-inmo")
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
     const response = await proxy(
       request("/propiedades/abc?operation=SALE", "mi-inmo.sites.test")
     )
@@ -42,9 +42,17 @@ describe("proxy", () => {
   })
 
   it("un host desconocido es 404 interno", async () => {
-    resolveHost.mockResolvedValue(null)
+    resolveHost.mockResolvedValue({ status: "missing" })
     const response = await proxy(request("/", "nadie.com"))
     expect(rewriteOf(response)).toBe("/s/nf")
+  })
+
+  it("si la API no responde, es un 503 con Retry-After (no un 404 que se cachee)", async () => {
+    resolveHost.mockResolvedValue({ status: "error" })
+    const response = await proxy(request("/", "caida.sites.test"))
+    expect(response.status).toBe(503)
+    expect(response.headers.get("retry-after")).toBe("10")
+    expect(response.headers.get("x-middleware-rewrite")).toBeNull()
   })
 
   it("el acceso por slug funciona en desarrollo", async () => {
@@ -68,7 +76,7 @@ describe("proxy", () => {
   })
 
   it("la vista previa viaja en la ruta y no en la query", async () => {
-    resolveHost.mockResolvedValue("mi-inmo")
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
     const response = await proxy(
       request(`/?preview=${TOKEN}`, "mi-inmo.sites.test")
     )
@@ -76,7 +84,7 @@ describe("proxy", () => {
   })
 
   it("un token con formato inválido se ignora", async () => {
-    resolveHost.mockResolvedValue("mi-inmo")
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
     const response = await proxy(
       request("/?preview=../../etc", "mi-inmo.sites.test")
     )

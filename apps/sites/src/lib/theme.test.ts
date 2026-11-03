@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest"
 
 import type { SiteTheme } from "@adminprop/shared-types"
 
-import { contrastRatio, onColor, themeStyle } from "./theme"
+import {
+  FONT_STACKS,
+  contrastRatio,
+  onColor,
+  themeCss,
+  themeStyle,
+} from "./theme"
 
 const THEME: SiteTheme = {
   primary: "#b6a28e",
@@ -46,5 +52,24 @@ describe("theme", () => {
     expect(joined).not.toMatch(/evil|expression|script|url\(/)
     expect(style["--site-radius"]).toBe("16px")
     expect(style["--site-font"]).toContain("ui-sans-serif")
+  })
+
+  it("el CSS del tema no lleva caracteres que React escape dentro de un <style>", () => {
+    const css = themeCss(THEME)
+    expect(css.startsWith(":root{--site-primary:#B6A28E;")).toBe(true)
+    expect(css).not.toMatch(/["'<>&]/)
+    for (const stack of Object.values(FONT_STACKS)) {
+      expect(stack).not.toMatch(/["'<>&;{}]/)
+    }
+  })
+
+  it("el CSS del tema tampoco deja pasar texto libre", () => {
+    const css = themeCss({
+      ...THEME,
+      primary: "red;}body{display:none",
+      fontKey: "x</style><script>alert(1)</script>",
+    })
+    expect(css).not.toMatch(/display|script|style>/)
+    expect(css.match(/:root\{/g)).toHaveLength(1)
   })
 })

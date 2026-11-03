@@ -95,7 +95,9 @@ body {
     .reveal {
       animation: reveal-in linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 40%;
+      /* Acotado a la distancia de scroll: una sección más alta que la pantalla
+         no queda a medio aparecer. */
+      animation-range: entry 0% cover 14%;
     }
   }
 }

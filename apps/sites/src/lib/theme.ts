@@ -4,16 +4,21 @@ import type { SiteTheme } from "@adminprop/shared-types"
 
 const HEX = /^#[0-9a-fA-F]{6}$/
 
-/** Pilas del sistema: sin descargar fuentes (rendimiento y privacidad). */
+/**
+ * Pilas del sistema: sin descargar fuentes (rendimiento y privacidad). Sin
+ * comillas a propósito: van dentro de un `<style>` y React escaparía `"` como
+ * `&quot;`, que en CSS rompe la regla. Los nombres con espacios son válidos sin
+ * comillas.
+ */
 export const FONT_STACKS: Record<string, string> = {
   system:
-    'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif",
   serif:
-    'ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif',
+    "ui-serif, Iowan Old Style, Palatino Linotype, Palatino, Georgia, Times New Roman, serif",
   humanist:
-    'Seravek, "Gill Sans Nova", "Gill Sans", Calibri, "Trebuchet MS", ui-sans-serif, sans-serif',
+    "Seravek, Gill Sans Nova, Gill Sans, Calibri, Trebuchet MS, ui-sans-serif, sans-serif",
   rounded:
-    'ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", Quicksand, Nunito, "Varela Round", ui-sans-serif, sans-serif',
+    "ui-rounded, SF Pro Rounded, Hiragino Maru Gothic ProN, Quicksand, Nunito, Varela Round, ui-sans-serif, sans-serif",
 }
 
 const DEFAULT_FONT = FONT_STACKS.system as string
@@ -87,4 +92,18 @@ export function themeStyle(theme: SiteTheme): CSSProperties {
     "--site-font": FONT_STACKS[theme.fontKey] ?? DEFAULT_FONT,
   }
   return vars as CSSProperties
+}
+
+/**
+ * El tema como una regla `:root{…}` para un `<style>`. Va en `:root` (y no en
+ * un `div`) para que el color de fondo llegue al `html`: si no, el rebote al
+ * hacer scroll en el celular y las áreas seguras de iOS se ven blancas en un
+ * sitio oscuro. Todos los valores salen de `themeStyle`, que los valida: solo
+ * hex, píxeles y pilas de la lista cerrada, sin caracteres que React escape.
+ */
+export function themeCss(theme: SiteTheme): string {
+  const vars = themeStyle(theme) as Record<string, string>
+  return `:root{${Object.entries(vars)
+    .map(([name, value]) => `${name}:${value}`)
+    .join(";")}}`
 }

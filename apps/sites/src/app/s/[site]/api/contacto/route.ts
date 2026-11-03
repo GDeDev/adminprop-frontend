@@ -1,21 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { apiUrl } from "@/lib/api"
+import { clientIp } from "@/lib/client-ip"
 import { decodeSiteRoute } from "@/lib/site-route"
 
 const MAX_BODY = 8_000
 
 const fail = (status: number, message: string) =>
   NextResponse.json({ message }, { status })
-
-/** IP del visitante, para que la API cuente el límite por persona y no por servidor. */
-function visitorIp(request: NextRequest): string | null {
-  const forwarded = request.headers
-    .get("x-forwarded-for")
-    ?.split(",")[0]
-    ?.trim()
-  return forwarded || request.headers.get("x-real-ip")
-}
 
 /**
  * Recibe la consulta del formulario del sitio y la reenvía a la API
@@ -62,7 +54,7 @@ export async function POST(
   const propertyId =
     typeof body.propertyId === "string" ? body.propertyId : null
 
-  const ip = visitorIp(request)
+  const ip = clientIp(request.headers)
   try {
     const response = await fetch(
       `${base}/public/${encodeURIComponent(route.slug)}/contact`,

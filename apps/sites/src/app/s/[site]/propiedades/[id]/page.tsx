@@ -53,17 +53,18 @@ export default async function PropertyPage({ params }: Props) {
   const { site, route } = loaded
   const kit = templateKit(site.template)
 
-  const property = await getProperty(route, id)
+  // La ficha y las "parecidas" se piden a la vez: las parecidas no dependen de
+  // la ficha para pedirse (se filtran por operación después) y, si fallan, la
+  // ficha sale igual.
+  const [property, latest] = await Promise.all([
+    getProperty(route, id),
+    getProperties(route, { limit: 8 }).catch(() => null),
+  ])
   if (!property) notFound()
 
   // Parecidas: misma operación, sin esta.
-  const similar = (
-    await getProperties(route, {
-      operation: property.operation,
-      limit: 4,
-    })
-  )?.data
-    .filter((p) => p.id !== property.id)
+  const similar = latest?.data
+    .filter((p) => p.id !== property.id && p.operation === property.operation)
     .slice(0, 3)
 
   const { contact } = site.content

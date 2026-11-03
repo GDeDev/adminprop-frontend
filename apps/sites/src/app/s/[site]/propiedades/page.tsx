@@ -3,7 +3,11 @@ import { notFound } from "next/navigation"
 
 import { ListingFilters } from "@/components/listing-filters"
 import { getFilters, getProperties } from "@/lib/api"
-import { listingSearch, parseListingQuery } from "@/lib/listing-query"
+import {
+  listingSearch,
+  pageWindow,
+  parseListingQuery,
+} from "@/lib/listing-query"
 import { loadSite } from "@/lib/load-site"
 import { hrefFor } from "@/lib/site-route"
 import { templateKit } from "@/templates"
@@ -35,9 +39,10 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
 
   // Un rango de precio sin moneda se compara en la de la inmobiliaria (lo
   // resuelve la API); acá solo se pasan los filtros.
+  // Si la API falla, el listado muestra su propio aviso en vez de la página de error.
   const [result, filters] = await Promise.all([
-    getProperties(route, query),
-    getFilters(route),
+    getProperties(route, query).catch(() => null),
+    getFilters(route).catch(() => null),
   ])
 
   const action = hrefFor({ ...route, previewToken: null }, "/propiedades")
@@ -113,32 +118,53 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
             {pagination && pagination.totalPages > 1 && (
               <nav
                 aria-label="Páginas de resultados"
-                className="mt-10 flex items-center justify-between gap-4"
+                className="mt-10 flex flex-wrap items-center justify-center gap-2"
               >
-                {pagination.hasPreviousPage ? (
+                {pagination.hasPreviousPage && (
                   <a
                     href={pageLink(pagination.page - 1)}
                     rel="prev"
-                    className="rounded-site border-site-border inline-flex min-h-11 items-center border px-5 font-medium"
+                    className="rounded-site border-site-border inline-flex min-h-11 items-center border px-4 font-medium"
                   >
                     ← Anterior
                   </a>
-                ) : (
-                  <span />
                 )}
-                <p className="text-site-muted">
-                  Página {pagination.page} de {pagination.totalPages}
-                </p>
-                {pagination.hasNextPage ? (
+                {pageWindow(pagination.page, pagination.totalPages).map(
+                  (page, i) =>
+                    page === null ? (
+                      <span
+                        key={`gap-${i}`}
+                        aria-hidden
+                        className="text-site-muted px-1"
+                      >
+                        …
+                      </span>
+                    ) : (
+                      <a
+                        key={page}
+                        href={pageLink(page)}
+                        aria-label={`Página ${page}`}
+                        aria-current={
+                          page === pagination.page ? "page" : undefined
+                        }
+                        className={
+                          page === pagination.page
+                            ? "rounded-site bg-site-text text-site-bg inline-flex size-11 items-center justify-center font-semibold"
+                            : "rounded-site border-site-border inline-flex size-11 items-center justify-center border"
+                        }
+                      >
+                        {page}
+                      </a>
+                    )
+                )}
+                {pagination.hasNextPage && (
                   <a
                     href={pageLink(pagination.page + 1)}
                     rel="next"
-                    className="rounded-site border-site-border inline-flex min-h-11 items-center border px-5 font-medium"
+                    className="rounded-site border-site-border inline-flex min-h-11 items-center border px-4 font-medium"
                   >
                     Siguiente →
                   </a>
-                ) : (
-                  <span />
                 )}
               </nav>
             )}

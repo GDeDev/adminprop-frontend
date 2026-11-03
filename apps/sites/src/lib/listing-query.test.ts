@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { listingSearch, parseListingQuery } from "./listing-query"
+import { listingSearch, pageWindow, parseListingQuery } from "./listing-query"
 
 const ID = "11111111-1111-4111-8111-111111111111"
 
@@ -55,5 +55,20 @@ describe("listing query", () => {
     expect(listingSearch({ operation: "RENT" }, { page: 4 })).toBe(
       "?operation=RENT&page=4"
     )
+  })
+
+  it("invierte un rango de precio al revés", () => {
+    expect(parseListingQuery({ priceFrom: "900", priceTo: "100" })).toEqual({
+      priceFrom: "100",
+      priceTo: "900",
+    })
+  })
+
+  it("arma la ventana de páginas con saltos", () => {
+    expect(pageWindow(1, 1)).toEqual([1])
+    expect(pageWindow(2, 3)).toEqual([1, 2, 3])
+    expect(pageWindow(1, 10)).toEqual([1, 2, null, 10])
+    expect(pageWindow(5, 10)).toEqual([1, null, 4, 5, 6, null, 10])
+    expect(pageWindow(10, 10)).toEqual([1, null, 9, 10])
   })
 })

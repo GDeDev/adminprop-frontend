@@ -41,11 +41,12 @@ export async function loadHomeData(loaded: LoadedSite): Promise<HomeData> {
           ? getProperties(route, {
               ids: config.propertyIds,
               limit: config.propertyIds.length,
-            })
+            }).catch(() => null)
           : Promise.resolve(null)
-        : getProperties(route, { limit: config.count })
+        : getProperties(route, { limit: config.count }).catch(() => null)
       : Promise.resolve(null),
-    showSearch ? getFilters(route) : Promise.resolve(null),
+    // Si la API falla acá, la home sale igual (sin destacadas ni opciones).
+    showSearch ? getFilters(route).catch(() => null) : Promise.resolve(null),
   ])
 
   let featured = list?.data ?? []
