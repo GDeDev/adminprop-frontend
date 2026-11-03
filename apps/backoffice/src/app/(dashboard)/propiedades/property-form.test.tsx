@@ -11,6 +11,7 @@ const upload = vi.fn()
 vi.mock("@adminprop/session/client", () => ({
   useSession: () => ({ user: { id: "u1", tenantId: "t1" } }),
 }))
+vi.mock("./[id]/appraisal-sheet", () => ({ AppraisalSheet: () => null }))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
