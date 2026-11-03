@@ -36,7 +36,8 @@ vi.mock("@/lib/services-api", () => ({
   useDeleteService: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
 
-// La publicación tiene sus propios tests.
+// La tasación y la publicación tienen sus propios tests.
+vi.mock("./appraisal-section", () => ({ AppraisalSection: () => null }))
 vi.mock("./publication-section", () => ({ PublicationSection: () => null }))
 
 function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {

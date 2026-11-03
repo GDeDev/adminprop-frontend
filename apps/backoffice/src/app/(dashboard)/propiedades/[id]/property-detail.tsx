@@ -49,6 +49,7 @@ import {
 import { usePropertyServices } from "@/lib/services-api"
 
 import { StatusBadge } from "../property-list"
+import { AppraisalSection } from "./appraisal-section"
 import { PublicationSection } from "./publication-section"
 import { ServicesSection } from "./services-section"
 
@@ -210,6 +211,11 @@ function Detail({ property }: { property: PropertyDetail }) {
           text="Aparece cuando existan contratos y cobros."
         />
       </div>
+
+      <AppraisalSection
+        propertyId={property.id}
+        locationId={property.locationId}
+      />
 
       <PublicationSection propertyId={property.id} />
 
