@@ -24,6 +24,8 @@ import type {
   SettlementSummary,
 } from "@adminprop/shared-types"
 
+import { openInNewTab } from "@adminprop/ui/lib/open-in-new-tab"
+
 import { apiClient } from "./api-client"
 
 const PAGE_SIZE = 12
@@ -209,8 +211,13 @@ export function ownerStatementPdfPath(id: string): string {
  * se pide `?format=json` (devuelve `{ url }`) y se abre esa URL (D-114).
  */
 export async function openPortalPdf(path: string): Promise<void> {
-  const { data } = await apiClient.get<ApiSuccess<{ url: string }>>(path, {
-    params: { format: "json" },
+  // La pestaña se abre en el click y se completa después: Safari/iOS bloquea
+  // un window.open posterior al await.
+  const opened = await openInNewTab(async () => {
+    const { data } = await apiClient.get<ApiSuccess<{ url: string }>>(path, {
+      params: { format: "json" },
+    })
+    return data.data.url
   })
-  window.open(data.data.url, "_blank", "noopener,noreferrer")
+  if (!opened) throw new Error("La API no devolvió un enlace válido al PDF.")
 }

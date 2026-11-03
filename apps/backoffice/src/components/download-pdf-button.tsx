@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { apiErrorMessage } from "@adminprop/session/client"
 import type { DocumentKind } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
+import { openInNewTab } from "@adminprop/ui/lib/open-in-new-tab"
 
 import { fetchDocument, useRegenerateDocument } from "@/lib/documents-api"
 
@@ -37,14 +38,21 @@ export function DownloadPdfButton({
   async function download() {
     setBusy(true)
     try {
-      const outcome = await fetchDocument(kind, entityId)
-      if (outcome.state === "ready") {
-        window.open(outcome.url, "_blank", "noopener,noreferrer")
-      } else if (outcome.state === "failed") {
+      // La pestaña se abre en el click y se completa después: Safari/iOS
+      // bloquea un window.open posterior al await.
+      const seen: { state?: "ready" | "failed" | "timeout" } = {}
+      const opened = await openInNewTab(async () => {
+        const outcome = await fetchDocument(kind, entityId)
+        seen.state = outcome.state
+        return outcome.state === "ready" ? outcome.url : null
+      })
+      if (!opened && seen.state === "ready") {
+        toast.error("No se pudo abrir el PDF.")
+      } else if (seen.state === "failed") {
         toast.error(
           "No se pudo generar el PDF. Un administrador puede regenerarlo."
         )
-      } else {
+      } else if (seen.state === "timeout") {
         toast.info("Todavía no está listo, probá en un momento.")
       }
     } catch (cause) {

@@ -20,6 +20,7 @@ import type {
   InquiryStage,
 } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
+import { openInNewTab } from "@adminprop/ui/lib/open-in-new-tab"
 import {
   Select,
   SelectContent,
@@ -59,20 +60,17 @@ export function useOpenWhatsApp() {
   const attempt = useContactAttempt()
   return React.useCallback(
     async (id: string, templateKey?: string) => {
-      const tab = window.open("", "_blank")
-      if (tab) tab.opener = null
       try {
-        const link = await fetchWhatsAppLink(id, templateKey)
-        if (!link.url) {
-          tab?.close()
+        const opened = await openInNewTab(async () => {
+          const link = await fetchWhatsAppLink(id, templateKey)
+          return link.url
+        })
+        if (!opened) {
           toast.error("La consulta no tiene un teléfono válido para WhatsApp.")
           return
         }
-        if (tab) tab.location.href = link.url
-        else window.open(link.url, "_blank", "noopener,noreferrer")
         await attempt.mutateAsync({ id, channel: "WHATSAPP" })
       } catch (error) {
-        tab?.close()
         toast.error(crmApiError(error, "No se pudo abrir WhatsApp."))
       }
     },
