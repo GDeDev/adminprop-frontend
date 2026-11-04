@@ -168,6 +168,21 @@ describe("safeNextPath", () => {
     }
   })
 
+  it("descarta backslashes y caracteres de control (el navegador los lee como //)", () => {
+    for (const next of [
+      "/\\evil.example",
+      "/\\\\evil.example",
+      "/%5Cevil.example".replace("%5C", "\\"),
+      "/\t/evil.example",
+      "/\n/evil.example",
+      "/\r/evil.example",
+      "/\u0000/evil.example",
+      "/ok\u007f",
+    ]) {
+      expect(safeNextPath(next, "/dashboard")).toBe("/dashboard")
+    }
+  })
+
   it("descarta las rutas de la API de la app y la ausencia de next", () => {
     expect(safeNextPath("/api/session", "/dashboard")).toBe("/dashboard")
     expect(safeNextPath(null, "/dashboard")).toBe("/dashboard")
