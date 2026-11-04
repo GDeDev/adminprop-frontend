@@ -44,6 +44,20 @@ describe("listing query", () => {
     expect(parseListingQuery({})).toEqual({})
   })
 
+  it("lee el orden: recent es el default y no viaja, lo inválido se ignora", () => {
+    expect(parseListingQuery({ sort: "price_asc" })).toEqual({
+      sort: "price_asc",
+    })
+    expect(parseListingQuery({ sort: "price_desc" })).toEqual({
+      sort: "price_desc",
+    })
+    expect(parseListingQuery({ sort: "recent" })).toEqual({})
+    expect(parseListingQuery({ sort: "id; drop table" })).toEqual({})
+    expect(listingSearch({ operation: "SALE", sort: "price_desc" })).toBe(
+      "?operation=SALE&sort=price_desc"
+    )
+  })
+
   it("arma la URL de nuevo, sin la página 1", () => {
     expect(listingSearch({})).toBe("")
     expect(listingSearch({ operation: "RENT", bedrooms: 2 })).toBe(

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { ListingFilters } from "@/components/listing-filters"
+import { SortLinks } from "@/components/sort-links"
 import { getFilters, getProperties } from "@/lib/api"
 import {
   listingSearch,
@@ -112,11 +113,14 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
           </div>
         ) : (
           <>
-            <p className="text-site-muted mb-6" aria-live="polite">
-              {pagination?.total === 1
-                ? "1 propiedad"
-                : `${pagination?.total ?? properties.length} propiedades`}
-            </p>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-site-muted" aria-live="polite">
+                {pagination?.total === 1
+                  ? "1 propiedad"
+                  : `${pagination?.total ?? properties.length} propiedades`}
+              </p>
+              <SortLinks route={route} query={query} />
+            </div>
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {properties.map((property, i) => (
                 <li key={property.id}>
