@@ -184,7 +184,7 @@ function Account({
           {DEPOSIT_RETURN_MODE_LABELS[deposit.returnMode]}
           {deposit.suggestedReturn &&
             !deposit.returned &&
-            ` · a devolver hoy: ${formatMoney(deposit.suggestedReturn, deposit.currency)}`}
+            ` · monto de referencia: ${formatMoney(deposit.suggestedReturn, deposit.currency)}`}
         </p>
         {deposit.returned && (
           <p className="mt-1">
@@ -238,6 +238,18 @@ function Account({
                         movement.description
                       )}
                     </p>
+                    {movement.amount && (
+                      // Los movimientos del depósito traen su importe aparte:
+                      // es informativo y no entra en el saldo.
+                      <p className="num text-xs text-muted-foreground">
+                        Importe:{" "}
+                        {formatMoney(
+                          movement.amount,
+                          movement.amountCurrency ?? account.contract.currency
+                        )}{" "}
+                        (no modifica el saldo)
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell className="text-right num">
                     {movement.debit ? money(movement.debit) : ""}
