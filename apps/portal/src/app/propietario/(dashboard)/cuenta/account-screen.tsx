@@ -10,6 +10,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import {
   formatMoney,
@@ -200,17 +201,12 @@ function Stat({
   warn?: boolean
 }) {
   return (
-    <div className="rounded-xl border bg-card p-4 shadow-raised">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p
-        className={`font-display text-xl font-semibold tabular-nums ${warn ? "text-warning" : ""}`}
-      >
-        {value}
-      </p>
-      {hint && (
-        <p className="text-xs text-muted-foreground tabular-nums">{hint}</p>
-      )}
-    </div>
+    <StatCard
+      label={label}
+      value={value}
+      hint={hint}
+      className={warn ? "text-warning" : undefined}
+    />
   )
 }
 

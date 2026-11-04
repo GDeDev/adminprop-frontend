@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { conversionLabel, crmApiError, STAGE_LABELS, STAGES } from "@/lib/crm"
 import { usePropertyAnalytics } from "@/lib/crm-api"
@@ -229,12 +230,7 @@ function ListingCard({
 }
 
 function Figure({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border p-3">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
-    </div>
-  )
+  return <StatCard label={label} value={value} className="p-4" />
 }
 
 const RANGE_DAYS = 30

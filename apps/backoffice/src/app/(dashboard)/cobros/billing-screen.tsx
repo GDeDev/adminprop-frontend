@@ -43,6 +43,7 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 import { Tabs, TabsList, TabsTrigger } from "@adminprop/ui/components/tabs"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { LoadMore } from "@/components/load-more"
 import {
@@ -270,16 +271,8 @@ function Stat({
         ? "text-warning"
         : tone === "muted"
           ? "text-muted-foreground"
-          : ""
-  return (
-    <div className="rounded-xl border bg-card p-4 shadow-raised">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={`font-display text-xl font-semibold tabular-nums ${color}`}>
-        {value}
-      </p>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
-  )
+          : undefined
+  return <StatCard label={label} value={value} hint={hint} className={color} />
 }
 
 function InstallmentList({

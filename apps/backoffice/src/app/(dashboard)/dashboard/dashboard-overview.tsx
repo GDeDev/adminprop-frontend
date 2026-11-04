@@ -11,6 +11,7 @@ import type {
 } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 
 import { currentPeriod, formatMoneyList, periodLabel } from "@/lib/billing"
@@ -59,17 +60,16 @@ function BucketCard({
   return (
     <Link
       href={href}
-      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
-      <p className="text-sm text-muted-foreground">{title}</p>
-      <p
-        className={`font-display text-2xl font-semibold tabular-nums ${tone === "danger" && bucket.count > 0 ? "text-destructive" : ""}`}
-      >
-        {bucket.count}
-      </p>
-      <p className="text-xs text-muted-foreground tabular-nums">
-        {formatMoneyList(bucket.amounts)}
-      </p>
+      <StatCard
+        label={title}
+        value={String(bucket.count)}
+        hint={<span className="num">{formatMoneyList(bucket.amounts)}</span>}
+        className={
+          tone === "danger" && bucket.count > 0 ? "text-destructive" : undefined
+        }
+      />
     </Link>
   )
 }
@@ -269,12 +269,9 @@ function Figure({
   label: string
   amounts: CurrencyAmount[]
 }) {
+  const value = formatMoneyList(amounts)
+  // Con varias monedas el contador solo animaría la primera: queda estático.
   return (
-    <div className="rounded-xl border bg-card p-4 shadow-raised">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="font-display text-lg font-semibold tabular-nums">
-        {formatMoneyList(amounts)}
-      </p>
-    </div>
+    <StatCard label={label} value={value} animate={!value.includes(" · ")} />
   )
 }

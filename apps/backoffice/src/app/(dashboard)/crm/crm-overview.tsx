@@ -3,17 +3,13 @@
 import Link from "next/link"
 
 import { Skeleton } from "@adminprop/ui/components/skeleton"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { conversionLabel } from "@/lib/crm"
 import { useCrmOverview } from "@/lib/crm-api"
 
 function Figure({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border bg-card p-3 shadow-raised">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
-    </div>
-  )
+  return <StatCard label={label} value={value} className="p-4" />
 }
 
 /** Resumen del embudo y propiedades más consultadas (`/crm/analytics/overview`). */

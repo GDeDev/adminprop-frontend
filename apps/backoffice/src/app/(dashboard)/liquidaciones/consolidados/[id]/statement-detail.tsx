@@ -40,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from "@adminprop/ui/components/table"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { DownloadPdfButton } from "@/components/download-pdf-button"
 import { periodLabel } from "@/lib/billing"
@@ -332,15 +333,7 @@ function Stat({
   value: string
   hint?: string
 }) {
-  return (
-    <div className="rounded-xl border bg-card p-4 shadow-raised">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
-      {hint && (
-        <p className="text-xs text-muted-foreground tabular-nums">{hint}</p>
-      )}
-    </div>
-  )
+  return <StatCard label={label} value={value} hint={hint} />
 }
 
 /** Las confirmadas del propietario que todavía no están en ningún consolidado. */
