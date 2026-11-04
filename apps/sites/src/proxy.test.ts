@@ -41,6 +41,34 @@ describe("proxy", () => {
     expect(resolveHost).toHaveBeenCalledWith("mi-inmo.sites.test")
   })
 
+  it("un host imposible se descarta sin llamar a la API", async () => {
+    vi.stubEnv("SITES_BASE_DOMAIN", "sites.test")
+    for (const host of [
+      "192.168.0.1",
+      "localhost:3003",
+      "a.b.sites.test",
+      "ab.sites.test",
+      "sites.test",
+      "sin-punto",
+      "a_b.com",
+    ]) {
+      const response = await proxy(request("/", host))
+      expect(rewriteOf(response)).toBe("/s/nf")
+    }
+    expect(resolveHost).not.toHaveBeenCalled()
+  })
+
+  it("un subdominio o un dominio propio con forma válida sí se consulta", async () => {
+    vi.stubEnv("SITES_BASE_DOMAIN", "sites.test")
+    resolveHost.mockResolvedValue({ status: "missing" })
+    await proxy(request("/", "mi-inmo.sites.test"))
+    await proxy(request("/", "www.otra-inmo.com.ar"))
+    expect(resolveHost.mock.calls.map(([h]) => h)).toEqual([
+      "mi-inmo.sites.test",
+      "www.otra-inmo.com.ar",
+    ])
+  })
+
   it("un host desconocido es 404 interno", async () => {
     resolveHost.mockResolvedValue({ status: "missing" })
     const response = await proxy(request("/", "nadie.com"))

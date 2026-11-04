@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { resolveHost } from "@/lib/api"
 import { cachedHostLookup, HostLookupError } from "@/lib/host-cache"
+import { isPlausibleSiteHost } from "@/lib/host-policy"
 import {
   encodeSiteRoute,
   isValidPreviewToken,
@@ -64,7 +65,9 @@ export async function proxy(request: NextRequest) {
         .split(",")[0]
         ?.trim() ?? ""
     let slug: string | null = null
-    if (host) {
+    // Lo que jamás podría ser un sitio (IPs, `localhost`, nombres mal formados,
+    // subdominios de dos niveles) se descarta sin llamar a la API.
+    if (host && isPlausibleSiteHost(host)) {
       try {
         slug = await cachedHostLookup(host, resolveHost)
       } catch (error) {
