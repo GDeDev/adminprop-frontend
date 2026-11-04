@@ -24,8 +24,10 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Todo menos el login, los route handlers y los assets.
+  // Todo menos el login, los route handlers y los assets. `login`/`api`
+  // van anclados a un segmento entero: una ruta futura `/apiarios` o
+  // `/login-historial` no debe quedar sin proteger.
   matcher: [
-    "/((?!login|api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|webp|ico)$).*)",
+    "/((?!(?:login|api)(?:/|$)|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|webp|ico)$).*)",
   ],
 }
