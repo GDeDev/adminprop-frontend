@@ -26,7 +26,7 @@ function BrandMark({ tenantName }: { tenantName: string | null }) {
   return (
     <Link
       href="/dashboard"
-      className="block truncate font-display text-xl font-semibold tracking-tight"
+      className="block truncate py-2.5 font-display text-xl font-semibold tracking-tight"
     >
       {tenantName ?? "Adminprop"}
     </Link>

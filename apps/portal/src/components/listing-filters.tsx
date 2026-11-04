@@ -6,7 +6,7 @@ import { Button } from "@adminprop/ui/components/button"
 // Mismo aspecto que `Input`/`Select` del sistema (select nativo: el formulario
 // GET funciona sin JavaScript). Borde visible también en oscuro.
 const FIELD =
-  "h-11 w-full min-w-0 rounded-md border border-input bg-card px-3 py-1 text-base shadow-xs transition-[border-color,box-shadow] outline-none hover:border-foreground/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 md:h-9 md:text-sm dark:border-muted-foreground/50 [&>option]:bg-background [&>option]:text-foreground"
+  "h-11 w-full min-w-0 rounded-md border border-control bg-card px-3 py-1 text-base shadow-xs transition-[border-color,box-shadow] outline-none hover:border-foreground/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 md:h-9 md:text-sm [&>option]:bg-background [&>option]:text-foreground"
 
 /**
  * Filtros del listado: un formulario GET, así funcionan sin JavaScript y

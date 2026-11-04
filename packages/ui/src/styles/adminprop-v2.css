@@ -65,6 +65,8 @@
   /* Líneas: translúcidas, se adaptan a la superficie que tengan debajo */
   --border: oklch(0.21 0.03 258 / 0.1);
   --input: oklch(0.21 0.03 258 / 0.18);
+  /* Borde de campos y controles: opaco, 3:1 contra card y fondo (WCAG 1.4.11) */
+  --control: oklch(0.62 0.02 258);
   --ring: var(--primary);
 
   /* Chrome oscuro (sidebar, bottom-nav): no es tema, es igual en claro y oscuro */
@@ -166,6 +168,7 @@
 
   --border: oklch(1 0 0 / 0.09);
   --input: oklch(1 0 0 / 0.15);
+  --control: oklch(0.54 0.02 262);
   --ring: var(--primary);
 
   --sidebar: oklch(0.14 0.022 262);
@@ -228,6 +231,7 @@
   --color-overlay: var(--overlay);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-control: var(--control);
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);

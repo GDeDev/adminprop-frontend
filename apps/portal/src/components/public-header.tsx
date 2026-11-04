@@ -14,7 +14,7 @@ export async function PublicHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
         <Link
           href="/"
-          className="flex min-w-0 items-center gap-2 font-display text-xl font-semibold tracking-tight"
+          className="flex min-w-0 items-center gap-2 py-2.5 font-display text-xl font-semibold tracking-tight"
         >
           {branding?.logoUrl && (
             // Logo del tenant: host variable, sin next/image.

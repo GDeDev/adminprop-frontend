@@ -379,6 +379,20 @@
   .stagger > * {
     animation: none !important;
   }
+  /* Esqueletos y entradas/salidas de diálogos, menús y popovers (tw-animate-css) */
+  .animate-pulse {
+    animation: none !important;
+  }
+  .animate-in,
+  .animate-out {
+    animation-duration: 1ms !important;
+  }
+  /* Toasts de sonner */
+  [data-sonner-toast],
+  [data-sonner-toaster] {
+    transition: none !important;
+    animation: none !important;
+  }
   .shimmer::after {
     animation: none !important;
     display: none;

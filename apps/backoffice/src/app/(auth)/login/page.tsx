@@ -16,7 +16,9 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-display text-xl">Ingresar</CardTitle>
+        <CardTitle className="font-display text-xl">
+          <h1>Ingresar</h1>
+        </CardTitle>
         <CardDescription>Accedé con tu email y contraseña.</CardDescription>
       </CardHeader>
       <CardContent>
