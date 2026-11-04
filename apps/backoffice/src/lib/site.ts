@@ -91,6 +91,18 @@ export const SECTION_LABELS: Record<SiteSectionKey, string> = {
   contact: "Contacto",
 }
 
+/**
+ * Miniaturas reales de los templates (capturas del sitio renderizado con datos
+ * de ejemplo, 640x400, en `public/templates/`). Se usan cuando el template no
+ * trae su propia `previewImageUrl`. Para regenerarlas ver
+ * `docs/tecnica/web-inmobiliaria-v1-1.md`.
+ */
+export const TEMPLATE_THUMBNAILS: Record<string, string> = {
+  CLASSIC: "/templates/classic.png",
+  MODERN: "/templates/modern.png",
+  LUXURY: "/templates/luxury.png",
+}
+
 export const TEMPLATE_LABELS = {
   CLASSIC: "Clásico",
   MODERN: "Moderno",

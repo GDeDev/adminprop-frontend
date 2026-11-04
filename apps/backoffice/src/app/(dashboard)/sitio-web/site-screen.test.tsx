@@ -522,9 +522,11 @@ describe("Mi sitio web", () => {
       expect(reset).not.toHaveBeenCalled()
     })
 
-    it("la mini-maqueta usa el tema por defecto del template (placeholder sin miniatura)", () => {
+    it("cada template muestra su miniatura real", () => {
       render(<SiteScreen />)
-      expect(screen.queryByAltText(/Miniatura/)).toBeNull()
+      expect(
+        screen.getByAltText("Vista de ejemplo del template Clásico")
+      ).toHaveAttribute("src", "/templates/classic.png")
       expect(screen.getByRole("radio", { name: /Clásico/ })).toHaveAttribute(
         "aria-checked",
         "true"

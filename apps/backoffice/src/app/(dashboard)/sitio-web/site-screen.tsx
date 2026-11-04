@@ -368,6 +368,13 @@ function Editor({
     }
   }
 
+  // Un template que esta versión no conoce igual se puede mostrar: usa el
+  // nombre que manda la API (o su clave).
+  const templateLabel = (key: SiteTemplateKey): string =>
+    (TEMPLATE_LABELS as Record<string, string>)[key] ??
+    templates.find((t) => t.key === key)?.name ??
+    key
+
   const slug = tenant.data?.slug
   const previewPanel = <PreviewPanel slug={slug} version={previewVersion} />
 
@@ -573,7 +580,7 @@ function Editor({
           <ResponsiveDialogHeader>
             <ResponsiveDialogTitle>
               ¿Pasar al template{" "}
-              {pendingTemplate ? TEMPLATE_LABELS[pendingTemplate] : ""}?
+              {pendingTemplate ? templateLabel(pendingTemplate) : ""}?
             </ResponsiveDialogTitle>
             <ResponsiveDialogDescription>
               Tus textos e imágenes se conservan. ¿Querés también restaurar los
