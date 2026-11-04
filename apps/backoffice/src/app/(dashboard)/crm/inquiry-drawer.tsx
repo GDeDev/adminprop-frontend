@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Loader2, MessageCircle, Save, Send } from "lucide-react"
+import { Loader2, Mail, MessageCircle, Phone, Save, Send } from "lucide-react"
 import { toast } from "sonner"
 
 import type {
@@ -45,6 +45,7 @@ import {
   useAddNote,
   useAssignInquiry,
   useAssignees,
+  useContactAttempt,
   useInquiry,
   useUpdateInquiry,
 } from "@/lib/crm-api"
@@ -142,6 +143,7 @@ function Detail({
       <StageAssign inquiry={inquiry} onMove={onMove} stageCards={stageCards} />
       <EditForm inquiry={inquiry} />
       <WhatsAppSection inquiry={inquiry} />
+      <ContactAttempts inquiry={inquiry} />
       <Timeline inquiry={inquiry} />
     </>
   )
@@ -377,6 +379,50 @@ function WhatsAppSection({ inquiry }: { inquiry: InquiryDetail }) {
   )
 }
 
+/** Registro manual de un llamado o un email (el de WhatsApp sale del botón). */
+function ContactAttempts({ inquiry }: { inquiry: InquiryDetail }) {
+  const attempt = useContactAttempt()
+
+  async function register(channel: "PHONE" | "EMAIL") {
+    try {
+      await attempt.mutateAsync({ id: inquiry.id, channel })
+      toast.success("Intento de contacto registrado.")
+    } catch (error) {
+      toast.error(crmApiError(error, "No se pudo registrar el contacto."))
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-sm text-muted-foreground">
+        Registrar un intento de contacto:
+      </span>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="min-h-11 md:min-h-8"
+        disabled={attempt.isPending}
+        onClick={() => void register("PHONE")}
+      >
+        <Phone aria-hidden />
+        Llamado
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="min-h-11 md:min-h-8"
+        disabled={attempt.isPending}
+        onClick={() => void register("EMAIL")}
+      >
+        <Mail aria-hidden />
+        Email
+      </Button>
+    </div>
+  )
+}
+
 function Timeline({ inquiry }: { inquiry: InquiryDetail }) {
   const id = React.useId()
   const addNote = useAddNote(inquiry.id)
@@ -432,6 +478,11 @@ function Timeline({ inquiry }: { inquiry: InquiryDetail }) {
           </Button>
         </div>
       </form>
+      {activities.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Todavía no hay actividad registrada.
+        </p>
+      )}
       <ol className="flex flex-col gap-2 border-l pl-4">
         {activities.map((activity) => (
           <li key={activity.id} className="text-sm">
