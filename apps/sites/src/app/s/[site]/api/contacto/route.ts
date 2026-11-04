@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { apiUrl } from "@/lib/api"
 import { clientIp } from "@/lib/client-ip"
+import { isSameOrigin } from "@/lib/origin"
 import { decodeSiteRoute } from "@/lib/site-route"
 
 const MAX_BODY = 8_000
@@ -33,7 +34,7 @@ export async function POST(
   const origin = request.headers.get("origin")
   const host =
     request.headers.get("x-forwarded-host") ?? request.headers.get("host")
-  if (origin && host && new URL(origin).host !== host.split(",")[0]?.trim()) {
+  if (!isSameOrigin(origin, host)) {
     return fail(403, "Pedido no permitido.")
   }
 
