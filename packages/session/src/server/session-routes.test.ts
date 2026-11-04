@@ -59,7 +59,8 @@ afterEach(() => {
 describe("POST /api/session (guardar la sesión del login)", () => {
   it("guarda el refresh token en una cookie httpOnly y la marca de la inmobiliaria", async () => {
     const refreshToken = fakeJwt(inOneWeek())
-    fetchMock.mockResolvedValue(
+    fetchMock.mockResolvedValueOnce(apiResponds(200, { id: "u1" }))
+    fetchMock.mockResolvedValueOnce(
       apiResponds(200, {
         id: "t1",
         name: "Inmobiliaria Demo",
@@ -88,10 +89,52 @@ describe("POST /api/session (guardar la sesión del login)", () => {
       primaryColor: "#1f4e79",
     })
     // La marca se pide con el access token recién emitido.
-    const [url, init] = fetchMock.mock.calls[0]!
+    const [url, init] = fetchMock.mock.calls[1]!
     expect(url).toBe(`${API}/tenants/current`)
     expect((init?.headers as Record<string, string>).Authorization).toBe(
       "Bearer access"
+    )
+  })
+
+  it("no escribe cookies si la API no reconoce el access token", async () => {
+    fetchMock.mockResolvedValue(apiResponds(401, null))
+    const response = await routes.start(
+      request("/api/session", {
+        method: "POST",
+        body: { accessToken: "inventado", refreshToken: fakeJwt(inOneWeek()) },
+      })
+    )
+
+    expect(response.status).toBe(401)
+    expect(response.cookies.get("bo_rt")).toBeUndefined()
+    expect(response.cookies.get("bo_brand")).toBeUndefined()
+  })
+
+  it("si la API no responde, no guarda la sesión (503)", async () => {
+    fetchMock.mockRejectedValue(new Error("down"))
+    const response = await routes.start(
+      request("/api/session", {
+        method: "POST",
+        body: { accessToken: "a", refreshToken: fakeJwt(inOneWeek()) },
+      })
+    )
+
+    expect(response.status).toBe(503)
+    expect(response.cookies.get("bo_rt")).toBeUndefined()
+  })
+
+  it("la cookie no dura más de 30 días aunque el exp sea lejano", async () => {
+    fetchMock.mockImplementation(async () => apiResponds(200, {}))
+    const farFuture = Math.floor(Date.now() / 1000) + 365 * 24 * 3600
+    const response = await routes.start(
+      request("/api/session", {
+        method: "POST",
+        body: { accessToken: "a", refreshToken: fakeJwt(farFuture) },
+      })
+    )
+
+    expect(response.cookies.get("bo_rt")?.maxAge).toBeLessThanOrEqual(
+      30 * 24 * 3600
     )
   })
 
