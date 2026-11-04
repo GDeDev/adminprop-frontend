@@ -5,7 +5,11 @@
  * y se agregó este encabezado. Si algo tiene que
  * cambiar, se cambia primero allá y se anota como desvío.
  */
-export type SiteTemplateKey = "CLASSIC" | "MODERN"
+/**
+ * La spec 5.1 define CLASSIC y MODERN; LUXURY se suma en la v1.1 (aditivo: el
+ * backend lo registra en su catálogo de templates).
+ */
+export type SiteTemplateKey = "CLASSIC" | "MODERN" | "LUXURY"
 export type SiteSectionKey =
   | "hero"
   | "steps"

@@ -94,6 +94,7 @@ export const SECTION_LABELS: Record<SiteSectionKey, string> = {
 export const TEMPLATE_LABELS = {
   CLASSIC: "Clásico",
   MODERN: "Moderno",
+  LUXURY: "Lujo",
 } as const
 
 /* ------------------------------------------------------------------ */
