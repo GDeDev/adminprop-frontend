@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Calculator } from "lucide-react"
+import { Sparkles } from "lucide-react"
 
 import type { Currency } from "@adminprop/shared-types"
+import { AiBadge } from "@adminprop/ui/components/ai-badge"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -41,8 +42,8 @@ export function AppraisalSection({
         >
           Historial de tasaciones
         </h2>
-        <Button variant="outline" onClick={() => setOpen(true)}>
-          <Calculator aria-hidden />
+        <Button variant="ai" onClick={() => setOpen(true)}>
+          <Sparkles aria-hidden />
           Sugerir precio
         </Button>
       </div>
@@ -74,8 +75,11 @@ export function AppraisalSection({
                 className="flex flex-col gap-1 py-2 text-sm first:pt-0 last:pb-0"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-display num font-semibold">
-                    {money(item.suggestedPriceRounded)}
+                  <span className="flex items-center gap-2">
+                    <span className="font-display num font-semibold">
+                      {money(item.suggestedPriceRounded)}
+                    </span>
+                    <AiBadge>Sugerido</AiBadge>
                   </span>
                   <Badge variant={confidence.badge}>{confidence.label}</Badge>
                 </div>

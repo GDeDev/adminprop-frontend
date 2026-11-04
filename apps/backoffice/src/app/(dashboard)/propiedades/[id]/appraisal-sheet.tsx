@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react"
 
 import type { Currency, ValuationResult } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
+import { AiBadge } from "@adminprop/ui/components/ai-badge"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import {
@@ -260,7 +261,10 @@ export function ResultView({ result }: { result: ValuationResult }) {
   return (
     <div className="flex flex-col gap-4" aria-live="polite">
       <div>
-        <p className="text-xs text-muted-foreground">Precio sugerido</p>
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          Precio sugerido
+          <AiBadge>Sugerido</AiBadge>
+        </p>
         <p className="font-display num text-display-md font-semibold">
           {money(result.suggestedPriceRounded)}
         </p>
