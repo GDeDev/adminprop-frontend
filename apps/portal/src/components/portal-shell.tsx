@@ -58,6 +58,31 @@ function SecurityLink({
   )
 }
 
+function SecurityLink({
+  role,
+  className,
+}: {
+  role: PortalRole
+  className?: string
+}) {
+  return (
+    <Button
+      asChild
+      variant="ghost"
+      size="icon"
+      className={className}
+      title="Seguridad de la cuenta"
+    >
+      <Link
+        href={`${PORTAL_AREAS[role].basePath}/seguridad`}
+        aria-label="Seguridad de la cuenta"
+      >
+        <KeyRound aria-hidden />
+      </Link>
+    </Button>
+  )
+}
+
 function SignOutButton({
   role,
   className,
@@ -151,6 +176,7 @@ export function PortalShell({
           </Link>
           <div className="flex shrink-0 items-center">
             <ThemeToggle className="hover:bg-muted" />
+            <SecurityLink role={role} className="hover:bg-muted" />
             <SecurityLink role={role} className="hover:bg-muted" />
             <SignOutButton role={role} className="hover:bg-muted" />
           </div>
