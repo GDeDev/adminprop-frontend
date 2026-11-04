@@ -6,4 +6,3 @@ coverage/
 pnpm-lock.yaml
 .pnpm-store/
 # Copia textual del sistema de diseño: no se reformatea.
-packages/ui/src/styles/adminprop.css

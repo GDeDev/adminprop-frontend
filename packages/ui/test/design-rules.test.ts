@@ -21,7 +21,6 @@ const components = readdirSync(componentsDir)
     source: readFileSync(path.join(componentsDir, file), "utf8"),
   }))
 
-const v1 = readFileSync(path.join(stylesDir, "adminprop.css"), "utf8")
 const v2 = readFileSync(path.join(stylesDir, "adminprop-v2.css"), "utf8")
 const effects = readFileSync(
   path.join(stylesDir, "adminprop-v2-effects.css"),
@@ -94,12 +93,51 @@ describe("reglas del sistema de diseño (tokens v2)", () => {
   const names = (css: string) =>
     new Set([...css.matchAll(/^\s*--([\w-]+):/gm)].map((m) => m[1]!))
 
-  it("v2 conserva todos los tokens de color de v1 (las apps no cambian)", () => {
-    const colorTokens = [...names(v1)].filter(
-      (name) =>
-        !/^(radius|space|shadow)/.test(name) && !name.startsWith("font-")
-    )
-    const missing = colorTokens.filter((name) => !names(v2).has(name))
+  it("v2 define todos los tokens de color que usan las apps y los componentes", () => {
+    // Nombres heredados de v1 (el archivo ya no existe; la lista congela el
+    // contrato para que borrar un token no rompa pantallas en silencio).
+    const base = [
+      "background",
+      "foreground",
+      "card",
+      "card-foreground",
+      "popover",
+      "popover-foreground",
+      "primary",
+      "primary-foreground",
+      "primary-soft",
+      "secondary",
+      "secondary-foreground",
+      "muted",
+      "muted-foreground",
+      "accent",
+      "accent-foreground",
+      "accent-soft",
+      "destructive",
+      "destructive-foreground",
+      "destructive-soft",
+      "success",
+      "success-foreground",
+      "success-soft",
+      "warning",
+      "warning-foreground",
+      "warning-soft",
+      "info",
+      "info-soft",
+      "border",
+      "input",
+      "ring",
+      "sidebar",
+      "sidebar-foreground",
+      "sidebar-muted",
+      "sidebar-border",
+      "chart-1",
+      "chart-2",
+      "chart-3",
+      "chart-4",
+      "chart-5",
+    ]
+    const missing = base.filter((name) => !names(v2).has(name))
     expect(missing).toEqual([])
   })
 
