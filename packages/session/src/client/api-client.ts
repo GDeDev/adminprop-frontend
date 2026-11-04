@@ -94,7 +94,23 @@ export function safeNextPath(
 ): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) return fallback
   if (next.startsWith("/api/")) return fallback
+  // El navegador trata `\` como `/` y descarta tabs/saltos de línea al parsear:
+  // `/\evil.com` y `/\t/evil.com` terminan siendo `//evil.com`.
+  if (UNSAFE_PATH_CHARS.test(next)) return fallback
+  // Última red: si resuelto contra un origen cualquiera cambia de host, no es
+  // una ruta de esta app.
+  try {
+    if (new URL(next, SENTINEL_ORIGIN).origin !== SENTINEL_ORIGIN) {
+      return fallback
+    }
+  } catch {
+    return fallback
+  }
   return next
 }
+
+// eslint-disable-next-line no-control-regex
+const UNSAFE_PATH_CHARS = /[\\\u0000-\u001f\u007f]/
+const SENTINEL_ORIGIN = "http://app.invalid"
 
 export { DEFAULT_SESSION_PATH }

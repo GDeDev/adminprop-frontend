@@ -39,6 +39,7 @@ import {
   isFollowUpDue,
 } from "@/lib/crm"
 import { todayIso } from "@/lib/dates"
+import { safeHttpUrl } from "@/lib/safe-url"
 
 const SOURCE_ICONS: Record<InquirySource, LucideIcon> = {
   PORTAL: Globe,
@@ -63,13 +64,14 @@ export function useOpenWhatsApp() {
       if (tab) tab.opener = null
       try {
         const link = await fetchWhatsAppLink(id, templateKey)
-        if (!link.url) {
+        const url = safeHttpUrl(link.url)
+        if (!url) {
           tab?.close()
           toast.error("La consulta no tiene un teléfono válido para WhatsApp.")
           return
         }
-        if (tab) tab.location.href = link.url
-        else window.open(link.url, "_blank", "noopener,noreferrer")
+        if (tab) tab.location.href = url
+        else window.open(url, "_blank", "noopener,noreferrer")
         await attempt.mutateAsync({ id, channel: "WHATSAPP" })
       } catch (error) {
         tab?.close()
