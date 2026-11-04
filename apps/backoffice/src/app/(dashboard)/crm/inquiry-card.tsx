@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   AlarmClock,
+  ArrowRightLeft,
   Globe,
   GripVertical,
   Home,
@@ -20,6 +21,13 @@ import type {
   InquiryStage,
 } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@adminprop/ui/components/dropdown-menu"
 import {
   Select,
   SelectContent,
@@ -87,6 +95,11 @@ export interface CardViewProps {
   onMoveTo?: (stage: InquiryStage) => void
   /** Props del botón de arrastre (desktop). */
   dragHandle?: React.ComponentProps<"button">
+  /**
+   * Desktop: menú «Mover a…», la alternativa al arrastre para quien usa
+   * teclado, lector de pantalla o tiene dificultad para arrastrar.
+   */
+  onMoveMenu?: (stage: InquiryStage) => void
 }
 
 /** Tarjeta de una consulta, compartida por el tablero y la lista mobile. */
@@ -95,6 +108,7 @@ export function InquiryCardView({
   onOpen,
   onMoveTo,
   dragHandle,
+  onMoveMenu,
 }: CardViewProps) {
   const openWhatsApp = useOpenWhatsApp()
   const SourceIcon = SOURCE_ICONS[card.source]
@@ -108,7 +122,7 @@ export function InquiryCardView({
             type="button"
             {...dragHandle}
             aria-label={`Mover la consulta de ${card.name}`}
-            className="-ml-1 flex size-8 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none pointer-coarse:size-11"
           >
             <GripVertical aria-hidden className="size-4" />
           </button>
@@ -116,7 +130,7 @@ export function InquiryCardView({
         <button
           type="button"
           onClick={() => onOpen(card.id)}
-          className="min-w-0 flex-1 rounded text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="min-h-11 min-w-0 flex-1 rounded text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <span className="block truncate font-medium">{card.name}</span>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -126,6 +140,7 @@ export function InquiryCardView({
             </span>
           </span>
         </button>
+        {onMoveMenu && <MoveMenu card={card} onSelect={onMoveMenu} />}
         {card.assignedTo && (
           <span
             title={card.assignedTo.fullName}
@@ -155,7 +170,6 @@ export function InquiryCardView({
         {card.hasWhatsApp && (
           <Button
             type="button"
-            size="sm"
             variant="outline"
             onClick={() => void openWhatsApp(card.id)}
             aria-label={`WhatsApp a ${card.name}`}
@@ -172,7 +186,7 @@ export function InquiryCardView({
             <SelectTrigger
               size="sm"
               aria-label={`Mover a… (${card.name})`}
-              className="ml-auto"
+              className="ml-auto data-[size=sm]:h-11 md:data-[size=sm]:h-8"
             >
               <SelectValue />
             </SelectTrigger>
@@ -187,5 +201,41 @@ export function InquiryCardView({
         )}
       </div>
     </div>
+  )
+}
+
+/** Menú «Mover a…» con las etapas a las que puede ir la consulta. */
+function MoveMenu({
+  card,
+  onSelect,
+}: {
+  card: InquiryCard
+  onSelect: (stage: InquiryStage) => void
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={`Mover a… (${card.name})`}
+        >
+          <ArrowRightLeft aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Mover a…</DropdownMenuLabel>
+        {STAGES.filter((stage) => stage !== card.stage).map((stage) => (
+          <DropdownMenuItem
+            key={stage}
+            className="min-h-11 md:min-h-8"
+            onSelect={() => onSelect(stage)}
+          >
+            {STAGE_LABELS[stage]}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
