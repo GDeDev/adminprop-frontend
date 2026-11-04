@@ -498,6 +498,7 @@ function RentHistory({ contract }: { contract: ContractDetail }) {
                 {indexLabel(update)}
               </p>
             )}
+            {update.adjustmentReason && <ManualAdjustment update={update} />}
           </li>
         ))}
       </ul>
@@ -510,6 +511,7 @@ function RentHistory({ contract }: { contract: ContractDetail }) {
               <TableHead className="text-right">Nuevo</TableHead>
               <TableHead>Origen</TableHead>
               <TableHead>Índice</TableHead>
+              <TableHead>Motivo y autorización</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -530,12 +532,33 @@ function RentHistory({ contract }: { contract: ContractDetail }) {
                 <TableCell className="text-muted-foreground">
                   {update.indexType ? indexLabel(update) : "—"}
                 </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {update.adjustmentReason ? (
+                    <ManualAdjustment update={update} />
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
     </>
+  )
+}
+
+/** Motivo y autorizante de un ajuste manual (D-230); los demás no los tienen. */
+function ManualAdjustment({
+  update,
+}: {
+  update: ContractDetail["rentUpdates"][number]
+}) {
+  return (
+    <div className="mt-1 text-xs text-muted-foreground">
+      <p>Motivo: {update.adjustmentReason}</p>
+      {update.authorizedBy && <p>Autorizado por: {update.authorizedBy}</p>}
+    </div>
   )
 }
 

@@ -195,6 +195,32 @@ afterEach(() => {
 })
 
 describe("ContractDetailScreen", () => {
+  it("muestra el motivo y quién autorizó un ajuste manual en el historial", () => {
+    const base = makeContract()
+    contract = makeContract({
+      rentUpdates: [
+        {
+          ...base.rentUpdates[0]!,
+          id: "u3",
+          source: "MANUAL",
+          indexType: null,
+          adjustmentReason: "Acuerdo por refacciones",
+          authorizedBy: "María Fernández",
+        },
+        ...base.rentUpdates,
+      ],
+    })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    render(<ContractDetailScreen id="c1" />)
+    const history = screen.getByRole("table")
+    expect(
+      within(history).getByText("Motivo: Acuerdo por refacciones")
+    ).toBeInTheDocument()
+    expect(
+      within(history).getByText("Autorizado por: María Fernández")
+    ).toBeInTheDocument()
+  })
+
   it("muestra la línea de tiempo, las partes con link y el historial de aumentos", () => {
     contract = makeContract()
     previewState = { isPending: true, isError: false, isSuccess: false }
@@ -323,9 +349,27 @@ describe("ContractDetailScreen", () => {
 
     await user.type(screen.getByLabelText("Nuevo alquiler"), "600.000,00")
     await user.click(dialogButton)
+    // Un monto a mano es un ajuste manual: sin motivo ni autorizante no sale.
+    expect(
+      await screen.findByText("Indicá el motivo del ajuste manual.")
+    ).toBeInTheDocument()
+    expect(screen.getByText("Indicá quién autorizó el ajuste.")).toBeVisible()
+    expect(applyRentUpdate).not.toHaveBeenCalled()
+
+    await user.type(
+      screen.getByLabelText("Motivo del ajuste"),
+      "Acuerdo por refacciones"
+    )
+    await user.type(
+      screen.getByLabelText("Autorizado por"),
+      "María Fernández (propietaria)"
+    )
+    await user.click(dialogButton)
     expect(applyRentUpdate).toHaveBeenCalledWith({
       id: "c1",
       newRent: "600000.00",
+      reason: "Acuerdo por refacciones",
+      authorizedBy: "María Fernández (propietaria)",
     })
     expect(
       await screen.findByText("No se pudo aplicar el aumento.")
