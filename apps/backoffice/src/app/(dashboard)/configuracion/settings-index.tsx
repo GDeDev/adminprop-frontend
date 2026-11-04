@@ -9,6 +9,7 @@ import {
   Building2,
   History,
   ListTree,
+  SlidersHorizontal,
   Timer,
   TrendingUp,
   Users,
@@ -69,6 +70,14 @@ export function SettingsIndex() {
                 icon={Building2}
                 title="Inmobiliaria"
                 description="Razón social, CUIT, datos bancarios, logo y color que salen en los PDF."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/parametros"
+                icon={SlidersHorizontal}
+                title="Parámetros de cobro"
+                description="Punitorio diario y días de gracia por defecto de la inmobiliaria."
               />
             </li>
             <li>
