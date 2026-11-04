@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
+import { Loader2Icon } from "lucide-react"
 import { Slot } from "radix-ui"
 
 const buttonVariants = cva(
@@ -13,7 +14,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground shadow-primary-edge hover:bg-destructive/90 focus-visible:ring-destructive/30 dark:focus-visible:ring-destructive/40",
         outline:
-          "border border-input bg-card shadow-edge hover:bg-muted hover:text-foreground dark:bg-input/30 dark:hover:bg-input/50",
+          "border border-control bg-card shadow-edge hover:bg-muted hover:text-foreground dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/70",
         ghost: "hover:bg-muted hover:text-foreground dark:hover:bg-muted/50",
@@ -23,13 +24,15 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-11 px-4 py-2 has-[>svg]:px-3 md:h-9",
-        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
+        // xs: chip denso; el área táctil crece por debajo de md con un pseudo-elemento
+        xs: "relative h-6 gap-1 rounded-md px-2 text-xs after:absolute after:-inset-x-1 after:-inset-y-2.5 after:content-[''] has-[>svg]:px-1.5 md:after:hidden [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-11 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5 md:h-8",
         lg: "h-11 rounded-md px-6 has-[>svg]:px-4 md:h-10",
         icon: "size-11 md:size-9",
-        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8",
-        "icon-lg": "size-10",
+        "icon-xs":
+          "relative size-6 rounded-md after:absolute after:-inset-2.5 after:content-[''] md:after:hidden [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-11 md:size-8",
+        "icon-lg": "size-11 md:size-10",
       },
     },
     defaultVariants: {
@@ -44,12 +47,18 @@ function Button({
   variant = "default",
   size = "default",
   asChild = false,
+  loading = false,
+  disabled,
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    /** Muestra un spinner y bloquea el botón (aria-busy). No aplica con `asChild`. */
+    loading?: boolean
   }) {
   const Comp = asChild ? Slot.Root : "button"
+  const busy = loading && !asChild
 
   return (
     <Comp
@@ -57,8 +66,20 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={disabled || busy}
+      aria-busy={busy || undefined}
       {...props}
-    />
+    >
+      {/* Slot exige un único hijo: con asChild no se agrega el spinner. */}
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {busy && <Loader2Icon aria-hidden className="animate-spin" />}
+          {children}
+        </>
+      )}
+    </Comp>
   )
 }
 

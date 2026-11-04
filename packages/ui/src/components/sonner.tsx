@@ -17,6 +17,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      // En mobile los toasts suben por encima del BottomNav (4rem) y del
+      // área segura del equipo, para no taparlo ni quedar bajo la barra de
+      // gestos. Desde md: la esquina inferior derecha, sin barra abajo.
+      mobileOffset={{
+        bottom: "calc(4rem + env(safe-area-inset-bottom) + 0.75rem)",
+        left: "0.75rem",
+        right: "0.75rem",
+      }}
       icons={{
         success: <CircleCheckIcon className="size-4 text-success" />,
         info: <InfoIcon className="size-4 text-info" />,
@@ -32,7 +40,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--border-radius": "var(--radius-lg)",
         } as React.CSSProperties
       }
-      toastOptions={{ classNames: { toast: "shadow-float!" } }}
+      toastOptions={{
+        classNames: {
+          toast: "shadow-float!",
+          // Sonner pinta la descripción con un gris propio que no llega a AA.
+          description: "text-muted-foreground!",
+        },
+      }}
       {...props}
     />
   )

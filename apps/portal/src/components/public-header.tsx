@@ -9,7 +9,7 @@ export function PublicHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
         <Link
           href="/"
-          className="font-display text-xl font-semibold tracking-tight"
+          className="inline-block py-2.5 font-display text-xl font-semibold tracking-tight"
         >
           Adminprop
         </Link>

@@ -150,7 +150,7 @@ function Overview({ report }: { report: DashboardReport }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section
-          className="rounded-xl border bg-card p-4"
+          className="min-w-0 rounded-xl border bg-card p-4"
           aria-labelledby="todo-title"
         >
           <h2
@@ -169,7 +169,7 @@ function Overview({ report }: { report: DashboardReport }) {
                 <li key={item.key}>
                   <Link
                     href={item.href}
-                    className="flex items-center justify-between py-2 text-sm hover:underline"
+                    className="flex min-h-11 items-center justify-between py-2 text-sm hover:underline md:min-h-9"
                   >
                     {item.label}
                     <span className="font-semibold tabular-nums">
@@ -183,7 +183,7 @@ function Overview({ report }: { report: DashboardReport }) {
         </section>
 
         <section
-          className="rounded-xl border bg-card p-4"
+          className="min-w-0 rounded-xl border bg-card p-4"
           aria-labelledby="expiring-title"
         >
           <h2
@@ -202,7 +202,7 @@ function Overview({ report }: { report: DashboardReport }) {
                 <li key={row.contractId}>
                   <Link
                     href={`/contratos/${row.contractId}`}
-                    className="flex items-center justify-between gap-3 py-2 text-sm hover:underline"
+                    className="flex min-h-11 items-center justify-between gap-3 py-2 text-sm hover:underline md:min-h-9"
                   >
                     <span className="min-w-0 truncate">
                       {row.propertyAddress} · {row.renterName}
