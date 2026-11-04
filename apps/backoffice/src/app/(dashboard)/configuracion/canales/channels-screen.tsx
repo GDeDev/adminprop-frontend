@@ -25,6 +25,7 @@ import { Skeleton } from "@adminprop/ui/components/skeleton"
 import { formatDateTime } from "@/lib/automations"
 import { crmApiError } from "@/lib/crm"
 import { CHANNEL_LABELS, channelStatusMeta } from "@/lib/listings"
+import { safeHttpUrl } from "@/lib/safe-url"
 import {
   useChannels,
   useConnectMercadoLibre,
@@ -148,7 +149,9 @@ function MercadoLibreActions({ channel }: { channel: ListingChannelDto }) {
   async function start() {
     try {
       const { authorizeUrl } = await connect.mutateAsync()
-      window.location.assign(authorizeUrl)
+      const url = safeHttpUrl(authorizeUrl)
+      if (!url) throw new Error("URL de autorización inválida")
+      window.location.assign(url)
     } catch (error) {
       toast.error(crmApiError(error, "No se pudo iniciar la conexión."))
     }
