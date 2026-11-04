@@ -4,4 +4,11 @@
 // vista previa vive en su propio árbol, que reusa las mismas páginas.
 export const dynamic = "force-dynamic"
 
-export { default, generateMetadata } from "../../s/[site]/layout"
+// `generateViewport` también: sin él la vista previa perdía el `theme-color` del
+// sitio (el color de la barra del navegador del celular) y se veía distinta de
+// lo publicado.
+export {
+  default,
+  generateMetadata,
+  generateViewport,
+} from "../../s/[site]/layout"
