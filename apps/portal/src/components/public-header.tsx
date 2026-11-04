@@ -5,7 +5,7 @@ import { ThemeToggle } from "@adminprop/ui/components/theme-toggle"
 /** Header del sitio público. El nombre/logo es slot de marca del tenant. */
 export function PublicHeader() {
   return (
-    <header className="sticky top-0 z-30 bg-sidebar pt-[env(safe-area-inset-top)] text-sidebar-foreground">
+    <header className="sticky top-0 z-30 border-b border-sidebar-border bg-sidebar chrome-glow pt-[env(safe-area-inset-top)] text-sidebar-foreground supports-[backdrop-filter]:bg-sidebar/85 supports-[backdrop-filter]:backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
         <Link
           href="/"
