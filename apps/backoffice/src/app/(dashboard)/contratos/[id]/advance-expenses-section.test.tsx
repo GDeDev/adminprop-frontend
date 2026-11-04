@@ -109,6 +109,16 @@ describe("AdvanceExpensesSection", () => {
     expect(within(totals).getByText("$ 8.000,00")).toBeInTheDocument()
   })
 
+  it("no enlaza un comprobante cuya URL no es http(s)", () => {
+    list = {
+      items: [makeExpense({ receiptUrl: "javascript:alert(1)" })],
+      pendingTotal: "15000.00",
+      settledTotal: "0.00",
+    }
+    render(<AdvanceExpensesSection contract={contract} />)
+    expect(screen.queryByRole("link", { name: "Ver comprobante" })).toBeNull()
+  })
+
   it("edita sólo los pendientes y eliminar es sólo para admin", () => {
     list = {
       items: [

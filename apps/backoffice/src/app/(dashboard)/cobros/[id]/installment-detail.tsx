@@ -62,6 +62,7 @@ import {
   todayIso,
 } from "@/lib/dates"
 import { useRenter } from "@/lib/renters-api"
+import { safeHttpUrl } from "@/lib/safe-url"
 
 import { InstallmentBadges } from "../billing-screen"
 import { ApplyCreditDialog } from "./apply-credit-dialog"
@@ -601,10 +602,10 @@ function PaymentRows({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={status.badge}>{status.label}</Badge>
-                {payment.receiptUrl && (
+                {safeHttpUrl(payment.receiptUrl) && (
                   <Button variant="ghost" size="sm" asChild>
                     <a
-                      href={payment.receiptUrl}
+                      href={safeHttpUrl(payment.receiptUrl) ?? undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

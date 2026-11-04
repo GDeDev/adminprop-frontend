@@ -31,6 +31,7 @@ import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 import { expenseStatusMeta } from "@/lib/services"
 import { useAdvanceExpenses, useDeleteAdvanceExpense } from "@/lib/services-api"
+import { safeHttpUrl } from "@/lib/safe-url"
 
 import { AdvanceExpenseDialog } from "./advance-expense-dialog"
 
@@ -301,9 +302,11 @@ function ExpenseStatus({ expense }: { expense: AdvanceExpense }) {
 }
 
 function ReceiptLink({ expense }: { expense: AdvanceExpense }) {
+  const href = safeHttpUrl(expense.receiptUrl)
+  if (!href) return null
   return (
     <Button variant="ghost" size="sm" asChild>
-      <a href={expense.receiptUrl} target="_blank" rel="noopener noreferrer">
+      <a href={href} target="_blank" rel="noopener noreferrer">
         <ExternalLink aria-hidden />
         Ver comprobante
       </a>
