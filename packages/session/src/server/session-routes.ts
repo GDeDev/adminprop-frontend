@@ -57,6 +57,8 @@ export interface RefreshedSession {
 }
 
 const API_TIMEOUT_MS = 10_000
+/** Tope de la cookie: un `exp` lejano en un token ajeno no la vuelve casi permanente. */
+const MAX_SESSION_SECONDS = 30 * 24 * 60 * 60
 
 export function createSessionRoutes(options: SessionRouteOptions) {
   const allowedOrigins = normalizeOrigins(
@@ -93,12 +95,25 @@ export function createSessionRoutes(options: SessionRouteOptions) {
       return error(400, "VALIDATION_ERROR", "Faltan los tokens de la sesión")
     }
 
-    const response = NextResponse.json({ ok: true })
-    response.cookies.set(
-      refreshName,
-      body.refreshToken,
-      cookieOptions(secondsUntilExpiry(body.refreshToken))
+    // El refresh token lo manda el navegador y acá no se puede verificar su
+    // firma. El access token recién emitido sí lo valida la API: sin una sesión
+    // real detrás, no se escribe ninguna cookie.
+    const me = await callApi<unknown>(options.apiUrl, "/auth/me", {
+      method: "GET",
+      accessToken: body.accessToken,
+    })
+    if (!me.ok) {
+      return me.status === 401 || me.status === 403
+        ? error(401, "INVALID_SESSION", "La sesión no es válida")
+        : error(503, "API_UNAVAILABLE", "No se pudo validar la sesión")
+    }
+
+    const maxAge = Math.min(
+      secondsUntilExpiry(body.refreshToken),
+      MAX_SESSION_SECONDS
     )
+    const response = NextResponse.json({ ok: true })
+    response.cookies.set(refreshName, body.refreshToken, cookieOptions(maxAge))
 
     if (options.storeBranding) {
       // Con el access token recién emitido: si fuera inválido, la API lo
@@ -112,7 +127,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
         response.cookies.set(
           brandingName,
           encodeBranding(branding.data),
-          cookieOptions(secondsUntilExpiry(body.refreshToken))
+          cookieOptions(maxAge)
         )
       }
     }

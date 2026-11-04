@@ -53,6 +53,7 @@ import {
   useUpdateProperty,
   useUploadPropertyPhotos,
 } from "@/lib/properties-api"
+import { loadDraft, removeDraft, saveDraft } from "@/lib/form-draft"
 
 import { AppraisalSheet } from "./[id]/appraisal-sheet"
 
@@ -118,7 +119,8 @@ const STEPS = [
   { title: "Fotos", fields: [] },
 ] as const
 
-/** Borrador del alta en el navegador (spec 5.3). Solo datos, no fotos. */
+/** Borrador del alta en el navegador (spec 5.3). Sólo datos, no fotos. */
+const DRAFT_OMIT = ["notes"]
 
 /**
  * Un borrador está a medio cargar: se validan los tipos, no las reglas del
@@ -197,9 +199,9 @@ export function listingBody(data: FormValues, editing: boolean) {
 function readDraft(key: string | null): FormValues | null {
   if (!key) return null
   try {
-    const raw = window.localStorage.getItem(key)
+    const raw = loadDraft(key)
     if (!raw) return null
-    const parsed = draftSchema.safeParse(JSON.parse(raw))
+    const parsed = draftSchema.safeParse(raw)
     return parsed.success ? { ...EMPTY, ...parsed.data } : null
   } catch {
     return null
@@ -277,19 +279,12 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
   React.useEffect(() => {
     if (editing) return
     if (!draftKey) return
-    try {
-      window.localStorage.setItem(draftKey, JSON.stringify(values))
-    } catch {
-      // Sin storage (modo privado): el wizard funciona igual, sin borrador.
-    }
+    // Las notas internas no se guardan en el navegador.
+    saveDraft(draftKey, values, DRAFT_OMIT)
   }, [editing, values, draftKey])
 
   function discardDraft() {
-    try {
-      if (draftKey) window.localStorage.removeItem(draftKey)
-    } catch {
-      // nada que borrar
-    }
+    if (draftKey) removeDraft(draftKey)
     form.reset(EMPTY)
     setDraftRestored(false)
     setStep(0)
@@ -317,11 +312,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
         : await create.mutateAsync(body)
 
       if (!editing) {
-        try {
-          if (draftKey) window.localStorage.removeItem(draftKey)
-        } catch {
-          // ignorado
-        }
+        if (draftKey) removeDraft(draftKey)
       }
 
       if (photos.length > 0) {

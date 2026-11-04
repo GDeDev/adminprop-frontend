@@ -69,6 +69,7 @@ import { addDays, formatDate } from "@/lib/dates"
 import { useDraftKey } from "@/lib/drafts"
 import { useProperty } from "@/lib/properties-api"
 import { useRenter } from "@/lib/renters-api"
+import { loadDraft, removeDraft, saveDraft } from "@/lib/form-draft"
 
 import {
   BillingTermsFields,
@@ -184,7 +185,8 @@ function stepOf(field: string): number {
   return STEPS.findIndex((step) => step.fields.includes(root))
 }
 
-/** Borrador del alta en el navegador (DT-36). Solo datos, no el PDF. */
+/** Borrador del alta en el navegador (DT-36). Sólo datos, no el PDF. */
+const DRAFT_OMIT = ["notes", "surety"]
 
 const EMPTY: FormValues = {
   propertyId: "",
@@ -264,9 +266,9 @@ const draftSchema = z
 function readDraft(key: string | null): FormValues | null {
   if (!key) return null
   try {
-    const raw = window.localStorage.getItem(key)
+    const raw = loadDraft(key)
     if (!raw) return null
-    const parsed = draftSchema.safeParse(JSON.parse(raw))
+    const parsed = draftSchema.safeParse(raw)
     if (!parsed.success) return null
     return {
       ...EMPTY,
@@ -415,11 +417,8 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
   React.useEffect(() => {
     if (renewing) return
     if (!draftKey) return
-    try {
-      window.localStorage.setItem(draftKey, JSON.stringify(values))
-    } catch {
-      // Sin storage (modo privado): el wizard funciona igual, sin borrador.
-    }
+    // Las notas y los datos de la póliza no se guardan en el navegador.
+    saveDraft(draftKey, values, DRAFT_OMIT)
   }, [renewing, values, draftKey])
 
   const propertyId = values.propertyId ?? ""
@@ -442,11 +441,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
   }, [renter.data, renterId, form])
 
   function discardDraft() {
-    try {
-      if (draftKey) window.localStorage.removeItem(draftKey)
-    } catch {
-      // nada que borrar
-    }
+    if (draftKey) removeDraft(draftKey)
     form.reset(EMPTY)
     setDraftRestored(false)
     setStep(0)
@@ -506,11 +501,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
         : await create.mutateAsync({ propertyId: data.propertyId, ...body })
 
       if (!renewing) {
-        try {
-          if (draftKey) window.localStorage.removeItem(draftKey)
-        } catch {
-          // ignorado
-        }
+        if (draftKey) removeDraft(draftKey)
       }
 
       if (pdf) {

@@ -3,8 +3,10 @@ import { NextResponse, type NextRequest } from "next/server"
 import { resolveHost } from "@/lib/api"
 import { cachedHostLookup, HostLookupError } from "@/lib/host-cache"
 import { isPlausibleSiteHost, normalizeHost } from "@/lib/host-policy"
+import { requestHost } from "@/lib/request-host"
 import {
   encodeSiteRoute,
+  isPreviewablePath,
   isValidPreviewToken,
   isValidSlug,
   type SiteRoute,
@@ -34,6 +36,12 @@ function slugPathAllowed(hasPreview: boolean): boolean {
  * El token de vista previa viaja en la ruta, no en la query, para que la
  * caché de ISR nunca mezcle el borrador con lo publicado.
  */
+/** Ruta del sitio sin el prefijo `/_s/<slug>` del acceso de desarrollo. */
+function previewPathOf(pathname: string): string {
+  const dev = DEV_PATH.exec(pathname)
+  return dev ? (dev[2] ?? "/") : pathname
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
@@ -41,9 +49,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(new URL(NOT_FOUND, request.url))
   }
 
+  // `?preview=` solo cuenta en las páginas del sitio y con forma de JWT: así un
+  // valor inventado no llega a la API ni abre una entrada de caché por pedido.
   const previewParam = searchParams.get("preview")
   const previewToken =
-    previewParam && isValidPreviewToken(previewParam) ? previewParam : null
+    previewParam &&
+    isValidPreviewToken(previewParam) &&
+    isPreviewablePath(previewPathOf(pathname))
+      ? previewParam
+      : null
 
   let route: SiteRoute | null = null
   let rest = pathname
@@ -56,14 +70,7 @@ export async function proxy(request: NextRequest) {
       rest = dev[2] ?? ""
     }
   } else {
-    const host =
-      (
-        request.headers.get("x-forwarded-host") ??
-        request.headers.get("host") ??
-        ""
-      )
-        .split(",")[0]
-        ?.trim() ?? ""
+    const host = requestHost(request.headers)
     let slug: string | null = null
     // Lo que jamás podría ser un sitio (IPs, `localhost`, nombres mal formados,
     // subdominios de dos niveles) se descarta sin llamar a la API.
@@ -107,7 +114,10 @@ export async function proxy(request: NextRequest) {
   searchParams.forEach((value, key) => {
     if (key !== "preview") target.searchParams.append(key, value)
   })
-  return NextResponse.rewrite(target)
+  const response = NextResponse.rewrite(target)
+  // El borrador nunca se guarda en cachés compartidas (CDN, navegador).
+  if (route.previewToken) response.headers.set("Cache-Control", "no-store")
+  return response
 }
 
 export const config = {

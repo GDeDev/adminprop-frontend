@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { apiUrl } from "@/lib/api"
 import { clientIp } from "@/lib/client-ip"
 import { isSameOrigin } from "@/lib/origin"
+import { requestHost } from "@/lib/request-host"
 import { decodeSiteRoute } from "@/lib/site-route"
 
 const MAX_BODY = 8_000
@@ -32,8 +33,7 @@ export async function POST(
 
   // Solo se acepta desde el propio sitio (frena el envío desde otras páginas).
   const origin = request.headers.get("origin")
-  const host =
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host")
+  const host = requestHost(request.headers)
   if (!isSameOrigin(origin, host)) {
     return fail(403, "Pedido no permitido.")
   }

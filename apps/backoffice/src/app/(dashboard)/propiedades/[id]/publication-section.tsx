@@ -160,7 +160,7 @@ function ListingCard({
           </Link>
         </p>
       )}
-      {listing.externalUrl && (
+      {safeHttpUrl(listing.externalUrl) && (
         <a
           href={safeHttpUrl(listing.externalUrl) ?? undefined}
           target="_blank"
