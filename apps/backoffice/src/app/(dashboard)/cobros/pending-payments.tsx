@@ -147,7 +147,7 @@ export function PendingPayments() {
                 <TableCell className="num">
                   {formatDate(payment.paidAt)}
                 </TableCell>
-                <TableCell className="text-right num">
+                <TableCell className="text-right font-display num">
                   {formatMoney(payment.amount, payment.paidCurrency)}
                   {exchangeRateLabel(payment, formatDate) && (
                     <p className="text-xs text-muted-foreground">

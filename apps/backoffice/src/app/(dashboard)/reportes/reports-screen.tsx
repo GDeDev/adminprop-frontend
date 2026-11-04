@@ -319,7 +319,7 @@ function IncomeTable({ range }: { range: RangeFilters }) {
                 row.netSettled,
                 row.netTransferred,
               ].map((amount, index) => (
-                <TableCell key={index} className="num">
+                <TableCell key={index} className="font-display num">
                   {formatMoney(amount, row.currency)}
                 </TableCell>
               ))}
@@ -359,7 +359,7 @@ function PaymentsTable({ range }: { range: RangeFilters }) {
               <TableCell>{row.renterName}</TableCell>
               <TableCell>{row.propertyAddress}</TableCell>
               <TableCell>{row.ownerName}</TableCell>
-              <TableCell className="num">
+              <TableCell className="font-display num">
                 {formatMoney(row.amount, row.currency)}
               </TableCell>
             </TableRow>
@@ -402,10 +402,10 @@ function ArrearsTable({ minDays }: { minDays: number }) {
               <TableCell>{row.ownerName}</TableCell>
               <TableCell className="num">{row.overdueInstallments}</TableCell>
               <TableCell>{daysLabel(row.maxDaysOverdue)}</TableCell>
-              <TableCell className="num">
+              <TableCell className="font-display num">
                 {formatMoneyList(row.balance)}
               </TableCell>
-              <TableCell className="num">
+              <TableCell className="font-display num">
                 {formatMoneyList(row.lateFee)}
               </TableCell>
             </TableRow>

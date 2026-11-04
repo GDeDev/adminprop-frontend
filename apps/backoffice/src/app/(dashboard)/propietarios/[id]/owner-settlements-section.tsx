@@ -98,7 +98,7 @@ export function OwnerSettlementsSection({ owner }: { owner: OwnerDetail }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="num font-medium">
+                    <span className="font-display num font-medium">
                       {money(settlement.netAmount)}
                     </span>
                     <Badge variant={meta.badge}>{meta.label}</Badge>
@@ -225,7 +225,7 @@ export function OwnerFeeAccountSection({
                         · cuota {receivable.installmentPeriod}
                       </span>
                       <span className="flex items-center gap-2">
-                        <span className="num">
+                        <span className="font-display num">
                           {formatMoney(receivable.amount, receivable.currency)}
                         </span>
                         <Badge variant={meta.badge}>{meta.label}</Badge>

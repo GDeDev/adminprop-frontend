@@ -270,16 +270,16 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                         {settlementLabel(settlement)}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-right num">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.rentTotal)}
                     </TableCell>
-                    <TableCell className="text-right num">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.feeTotal)}
                     </TableCell>
-                    <TableCell className="text-right num">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.expensesTotal)}
                     </TableCell>
-                    <TableCell className="text-right num font-medium">
+                    <TableCell className="text-right font-display num font-medium">
                       {money(settlement.netAmount)}
                     </TableCell>
                     <TableCell>
@@ -414,7 +414,7 @@ function AddSettlementsDialog({
                         {settlement.property?.address ?? "Propiedad eliminada"}{" "}
                         · {settlementLabel(settlement)}
                       </span>
-                      <span className="num">
+                      <span className="font-display num">
                         {formatMoney(settlement.netAmount, settlement.currency)}
                       </span>
                     </Label>

@@ -183,7 +183,7 @@ function InstallmentDialog({
                     className="flex flex-wrap items-center justify-between gap-2 py-2"
                   >
                     <div>
-                      <p className="num font-medium">
+                      <p className="font-display num font-medium">
                         {formatMoney(payment.amount, payment.paidCurrency)}
                         <span className="font-normal text-muted-foreground">
                           {" "}

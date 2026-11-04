@@ -362,7 +362,9 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                       · {formatDate(expense.expenseDate)}
                     </span>
                   </span>
-                  <span className="num">−{money(expense.amount)}</span>
+                  <span className="font-display num">
+                    −{money(expense.amount)}
+                  </span>
                 </li>
               ))}
               {settlement.skippedExpenses.map((expense) => (
@@ -373,7 +375,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                   <span>
                     {expense.description} · en otra moneda, no se descuenta acá
                   </span>
-                  <span className="num">
+                  <span className="font-display num">
                     {formatMoney(
                       expense.amount,
                       expense.currency ?? settlement.currency

@@ -152,7 +152,7 @@ function Account({ account }: { account: PortalOwnerAccount }) {
                               ` · ${settlement.sequence}`}
                           </Link>
                           <span className="flex items-center gap-2">
-                            <span className="num">
+                            <span className="font-display num">
                               {money(settlement.netAmount)}
                             </span>
                             <Badge variant={meta.badge}>{meta.label}</Badge>

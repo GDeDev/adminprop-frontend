@@ -119,11 +119,13 @@ function Account({
 
         <dl className="mt-4 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted-foreground">Alquiler</dt>
-          <dd className="text-right num">{money(installment.baseAmount)}</dd>
+          <dd className="text-right font-display num">
+            {money(installment.baseAmount)}
+          </dd>
           {!isZero(installment.chargesTotal) && (
             <>
               <dt className="text-muted-foreground">Otros conceptos</dt>
-              <dd className="text-right num">
+              <dd className="text-right font-display num">
                 {money(installment.chargesTotal)}
               </dd>
             </>
@@ -133,7 +135,7 @@ function Account({
               <dt className="text-muted-foreground">
                 Punitorio ({daysLabel(installment.feeDays)})
               </dt>
-              <dd className="text-right num">
+              <dd className="text-right font-display num">
                 {money(installment.lateFeeAccrued)}
               </dd>
             </>
@@ -141,7 +143,7 @@ function Account({
           {!isZero(installment.paidTotal) && (
             <>
               <dt className="text-muted-foreground">Ya pagaste</dt>
-              <dd className="text-right num">
+              <dd className="text-right font-display num">
                 −{money(installment.paidTotal)}
               </dd>
             </>

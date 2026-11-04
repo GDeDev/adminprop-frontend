@@ -189,7 +189,7 @@ function Account({
         {deposit.returned && (
           <p className="mt-1">
             Devuelto el {formatDate(deposit.returned.returnedAt)}:{" "}
-            <span className="num">
+            <span className="font-display num">
               {formatMoney(deposit.returned.returnedAmount, deposit.currency)}
             </span>
             {deposit.returned.deductions.length > 0 &&
@@ -245,7 +245,7 @@ function Account({
                   <TableCell className="text-right num">
                     {movement.credit ? money(movement.credit) : ""}
                   </TableCell>
-                  <TableCell className="text-right num font-medium">
+                  <TableCell className="text-right font-display num font-medium">
                     {money(movement.balance)}
                   </TableCell>
                 </TableRow>

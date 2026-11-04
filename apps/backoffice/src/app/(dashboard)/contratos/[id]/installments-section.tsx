@@ -113,16 +113,16 @@ export function InstallmentsSection({
                         </p>
                       )}
                     </TableCell>
-                    <TableCell className="text-right num">
+                    <TableCell className="text-right font-display num">
                       {money(installment.baseAmount)}
                     </TableCell>
-                    <TableCell className="text-right num">
+                    <TableCell className="text-right font-display num">
                       {money(installment.lateFeeAccrued)}
                     </TableCell>
-                    <TableCell className="text-right num">
+                    <TableCell className="text-right font-display num">
                       {money(installment.paidTotal)}
                     </TableCell>
-                    <TableCell className="text-right num font-medium">
+                    <TableCell className="text-right font-display num font-medium">
                       {money(installment.totalDue)}
                     </TableCell>
                     <TableCell>

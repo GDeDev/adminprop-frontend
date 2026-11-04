@@ -234,11 +234,11 @@ function Detail({ contract }: { contract: ContractDetail }) {
               {money(contract.currentRent)}
             </dd>
             <dt className="text-muted-foreground">Alquiler inicial</dt>
-            <dd className="num">{money(contract.initialRent)}</dd>
+            <dd className="font-display num">{money(contract.initialRent)}</dd>
             <dt className="text-muted-foreground">Moneda</dt>
             <dd>{CURRENCY_LABELS[contract.currency]}</dd>
             <dt className="text-muted-foreground">Depósito</dt>
-            <dd className="num">{money(contract.deposit)}</dd>
+            <dd className="font-display num">{money(contract.deposit)}</dd>
             <dt className="text-muted-foreground">Actualización</dt>
             <dd>
               {RENT_UPDATE_TYPE_LABELS[contract.rentUpdateType]} ·{" "}
@@ -293,7 +293,9 @@ function Detail({ contract }: { contract: ContractDetail }) {
               <dt className="text-muted-foreground">Rescindido el</dt>
               <dd>{formatDate(contract.termination.terminatedAt)}</dd>
               <dt className="text-muted-foreground">Alquiler futuro</dt>
-              <dd className="num">{money(contract.termination.futureRent)}</dd>
+              <dd className="font-display num">
+                {money(contract.termination.futureRent)}
+              </dd>
               <dt className="text-muted-foreground">Multa</dt>
               <dd className="font-display num text-title-md font-semibold">
                 {money(contract.termination.penalty)}

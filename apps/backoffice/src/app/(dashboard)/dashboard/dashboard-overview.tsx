@@ -65,7 +65,11 @@ function BucketCard({
       <StatCard
         label={title}
         value={String(bucket.count)}
-        hint={<span className="num">{formatMoneyList(bucket.amounts)}</span>}
+        hint={
+          <span className="font-display num">
+            {formatMoneyList(bucket.amounts)}
+          </span>
+        }
         className={
           tone === "danger" && bucket.count > 0 ? "text-destructive" : undefined
         }

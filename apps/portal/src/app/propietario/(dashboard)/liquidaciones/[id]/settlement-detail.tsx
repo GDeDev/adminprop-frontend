@@ -165,7 +165,9 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
                     · {formatDate(expense.expenseDate)}
                   </span>
                 </span>
-                <span className="num">−{money(expense.amount)}</span>
+                <span className="font-display num">
+                  −{money(expense.amount)}
+                </span>
               </li>
             ))}
           </ul>
@@ -199,7 +201,9 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
                   {formatDate(transfer.transferredAt)} ·{" "}
                   {PAYMENT_METHOD_LABELS[transfer.method]}
                 </span>
-                <span className="num">{money(transfer.amount)}</span>
+                <span className="font-display num">
+                  {money(transfer.amount)}
+                </span>
               </li>
             ))}
           </ul>

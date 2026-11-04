@@ -287,7 +287,7 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
       <TableCell className="num capitalize">
         {settlementLabel(settlement)}
       </TableCell>
-      <TableCell className="text-right num">
+      <TableCell className="text-right font-display num">
         {money(settlement.rentTotal)}
       </TableCell>
       <TableCell className="text-right num">
@@ -295,7 +295,7 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
           ? `−${money(settlement.feeTotal)}`
           : money(settlement.feeTotal)}
       </TableCell>
-      <TableCell className="text-right num font-medium">
+      <TableCell className="text-right font-display num font-medium">
         {money(settlement.netAmount)}
         {!isZero(settlement.transferredTotal) && (
           <p className="text-xs text-muted-foreground">
@@ -576,7 +576,7 @@ function FeeReceivableList() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="num font-medium">
+                    <span className="font-display num font-medium">
                       {formatMoney(receivable.amount, receivable.currency)}
                       {!isZero(receivable.paidAmount) && (
                         <span className="text-xs font-normal text-muted-foreground">

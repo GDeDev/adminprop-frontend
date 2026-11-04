@@ -453,10 +453,10 @@ function InstallmentRow({ installment }: { installment: InstallmentSummary }) {
       <TableCell className="text-muted-foreground">
         {COLLECTION_MODE_SHORT[installment.collectionMode]}
       </TableCell>
-      <TableCell className="text-right num">
+      <TableCell className="text-right font-display num">
         {money(installment.baseAmount)}
       </TableCell>
-      <TableCell className="text-right num font-medium">
+      <TableCell className="text-right font-display num font-medium">
         {money(installment.totalDue)}
       </TableCell>
       <TableCell>

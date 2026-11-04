@@ -248,7 +248,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
               </p>
             </dd>
             <dt className="text-muted-foreground">Devengados</dt>
-            <dd className="num">
+            <dd className="font-display num">
               {money(installment.feeOnCollected)} sobre lo cobrado
               <p className="text-xs text-muted-foreground">
                 {money(installment.feeOnBase)} sobre el alquiler completo
@@ -318,7 +318,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="num font-medium">
+                    <span className="font-display num font-medium">
                       {money(charge.amount)}
                     </span>
                     {!charge.voidedAt && installment.status !== "PAID" && (
@@ -359,7 +359,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
                         ` · ${adjustment.createdBy.fullName}`}
                     </p>
                   </div>
-                  <span className="num font-medium">
+                  <span className="font-display num font-medium">
                     −{money(adjustment.amount)}
                   </span>
                 </li>
@@ -449,24 +449,32 @@ function Breakdown({ installment }: { installment: InstallmentDetail }) {
     <Section title="Desglose">
       <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 text-sm">
         <dt className="text-muted-foreground">Alquiler</dt>
-        <dd className="text-right num">{money(installment.baseAmount)}</dd>
+        <dd className="text-right font-display num">
+          {money(installment.baseAmount)}
+        </dd>
         <dt className="text-muted-foreground">Cargos</dt>
-        <dd className="text-right num">{money(installment.chargesTotal)}</dd>
+        <dd className="text-right font-display num">
+          {money(installment.chargesTotal)}
+        </dd>
         <dt className="text-muted-foreground">
           Punitorio devengado
           {installment.feeDays > 0 && ` (${daysLabel(installment.feeDays)})`}
         </dt>
-        <dd className="text-right num">{money(installment.lateFeeAccrued)}</dd>
+        <dd className="text-right font-display num">
+          {money(installment.lateFeeAccrued)}
+        </dd>
         {!isZero(installment.lateFeeAdjusted) && (
           <>
             <dt className="text-muted-foreground">Ajustes de punitorio</dt>
-            <dd className="text-right num">
+            <dd className="text-right font-display num">
               −{money(installment.lateFeeAdjusted)}
             </dd>
           </>
         )}
         <dt className="text-muted-foreground">Pagado</dt>
-        <dd className="text-right num">−{money(installment.paidTotal)}</dd>
+        <dd className="text-right font-display num">
+          −{money(installment.paidTotal)}
+        </dd>
         <dt className="border-t pt-2 font-medium">Saldo</dt>
         <dd className="border-t pt-2 text-right font-display num text-title-md font-semibold">
           {money(installment.totalDue)}
@@ -501,13 +509,13 @@ function Breakdown({ installment }: { installment: InstallmentDetail }) {
                   <TableCell className="num">
                     {day.dayNumber} · {formatDate(day.day)}
                   </TableCell>
-                  <TableCell className="text-right num">
+                  <TableCell className="text-right font-display num">
                     {money(day.outstandingBase)}
                   </TableCell>
                   <TableCell className="text-right num">
                     {day.dailyPercentage} %
                   </TableCell>
-                  <TableCell className="text-right num">
+                  <TableCell className="text-right font-display num">
                     {money(day.amount)}
                   </TableCell>
                 </TableRow>
@@ -544,7 +552,7 @@ function PaymentRows({
           <li key={payment.id} className="flex flex-col gap-1 py-3">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="num font-medium">
+                <p className="font-display num font-medium">
                   {formatMoney(payment.amount, payment.paidCurrency)}
                   {foreign && ` = ${money(payment.amountInContractCurrency)}`}
                   <span className="font-normal text-muted-foreground">

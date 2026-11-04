@@ -82,7 +82,7 @@ function PropertyCard({ property }: { property: PortalOwnerProperty }) {
           <p className="text-sm text-muted-foreground">
             {contract.renter.fullName} · hasta el {formatDate(contract.endDate)}{" "}
             ·{" "}
-            <span className="num">
+            <span className="font-display num">
               {formatMoney(contract.currentRent, contract.currency)}
             </span>
             {contract.collectionMode === "OWNER_DIRECT" && " · cobrás directo"}

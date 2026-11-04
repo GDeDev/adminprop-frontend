@@ -80,7 +80,7 @@ export function ContractSettlementsSection({
                   {settlementLabel(settlement)}
                 </Link>
                 <div className="flex items-center gap-2">
-                  <span className="num">
+                  <span className="font-display num">
                     {money(settlement.netAmount)}
                     {!isZero(settlement.transferredTotal) && (
                       <span className="text-xs text-muted-foreground">
