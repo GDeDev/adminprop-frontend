@@ -1,9 +1,14 @@
 import type { NextRequest } from "next/server"
 
-import { basePath, type SiteRoute } from "./site-route"
+import { basePath, canonicalUrl, type SiteRoute } from "./site-route"
 
 /** Origen público del pedido (detrás de un proxy, el que mandó la plataforma) + prefijo del modo. */
 export function absoluteBase(request: NextRequest, route: SiteRoute): string {
+  // En el sitio público por host la base es la misma del canonical (https salvo
+  // SITES_PROTOCOL=http): el sitemap y las páginas no pueden discrepar solo
+  // porque el proxy no mandó `X-Forwarded-Proto`.
+  const canonical = canonicalUrl(route, "/")
+  if (canonical) return canonical
   const host = (
     request.headers.get("x-forwarded-host") ??
     request.headers.get("host") ??
