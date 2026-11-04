@@ -7510,6 +7510,9 @@ export interface components {
       /** @description Barrio, ciudad */
       location: string
       features: components["schemas"]["PublicFeatureDto"][]
+      /** Coordenadas (aditivo, v1.1): editado a mano hasta regenerar con `npm run api:types` */
+      latitude?: number | null
+      longitude?: number | null
     }
     PublicFilterOptionDto: {
       id: string
@@ -7574,7 +7577,7 @@ export interface components {
     }
     SiteTemplateInfoDto: {
       /** @enum {string} */
-      key: "CLASSIC" | "MODERN"
+      key: "CLASSIC" | "MODERN" | "LUXURY"
       name: string
       description: string
       previewImageUrl: string | null
@@ -7706,7 +7709,7 @@ export interface components {
     }
     SiteSettingsDraftDto: {
       /** @enum {string} */
-      template: "CLASSIC" | "MODERN"
+      template: "CLASSIC" | "MODERN" | "LUXURY"
       theme: components["schemas"]["SiteThemeDto"]
       content: components["schemas"]["SiteContentDto"]
     }
@@ -7723,7 +7726,7 @@ export interface components {
     }
     UpdateSiteSettingsDto: {
       /** @enum {string} */
-      template?: "CLASSIC" | "MODERN"
+      template?: "CLASSIC" | "MODERN" | "LUXURY"
       /** @description Parcial: solo los campos que se mandan cambian. */
       theme?: components["schemas"]["SiteThemeDto"]
       /** @description Parcial por bloque: cada bloque que se manda (brand, hero, steps…) reemplaza al anterior entero. */
@@ -7786,7 +7789,7 @@ export interface components {
     }
     PublicSiteDto: {
       /** @enum {string} */
-      template: "CLASSIC" | "MODERN"
+      template: "CLASSIC" | "MODERN" | "LUXURY"
       theme: components["schemas"]["SiteThemeDto"]
       content: components["schemas"]["SiteContentDto"]
       tenant: components["schemas"]["PublicSiteTenantDto"]

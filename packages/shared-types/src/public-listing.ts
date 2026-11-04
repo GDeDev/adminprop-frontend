@@ -1,44 +1,19 @@
-import type { Currency, Money, Uuid } from "./common"
+import type { ApiSchemas } from "./api"
+import type { Currency, Uuid } from "./common"
 
-/** Contrato de la Fase 22 (REDISENO_FASE_22.md, sección 3). Escrito a mano hasta regenerar. */
-export interface PublicPropertySummary {
-  id: Uuid
-  title: string
-  address: string
-  propertyType: string
-  neighborhood: string | null
-  bedrooms: number | null
-  bathrooms: number | null
-  areaM2: number | null
-  price: Money | null
-  currency: Currency | null
-  coverPhotoUrl: string | null
-  amenities: string[]
-  /** Sitio web (spec web-inmobiliaria 4.3): campos aditivos. `areaM2` es la superficie total. */
-  operation: "SALE" | "RENT"
-  rooms: number | null
-  coveredAreaM2: number | null
-  ageYears: number | null
-}
+/**
+ * Catálogo público de propiedades (Fase 22 y sitio web), tal como lo devuelve
+ * la API.
+ */
+export type PublicPropertySummary = ApiSchemas["PublicPropertySummaryDto"]
+export type PublicPropertyDetail = ApiSchemas["PublicPropertyDetailDto"]
+export type PublicFilters = ApiSchemas["PublicFiltersDto"]
 
-export interface PublicPropertyDetail extends PublicPropertySummary {
-  publicDescription: string | null
-  photos: { id: Uuid; url: string }[]
-  location: string
-  features: { label: string; value: string }[]
-  /**
-   * Coordenadas (sitio web v1.1, aditivo y opcional: el backend las expone
-   * cuando la propiedad las tiene). Habilitan el mapa de la ficha.
-   */
-  latitude?: number | null
-  longitude?: number | null
-}
-
-export interface PublicFilters {
-  propertyTypes: { id: Uuid; name: string }[]
-  locations: { id: Uuid; name: string }[]
-}
-
+/**
+ * Sigue escrito a mano: el formulario exige `phone`, `propertyId` y `website`
+ * (honeypot) aunque la API los declara opcionales. Es más estricto a propósito;
+ * ver `docs/tecnica/shared-types-generados.md`.
+ */
 export interface PublicContactRequest {
   name: string
   email: string
@@ -52,6 +27,7 @@ export interface PublicContactRequest {
 /** Orden del listado público (sitio web v1.1). Sin `sort` es `recent`. */
 export type PublicListingSort = "recent" | "price_asc" | "price_desc"
 
+/** Parámetros de query del listado público (no son un DTO del OpenAPI). */
 export interface PublicListingQuery {
   locationId?: string
   propertyTypeId?: string
