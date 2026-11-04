@@ -16,7 +16,7 @@ Rama `feature/web-inmobiliaria-sites` → `dev`. Spec: `adminprop-repo-files/spe
 1. **DT-116** — La vista previa vive en su propio árbol `/p/…` (`force-dynamic`, reexporta las páginas). Un primer diseño con `?preview` en las mismas páginas rompía el ISR («Page changed from static to dynamic»); lo encontré probando contra la API real.
 2. **DT-121 / DT-122** — CSP con `'unsafe-inline'` en `script-src` (costo de servir HTML cacheable) y `frame-ancestors 'none'` salvo la vista previa. **En producción hay que cargar `SITES_PREVIEW_ANCESTORS` con el origen del backoffice** o el iframe queda bloqueado.
 3. **DT-117** — El listado es dinámico, no ISR (depende de la query). Home, ficha, contacto y «nosotros» sí son ISR.
-4. **DT-123** — El formulario de contacto pasa por el propio sitio y reenvía la IP del visitante; requiere `TRUST_PROXY=true` en la API (A-130 del backend).
+4. **DT-123** — El formulario de contacto pasa por el propio sitio y reenvía la IP del visitante; requiere `TRUST_PROXY=true` en la API (A-142 del backend).
 5. **DT-126** — Ampliaciones aditivas de `public-listing.ts` (`operation`, `rooms`, `coveredAreaM2`, `ageYears`; `operation`/`bedrooms`/`bathrooms`/`ids` en la query).
 6. **DT-109 / DT-111 / DT-112** (backoffice) — Cambio de template con cambios sin guardar, aviso al salir (el botón «atrás» no se puede frenar con el App Router) y dominio propio con instrucciones DNS genéricas.
 7. **Pendiente de Giuliano**: variables nuevas en Doppler (A-SITES-5) y, para la revalidación, `SITES_REVALIDATE_SECRET` en `sites` y `SITES_REVALIDATE_URL`/`SITES_REVALIDATE_SECRET` en el backend y `NEXT_PUBLIC_SITES_URL` / `NEXT_PUBLIC_SITES_DNS_TARGET` del backoffice; en el backend, `SITES_BASE_DOMAIN`.
@@ -56,7 +56,7 @@ Hice una revisión del código de los dos PR y corregí lo encontrado:
 | Animación de aparición sin verificar con movimiento                  | Rango acotado y medido (DT-131)                                                                                              |
 | Paginación sin números, rango de precio invertido, pedidos en serie  | DT-132                                                                                                                       |
 | El backoffice no validaba el rol en la página                        | `AdminGate` (DT-133)                                                                                                         |
-| Dominio propio sin verificación en el editor                         | Pestaña Dominio con el registro TXT (DT-133), contra el backend D-170                                                        |
+| Dominio propio sin verificación en el editor                         | Pestaña Dominio con el registro TXT (DT-133), contra el backend D-190                                                        |
 
 Resultados: `typecheck`, `lint` y `format:check` verdes; tests **sites 73**, **backoffice 302**, ui 39, portal 19, session 30. Contra la API real: revalidación con secreto (401 sin él o con uno malo), tema en `:root`, `theme-color`, y las secciones llegan a opacidad 1 con movimiento activo a 375 y 1280 px.
 

@@ -1,6 +1,6 @@
 # Sitio web de la inmobiliaria — backoffice (frontend)
 
-Contrato: `adminprop-repo-files/specs/web-inmobiliaria.md` (secciones 5 y 6.2). Tipos en `shared-types/src/site.ts` (equivalente en contenido a la spec 5.1) y `site-api.ts` (requests y extras del backend); API regenerada en `generated/api.ts`. Comportamiento exacto de la API: `adminprop-backend/docs/tecnica/web-inmobiliaria.md` y D-157 a D-169. Decisiones del frontend: DT-107 a DT-114. La app pública (`apps/sites`) es de otra sesión: acá solo se arma la URL de la vista previa.
+Contrato: `adminprop-repo-files/specs/web-inmobiliaria.md` (secciones 5 y 6.2). Tipos en `shared-types/src/site.ts` (equivalente en contenido a la spec 5.1) y `site-api.ts` (requests y extras del backend); API regenerada en `generated/api.ts`. Comportamiento exacto de la API: `adminprop-backend/docs/tecnica/web-inmobiliaria.md` y D-177 a D-189. Decisiones del frontend: DT-107 a DT-114. La app pública (`apps/sites`) es de otra sesión: acá solo se arma la URL de la vista previa.
 
 ## Qué hay
 

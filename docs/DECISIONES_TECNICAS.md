@@ -608,7 +608,7 @@ Home, ficha, contacto y «nosotros» usan `revalidate = 60` con `generateStaticP
 
 ### DT-119 — Fuentes del sistema, sin `next/font`
 
-Las cuatro opciones (`system`, `serif`, `humanist`, `rounded`) son pilas de fuentes del sistema (D-165 del backend): cero descargas, mejor rendimiento y nada que falle en el build sin red.
+Las cuatro opciones (`system`, `serif`, `humanist`, `rounded`) son pilas de fuentes del sistema (D-185 del backend): cero descargas, mejor rendimiento y nada que falle en el build sin red.
 
 ### DT-120 — `<img>` y no `next/image`
 
@@ -624,7 +624,7 @@ La regla general prohíbe embeber el sitio. Un segundo `headers()` con `has: que
 
 ### DT-123 — El contacto pasa por el propio sitio
 
-`POST <base>/api/contacto` reenvía a `POST /public/:slug/contact` desde el servidor. Así el navegador nunca habla con la API desde un dominio propio (sin CORS que mantener por cada dominio) y se puede comprobar el `Origin`. Reenvía `X-Forwarded-For` con la IP del visitante para que el límite de 5 por hora de la API cuente personas y no al servidor (A-130 del backend: requiere `TRUST_PROXY=true`). En la vista previa no envía.
+`POST <base>/api/contacto` reenvía a `POST /public/:slug/contact` desde el servidor. Así el navegador nunca habla con la API desde un dominio propio (sin CORS que mantener por cada dominio) y se puede comprobar el `Origin`. Reenvía `X-Forwarded-For` con la IP del visitante para que el límite de 5 por hora de la API cuente personas y no al servidor (A-142 del backend: requiere `TRUST_PROXY=true`). En la vista previa no envía.
 
 ### DT-124 — Resolución del host con caché en el proxy
 
@@ -636,11 +636,11 @@ Las secciones aparecen con `animation-timeline: view()`: cero JavaScript, y sin 
 
 ### DT-126 — Ampliaciones de `shared-types/public-listing.ts`
 
-`PublicPropertySummary` suma `operation`, `rooms`, `coveredAreaM2` y `ageYears`; `PublicListingQuery` suma `operation`, `bedrooms`, `bathrooms` e `ids`. Son aditivos y coinciden con el backend (D-167). `site.ts` es la spec verbatim y `site.contract.ts` falla el `tsc` si el OpenAPI deja de ser asignable al contrato (la comprobación es de un solo sentido: la API es más estrecha, p. ej. `radius: 0|8|16|24`).
+`PublicPropertySummary` suma `operation`, `rooms`, `coveredAreaM2` y `ageYears`; `PublicListingQuery` suma `operation`, `bedrooms`, `bathrooms` e `ids`. Son aditivos y coinciden con el backend (D-187). `site.ts` es equivalente en contenido a la spec (5.1) y `site.contract.ts` falla el `tsc` si el OpenAPI deja de ser asignable al contrato (la comprobación es de un solo sentido: la API es más estrecha, p. ej. `radius: 0|8|16|24`).
 
 ### Supuestos (sitios)
 
-- **A-SITES-1** · Los textos por defecto del sitio (pasos, servicios, preguntas) los fija el backend (D-166); `apps/sites` no inventa contenido.
+- **A-SITES-1** · Los textos por defecto del sitio (pasos, servicios, preguntas) los fija el backend (D-186); `apps/sites` no inventa contenido.
 - **A-SITES-2** · Selector de ubicación como `<select>` (no autocompletado como en el sitio de referencia): es accesible y funciona sin JS; con cientos de zonas habría que pasar a un combobox.
 - **A-SITES-3** · Redes sociales con glifos propios en SVG (lucide ya no trae logos de marcas).
 - **A-SITES-4** · «Propiedades parecidas» = misma operación, sin la actual (la ficha pública no expone el id del tipo).
@@ -676,7 +676,7 @@ Paginación con ventana (primera, última, actual y vecinas); un rango «desde»
 
 ### DT-133 — Backoffice: guarda de rol y verificación de dominio
 
-`AdminGate` muestra «Sólo para administradores» a un empleado que entra por URL (la API ya lo frenaba con 403; antes veía la pantalla llena de errores). La pestaña Dominio muestra si el dominio está verificado y, si no, el registro TXT con botones de copiar y «Verificar dominio». `useSiteDomain` / `useVerifySiteDomain` consumen los endpoints nuevos del backend (D-170); los tipos salen del OpenAPI regenerado y `SiteDomain` está en `site-api.ts`.
+`AdminGate` muestra «Sólo para administradores» a un empleado que entra por URL (la API ya lo frenaba con 403; antes veía la pantalla llena de errores). La pestaña Dominio muestra si el dominio está verificado y, si no, el registro TXT con botones de copiar y «Verificar dominio». `useSiteDomain` / `useVerifySiteDomain` consumen los endpoints nuevos del backend (D-190); los tipos salen del OpenAPI regenerado y `SiteDomain` está en `site-api.ts`.
 
 ### Qué NO se hizo de la revisión (y por qué)
 

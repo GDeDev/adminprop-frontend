@@ -82,4 +82,4 @@ Ver el documento de PR (`docs/PR-web-inmobiliaria-sites.md`): `typecheck`, lint,
 | `SITES_ALLOW_SLUG_PATH`                                 | sites      | Habilita `/_s/<slug>` en producción                        |
 | `SITES_IMAGE_SOURCES`                                   | sites      | Orígenes extra de imágenes (storage local en desarrollo)   |
 | `NEXT_PUBLIC_SITES_URL`, `NEXT_PUBLIC_SITES_DNS_TARGET` | backoffice | URL de la app de sitios y destino del CNAME                |
-| `SITES_BASE_DOMAIN` y compañía                          | backend    | Ver `docs/DECISIONES_TECNICAS.md` del backend (A-129)      |
+| `SITES_BASE_DOMAIN` y compañía                          | backend    | Ver `docs/DECISIONES_TECNICAS.md` del backend (A-141)      |
