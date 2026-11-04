@@ -17,6 +17,21 @@ export const REVALIDATE_SECONDS = 60
 
 export const PAGE_SIZE = 12
 
+/**
+ * Cuánto se espera a la API antes de darla por caída. Sin tope, un pedido
+ * colgado deja el render esperando hasta que lo corte la plataforma, y mientras
+ * tanto nadie ve ni la versión anterior. `API_TIMEOUT_MS` solo existe para
+ * poder probar el corte sin esperar segundos.
+ */
+export const DEFAULT_API_TIMEOUT_MS = 8000
+
+function apiTimeoutMs(): number {
+  const configured = Number(process.env.API_TIMEOUT_MS)
+  return Number.isFinite(configured) && configured > 0
+    ? configured
+    : DEFAULT_API_TIMEOUT_MS
+}
+
 export function apiUrl(): string | null {
   return (
     process.env.API_URL?.replace(/\/+$/, "") ??
@@ -64,13 +79,15 @@ async function get<T>(
 ): Promise<T | null> {
   const base = apiUrl()
   if (!base) throw new UpstreamError("API_URL sin configurar", null)
+  const signal = AbortSignal.timeout(apiTimeoutMs())
   let response: Response
   try {
     response = await fetch(
       `${base}/public${path}${queryString(options.params)}`,
       options.fresh
-        ? { cache: "no-store" }
+        ? { cache: "no-store", signal }
         : {
+            signal,
             next: {
               revalidate: REVALIDATE_SECONDS,
               ...(options.tag ? { tags: [options.tag] } : {}),
@@ -90,7 +107,26 @@ async function get<T>(
       response.status
     )
   }
-  return ((await response.json()) as ApiSuccess<T>).data
+  // Un 200 con el cuerpo cortado o que no es JSON también es una falla de la
+  // API; sin esto saldría como un error cualquiera y no como `UpstreamError`.
+  // El `signal` sigue vivo mientras se lee el cuerpo: un cuerpo que se cuelga
+  // también corta por tiempo.
+  let body: unknown
+  try {
+    body = await response.json()
+  } catch (error) {
+    throw new UpstreamError(
+      `La API devolvió un cuerpo ilegible: ${String(error)}`,
+      response.status
+    )
+  }
+  if (typeof body !== "object" || body === null || !("data" in body)) {
+    throw new UpstreamError(
+      "La API devolvió una respuesta sin `data`",
+      response.status
+    )
+  }
+  return (body as ApiSuccess<T>).data
 }
 
 const slugPath = (route: SiteRoute) => `/${encodeURIComponent(route.slug)}`
