@@ -784,3 +784,23 @@ Capturas reales (640×400) de cada template con datos de ejemplo en `apps/backof
 - `error.tsx` usa `retry()` (vuelve a pedir los datos) y no `reset()`; se agregó `app/error.tsx` para fallas del layout del sitio.
 
 **Costo asumido.** Si la API cae y no hay versión previa (primer pedido de una página o caché vacío tras un deploy), el visitante ve la pantalla de error en lugar de una página parcial. Si el que falla es el layout, no hay sitio y por lo tanto tampoco tema: la pantalla de error sale con los colores por defecto. El listado y los favoritos son dinámicos (sin ISR), así que ahí el error se muestra siempre mientras la API esté caída.
+
+### DT-154 — Rediseño v2 como archivos paralelos, activable con un import
+
+El dueño pidió rehacer el sistema de diseño, hoy "cerrado y aprobado". Para no reemplazar nada sin su aprobación, la v2 vive en `packages/ui/src/styles/adminprop-v2.css` y `adminprop-v2-effects.css`; `adminprop.css` (v1) queda intacto. `globals.css` elige cuál con un único `@import`. Lo que no se puede garantizar con un solo import: los componentes ya llevan clases v2 (`shadow-raised`, `pressable`, `bg-overlay`…) que en v1 no existen y degradan en silencio; la vuelta atrás completa es el import más revertir los commits de componentes (ver `docs/tecnica/design-v2.md`). Se conservan todos los nombres de token de v1 (un test lo exige) para que las apps no cambien.
+
+### DT-155 — Paleta en OKLCH y contraste AA verificado por test
+
+Los tokens v2 están en OKLCH (bordes con alfa). `packages/ui/src/lib/color.ts` convierte OKLCH y hex a sRGB y calcula la relación WCAG; `test/contrast.test.ts` lee el CSS real y comprueba 33 pares texto/fondo en claro y oscuro (4.5:1 texto, 3:1 anillo e íconos). v1 no pasaba: `muted-foreground` daba 3.77:1 sobre `muted` y `accent-foreground` 3.49:1 sobre `accent`. Para el tema por inmobiliaria se mantiene `tenantThemeStyle` sin cambios: los colores de luminosidad media no llegan a 4.5:1 con ningún texto (piso medido 3.96:1); queda como riesgo y recomendación de validar el color al guardarlo.
+
+### DT-156 — Tipografías Bricolage Grotesque + Geist, y las de v1 sin precarga
+
+Display Bricolage Grotesque (variable, eje `opsz`), cuerpo Geist, datos Geist Mono, todas vía `next/font/google` (el build las bajó sin problemas en esta sandbox). Los tokens definen una pila de sistema de respaldo. Outfit y Figtree siguen declaradas con `preload: false` en `fonts.ts` de las dos apps para que volver a `adminprop.css` conserve sus fuentes; el navegador solo baja una fuente si algún estilo la usa.
+
+### DT-157 — Animaciones solo con CSS y un hook; el contador anima solo la presentación
+
+No se suma ninguna dependencia: keyframes en CSS (solo `transform` y `opacity`, un test lo verifica), `prefers-reduced-motion` apaga todo, y `StatCard` usa un hook de `requestAnimationFrame` (`use-count-up`). Para respetar "el frontend no calcula montos", el contador interpola de 0 al valor leyendo el string ya formateado de la API y siempre termina mostrando ese string exacto; lo que ve un lector de pantalla es el valor final. Alternativa descartada: Motion/GSAP (30–100 kB) para lo que se resuelve con CSS.
+
+### DT-158 — La vitrina `/design-system` sale del grupo `(dashboard)`
+
+Estaba dentro del `SessionGate`, así que sin API no se podía abrir ni capturar. Pasa a `app/design-system/` (misma URL, sigue dando 404 en producción). El proxy igual pide cookie de sesión: para verla en desarrollo sin API alcanza una cookie `adminprop_bo_rt` cualquiera.

@@ -2,13 +2,14 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { LogOut, UserRound } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { LogOut, Search, UserRound } from "lucide-react"
 
 import { useSession } from "@adminprop/session/client"
 import { AppSidebar } from "@adminprop/ui/components/app-sidebar"
 import { BottomNav } from "@adminprop/ui/components/bottom-nav"
 import { Button } from "@adminprop/ui/components/button"
+import { CommandPalette } from "@adminprop/ui/components/command-palette"
 import { ThemeToggle } from "@adminprop/ui/components/theme-toggle"
 
 import { TenantNameProvider } from "./tenant-name"
@@ -55,11 +56,22 @@ function SignOutButton({ className }: { className?: string }) {
 }
 
 /** Pie del sidebar: quién está logueado, tema y salir. */
-function AccountFooter() {
+function AccountFooter({ onSearch }: { onSearch: () => void }) {
   const { user } = useSession()
 
   return (
     <div className="flex flex-col gap-3">
+      <button
+        type="button"
+        onClick={onSearch}
+        className="mx-3 flex min-h-10 pressable items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-border/40 px-3 text-sm text-sidebar-muted outline-none hover:bg-sidebar-border/70 hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <Search aria-hidden className="size-4" />
+        Buscar
+        <kbd className="ml-auto rounded border border-sidebar-border px-1.5 font-mono text-[0.7rem]">
+          Ctrl K
+        </kbd>
+      </button>
       {user && (
         <div className="flex items-center justify-between gap-2 px-3">
           <Link
@@ -97,6 +109,8 @@ export function AppShell({
   const pathname = usePathname()
   const { user } = useSession()
   const role = user?.role
+  const router = useRouter()
+  const [paletteOpen, setPaletteOpen] = React.useState(false)
 
   return (
     <TenantNameProvider name={tenantName}>
@@ -106,15 +120,24 @@ export function AppShell({
           pathname={pathname}
           linkComponent={Link}
           header={<BrandMark tenantName={tenantName} />}
-          footer={<AccountFooter />}
+          footer={<AccountFooter onSearch={() => setPaletteOpen(true)} />}
         />
 
         <div className="flex min-h-svh min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+          <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b glass px-4 pt-[env(safe-area-inset-top)] md:hidden">
             <div className="min-w-0">
               <BrandMark tenantName={tenantName} />
             </div>
             <div className="flex shrink-0 items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Buscar"
+                title="Buscar"
+                onClick={() => setPaletteOpen(true)}
+              >
+                <Search aria-hidden />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -134,9 +157,28 @@ export function AppShell({
 
           {/* pb-28: que la BottomNav no tape el final del contenido en mobile. */}
           <main className="flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-10">
-            {children}
+            {/* key por ruta: la pantalla nueva entra con fade + subida. */}
+            <div key={pathname} className="page-enter">
+              {children}
+            </div>
           </main>
         </div>
+
+        <CommandPalette
+          open={paletteOpen}
+          onOpenChange={setPaletteOpen}
+          groups={[
+            {
+              heading: "Ir a",
+              items: visibleNavItems(navItems, role).map((item) => ({
+                id: item.href,
+                label: item.label,
+                icon: item.icon,
+                onSelect: () => router.push(item.href),
+              })),
+            },
+          ]}
+        />
 
         <BottomNav
           items={visibleNavItems(mobileNavItems, role)}

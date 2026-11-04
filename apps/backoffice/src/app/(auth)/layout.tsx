@@ -6,7 +6,7 @@ export default async function AuthLayout({
   const branding = await getTenantBranding()
 
   return (
-    <div className="flex min-h-svh flex-col bg-sidebar px-4 py-10 text-sidebar-foreground">
+    <div className="flex min-h-svh flex-col bg-sidebar chrome-glow px-4 py-10 text-sidebar-foreground">
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-8">
         <div className="flex flex-col items-center gap-3">
           {branding?.logoUrl && (

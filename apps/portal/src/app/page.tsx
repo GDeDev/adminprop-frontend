@@ -8,7 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@adminprop/ui/components/card"
+import {
+  AnimatedList,
+  AnimatedListItem,
+} from "@adminprop/ui/components/animated-list"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { GradientSurface } from "@adminprop/ui/components/gradient-surface"
 
 import { PublicFooter } from "@/components/public-footer"
 import { PublicHeader } from "@/components/public-header"
@@ -35,8 +40,8 @@ export default async function HomePage(props: PageProps<"/">) {
     <>
       <PublicHeader />
       <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-semibold tracking-tight">
+        <GradientSurface className="flex flex-col gap-1 px-6 py-8 md:py-10">
+          <h1 className="text-display-md font-semibold md:text-display-lg">
             Propiedades en alquiler
           </h1>
           {listing && (
@@ -47,7 +52,7 @@ export default async function HomePage(props: PageProps<"/">) {
                 : "propiedades disponibles"}
             </p>
           )}
-        </div>
+        </GradientSurface>
 
         <ListingFilters filters={filters} query={query} />
 
@@ -62,20 +67,20 @@ export default async function HomePage(props: PageProps<"/">) {
             description="Probá quitando algún filtro."
           />
         ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <AnimatedList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {listing.data.map((property) => (
-              <li key={property.id}>
+              <AnimatedListItem key={property.id}>
                 <Link
                   href={`/propiedades/${property.id}`}
                   className="block h-full"
                 >
-                  <Card className="h-full overflow-hidden pt-0 transition-shadow hover:shadow-md">
+                  <Card className="group h-full lift overflow-hidden pt-0">
                     {property.coverPhotoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={property.coverPhotoUrl}
                         alt={`Foto de ${property.address}`}
-                        className="aspect-[4/3] w-full object-cover"
+                        className="aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
                       />
                     ) : (
                       <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
@@ -87,7 +92,7 @@ export default async function HomePage(props: PageProps<"/">) {
                         {property.propertyType}
                         {property.neighborhood && ` · ${property.neighborhood}`}
                       </CardDescription>
-                      <CardTitle className="font-display text-lg">
+                      <CardTitle className="font-display text-title-md">
                         {property.address}
                       </CardTitle>
                       <PriceText
@@ -118,9 +123,9 @@ export default async function HomePage(props: PageProps<"/">) {
                     </CardHeader>
                   </Card>
                 </Link>
-              </li>
+              </AnimatedListItem>
             ))}
-          </ul>
+          </AnimatedList>
         )}
 
         {listing && listing.pagination.hasNextPage && (

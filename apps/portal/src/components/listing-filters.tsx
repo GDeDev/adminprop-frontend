@@ -6,7 +6,7 @@ import { Button } from "@adminprop/ui/components/button"
 // Mismo aspecto que `Input`/`Select` del sistema (select nativo: el formulario
 // GET funciona sin JavaScript). Borde visible también en oscuro.
 const FIELD =
-  "h-11 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:h-9 md:text-sm dark:border-muted-foreground/50 dark:bg-input/30 [&>option]:bg-background [&>option]:text-foreground"
+  "h-11 w-full min-w-0 rounded-md border border-input bg-card px-3 py-1 text-base shadow-xs transition-[border-color,box-shadow] outline-none hover:border-foreground/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 md:h-9 md:text-sm dark:border-muted-foreground/50 [&>option]:bg-background [&>option]:text-foreground"
 
 /**
  * Filtros del listado: un formulario GET, así funcionan sin JavaScript y
@@ -23,7 +23,7 @@ export function ListingFilters({
     <form
       action="/"
       method="get"
-      className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-6"
+      className="grid gap-3 rounded-xl border bg-card p-4 shadow-raised sm:grid-cols-2 lg:grid-cols-6"
     >
       <label className="flex flex-col gap-1 text-sm font-medium lg:col-span-2">
         Ubicación
