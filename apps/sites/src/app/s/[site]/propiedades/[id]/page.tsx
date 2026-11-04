@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/json-ld"
 import { getProperties, getProperty } from "@/lib/api"
 import { formatPrice, operationLabel } from "@/lib/format"
 import { loadSite } from "@/lib/load-site"
+import { pageSeo } from "@/lib/seo"
 import { basePath, hrefFor } from "@/lib/site-route"
 import { whatsappLink } from "@/lib/whatsapp"
 import { templateKit } from "@/templates"
@@ -36,13 +37,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: property.title,
     description,
-    openGraph: {
+    ...pageSeo(loaded.site, loaded.route, `/propiedades/${id}`, {
       title: property.title,
       description,
-      images: property.coverPhotoUrl
-        ? [{ url: property.coverPhotoUrl }]
-        : undefined,
-    },
+      image: property.coverPhotoUrl,
+    }),
   }
 }
 

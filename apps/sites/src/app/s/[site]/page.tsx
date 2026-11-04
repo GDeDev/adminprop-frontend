@@ -1,10 +1,27 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { JsonLd } from "@/components/json-ld"
 import { loadHomeData, loadSite } from "@/lib/load-site"
+import { pageSeo } from "@/lib/seo"
 import { templateKit } from "@/templates"
 
 export const revalidate = 60
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ site: string }>
+}): Promise<Metadata> {
+  const loaded = await loadSite((await params).site)
+  if (!loaded) return {}
+  const { site, route } = loaded
+  const { seo, brand } = site.content
+  return pageSeo(site, route, "/", {
+    title: seo.title || brand.displayName,
+    description: seo.description,
+  })
+}
 
 export default async function HomePage({
   params,

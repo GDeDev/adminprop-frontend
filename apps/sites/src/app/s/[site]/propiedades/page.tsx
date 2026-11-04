@@ -9,6 +9,7 @@ import {
   parseListingQuery,
 } from "@/lib/listing-query"
 import { loadSite } from "@/lib/load-site"
+import { isFilteredListing, pageSeo } from "@/lib/seo"
 import { hrefFor } from "@/lib/site-route"
 import { templateKit } from "@/templates"
 
@@ -21,12 +22,25 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const loaded = await loadSite((await params).site)
   if (!loaded) return {}
+  const { site, route } = loaded
+  const description = `Propiedades en venta y alquiler de ${site.content.brand.displayName}. Filtrá por operación, tipo, zona y precio.`
+  const filtered = isFilteredListing(parseListingQuery(await searchParams))
   return {
     title: "Propiedades",
-    description: `Propiedades en venta y alquiler de ${loaded.site.content.brand.displayName}.`,
+    description,
+    // Un listado filtrado o paginado repite al base: no se indexa (se siguen
+    // los links hacia las fichas). El canonical siempre apunta al listado base.
+    robots: filtered ? { index: false, follow: true } : undefined,
+    ...pageSeo(site, route, "/propiedades", {
+      title: "Propiedades",
+      description,
+    }),
   }
 }
 

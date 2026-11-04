@@ -3,11 +3,29 @@ import { notFound } from "next/navigation"
 
 import { isSectionVisible } from "@/lib/site-links"
 import { loadSite } from "@/lib/load-site"
+import { excerpt, pageSeo } from "@/lib/seo"
 import { templateKit } from "@/templates"
 
 type Props = { params: Promise<{ site: string }> }
 
-export const metadata: Metadata = { title: "Nosotros" }
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const loaded = await loadSite((await params).site)
+  if (!loaded) return {}
+  const { site, route } = loaded
+  const { about, brand } = site.content
+  const description =
+    excerpt(about.body) ??
+    `Conocé a ${brand.displayName}, nuestra historia y cómo trabajamos.`
+  return {
+    title: about.title || "Nosotros",
+    description,
+    ...pageSeo(site, route, "/nosotros", {
+      title: about.title || "Nosotros",
+      description,
+      image: about.imageUrl,
+    }),
+  }
+}
 
 export default async function AboutPage({ params }: Props) {
   const loaded = await loadSite((await params).site)

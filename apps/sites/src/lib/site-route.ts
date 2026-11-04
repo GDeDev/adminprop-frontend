@@ -2,7 +2,9 @@
  * Cómo llegó el pedido a la app: el `proxy` reescribe todo a `/s/<site>/…`,
  * donde `<site>` codifica el modo, el slug y, en vista previa, el token.
  *
- * - `h~slug`         sitio por host (subdominio o dominio propio): links sin prefijo.
+ * - `h~slug~host`    sitio por host (subdominio o dominio propio): links sin prefijo. El
+ *                    host (sin puerto) va en la ruta para armar el canonical absoluto
+ *                    sin leer headers (que haría dinámica la página y rompería el ISR).
  * - `d~slug`         acceso por slug (`/_s/slug/…`): los links llevan ese prefijo.
  * - `hp~slug~token`  vista previa por host.  `dp~slug~token`  vista previa por slug.
  *
@@ -14,7 +16,15 @@ export interface SiteRoute {
   slug: string
   /** Token de vista previa; null en el sitio público. */
   previewToken: string | null
+  /**
+   * Host con el que se pidió el sitio público (sin puerto), solo en modo host y
+   * sin vista previa. Sirve para el canonical y `og:url`. El borrador no lo
+   * lleva: no se indexa.
+   */
+  host?: string | null
 }
+
+import { isPlausibleSiteHost, normalizeHost } from "./host-policy"
 
 const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/
 const TOKEN = /^[\w.-]{20,2000}$/
@@ -29,8 +39,9 @@ export function isValidPreviewToken(value: string): boolean {
 
 export function encodeSiteRoute(route: SiteRoute): string {
   const mode = route.mode === "host" ? "h" : "d"
-  return route.previewToken
-    ? `${mode}p~${route.slug}~${route.previewToken}`
+  if (route.previewToken) return `${mode}p~${route.slug}~${route.previewToken}`
+  return route.mode === "host" && route.host
+    ? `h~${route.slug}~${route.host}`
     : `${mode}~${route.slug}`
 }
 
@@ -38,9 +49,19 @@ export function encodeSiteRoute(route: SiteRoute): string {
 export function decodeSiteRoute(segment: string): SiteRoute | null {
   const [tag, slug, token, ...rest] = decodeURIComponent(segment).split("~")
   if (rest.length > 0 || !slug || !SLUG.test(slug)) return null
-  if (tag === "h" || tag === "d") {
+  if (tag === "d") {
     return token === undefined
-      ? { mode: tag === "h" ? "host" : "dev", slug, previewToken: null }
+      ? { mode: "dev", slug, previewToken: null }
+      : null
+  }
+  if (tag === "h") {
+    if (token === undefined) {
+      return { mode: "host", slug, previewToken: null, host: null }
+    }
+    // El host tiene que tener forma de dominio: el segmento lo arma el proxy,
+    // pero nada impide que alguien lo escriba a mano.
+    return isPlausibleSiteHost(token)
+      ? { mode: "host", slug, previewToken: null, host: normalizeHost(token) }
       : null
   }
   if (tag === "hp" || tag === "dp") {
@@ -71,4 +92,15 @@ export function hrefFor(route: SiteRoute, path = "/"): string {
   if (!route.previewToken) return target
   const separator = target.includes("?") ? "&" : "?"
   return `${target}${separator}preview=${encodeURIComponent(route.previewToken)}`
+}
+
+/**
+ * URL absoluta de una ruta del sitio público, para el canonical y `og:url`.
+ * `null` si no se sabe el host (acceso por slug de desarrollo, vista previa):
+ * ahí no se emite canonical.
+ */
+export function canonicalUrl(route: SiteRoute, path = "/"): string | null {
+  if (route.mode !== "host" || route.previewToken || !route.host) return null
+  const protocol = process.env.SITES_PROTOCOL === "http" ? "http" : "https"
+  return `${protocol}://${route.host}${path === "/" ? "" : path}`
 }

@@ -36,7 +36,7 @@ describe("proxy", () => {
       request("/propiedades/abc?operation=SALE", "mi-inmo.sites.test")
     )
     expect(rewriteOf(response)).toBe(
-      "/s/h~mi-inmo/propiedades/abc?operation=SALE"
+      "/s/h~mi-inmo~mi-inmo.sites.test/propiedades/abc?operation=SALE"
     )
     expect(resolveHost).toHaveBeenCalledWith("mi-inmo.sites.test")
   })
@@ -116,7 +116,7 @@ describe("proxy", () => {
     const response = await proxy(
       request("/?preview=../../etc", "mi-inmo.sites.test")
     )
-    expect(rewriteOf(response)).toBe("/s/h~mi-inmo")
+    expect(rewriteOf(response)).toBe("/s/h~mi-inmo~mi-inmo.sites.test")
   })
 
   it("nadie entra directo al árbol interno /s/…", async () => {

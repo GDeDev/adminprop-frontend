@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { resolveHost } from "@/lib/api"
 import { cachedHostLookup, HostLookupError } from "@/lib/host-cache"
-import { isPlausibleSiteHost } from "@/lib/host-policy"
+import { isPlausibleSiteHost, normalizeHost } from "@/lib/host-policy"
 import {
   encodeSiteRoute,
   isValidPreviewToken,
@@ -86,7 +86,13 @@ export async function proxy(request: NextRequest) {
       }
     }
     if (slug && isValidSlug(slug)) {
-      route = { mode: "host", slug, previewToken }
+      // El host viaja en la ruta (solo en el sitio público) para el canonical.
+      route = {
+        mode: "host",
+        slug,
+        previewToken,
+        host: previewToken ? null : normalizeHost(host),
+      }
     }
   }
 

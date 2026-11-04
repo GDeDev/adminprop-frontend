@@ -2,11 +2,30 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { loadSite } from "@/lib/load-site"
+import { pageSeo } from "@/lib/seo"
 import { templateKit } from "@/templates"
 
 type Props = { params: Promise<{ site: string }> }
 
-export const metadata: Metadata = { title: "Contacto" }
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const loaded = await loadSite((await params).site)
+  if (!loaded) return {}
+  const { site, route } = loaded
+  const { brand, contact } = site.content
+  const description = [
+    `Contactá a ${brand.displayName}.`,
+    contact.address ? `Estamos en ${contact.address}.` : null,
+    contact.hours ? `Atendemos ${contact.hours}.` : null,
+    "Escribinos y te respondemos a la brevedad.",
+  ]
+    .filter(Boolean)
+    .join(" ")
+  return {
+    title: "Contacto",
+    description,
+    ...pageSeo(site, route, "/contacto", { title: "Contacto", description }),
+  }
+}
 
 export default async function ContactPage({ params }: Props) {
   const loaded = await loadSite((await params).site)
