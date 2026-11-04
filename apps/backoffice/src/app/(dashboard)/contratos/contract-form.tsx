@@ -69,6 +69,13 @@ import { addDays, formatDate } from "@/lib/dates"
 import { useDraftKey } from "@/lib/drafts"
 import { useProperty } from "@/lib/properties-api"
 import { useRenter } from "@/lib/renters-api"
+import {
+  LATE_FEE_BOTH_TIMINGS_MESSAGE,
+  LATE_FEE_REQUIRED_MESSAGE,
+  lateFeeApiError,
+  lateFeeDefaults,
+  lateFeeRequestFields,
+} from "@/lib/late-fee"
 import { loadDraft, removeDraft, saveDraft } from "@/lib/form-draft"
 
 import {
@@ -172,7 +179,9 @@ const STEPS: { title: string; fields: FieldName[] }[] = [
       "feeAmount",
       "customLateFee",
       "lateFeePercentage",
+      "lateFeeTiming",
       "lateFeeGraceDays",
+      "lateFeeStartDay",
     ],
   },
   { title: "Caución", fields: ["surety"] },
@@ -207,7 +216,9 @@ const EMPTY: FormValues = {
   feeAmount: "",
   customLateFee: false,
   lateFeePercentage: "",
+  lateFeeTiming: "GRACE",
   lateFeeGraceDays: "",
+  lateFeeStartDay: "",
   surety: {
     hasSurety: false,
     insurerName: "",
@@ -247,7 +258,9 @@ const draftSchema = z
     feeAmount: z.string(),
     customLateFee: z.boolean(),
     lateFeePercentage: z.string(),
+    lateFeeTiming: z.enum(["GRACE", "START_DAY"]),
     lateFeeGraceDays: z.string(),
+    lateFeeStartDay: z.string(),
     surety: z
       .object({
         hasSurety: z.boolean(),
@@ -299,14 +312,11 @@ function renewalValues(original: ContractDetail): FormValues {
     feeKind: original.billingTerms.feeAmount ? "FIXED" : "PERCENTAGE",
     feePercentage: original.billingTerms.feePercentage,
     feeAmount: original.billingTerms.feeAmount ?? "",
-    customLateFee:
+    ...lateFeeDefaults(
+      original.billingTerms,
       original.billingTerms.lateFeePercentage !== null ||
-      original.billingTerms.lateFeeGraceDays !== null,
-    lateFeePercentage: original.billingTerms.lateFeePercentage ?? "",
-    lateFeeGraceDays:
-      original.billingTerms.lateFeeGraceDays === null
-        ? ""
-        : String(original.billingTerms.lateFeeGraceDays),
+        original.billingTerms.lateFeeGraceDays !== null
+    ),
     surety: {
       hasSurety: original.hasSurety,
       insurerName: original.surety?.insurerName ?? "",
@@ -365,6 +375,10 @@ function applyApiErrors(
       "surety.insurerAlertEmail",
       "Con caución, el email de alerta es obligatorio.",
     ],
+    CONTRACT_LATE_FEE_PERCENTAGE_REQUIRED: [
+      "lateFeePercentage",
+      LATE_FEE_REQUIRED_MESSAGE,
+    ],
     CONTRACT_DATES_INVALID: [
       "endDate",
       "La fecha de fin tiene que ser posterior a la de inicio.",
@@ -376,6 +390,13 @@ function applyApiErrors(
     ],
   }
   const code = apiErrorCode(error)
+  if (
+    code === "CONTRACT_INVALID_BILLING_TERMS" &&
+    apiErrorMessage(error, "").startsWith("lateFee")
+  ) {
+    setError("lateFeeStartDay", { message: LATE_FEE_BOTH_TIMINGS_MESSAGE })
+    marked.push("lateFeeStartDay")
+  }
   const match = code ? byCode[code] : undefined
   if (match) {
     setError(match[0] as FieldName, { message: match[1] })
@@ -482,12 +503,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
       feeMode: data.feeMode,
       feeAmount:
         data.feeKind === "FIXED" ? normalizeAmount(data.feeAmount) : null,
-      lateFeePercentage: data.customLateFee
-        ? normalizeAmount(data.lateFeePercentage)
-        : null,
-      lateFeeGraceDays: data.customLateFee
-        ? Number(data.lateFeeGraceDays)
-        : null,
+      ...lateFeeRequestFields(data),
       hasSurety: data.surety.hasSurety,
       insurerName: data.surety.insurerName || null,
       insurerAlertEmail: data.surety.insurerAlertEmail || null,
@@ -521,6 +537,8 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
       toast.success(renewing ? "Contrato renovado." : "Contrato creado.")
       router.push(`/contratos/${saved.id}`)
     } catch (cause) {
+      // El campo del porcentaje solo se ve con punitorio propio: se abre.
+      if (lateFeeApiError(cause)) form.setValue("customLateFee", true)
       const first = applyApiErrors(cause, form.setError)
       setError(apiErrorMessage(cause, "No se pudo guardar el contrato."))
       // Volver al paso del primer campo con error.

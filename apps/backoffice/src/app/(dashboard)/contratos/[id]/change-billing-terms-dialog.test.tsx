@@ -7,6 +7,14 @@ import type { ContractCurrentBillingTerms } from "@adminprop/shared-types"
 import { ChangeBillingTermsDialog } from "./change-billing-terms-dialog"
 
 const change = vi.fn()
+let reference: { percentage: string | null | undefined; graceDays?: number } = {
+  percentage: "0.50",
+  graceDays: 10,
+}
+
+vi.mock("@/lib/tenant-settings-api", () => ({
+  useTenantLateFeeReference: () => reference,
+}))
 
 vi.mock("@/lib/contracts-api", () => ({
   useChangeBillingTerms: () => ({ mutateAsync: change, isPending: false }),
@@ -38,6 +46,7 @@ const contract = {
 
 afterEach(() => {
   vi.clearAllMocks()
+  reference = { percentage: "0.50", graceDays: 10 }
 })
 
 describe("ChangeBillingTermsDialog", () => {
@@ -67,8 +76,8 @@ describe("ChangeBillingTermsDialog", () => {
       screen.getByRole("option", { name: "Los paga el propietario después" })
     )
     await user.click(within(dialog).getByLabelText(/Punitorio propio/))
-    await user.clear(within(dialog).getByLabelText("% diario"))
-    await user.type(within(dialog).getByLabelText("% diario"), "3")
+    await user.clear(within(dialog).getByLabelText("Punitorio diario (%)"))
+    await user.type(within(dialog).getByLabelText("Punitorio diario (%)"), "3")
     await user.type(
       within(dialog).getByLabelText("Motivo"),
       "Pedido del propietario"
@@ -122,5 +131,100 @@ describe("ChangeBillingTermsDialog", () => {
       lateFeePercentage: null,
       lateFeeGraceDays: null,
     })
+  })
+
+  function renderDialog() {
+    render(
+      <ChangeBillingTermsDialog
+        contract={contract}
+        terms={terms}
+        open
+        onOpenChange={vi.fn()}
+      />
+    )
+    return screen.getByRole("dialog")
+  }
+
+  it("muestra el punitorio de la inmobiliaria como referencia", () => {
+    const dialog = renderDialog()
+    expect(
+      within(dialog).getByText(/Referencia de la inmobiliaria: 0,50 %/)
+    ).toBeInTheDocument()
+  })
+
+  it("con 'día de inicio' manda lateFeeStartDay y no los días de gracia", async () => {
+    change.mockResolvedValue({})
+    const user = userEvent.setup()
+    const dialog = renderDialog()
+
+    await user.click(within(dialog).getByLabelText(/Punitorio propio/))
+    await user.click(
+      within(dialog).getByRole("combobox", { name: "Desde cuándo corre" })
+    )
+    await user.click(
+      screen.getByRole("option", { name: "Día de inicio del punitorio" })
+    )
+    // Ya no se ofrece el campo de gracia: no se pueden mandar los dos.
+    expect(within(dialog).queryByLabelText("Días de gracia")).toBeNull()
+    await user.clear(within(dialog).getByLabelText("Punitorio diario (%)"))
+    await user.type(
+      within(dialog).getByLabelText("Punitorio diario (%)"),
+      "0,5"
+    )
+    await user.click(within(dialog).getByRole("button", { name: "Guardar" }))
+    expect(
+      within(dialog).getByText(
+        "Ingresá el día del mes en que empieza, de 1 a 31."
+      )
+    ).toBeInTheDocument()
+    expect(change).not.toHaveBeenCalled()
+
+    await user.type(
+      within(dialog).getByLabelText("Día de inicio del punitorio"),
+      "16"
+    )
+    await user.click(within(dialog).getByRole("button", { name: "Guardar" }))
+    const body = change.mock.calls[0]![0] as Record<string, unknown>
+    expect(body).toMatchObject({
+      lateFeePercentage: "0.5",
+      lateFeeStartDay: 16,
+    })
+    expect("lateFeeGraceDays" in body).toBe(false)
+  })
+
+  it("sin punitorio en la inmobiliaria obliga a indicar el del contrato", async () => {
+    reference = { percentage: null }
+    const dialog = renderDialog()
+    expect(within(dialog).getByLabelText(/Punitorio propio/)).toBeDisabled()
+    expect(
+      within(dialog).getByText(/todavía no definió un punitorio diario/)
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getByLabelText("Punitorio diario (%)")
+    ).toBeInTheDocument()
+  })
+
+  it("traduce CONTRACT_LATE_FEE_PERCENTAGE_REQUIRED a un mensaje claro en el campo", async () => {
+    const user = userEvent.setup()
+    change.mockRejectedValue(
+      Object.assign(new Error("x"), {
+        isAxiosError: true,
+        response: {
+          status: 400,
+          data: {
+            code: "CONTRACT_LATE_FEE_PERCENTAGE_REQUIRED",
+            message: "Indicá el punitorio diario del contrato",
+          },
+        },
+      })
+    )
+    const dialog = renderDialog()
+    await user.click(within(dialog).getByRole("button", { name: "Guardar" }))
+    expect(
+      await within(dialog).findByText(/La inmobiliaria no tiene un punitorio/)
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getByLabelText("Punitorio diario (%)")
+    ).toBeInTheDocument()
   })
 })

@@ -17,6 +17,8 @@ import type {
   Currency,
   FeeMode,
 } from "@adminprop/shared-types"
+import { Info } from "lucide-react"
+
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import {
@@ -49,6 +51,15 @@ import { COLLECTION_MODE_LABELS, FEE_MODE_LABELS } from "@/lib/billing"
 import { normalizeAmount } from "@/lib/contracts"
 import { useChangeBillingTerms } from "@/lib/contracts-api"
 import { todayIso } from "@/lib/dates"
+import {
+  LATE_FEE_BOTH_TIMINGS_MESSAGE,
+  lateFeeApiError,
+  lateFeeDefaults,
+  lateFeeRequestFields,
+  percentLabel,
+  validateLateFee,
+} from "@/lib/late-fee"
+import { useTenantLateFeeReference } from "@/lib/tenant-settings-api"
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/
 
@@ -61,7 +72,9 @@ export const billingTermsSchema = z
     feeAmount: z.string(),
     customLateFee: z.boolean(),
     lateFeePercentage: z.string(),
+    lateFeeTiming: z.enum(["GRACE", "START_DAY"]),
     lateFeeGraceDays: z.string(),
+    lateFeeStartDay: z.string(),
   })
   .superRefine((values, ctx) => {
     if (
@@ -84,25 +97,17 @@ export const billingTermsSchema = z
         message: "Ingresá el importe fijo.",
       })
     }
-    if (values.customLateFee) {
-      if (normalizeAmount(values.lateFeePercentage) === null) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["lateFeePercentage"],
-          message: "Ingresá el porcentaje diario.",
-        })
-      }
-      if (!/^\d{1,2}$/.test(values.lateFeeGraceDays.trim())) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["lateFeeGraceDays"],
-          message: "Ingresá los días de gracia (0 a 31).",
-        })
-      }
+    for (const issue of validateLateFee(values)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [issue.path],
+        message: issue.message,
+      })
     }
   })
 
 export type BillingTermsValues = z.infer<typeof billingTermsSchema>
+type BillingTermsForm = ReturnType<typeof useForm<BillingTermsValues>>
 
 const schema = billingTermsSchema.safeExtend({
   effectiveFrom: z.string().regex(DATE, "Ingresá la fecha."),
@@ -139,11 +144,10 @@ export function ChangeBillingTermsDialog({
       feeKind: terms.feeAmount ? "FIXED" : "PERCENTAGE",
       feePercentage: terms.feePercentage,
       feeAmount: terms.feeAmount ?? "",
-      customLateFee:
-        !terms.inheritedLateFeePercentage || !terms.inheritedLateFeeGraceDays,
-      lateFeePercentage: terms.lateFeePercentage ?? "",
-      lateFeeGraceDays:
-        terms.lateFeeGraceDays === null ? "" : String(terms.lateFeeGraceDays),
+      ...lateFeeDefaults(
+        terms,
+        !terms.inheritedLateFeePercentage || !terms.inheritedLateFeeGraceDays
+      ),
       notes: "",
     },
   })
@@ -164,12 +168,7 @@ export function ChangeBillingTermsDialog({
           values.feeKind === "FIXED"
             ? normalizeAmount(values.feeAmount)!
             : null,
-        lateFeePercentage: values.customLateFee
-          ? normalizeAmount(values.lateFeePercentage)!
-          : null,
-        lateFeeGraceDays: values.customLateFee
-          ? Number(values.lateFeeGraceDays)
-          : null,
+        ...lateFeeRequestFields(values),
         notes: values.notes.trim() || undefined,
       })
       toast.success("Términos de cobro actualizados.")
@@ -182,7 +181,20 @@ export function ChangeBillingTermsDialog({
           handled = true
         }
       }
+      const lateFee = lateFeeApiError(cause)
+      if (lateFee) {
+        form.setValue("customLateFee", true)
+        form.setError(lateFee.field, { message: lateFee.message })
+        handled = true
+      }
       switch (apiErrorCode(cause)) {
+        case "CONTRACT_INVALID_BILLING_TERMS":
+          // Solo el choque gracia / día de inicio tiene texto propio.
+          if (apiErrorMessage(cause, "").startsWith("lateFee")) {
+            setError(LATE_FEE_BOTH_TIMINGS_MESSAGE)
+            handled = true
+          }
+          break
         case "CONTRACT_BILLING_TERMS_NOT_AFTER_LATEST":
         case "CONTRACT_BILLING_TERMS_OUT_OF_RANGE":
           form.setError("effectiveFrom", {
@@ -295,7 +307,6 @@ export function BillingTermsFields<T extends BillingTermsValues>({
     typeof useForm<BillingTermsValues>
   >["control"]
   const feeKind = useWatch({ control, name: "feeKind" })
-  const customLateFee = useWatch({ control, name: "customLateFee" })
 
   return (
     <>
@@ -445,6 +456,39 @@ export function BillingTermsFields<T extends BillingTermsValues>({
           />
         )}
       </div>
+      <LateFeeFields
+        form={form as unknown as BillingTermsForm}
+        prefix={prefix}
+      />
+    </>
+  )
+}
+
+/**
+ * Punitorio del contrato: el de la inmobiliaria (referencia visible) o uno
+ * propio con el porcentaje y UNA forma de decir desde cuándo corre. Las dos
+ * formas son excluyentes: la API rechaza que lleguen juntas.
+ */
+function LateFeeFields({
+  form,
+  prefix,
+}: {
+  form: BillingTermsForm
+  prefix: string
+}) {
+  const { control, setValue } = form
+  const reference = useTenantLateFeeReference()
+  const customLateFee = useWatch({ control, name: "customLateFee" })
+  const timing = useWatch({ control, name: "lateFeeTiming" })
+  // La inmobiliaria no fijó un punitorio: el del contrato es obligatorio.
+  const mustBeCustom = reference.percentage === null
+
+  React.useEffect(() => {
+    if (mustBeCustom) setValue("customLateFee", true)
+  }, [mustBeCustom, setValue])
+
+  return (
+    <>
       <Controller
         name="customLateFee"
         control={control}
@@ -453,6 +497,7 @@ export function BillingTermsFields<T extends BillingTermsValues>({
             <Switch
               id={`${prefix}-custom-late-fee`}
               checked={field.value}
+              disabled={mustBeCustom}
               onCheckedChange={field.onChange}
             />
             <FieldLabel htmlFor={`${prefix}-custom-late-fee`}>
@@ -461,54 +506,147 @@ export function BillingTermsFields<T extends BillingTermsValues>({
           </Field>
         )}
       />
+      {mustBeCustom ? (
+        <Alert role="note">
+          <Info aria-hidden />
+          <AlertDescription>
+            La inmobiliaria todavía no definió un punitorio diario por defecto,
+            así que este contrato tiene que indicar el suyo.
+          </AlertDescription>
+        </Alert>
+      ) : reference.percentage ? (
+        <FieldDescription>
+          Referencia de la inmobiliaria: {percentLabel(reference.percentage)}{" "}
+          diario
+          {reference.graceDays === undefined
+            ? ""
+            : `, ${reference.graceDays} días de gracia`}
+          .
+        </FieldDescription>
+      ) : null}
       {customLateFee && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4">
           <Controller
             name="lateFeePercentage"
             control={control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${prefix}-late-fee`}>% diario</FieldLabel>
+              <Field data-invalid={fieldState.invalid} className="sm:max-w-xs">
+                <FieldLabel htmlFor={`${prefix}-late-fee`}>
+                  Punitorio diario (%)
+                </FieldLabel>
                 <Input
                   {...field}
                   id={`${prefix}-late-fee`}
                   inputMode="decimal"
+                  placeholder={
+                    reference.percentage
+                      ? reference.percentage.replace(".", ",")
+                      : "0,50"
+                  }
                   aria-invalid={fieldState.invalid}
                 />
                 {fieldState.invalid ? (
                   <FieldError errors={[fieldState.error]} />
                 ) : (
                   <FieldDescription>
-                    Interés simple sobre el alquiler impago de cada día.
+                    Interés simple sobre el alquiler impago de cada día. 0
+                    significa sin punitorio.
                   </FieldDescription>
                 )}
               </Field>
             )}
           />
           <Controller
-            name="lateFeeGraceDays"
+            name="lateFeeTiming"
             control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={`${prefix}-grace-days`}>
-                  Días de gracia
+            render={({ field }) => (
+              <Field>
+                <FieldLabel htmlFor={`${prefix}-late-fee-timing`}>
+                  Desde cuándo corre
                 </FieldLabel>
-                <Input
-                  {...field}
-                  id={`${prefix}-grace-days`}
-                  inputMode="numeric"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid ? (
-                  <FieldError errors={[fieldState.error]} />
-                ) : (
-                  <FieldDescription>
-                    Del 1 al N del mes no corre punitorio.
-                  </FieldDescription>
-                )}
+                <Select
+                  value={field.value}
+                  onValueChange={(value) =>
+                    field.onChange(value as BillingTermsValues["lateFeeTiming"])
+                  }
+                >
+                  <SelectTrigger
+                    id={`${prefix}-late-fee-timing`}
+                    className="w-full sm:max-w-xs"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GRACE">Días de gracia</SelectItem>
+                    <SelectItem value="START_DAY">
+                      Día de inicio del punitorio
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FieldDescription>
+                  Se indica una sola de las dos: es lo mismo dicho al revés
+                  (gracia 10 equivale a inicio el día 11).
+                </FieldDescription>
               </Field>
             )}
           />
+          {timing === "START_DAY" ? (
+            <Controller
+              name="lateFeeStartDay"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field
+                  data-invalid={fieldState.invalid}
+                  className="sm:max-w-xs"
+                >
+                  <FieldLabel htmlFor={`${prefix}-start-day`}>
+                    Día de inicio del punitorio
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={`${prefix}-start-day`}
+                    inputMode="numeric"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : (
+                    <FieldDescription>
+                      Día del mes (1 a 31) desde el que se cobra punitorio.
+                    </FieldDescription>
+                  )}
+                </Field>
+              )}
+            />
+          ) : (
+            <Controller
+              name="lateFeeGraceDays"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field
+                  data-invalid={fieldState.invalid}
+                  className="sm:max-w-xs"
+                >
+                  <FieldLabel htmlFor={`${prefix}-grace-days`}>
+                    Días de gracia
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={`${prefix}-grace-days`}
+                    inputMode="numeric"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : (
+                    <FieldDescription>
+                      Del 1 al N del mes no corre punitorio.
+                    </FieldDescription>
+                  )}
+                </Field>
+              )}
+            />
+          )}
         </div>
       )}
     </>
