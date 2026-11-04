@@ -47,6 +47,7 @@ SEO por página con `generateMetadata` desde `seo`, Open Graph, favicon del siti
 ## Resiliencia y caché (segunda ronda)
 
 - Una falla de la API nunca se cachea como 404 (DT-127): 503 con `Retry-After` en el proxy, última versión buena en ISR.
+- **Ninguna página se publica degradada** (DT-150): `UpstreamError` no se atrapa en home, listado, ficha, favoritos ni `generateMetadata`; Next conserva la última versión buena o muestra `error.tsx` (con `retry()`, y `app/error.tsx` para el layout). El sitemap responde 503 `no-store`. El cliente corta a los 8 s (`API_TIMEOUT_MS` solo para tests). Cubierto por `lib/api.test.ts` (servidor HTTP simulado: 5xx, 429, corte de conexión, cuelgue, cuerpo roto), `app/s/[site]/api-failure.test.tsx`, `sitemap.xml/route.test.ts` y `error.test.tsx`.
 - **`POST /api/revalidate`** (DT-130): la API lo llama al publicar, despublicar o verificar un dominio; el cambio se ve en la próxima visita. Con el secreto sin configurar queda apagado y el sitio se actualiza solo a los 60 s.
 - El tema va en `:root` (DT-129) y el `theme-color` del navegador sale del fondo del sitio.
 
@@ -78,6 +79,7 @@ Ver el documento de PR (`docs/PR-web-inmobiliaria-sites.md`): `typecheck`, lint,
 | Variable                                                | Dónde      | Para qué                                                   |
 | ------------------------------------------------------- | ---------- | ---------------------------------------------------------- |
 | `API_URL` (o `NEXT_PUBLIC_API_URL`)                     | sites      | URL de la API, con `/api/v1`                               |
+| `API_TIMEOUT_MS`                                        | sites      | Tope de espera a la API (ms; por defecto 8000, solo tests) |
 | `SITES_PREVIEW_ANCESTORS`                               | sites      | Orígenes del backoffice que pueden embeber la vista previa |
 | `SITES_ALLOW_SLUG_PATH`                                 | sites      | Habilita `/_s/<slug>` en producción                        |
 | `SITES_IMAGE_SOURCES`                                   | sites      | Orígenes extra de imágenes (storage local en desarrollo)   |
