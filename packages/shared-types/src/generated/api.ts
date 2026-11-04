@@ -2459,6 +2459,983 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/migration/excel/template": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Descargar la plantilla de Excel
+     * @description Hojas Instrucciones, Propietarios, Garantes, Inquilinos, Propiedades y Contratos, con desplegables armados con los maestros de la inmobiliaria.
+     */
+    get: operations["MigrationController_template_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/excel/analyze": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Analizar un Excel (dry-run)
+     * @description Multipart: `file` (.xlsx, hasta 10 MB y 5.000 filas). No crea ninguna entidad: arma un lote con las filas validadas para revisar.
+     */
+    post: operations["MigrationController_analyzeExcel_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/tokko/analyze": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Analizar el stock de Tokko (dry-run)
+     * @description Siempre es un análisis: no hay "importar directo". Con `TOKKO_SOURCE=fixture` usa una muestra incluida; con `http`, la API real.
+     */
+    post: operations["MigrationController_analyzeTokko_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Historial de lotes */
+    get: operations["MigrationController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Resumen y reporte de un lote */
+    get: operations["MigrationController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/rows": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Filas del lote, con filtros */
+    get: operations["MigrationController_rows_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/rows/{rowId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Excluir una fila o elegir cómo resolver su conflicto
+     * @description Sólo mientras el lote está pendiente de revisión (READY).
+     */
+    patch: operations["MigrationController_updateRow_api/v1"]
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar el lote revisado
+     * @description Importa exactamente las filas analizadas. Las filas con error se omiten solas. Un conflicto se saltea por defecto; `MERGE_EMPTY_FIELDS` sólo completa campos vacíos, nunca pisa un valor cargado.
+     */
+    post: operations["MigrationController_confirm_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/discard": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Descartar el lote sin importar nada */
+    post: operations["MigrationController_discard_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/assets/retry": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Reintentar sólo las fotos que fallaron */
+    post: operations["MigrationController_retryAssets_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/report.xlsx": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Descargar el reporte del lote
+     * @description Una hoja con los errores y conflictos (fila, campo, mensaje) para corregir y volver a subir, y otra con las fotos por propiedad.
+     */
+    get: operations["MigrationController_report_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/properties/{propertyId}/appraise": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Sugerir un rango de alquiler
+     * @description Síncrono: consulta sólo el caché de avisos, sin red. Devuelve 201 también cuando `reused` es true (una tasación idéntica de las últimas 6 horas). 422 `INSUFFICIENT_MARKET_DATA` si no hay avisos suficientes; 429 `VALUATION_DAILY_LIMIT`. No modifica la propiedad. Auditado.
+     */
+    post: operations["ValuationController_appraise_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/properties/{propertyId}/history": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Historial de tasaciones de una propiedad, las nuevas primero */
+    get: operations["ValuationController_history_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/market-status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de las fuentes de datos de mercado
+     * @description Por fuente: último ingreso, estado y avisos vigentes. Son datos de mercado agregados, iguales para todas las inmobiliarias.
+     */
+    get: operations["ValuationController_marketStatus_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/market-coverage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Avisos vigentes de la zona de una ubicación
+     * @description Para anticipar el 422 antes de tasar. No distingue categoría ni moneda: es una cobertura orientativa.
+     */
+    get: operations["ValuationController_marketCoverage_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/zones/refresh": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Refrescar los avisos de la zona de una ubicación (admin)
+     * @description Se encola y responde 202 con el id del trabajo (`GET /jobs/:id/status`). Respeta el máximo de una corrida por zona cada 24 h.
+     */
+    post: operations["ValuationController_refreshZone_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/pipeline": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Tablero: 6 columnas con hasta 50 tarjetas cada una */
+    get: operations["CrmController_pipeline_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Consultas paginadas (ver más de una columna, lista mobile)
+     * @description Con `stage` ordena por posición del tablero; sin él, las más nuevas primero.
+     */
+    get: operations["CrmController_list_api/v1"]
+    put?: never
+    /** Cargar una consulta a mano (llamado, WhatsApp, visita) */
+    post: operations["CrmController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Detalle de una consulta con su línea de tiempo */
+    get: operations["CrmController_detail_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Editar datos de contacto, propiedad o seguimiento */
+    patch: operations["CrmController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/stage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Mover una tarjeta de columna o de lugar
+     * @description La posición sale de los vecinos (`beforeId` arriba, `afterId` abajo); sin vecinos va arriba. `CLOSED_LOST` exige `lostReason` (422 `LOST_REASON_REQUIRED`). Reabrir una cerrada está permitido.
+     */
+    patch: operations["CrmController_move_api/v1"]
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/assign": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Asignar la consulta a un usuario (null la libera) */
+    patch: operations["CrmController_assign_api/v1"]
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/notes": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar una nota
+     * @description Las notas no se editan ni se borran: queda el rastro.
+     */
+    post: operations["CrmController_addNote_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/contact-attempts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar un intento de contacto
+     * @description Fija el último contacto y, si la consulta estaba en `NEW`, la pasa a `CONTACTED`.
+     */
+    post: operations["CrmController_contactAttempt_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/whatsapp-link": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Link de WhatsApp con el mensaje de la plantilla ya armado
+     * @description `url` es null si la consulta no tiene un teléfono utilizable. Plantilla por defecto: `INQUIRY_FIRST_CONTACT`.
+     */
+    get: operations["CrmController_whatsapp_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/assignees": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Personal activo al que se puede asignar */
+    get: operations["CrmController_assignees_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/analytics/overview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Resumen del CRM en un rango de fechas */
+    get: operations["CrmController_overview_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/analytics/properties/{propertyId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Vistas, consultas y conversión de una propiedad
+     * @description Las vistas se cuentan desde la activación de la fase; antes figuran en 0.
+     */
+    get: operations["CrmController_propertyAnalytics_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Los tres canales; Zonaprop y Argenprop salen UNAVAILABLE */
+    get: operations["ChannelsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels/mercadolibre/connect": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Empezar la conexión con Mercado Libre
+     * @description Devuelve la URL del portal a la que hay que mandar al navegador. El `state` va firmado con el tenant y el usuario y vence a los 10 minutos.
+     */
+    post: operations["ChannelsController_connect_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels/{channel}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Desconectar un canal
+     * @description Borra los tokens. Las publicaciones activas quedan en el portal.
+     */
+    delete: operations["ChannelsController_disconnect_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels/mercadolibre/callback": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Callback del OAuth de Mercado Libre (redirige al backoffice)
+     * @description Valida el `state`, canjea el código y guarda los tokens cifrados. Redirige a `/configuracion/canales?connected=mercadolibre` (o `?error=`). Un `state` vencido o manipulado es 400 `OAUTH_STATE_INVALID`.
+     */
+    get: operations["ChannelOAuthController_callback_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Estado de la propiedad en cada canal */
+    get: operations["PropertyListingsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/publish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Publicar o actualizar la publicación (trabajo en segundo plano)
+     * @description Responde 202 con el `jobId` (consultá `GET /jobs/:id/status`). Valida antes de encolar: 422 `LISTING_NOT_READY` (la lista de lo que falta va en `errors`), 409 `CHANNEL_NOT_CONNECTED`.
+     */
+    post: operations["PropertyListingsController_publish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/retry": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reintentar una publicación en error
+     * @description 409 `LISTING_STATE_INVALID` si no está en `ERROR`.
+     */
+    post: operations["PropertyListingsController_retry_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/pause": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Pausar la publicación en el portal */
+    post: operations["PropertyListingsController_pause_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/resume": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Reanudar una publicación pausada */
+    post: operations["PropertyListingsController_resume_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/close": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cerrar la publicación en el portal
+     * @description Un aviso cerrado no se reabre: publicar de nuevo crea uno nuevo.
+     */
+    post: operations["PropertyListingsController_close_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de notificaciones
+     * @description Los envíos de la inmobiliaria, más nuevos primero (los avisos internos de la campana no figuran: están en `/automations/alerts`).
+     */
+    get: operations["NotificationsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/resend-failed": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reintentar todas las notificaciones fallidas
+     * @description Encola un trabajo (`notifications-resend-failed`) y responde 202 con su id. El avance se consulta en `GET /jobs/:id/status`.
+     */
+    post: operations["NotificationsController_resendFailed_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Tipos de aviso y sus canales
+     * @description El catálogo con el estado de la inmobiliaria.
+     */
+    get: operations["NotificationsController_settings_api/v1"]
+    /**
+     * Habilitar tipos de aviso y elegir canales
+     * @description Un tipo obligatorio no se puede deshabilitar ni sacarle sus canales originales (422 `NOTIFICATION_MANDATORY`).
+     */
+    put: operations["NotificationsController_updateSettings_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Plantillas de email */
+    get: operations["NotificationsController_templates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Editar una plantilla
+     * @description Usar una variable que el tipo no declara da 422 `TEMPLATE_UNKNOWN_VARIABLE`.
+     */
+    put: operations["NotificationsController_updateTemplate_api/v1"]
+    post?: never
+    /** Restaurar el texto original de una plantilla */
+    delete: operations["NotificationsController_resetTemplate_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}/preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Vista previa de una plantilla
+     * @description Con datos de ejemplo del tipo. No envía nada.
+     */
+    post: operations["NotificationsController_preview_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}/test": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Enviarme una prueba
+     * @description Manda la plantilla vigente con datos de ejemplo al email del usuario logueado, por el mismo camino de entrega que un aviso real.
+     */
+    post: operations["NotificationsController_test_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/me/preferences": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Mis preferencias de notificación */
+    get: operations["NotificationsController_myPreferences_api/v1"]
+    /**
+     * Actualizar mis preferencias de notificación
+     * @description Sólo aplican a los avisos al personal que no son obligatorios. Apagar uno obligatorio da 422 `NOTIFICATION_MANDATORY`.
+     */
+    put: operations["NotificationsController_updateMyPreferences_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/whatsapp-templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Plantillas de WhatsApp
+     * @description Los textos con los que el backoffice arma los links `wa.me` (recordatorio, mora, primer contacto de una consulta).
+     */
+    get: operations["NotificationsController_whatsapp_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/whatsapp-templates/{key}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Editar una plantilla de WhatsApp */
+    put: operations["NotificationsController_updateWhatsapp_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/dev/events": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Simular un evento del proveedor de email (sólo desarrollo)
+     * @description Registra un evento (entregado, abierto, rebotó...) sobre una notificación ya enviada. Sólo con `EMAIL_PROVIDER=console` y fuera de producción; si no, 404.
+     */
+    post: operations["NotificationsController_devEvent_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de una notificación
+     * @description Con el asunto, el texto enviado y la cronología de entregas, aperturas y rebotes.
+     */
+    get: operations["NotificationsController_detail_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/{id}/resend": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reenviar una notificación fallida
+     * @description Vuelve a encolarla con los intentos en cero. Queda en la auditoría.
+     */
+    post: operations["NotificationsController_resend_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/webhooks/resend": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Webhook de Resend
+     * @description Público, con firma Svix (`svix-id`, `svix-timestamp`, `svix-signature`) y tolerancia de 5 minutos. Firma inválida: 401. Un evento repetido o de un mensaje desconocido responde 200 sin duplicar nada.
+     */
+    post: operations["WebhooksController_resendEvent_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/documents": {
     parameters: {
       query?: never
@@ -3309,40 +4286,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/inquiries": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Listar las consultas del portal */
-    get: operations["InquiriesController_list_api/v1"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/inquiries/{id}/status": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    /** Cambiar el estado de una consulta */
-    patch: operations["InquiriesController_updateStatus_api/v1"]
-    trace?: never
-  }
   "/api/v1/site/templates": {
     parameters: {
       query?: never
@@ -3578,286 +4521,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/notifications": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * Historial de notificaciones
-     * @description Los envíos de la inmobiliaria, más nuevos primero (los avisos internos de la campana no figuran: están en `/automations/alerts`).
-     */
-    get: operations["NotificationsController_list_api/v1"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/resend-failed": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Reintentar todas las notificaciones fallidas
-     * @description Encola un trabajo (`notifications-resend-failed`) y responde 202 con su id. El avance se consulta en `GET /jobs/:id/status`.
-     */
-    post: operations["NotificationsController_resendFailed_api/v1"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/settings": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * Tipos de aviso y sus canales
-     * @description El catálogo con el estado de la inmobiliaria.
-     */
-    get: operations["NotificationsController_settings_api/v1"]
-    /**
-     * Habilitar tipos de aviso y elegir canales
-     * @description Un tipo obligatorio no se puede deshabilitar ni sacarle sus canales originales (422 `NOTIFICATION_MANDATORY`).
-     */
-    put: operations["NotificationsController_updateSettings_api/v1"]
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/templates": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Plantillas de email */
-    get: operations["NotificationsController_templates_api/v1"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/templates/{key}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    /**
-     * Editar una plantilla
-     * @description Usar una variable que el tipo no declara da 422 `TEMPLATE_UNKNOWN_VARIABLE`.
-     */
-    put: operations["NotificationsController_updateTemplate_api/v1"]
-    post?: never
-    /** Restaurar el texto original de una plantilla */
-    delete: operations["NotificationsController_resetTemplate_api/v1"]
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/templates/{key}/preview": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Vista previa de una plantilla
-     * @description Con datos de ejemplo del tipo. No envía nada.
-     */
-    post: operations["NotificationsController_preview_api/v1"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/templates/{key}/test": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Enviarme una prueba
-     * @description Manda la plantilla vigente con datos de ejemplo al email del usuario logueado, por el mismo camino de entrega que un aviso real.
-     */
-    post: operations["NotificationsController_test_api/v1"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/me/preferences": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Mis preferencias de notificación */
-    get: operations["NotificationsController_myPreferences_api/v1"]
-    /**
-     * Actualizar mis preferencias de notificación
-     * @description Sólo aplican a los avisos al personal que no son obligatorios. Apagar uno obligatorio da 422 `NOTIFICATION_MANDATORY`.
-     */
-    put: operations["NotificationsController_updateMyPreferences_api/v1"]
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/whatsapp-templates": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * Plantillas de WhatsApp
-     * @description Los textos con los que el backoffice arma los links `wa.me` (recordatorio, mora, primer contacto de una consulta).
-     */
-    get: operations["NotificationsController_whatsapp_api/v1"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/whatsapp-templates/{key}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    /** Editar una plantilla de WhatsApp */
-    put: operations["NotificationsController_updateWhatsapp_api/v1"]
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/dev/events": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Simular un evento del proveedor de email (sólo desarrollo)
-     * @description Registra un evento (entregado, abierto, rebotó...) sobre una notificación ya enviada. Sólo con `EMAIL_PROVIDER=console` y fuera de producción; si no, 404.
-     */
-    post: operations["NotificationsController_devEvent_api/v1"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/{id}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * Detalle de una notificación
-     * @description Con el asunto, el texto enviado y la cronología de entregas, aperturas y rebotes.
-     */
-    get: operations["NotificationsController_detail_api/v1"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notifications/{id}/resend": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Reenviar una notificación fallida
-     * @description Vuelve a encolarla con los intentos en cero. Queda en la auditoría.
-     */
-    post: operations["NotificationsController_resend_api/v1"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/webhooks/resend": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Webhook de Resend
-     * @description Público, con firma Svix (`svix-id`, `svix-timestamp`, `svix-signature`) y tolerancia de 5 minutos. Firma inválida: 401. Un evento repetido o de un mensaje desconocido responde 200 sin duplicar nada.
-     */
-    post: operations["WebhooksController_resendEvent_api/v1"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/api/v1/examples": {
     parameters: {
       query?: never
@@ -3982,6 +4645,8 @@ export interface components {
         | "UNSUPPORTED_MEDIA_TYPE"
         | "METHOD_NOT_ALLOWED"
         | "RATE_LIMIT_EXCEEDED"
+        | "VALUATION_DAILY_LIMIT"
+        | "LISTING_NOT_READY"
         | "SERVICE_UNAVAILABLE"
         | "REQUEST_TIMEOUT"
         | "UNAUTHENTICATED"
@@ -4042,11 +4707,19 @@ export interface components {
        */
       path: string
     }
-    LoginDto: {
-      /** @example ana@ejemplo.com */
-      email: string
-      /** @example UnaClaveSegura123 */
-      password: string
+    ApiSuccessDto: {
+      /**
+       * @description Indica si la operación fue exitosa
+       * @example true
+       */
+      success: boolean
+      /**
+       * @description Mensaje que describe el resultado de la operación
+       * @example Operación completada correctamente
+       */
+      message: string | null
+      /** @description Payload devuelto por la operación */
+      data: Record<string, never>
     }
     PublicUserDto: {
       /** @example 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d */
@@ -4097,6 +4770,12 @@ export interface components {
       user: components["schemas"]["PublicUserDto"]
       tokens: components["schemas"]["AuthTokensDto"]
     }
+    LoginDto: {
+      /** @example ana@ejemplo.com */
+      email: string
+      /** @example UnaClaveSegura123 */
+      password: string
+    }
     PortalLoginDto: {
       /** @example ana@ejemplo.com */
       email: string
@@ -4133,20 +4812,6 @@ export interface components {
       currentPassword: string
       /** @description Contraseña nueva. Mínimo 10 caracteres, con minúscula, mayúscula y número. */
       newPassword: string
-    }
-    ApiSuccessDto: {
-      /**
-       * @description Indica si la operación fue exitosa
-       * @example true
-       */
-      success: boolean
-      /**
-       * @description Mensaje que describe el resultado de la operación
-       * @example Operación completada correctamente
-       */
-      message: string | null
-      /** @description Payload devuelto por la operación */
-      data: Record<string, never>
     }
     PaginationMetaDto: {
       /**
@@ -4500,6 +5165,8 @@ export interface components {
       /** @enum {string} */
       listingCurrency: "ARS" | "USD"
       publicDescription: string | null
+      /** @description La migración la dejó para revisar (ej. sin ubicación) */
+      needsReview: boolean
       /** @enum {string} */
       listingOperation: "SALE" | "RENT"
       /** Format: date-time */
@@ -4540,6 +5207,8 @@ export interface components {
       /** @enum {string} */
       listingCurrency: "ARS" | "USD"
       publicDescription: string | null
+      /** @description La migración la dejó para revisar (ej. sin ubicación) */
+      needsReview: boolean
       /** @enum {string} */
       listingOperation: "SALE" | "RENT"
       /** Format: date-time */
@@ -4654,6 +5323,8 @@ export interface components {
       latitude?: number | null
       /** @example -58.3816 */
       longitude?: number | null
+      /** @description Marcar o limpiar la revisión pendiente de una propiedad migrada. Cambiar la ubicación también la limpia. */
+      needsReview?: boolean
     }
     ChangePropertyStatusDto: {
       /**
@@ -6767,6 +7438,10 @@ export interface components {
         | "PUBLIC_INQUIRY"
         | "NOTIFICATION_FAILED"
         | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
       title: string
       body: string
       /** @example CONTRACT */
@@ -6803,6 +7478,901 @@ export interface components {
        * @example bcra-indec
        */
       provider: string
+    }
+    StartMigrationResultDto: {
+      batchId: string
+      /** @description Se consulta en GET /jobs/:id/status. */
+      jobId: string
+    }
+    AnalyzeTokkoDto: {
+      /**
+       * @description Tipos de operación a traer. Por defecto sólo alquiler.
+       * @example [
+       *       "Rent"
+       *     ]
+       */
+      operationTypes?: string[]
+      /**
+       * @description Para probar con pocas propiedades.
+       * @example 10
+       */
+      limit?: number
+      /** @description Si también se traen las fotos al confirmar. */
+      includeAssets: boolean
+    }
+    ImportAuthorDto: {
+      id: string
+      fullName: string
+    }
+    ImportCountsDto: {
+      total: number
+      valid: number
+      errors: number
+      conflicts: number
+      alreadyImported: number
+      imported: number
+      skipped: number
+      failed: number
+      needsReview: number
+      /** @description Por entidad: OWNER, RENTER, GUARANTOR, PROPERTY, CONTRACT. */
+      byEntity: {
+        [key: string]: components["schemas"]["ImportEntityCountsDto"]
+      }
+    }
+    ImportBatchSummaryDto: {
+      id: string
+      /** @enum {string} */
+      source: "EXCEL" | "TOKKO"
+      /** @enum {string} */
+      status:
+        | "ANALYZING"
+        | "READY"
+        | "IMPORTING"
+        | "COMPLETED"
+        | "PARTIAL"
+        | "FAILED"
+        | "DISCARDED"
+      fileName: string | null
+      createdBy: components["schemas"]["ImportAuthorDto"]
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      confirmedAt: string | null
+      counts: components["schemas"]["ImportCountsDto"]
+    }
+    ImportMastersCountDto: {
+      locations: number
+      propertyTypes: number
+      amenities: number
+    }
+    ImportAssetsDto: {
+      migrated: number
+      failed: number
+      pending: number
+    }
+    ImportBatchDetailDto: {
+      id: string
+      /** @enum {string} */
+      source: "EXCEL" | "TOKKO"
+      /** @enum {string} */
+      status:
+        | "ANALYZING"
+        | "READY"
+        | "IMPORTING"
+        | "COMPLETED"
+        | "PARTIAL"
+        | "FAILED"
+        | "DISCARDED"
+      fileName: string | null
+      createdBy: components["schemas"]["ImportAuthorDto"]
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      confirmedAt: string | null
+      counts: components["schemas"]["ImportCountsDto"]
+      missingSheets: string[]
+      mastersToCreate: components["schemas"]["ImportMastersCountDto"]
+      mastersCreated: components["schemas"]["ImportMastersCountDto"]
+      assets: components["schemas"]["ImportAssetsDto"]
+      /** @description El lote está listo para revisar y tiene algo para importar. */
+      canConfirm: boolean
+      errorMessage: string | null
+    }
+    ImportRowErrorDto: {
+      field: string
+      code: string
+      message: string
+    }
+    ImportRowConflictDto: {
+      entityId: string
+      reason: string
+      differingFields: string[]
+    }
+    ImportRowDto: {
+      id: string
+      /** @enum {string} */
+      entity: "OWNER" | "RENTER" | "GUARANTOR" | "PROPERTY" | "CONTRACT"
+      rowNumber: number | null
+      externalId: string | null
+      /** @description Texto para identificar la fila. */
+      label: string
+      /** @enum {string} */
+      status:
+        | "VALID"
+        | "ERROR"
+        | "CONFLICT"
+        | "ALREADY_IMPORTED"
+        | "IMPORTED"
+        | "SKIPPED"
+        | "FAILED"
+      errors: components["schemas"]["ImportRowErrorDto"][]
+      conflict: components["schemas"]["ImportRowConflictDto"] | null
+      /** @enum {string|null} */
+      resolution: "SKIP" | "MERGE_EMPTY_FIELDS" | null
+      excluded: boolean
+      needsReview: boolean
+      targetId: string | null
+    }
+    UpdateImportRowDto: {
+      /** @description Excluir la fila de la importación. */
+      excluded?: boolean
+      /**
+       * @description Cómo resolver el conflicto de esta fila.
+       * @enum {string}
+       */
+      resolution?: "SKIP" | "MERGE_EMPTY_FIELDS"
+    }
+    ConfirmImportDto: {
+      /** @description Filas a dejar afuera. */
+      excludeRowIds?: string[]
+      /**
+       * @description Qué hacer con los conflictos sin resolución propia. Nunca se pisa un valor ya cargado.
+       * @enum {string}
+       */
+      defaultConflictResolution: "SKIP" | "MERGE_EMPTY_FIELDS"
+      /** @description Si se traen las fotos de Tokko (por defecto, lo pedido al analizar). */
+      migrateAssets?: boolean
+    }
+    RetryAssetsResultDto: {
+      jobId: string
+    }
+    AppraisePropertyDto: {
+      /**
+       * @description Superficie en m² (decimal como string). Si la ficha no la tiene, se manda desde el formulario; sin ella se compara el precio absoluto.
+       * @example 48.5
+       */
+      areaM2?: string
+      bedrooms?: number
+      /** @description Textos libres; por defecto los de la propiedad. */
+      amenities?: string[]
+      /**
+       * @description Por defecto, la moneda de publicación de la propiedad.
+       * @enum {string}
+       */
+      currency?: "ARS" | "USD"
+    }
+    ValuationRequesterDto: {
+      id: string
+      fullName: string
+    }
+    ValuationResultDto: {
+      id: string
+      propertyId: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example 420000.00 */
+      minPrice: string
+      /** @example 510000.00 */
+      maxPrice: string
+      /** @example 455000.00 */
+      suggestedPrice: string
+      /**
+       * @description A la centena más cercana en pesos y a la decena en dólares.
+       * @example 455000.00
+       */
+      suggestedPriceRounded: string
+      /** @enum {string} */
+      confidence: "LOW" | "MEDIUM" | "HIGH"
+      comparablesUsed: number
+      comparablesDiscarded: number
+      /** @example Palermo, CABA */
+      zoneLabel: string
+      zoneWidened: boolean
+      /** Format: date-time */
+      oldestComparableAt: string | null
+      justification: string
+      /** @enum {string} */
+      engine: "STATISTICAL" | "STATISTICAL_LLM"
+      requestedBy: components["schemas"]["ValuationRequesterDto"]
+      /** Format: date-time */
+      createdAt: string
+      /** @description true si es una tasación idéntica de las últimas 6 horas que se devolvió en vez de crear otra. */
+      reused: boolean
+    }
+    MarketSourceStatusDto: {
+      /** @enum {string} */
+      source: "ZONAPROP" | "ARGENPROP" | "MERCADOLIBRE" | "FAKE"
+      /** Format: date-time */
+      lastIngestAt: string | null
+      /** @enum {string} */
+      status: "OK" | "STALE" | "BLOCKED" | "PARSE_ERROR" | "DISABLED"
+      activeComparables: number
+    }
+    MarketStatusDto: {
+      sources: components["schemas"]["MarketSourceStatusDto"][]
+      maxAgeDays: number
+    }
+    MarketCoverageDto: {
+      /** @example Palermo, CABA */
+      zoneLabel: string
+      activeComparables: number
+      enoughData: boolean
+      /** Format: date-time */
+      lastRefreshedAt: string | null
+    }
+    RefreshZoneDto: {
+      /** Format: uuid */
+      locationId: string
+    }
+    RefreshZoneResultDto: {
+      /** @description Se consulta con GET /jobs/:id/status */
+      jobId: string
+    }
+    InquiryPropertyRefDto: {
+      id: string
+      address: string
+    }
+    InquiryUserRefDto: {
+      id: string
+      fullName: string
+    }
+    InquiryCardDto: {
+      id: string
+      name: string
+      email: string | null
+      phone: string | null
+      /** @description Primeros 140 caracteres */
+      message: string
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      /** @description Decimal para ordenar dentro de la columna */
+      boardPosition: number
+      /** @enum {string} */
+      source:
+        | "PORTAL"
+        | "MERCADOLIBRE"
+        | "ZONAPROP"
+        | "ARGENPROP"
+        | "WHATSAPP"
+        | "PHONE"
+        | "MANUAL"
+      property: components["schemas"]["InquiryPropertyRefDto"] | null
+      assignedTo: components["schemas"]["InquiryUserRefDto"] | null
+      /** @example 2026-11-10 */
+      nextActionAt: string | null
+      /** Format: date-time */
+      lastContactAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      ageHours: number
+      hasWhatsApp: boolean
+    }
+    PipelineColumnDto: {
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      total: number
+      /** @description Hasta 50 */
+      cards: components["schemas"]["InquiryCardDto"][]
+    }
+    PipelineDto: {
+      columns: components["schemas"]["PipelineColumnDto"][]
+    }
+    CreateInquiryDto: {
+      name: string
+      email?: string
+      phone?: string
+      message?: string
+      propertyId?: string
+      /** @enum {string} */
+      source: "WHATSAPP" | "PHONE" | "MANUAL" | "ZONAPROP" | "ARGENPROP"
+      assignedToId?: string
+    }
+    InquiryActivityDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "CREATED"
+        | "STAGE_CHANGED"
+        | "ASSIGNED"
+        | "NOTE"
+        | "CONTACT_ATTEMPT"
+        | "FOLLOW_UP_SET"
+        | "EDITED"
+      author: components["schemas"]["InquiryUserRefDto"] | null
+      payload: {
+        [key: string]: unknown
+      }
+      /** Format: date-time */
+      createdAt: string
+    }
+    InquiryDetailDto: {
+      id: string
+      name: string
+      email: string | null
+      phone: string | null
+      /** @description Primeros 140 caracteres */
+      message: string
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      /** @description Decimal para ordenar dentro de la columna */
+      boardPosition: number
+      /** @enum {string} */
+      source:
+        | "PORTAL"
+        | "MERCADOLIBRE"
+        | "ZONAPROP"
+        | "ARGENPROP"
+        | "WHATSAPP"
+        | "PHONE"
+        | "MANUAL"
+      property: components["schemas"]["InquiryPropertyRefDto"] | null
+      assignedTo: components["schemas"]["InquiryUserRefDto"] | null
+      /** @example 2026-11-10 */
+      nextActionAt: string | null
+      /** Format: date-time */
+      lastContactAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      ageHours: number
+      hasWhatsApp: boolean
+      lostReason: string | null
+      /** Format: date-time */
+      closedAt: string | null
+      contractId: string | null
+      activities: components["schemas"]["InquiryActivityDto"][]
+    }
+    UpdateInquiryDto: {
+      name?: string
+      /** @description Vacío = borrarlo (si queda el teléfono) */
+      email?: string
+      phone?: string
+      propertyId?: string
+      /**
+       * @description Fecha de seguimiento; null la quita
+       * @example 2026-11-10
+       */
+      nextActionAt?: string | null
+    }
+    MoveInquiryDto: {
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      /** @description Tarjeta que queda arriba */
+      beforeId?: string
+      /** @description Tarjeta que queda abajo */
+      afterId?: string
+      /** @description Obligatorio para CLOSED_LOST */
+      lostReason?: string
+      contractId?: string
+    }
+    AssignInquiryDto: {
+      userId: string | null
+    }
+    AddInquiryNoteDto: {
+      body: string
+    }
+    ContactAttemptDto: {
+      /** @enum {string} */
+      channel: "WHATSAPP" | "PHONE" | "EMAIL"
+    }
+    WhatsAppLinkDto: {
+      url: string | null
+      message: string
+    }
+    CrmAssigneeDto: {
+      id: string
+      fullName: string
+      role: string
+    }
+    CrmTopPropertyDto: {
+      propertyId: string
+      address: string
+      inquiries: number
+      views: number
+    }
+    CrmOverviewDto: {
+      openCount: number
+      byStage: {
+        [key: string]: number
+      }
+      bySource: {
+        [key: string]: number
+      }
+      unassignedCount: number
+      averageFirstContactHours: number | null
+      /** @example 12.5 */
+      conversionRate: string | null
+      topProperties: components["schemas"]["CrmTopPropertyDto"][]
+    }
+    DailyPointDto: {
+      /** @example 2026-11-05 */
+      date: string
+      views: number
+      inquiries: number
+    }
+    PropertyInquiryAnalyticsDto: {
+      views: number
+      inquiries: number
+      byStage: {
+        [key: string]: number
+      }
+      bySource: {
+        [key: string]: number
+      }
+      conversionRate: string | null
+      daily: components["schemas"]["DailyPointDto"][]
+    }
+    ListingChannelDto: {
+      /** @enum {string} */
+      channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      /** @enum {string} */
+      status: "DISCONNECTED" | "CONNECTED" | "ERROR" | "UNAVAILABLE"
+      accountLabel: string | null
+      /** Format: date-time */
+      connectedAt: string | null
+      lastError: string | null
+      unavailableReason: string | null
+    }
+    ConnectChannelResultDto: {
+      authorizeUrl: string
+    }
+    PropertyListingDto: {
+      /** @enum {string} */
+      channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      /** @enum {string} */
+      status:
+        | "NOT_PUBLISHED"
+        | "PUBLISHING"
+        | "PUBLISHED"
+        | "PAUSED"
+        | "ERROR"
+        | "CLOSED"
+      externalUrl: string | null
+      /** Format: date-time */
+      publishedAt: string | null
+      /** Format: date-time */
+      lastSyncedAt: string | null
+      lastError: string | null
+      hasUnpublishedChanges: boolean
+      /** @description Canal disponible, cuenta conectada y la propiedad lista para publicarse */
+      canPublish: boolean
+      missingForPublish: string[]
+    }
+    StartListingResultDto: {
+      jobId: string
+    }
+    NotificationLogItemDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example PAYMENT_REMINDER.EMAIL */
+      templateKey: string | null
+      /** @enum {string} */
+      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+      /** @enum {string} */
+      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+      /** @enum {string|null} */
+      skipReason:
+        | "TYPE_DISABLED"
+        | "CHANNEL_DISABLED"
+        | "USER_OPTED_OUT"
+        | "NO_RECIPIENT_EMAIL"
+        | "NO_PHONE"
+        | null
+      /** @enum {string} */
+      recipientKind:
+        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+      /** @description Nombre o email del destinatario */
+      recipientLabel: string
+      recipientEmail: string | null
+      entityType: string | null
+      entityId: string | null
+      attempts: number
+      /** Format: date-time */
+      nextAttemptAt: string | null
+      lastError: string | null
+      /** Format: date-time */
+      sentAt: string | null
+      /** Format: date-time */
+      deliveredAt: string | null
+      /** Format: date-time */
+      openedAt: string | null
+      /** Format: date-time */
+      bouncedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    ResendFailedDto: {
+      /** @enum {string} */
+      type?:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example 2026-11-01 */
+      from?: string
+      /** @example 2026-11-30 */
+      to?: string
+    }
+    ResendFailedResultDto: {
+      /** @description AsyncJob: GET /jobs/:id/status */
+      jobId: string
+    }
+    NotificationTypeSettingDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      title: string
+      description: string
+      /** @example Inquilino */
+      audience: string
+      enabled: boolean
+      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+      availableChannels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+      mandatory: boolean
+    }
+    NotificationSettingItemDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      enabled: boolean
+      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+    }
+    UpdateNotificationSettingsDto: {
+      settings: components["schemas"]["NotificationSettingItemDto"][]
+    }
+    TemplateVariableDto: {
+      name: string
+      label: string
+      example: string
+    }
+    NotificationTemplateDto: {
+      /** @example PAYMENT_REMINDER.EMAIL */
+      key: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @enum {string} */
+      channel: "EMAIL"
+      title: string
+      subject: string
+      bodyText: string
+      variables: components["schemas"]["TemplateVariableDto"][]
+      isCustomized: boolean
+      /** Format: date-time */
+      updatedAt: string | null
+    }
+    TemplateBodyDto: {
+      subject: string
+      bodyText: string
+    }
+    TemplatePreviewDto: {
+      subject: string
+      text: string
+      html: string
+    }
+    TestTemplateResultDto: {
+      sentTo: string
+    }
+    MyPreferenceItemViewDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      title: string
+      emailEnabled: boolean
+      inAppEnabled: boolean
+      mandatory: boolean
+    }
+    MyNotificationPreferencesDto: {
+      items: components["schemas"]["MyPreferenceItemViewDto"][]
+    }
+    MyPreferenceItemDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      emailEnabled: boolean
+      inAppEnabled: boolean
+    }
+    UpdateMyPreferencesDto: {
+      items: components["schemas"]["MyPreferenceItemDto"][]
+    }
+    WhatsAppVariableDto: {
+      name: string
+      label: string
+    }
+    WhatsAppTemplateDto: {
+      /** @example PAYMENT_REMINDER */
+      key: string
+      title: string
+      body: string
+      variables: components["schemas"]["WhatsAppVariableDto"][]
+      isCustomized: boolean
+    }
+    UpdateWhatsAppTemplateDto: {
+      body: string
+    }
+    DevEventDto: {
+      /** @description Id de la notificación (con providerMessageId) */
+      notificationId: string
+      /** @enum {string} */
+      type:
+        | "SENT"
+        | "DELIVERED"
+        | "OPENED"
+        | "CLICKED"
+        | "BOUNCED"
+        | "COMPLAINED"
+        | "DELAYED"
+    }
+    RecordedEventDto: {
+      recorded: boolean
+    }
+    EmailEventDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "SENT"
+        | "DELIVERED"
+        | "OPENED"
+        | "CLICKED"
+        | "BOUNCED"
+        | "COMPLAINED"
+        | "DELAYED"
+      /** Format: date-time */
+      occurredAt: string
+    }
+    NotificationDetailDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example PAYMENT_REMINDER.EMAIL */
+      templateKey: string | null
+      /** @enum {string} */
+      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+      /** @enum {string} */
+      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+      /** @enum {string|null} */
+      skipReason:
+        | "TYPE_DISABLED"
+        | "CHANNEL_DISABLED"
+        | "USER_OPTED_OUT"
+        | "NO_RECIPIENT_EMAIL"
+        | "NO_PHONE"
+        | null
+      /** @enum {string} */
+      recipientKind:
+        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+      /** @description Nombre o email del destinatario */
+      recipientLabel: string
+      recipientEmail: string | null
+      entityType: string | null
+      entityId: string | null
+      attempts: number
+      /** Format: date-time */
+      nextAttemptAt: string | null
+      lastError: string | null
+      /** Format: date-time */
+      sentAt: string | null
+      /** Format: date-time */
+      deliveredAt: string | null
+      /** Format: date-time */
+      openedAt: string | null
+      /** Format: date-time */
+      bouncedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      subject: string | null
+      bodyText: string | null
+      events: components["schemas"]["EmailEventDto"][]
+      canResend: boolean
     }
     /** @enum {string} */
     DocumentKind:
@@ -7510,9 +9080,6 @@ export interface components {
       /** @description Barrio, ciudad */
       location: string
       features: components["schemas"]["PublicFeatureDto"][]
-      /** Coordenadas (aditivo, v1.1): editado a mano hasta regenerar con `npm run api:types` */
-      latitude?: number | null
-      longitude?: number | null
     }
     PublicFilterOptionDto: {
       id: string
@@ -7535,29 +9102,6 @@ export interface components {
     }
     PublicContactResultDto: {
       id: string
-    }
-    InquiryPropertyDto: {
-      id: string
-      address: string
-    }
-    PublicInquiryDto: {
-      id: string
-      name: string
-      email: string
-      phone: string
-      message: string
-      propertyId: string | null
-      property: components["schemas"]["InquiryPropertyDto"] | null
-      /** @enum {string} */
-      status: "NEW" | "CONTACTED" | "CLOSED"
-      /** @enum {string} */
-      source: "PORTAL"
-      /** Format: date-time */
-      createdAt: string
-    }
-    UpdateInquiryStatusDto: {
-      /** @enum {string} */
-      status: "NEW" | "CONTACTED" | "CLOSED"
     }
     SiteThemeDto: {
       /** @example #B6A28E */
@@ -7795,374 +9339,6 @@ export interface components {
       tenant: components["schemas"]["PublicSiteTenantDto"]
       publishedAt: string
     }
-    NotificationLogItemDto: {
-      id: string
-      /** @enum {string} */
-      type:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      /** @example PAYMENT_REMINDER.EMAIL */
-      templateKey: string | null
-      /** @enum {string} */
-      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
-      /** @enum {string} */
-      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
-      /** @enum {string|null} */
-      skipReason:
-        | "TYPE_DISABLED"
-        | "CHANNEL_DISABLED"
-        | "USER_OPTED_OUT"
-        | "NO_RECIPIENT_EMAIL"
-        | "NO_PHONE"
-        | null
-      /** @enum {string} */
-      recipientKind:
-        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
-      /** @description Nombre o email del destinatario */
-      recipientLabel: string
-      recipientEmail: string | null
-      entityType: string | null
-      entityId: string | null
-      attempts: number
-      /** Format: date-time */
-      nextAttemptAt: string | null
-      lastError: string | null
-      /** Format: date-time */
-      sentAt: string | null
-      /** Format: date-time */
-      deliveredAt: string | null
-      /** Format: date-time */
-      openedAt: string | null
-      /** Format: date-time */
-      bouncedAt: string | null
-      /** Format: date-time */
-      createdAt: string
-    }
-    ResendFailedDto: {
-      /** @enum {string} */
-      type?:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      /** @example 2026-11-01 */
-      from?: string
-      /** @example 2026-11-30 */
-      to?: string
-    }
-    ResendFailedResultDto: {
-      /** @description AsyncJob: GET /jobs/:id/status */
-      jobId: string
-    }
-    NotificationTypeSettingDto: {
-      /** @enum {string} */
-      type:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      title: string
-      description: string
-      /** @example Inquilino */
-      audience: string
-      enabled: boolean
-      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
-      availableChannels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
-      mandatory: boolean
-    }
-    NotificationSettingItemDto: {
-      /** @enum {string} */
-      type:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      enabled: boolean
-      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
-    }
-    UpdateNotificationSettingsDto: {
-      settings: components["schemas"]["NotificationSettingItemDto"][]
-    }
-    TemplateVariableDto: {
-      name: string
-      label: string
-      example: string
-    }
-    NotificationTemplateDto: {
-      /** @example PAYMENT_REMINDER.EMAIL */
-      key: string
-      /** @enum {string} */
-      type:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      /** @enum {string} */
-      channel: "EMAIL"
-      title: string
-      subject: string
-      bodyText: string
-      variables: components["schemas"]["TemplateVariableDto"][]
-      isCustomized: boolean
-      /** Format: date-time */
-      updatedAt: string | null
-    }
-    TemplateBodyDto: {
-      subject: string
-      bodyText: string
-    }
-    TemplatePreviewDto: {
-      subject: string
-      text: string
-      html: string
-    }
-    TestTemplateResultDto: {
-      sentTo: string
-    }
-    MyPreferenceItemViewDto: {
-      /** @enum {string} */
-      type:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      title: string
-      emailEnabled: boolean
-      inAppEnabled: boolean
-      mandatory: boolean
-    }
-    MyNotificationPreferencesDto: {
-      items: components["schemas"]["MyPreferenceItemViewDto"][]
-    }
-    MyPreferenceItemDto: {
-      /** @enum {string} */
-      type:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      emailEnabled: boolean
-      inAppEnabled: boolean
-    }
-    UpdateMyPreferencesDto: {
-      items: components["schemas"]["MyPreferenceItemDto"][]
-    }
-    WhatsAppVariableDto: {
-      name: string
-      label: string
-    }
-    WhatsAppTemplateDto: {
-      /** @example PAYMENT_REMINDER */
-      key: string
-      title: string
-      body: string
-      variables: components["schemas"]["WhatsAppVariableDto"][]
-      isCustomized: boolean
-    }
-    UpdateWhatsAppTemplateDto: {
-      body: string
-    }
-    DevEventDto: {
-      /** @description Id de la notificación (con providerMessageId) */
-      notificationId: string
-      /** @enum {string} */
-      type:
-        | "SENT"
-        | "DELIVERED"
-        | "OPENED"
-        | "CLICKED"
-        | "BOUNCED"
-        | "COMPLAINED"
-        | "DELAYED"
-    }
-    RecordedEventDto: {
-      recorded: boolean
-    }
-    EmailEventDto: {
-      id: string
-      /** @enum {string} */
-      type:
-        | "SENT"
-        | "DELIVERED"
-        | "OPENED"
-        | "CLICKED"
-        | "BOUNCED"
-        | "COMPLAINED"
-        | "DELAYED"
-      /** Format: date-time */
-      occurredAt: string
-    }
-    NotificationDetailDto: {
-      id: string
-      /** @enum {string} */
-      type:
-        | "PAYMENT_REMINDER"
-        | "ARREARS_NOTICE"
-        | "INSURER_ALERT"
-        | "CONTRACT_EXPIRING"
-        | "POLICY_EXPIRING"
-        | "POLICY_EXPIRED"
-        | "SERVICE_OVERDUE"
-        | "STATEMENT_PENDING"
-        | "SETTLEMENT_CONFIRMED"
-        | "OWNER_STATEMENT_CLOSED"
-        | "PAYMENT_RECEIVED"
-        | "PUBLIC_INQUIRY"
-        | "EMAIL_BOUNCED"
-        | "NOTIFICATION_FAILED"
-        | "RENT_UPDATE_PENDING"
-        | "INDEX_FETCH_FAILED"
-        | "INSTALLMENT_BASE_OUTDATED"
-        | "JOB_FAILED"
-        | "DOCUMENT_FAILED"
-      /** @example PAYMENT_REMINDER.EMAIL */
-      templateKey: string | null
-      /** @enum {string} */
-      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
-      /** @enum {string} */
-      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
-      /** @enum {string|null} */
-      skipReason:
-        | "TYPE_DISABLED"
-        | "CHANNEL_DISABLED"
-        | "USER_OPTED_OUT"
-        | "NO_RECIPIENT_EMAIL"
-        | "NO_PHONE"
-        | null
-      /** @enum {string} */
-      recipientKind:
-        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
-      /** @description Nombre o email del destinatario */
-      recipientLabel: string
-      recipientEmail: string | null
-      entityType: string | null
-      entityId: string | null
-      attempts: number
-      /** Format: date-time */
-      nextAttemptAt: string | null
-      lastError: string | null
-      /** Format: date-time */
-      sentAt: string | null
-      /** Format: date-time */
-      deliveredAt: string | null
-      /** Format: date-time */
-      openedAt: string | null
-      /** Format: date-time */
-      bouncedAt: string | null
-      /** Format: date-time */
-      createdAt: string
-      subject: string | null
-      bodyText: string | null
-      events: components["schemas"]["EmailEventDto"][]
-      canResend: boolean
-    }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
       name: string
@@ -8209,6 +9385,13 @@ export interface components {
        */
       jobId: string
     }
+    ImportEntityCountsDto: {
+      total: number
+      valid: number
+      errors: number
+      conflicts: number
+      imported: number
+    }
   }
   responses: never
   parameters: never
@@ -8237,10 +9420,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": Omit<
-            components["schemas"]["ApiSuccessDto"],
-            "data"
-          > & {
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
             data: components["schemas"]["AuthResultDto"]
           }
         }
@@ -8293,10 +9473,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": Omit<
-            components["schemas"]["ApiSuccessDto"],
-            "data"
-          > & {
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
             data: components["schemas"]["AuthResultDto"]
           }
         }
@@ -8340,10 +9517,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": Omit<
-            components["schemas"]["ApiSuccessDto"],
-            "data"
-          > & {
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
             data: components["schemas"]["AuthTokensDto"]
           }
         }
@@ -8414,10 +9588,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": Omit<
-            components["schemas"]["ApiSuccessDto"],
-            "data"
-          > & {
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
             data: components["schemas"]["RevokedSessionsDto"]
           }
         }
@@ -8452,10 +9623,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": Omit<
-            components["schemas"]["ApiSuccessDto"],
-            "data"
-          > & {
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
             data: components["schemas"]["RevokedSessionsDto"]
           }
         }
@@ -8495,10 +9663,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": Omit<
-            components["schemas"]["ApiSuccessDto"],
-            "data"
-          > & {
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
             data: components["schemas"]["PublicUserDto"]
           }
         }
@@ -10499,6 +11664,8 @@ export interface operations {
         propertyTypeId?: string
         /** @description Parte de la dirección, sin distinguir mayúsculas */
         search?: string
+        /** @description Sólo las propiedades que la migración dejó para revisar (true) o sin esa marca (false) */
+        needsReview?: boolean
       }
       header?: never
       path?: never
@@ -15203,6 +16370,2196 @@ export interface operations {
       }
     }
   }
+  "MigrationController_template_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description El .xlsx */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_analyzeExcel_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string
+        }
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartMigrationResultDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description INVALID_XLSX, TEMPLATE_VERSION_MISMATCH o IMPORT_TOO_MANY_ROWS */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_analyzeTokko_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AnalyzeTokkoDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartMigrationResultDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        source?: "EXCEL" | "TOKKO"
+        status?:
+          | "ANALYZING"
+          | "READY"
+          | "IMPORTING"
+          | "COMPLETED"
+          | "PARTIAL"
+          | "FAILED"
+          | "DISCARDED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Lotes de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ImportBatchSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ImportBatchDetailDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_rows_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        entity?: "OWNER" | "RENTER" | "GUARANTOR" | "PROPERTY" | "CONTRACT"
+        status?:
+          | "VALID"
+          | "ERROR"
+          | "CONFLICT"
+          | "ALREADY_IMPORTED"
+          | "IMPORTED"
+          | "SKIPPED"
+          | "FAILED"
+        /** @description Sólo las marcadas para revisar. */
+        needsReview?: boolean
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Filas del lote */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ImportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_updateRow_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        rowId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateImportRowDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ImportRowDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_READY */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_confirm_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConfirmImportDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartMigrationResultDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_READY o BATCH_ALREADY_CONFIRMED */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_discard_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ImportBatchDetailDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_READY */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_retryAssets_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RetryAssetsResultDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_IMPORTED */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_report_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description El .xlsx */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_appraise_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppraisePropertyDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ValuationResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_history_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Tasaciones de la propiedad */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ValuationResultDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_marketStatus_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MarketStatusDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_marketCoverage_api/v1": {
+    parameters: {
+      query: {
+        locationId: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MarketCoverageDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_refreshZone_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RefreshZoneDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RefreshZoneResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_pipeline_api/v1": {
+    parameters: {
+      query?: {
+        assignedToId?: string
+        propertyId?: string
+        source?:
+          | "PORTAL"
+          | "MERCADOLIBRE"
+          | "ZONAPROP"
+          | "ARGENPROP"
+          | "WHATSAPP"
+          | "PHONE"
+          | "MANUAL"
+        /** @description Busca en nombre, contacto y mensaje */
+        q?: string
+        /** @description Sólo las sin asignar */
+        unassigned?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PipelineDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        stage?:
+          | "NEW"
+          | "CONTACTED"
+          | "VISIT_SCHEDULED"
+          | "PROPOSAL_SENT"
+          | "CLOSED_WON"
+          | "CLOSED_LOST"
+        assignedToId?: string
+        propertyId?: string
+        source?:
+          | "PORTAL"
+          | "MERCADOLIBRE"
+          | "ZONAPROP"
+          | "ARGENPROP"
+          | "WHATSAPP"
+          | "PHONE"
+          | "MANUAL"
+        q?: string
+        unassigned?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Consultas */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InquiryCardDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateInquiryDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description ASSIGNEE_INVALID o INQUIRY_CONTACT_REQUIRED */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_detail_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description INQUIRY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateInquiryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_move_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MoveInquiryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryCardDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_assign_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignInquiryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryCardDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description ASSIGNEE_INVALID */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_addNote_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddInquiryNoteDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryActivityDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_contactAttempt_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContactAttemptDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryCardDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_whatsapp_api/v1": {
+    parameters: {
+      query: {
+        templateKey: string
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppLinkDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_assignees_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CrmAssigneeDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_overview_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Default: hace 30 días */
+        from?: string
+        /** @description Default: hoy */
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CrmOverviewDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description ANALYTICS_RANGE_INVALID */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_propertyAnalytics_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Default: hace 30 días */
+        from?: string
+        /** @description Default: hoy */
+        to?: string
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyInquiryAnalyticsDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelsController_list_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ListingChannelDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelsController_connect_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ConnectChannelResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelsController_disconnect_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ListingChannelDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelOAuthController_callback_api/v1": {
+    parameters: {
+      query: {
+        /** @description Código de autorización del portal */
+        code?: string
+        /** @description State firmado que devolvió `connect` */
+        state: string
+        /** @description El portal avisa que el usuario no autorizó */
+        error?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Redirección al backoffice */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_list_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_publish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartListingResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_retry_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartListingResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_pause_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_resume_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_close_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        type?:
+          | "PAYMENT_REMINDER"
+          | "ARREARS_NOTICE"
+          | "INSURER_ALERT"
+          | "CONTRACT_EXPIRING"
+          | "POLICY_EXPIRING"
+          | "POLICY_EXPIRED"
+          | "SERVICE_OVERDUE"
+          | "STATEMENT_PENDING"
+          | "SETTLEMENT_CONFIRMED"
+          | "OWNER_STATEMENT_CLOSED"
+          | "PAYMENT_RECEIVED"
+          | "PUBLIC_INQUIRY"
+          | "INQUIRY_FOLLOW_UP"
+          | "INQUIRY_ASSIGNED"
+          | "LISTING_CHANNEL_ERROR"
+          | "EMAIL_BOUNCED"
+          | "COMPARABLES_SOURCE_STALE"
+          | "NOTIFICATION_FAILED"
+          | "RENT_UPDATE_PENDING"
+          | "INDEX_FETCH_FAILED"
+          | "INSTALLMENT_BASE_OUTDATED"
+          | "JOB_FAILED"
+          | "DOCUMENT_FAILED"
+        status?: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+        channel?: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+        recipientKind?:
+          "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+        /** @description Id de la entidad a la que cuelga */
+        entityId?: string
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Historial de notificaciones */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["NotificationLogItemDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resendFailed_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResendFailedDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ResendFailedResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateSettings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateNotificationSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_templates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateTemplate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateBodyDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resetTemplate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_preview_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateBodyDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TemplatePreviewDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_test_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TestTemplateResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_myPreferences_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateMyPreferences_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMyPreferencesDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_whatsapp_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplateDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateWhatsapp_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateWhatsAppTemplateDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_devEvent_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DevEventDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RecordedEventDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_detail_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No existe, o es de otra inmobiliaria */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resend_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationLogItemDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description La notificación no está fallida (`NOTIFICATION_NOT_RESENDABLE`) */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "WebhooksController_resendEvent_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
   "DocumentsController_list_api/v1": {
     parameters: {
       query?: {
@@ -17010,6 +20367,8 @@ export interface operations {
         bathrooms?: number
         /** @description Sólo estas propiedades (hasta 12, separadas por coma). Las no disponibles no vuelven. Lo usa el sitio web para las destacadas a mano. */
         ids?: string[]
+        /** @description Orden: `recent` (más nuevas primero), `price_asc` (menor precio primero) o `price_desc` (mayor primero). Las que no tienen precio ("Consultar") van siempre al final. El orden por precio compara montos nominales: combinarlo con `currency` para no mezclar ARS y USD. */
+        sort?: "recent" | "price_asc" | "price_desc"
       }
       header?: never
       path: {
@@ -17178,92 +20537,6 @@ export interface operations {
       }
       /** @description Demasiadas solicitudes */
       429: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "InquiriesController_list_api/v1": {
-    parameters: {
-      query?: {
-        /** @description Número de página, empezando en 1 */
-        page?: number
-        /** @description Resultados por página (máximo 100) */
-        limit?: number
-        status?: "NEW" | "CONTACTED" | "CLOSED"
-        propertyId?: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Consultas, más nuevas primero */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": {
-            /** @example true */
-            success?: boolean
-            message?: string | null
-            data?: {
-              data?: components["schemas"]["PublicInquiryDto"][]
-              pagination?: components["schemas"]["PaginationMetaDto"]
-            }
-          }
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "InquiriesController_updateStatus_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateInquiryStatusDto"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["PublicInquiryDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-      404: {
         headers: {
           [name: string]: unknown
         }
@@ -17711,605 +20984,6 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ApiErrorDto"]
         }
-      }
-    }
-  }
-  "NotificationsController_list_api/v1": {
-    parameters: {
-      query?: {
-        /** @description Número de página, empezando en 1 */
-        page?: number
-        /** @description Resultados por página (máximo 100) */
-        limit?: number
-        type?:
-          | "PAYMENT_REMINDER"
-          | "ARREARS_NOTICE"
-          | "INSURER_ALERT"
-          | "CONTRACT_EXPIRING"
-          | "POLICY_EXPIRING"
-          | "POLICY_EXPIRED"
-          | "SERVICE_OVERDUE"
-          | "STATEMENT_PENDING"
-          | "SETTLEMENT_CONFIRMED"
-          | "OWNER_STATEMENT_CLOSED"
-          | "PAYMENT_RECEIVED"
-          | "PUBLIC_INQUIRY"
-          | "EMAIL_BOUNCED"
-          | "NOTIFICATION_FAILED"
-          | "RENT_UPDATE_PENDING"
-          | "INDEX_FETCH_FAILED"
-          | "INSTALLMENT_BASE_OUTDATED"
-          | "JOB_FAILED"
-          | "DOCUMENT_FAILED"
-        status?: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
-        channel?: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
-        recipientKind?:
-          "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
-        /** @description Id de la entidad a la que cuelga */
-        entityId?: string
-        from?: string
-        to?: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Historial de notificaciones */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": {
-            /** @example true */
-            success?: boolean
-            message?: string | null
-            data?: {
-              data?: components["schemas"]["NotificationLogItemDto"][]
-              pagination?: components["schemas"]["PaginationMetaDto"]
-            }
-          }
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_resendFailed_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ResendFailedDto"]
-      }
-    }
-    responses: {
-      202: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ResendFailedResultDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_settings_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_updateSettings_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateNotificationSettingsDto"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_templates_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["NotificationTemplateDto"][]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_updateTemplate_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        key: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TemplateBodyDto"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["NotificationTemplateDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_resetTemplate_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        key: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["NotificationTemplateDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_preview_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        key: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TemplateBodyDto"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["TemplatePreviewDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_test_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        key: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["TestTemplateResultDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_myPreferences_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_updateMyPreferences_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateMyPreferencesDto"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_whatsapp_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["WhatsAppTemplateDto"][]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_updateWhatsapp_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        key: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateWhatsAppTemplateDto"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["WhatsAppTemplateDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_devEvent_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DevEventDto"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["RecordedEventDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_detail_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["NotificationDetailDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-      /** @description No existe, o es de otra inmobiliaria */
-      404: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "NotificationsController_resend_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["NotificationLogItemDto"]
-        }
-      }
-      /** @description Rol insuficiente */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-      /** @description La notificación no está fallida (`NOTIFICATION_NOT_RESENDABLE`) */
-      409: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ApiErrorDto"]
-        }
-      }
-    }
-  }
-  "WebhooksController_resendEvent_api/v1": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
       }
     }
   }

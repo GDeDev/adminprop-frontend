@@ -6,7 +6,17 @@ import type { Currency, Uuid } from "./common"
  * la API.
  */
 export type PublicPropertySummary = ApiSchemas["PublicPropertySummaryDto"]
-export type PublicPropertyDetail = ApiSchemas["PublicPropertyDetailDto"]
+/**
+ * `latitude` y `longitude` los lee `apps/sites` (mapa de la ficha), pero el
+ * OpenAPI de la API todavía no los publica en `PublicPropertyDetailDto`. Se
+ * agregan acá, opcionales y fuera de `generated/api.ts` para que regenerar no
+ * los pise. Ver `docs/tecnica/shared-types-generados.md` (hallazgo del
+ * contrato).
+ */
+export type PublicPropertyDetail = ApiSchemas["PublicPropertyDetailDto"] & {
+  latitude?: number | null
+  longitude?: number | null
+}
 export type PublicFilters = ApiSchemas["PublicFiltersDto"]
 
 /**
