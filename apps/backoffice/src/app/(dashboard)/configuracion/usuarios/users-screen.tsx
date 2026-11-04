@@ -132,7 +132,7 @@ function UsersManager({ meId }: { meId: string }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Usuarios
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -203,7 +203,10 @@ function UsersManager({ meId }: { meId: string }) {
           {/* Mobile: tarjetas. Desktop: tabla. */}
           <ul className="flex flex-col gap-3 md:hidden">
             {users.data.data.map((user) => (
-              <li key={user.id} className="rounded-xl border bg-card p-4">
+              <li
+                key={user.id}
+                className="rounded-xl border bg-card p-4 shadow-raised"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{displayName(user)}</p>

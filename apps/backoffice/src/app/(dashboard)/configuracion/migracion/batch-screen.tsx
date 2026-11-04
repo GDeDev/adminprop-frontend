@@ -59,7 +59,7 @@ export function BatchScreen({
           </Link>
         </Button>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             {data
               ? `Migración desde ${SOURCE_LABELS[data.source]}`
               : "Migración"}

@@ -36,8 +36,13 @@ function HistoryList({
   const [openId, setOpenId] = React.useState<string | null>(null)
 
   return (
-    <section className="rounded-xl border bg-card p-4" aria-label="Historial">
-      <h2 className="mb-2 font-display text-lg font-semibold">Historial</h2>
+    <section
+      className="rounded-xl border bg-card p-4 shadow-raised"
+      aria-label="Historial"
+    >
+      <h2 className="mb-2 font-display text-title-md font-semibold">
+        Historial
+      </h2>
       {history.isPending ? (
         <Skeleton className="h-12" />
       ) : history.isError ? (

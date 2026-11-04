@@ -25,7 +25,7 @@ function BrandMark({
 }) {
   return (
     <Link href="/" className="flex min-w-0 flex-col">
-      <span className="truncate font-display text-xl font-semibold tracking-tight">
+      <span className="truncate font-display text-title-lg font-semibold">
         {tenantName ?? "Adminprop"}
       </span>
       <span className="text-xs text-sidebar-muted">{areaLabel}</span>
@@ -114,7 +114,7 @@ export function PortalShell({
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
           <Link
             href="/"
-            className="min-w-0 truncate font-display text-xl font-semibold tracking-tight"
+            className="min-w-0 truncate font-display text-title-lg font-semibold"
           >
             {tenantName ?? "Adminprop"}
           </Link>

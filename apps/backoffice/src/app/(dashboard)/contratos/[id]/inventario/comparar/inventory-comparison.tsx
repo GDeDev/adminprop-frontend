@@ -84,7 +84,7 @@ export function InventoryComparisonScreen({
           </Link>
         </Button>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Entrega y devolución
           </h1>
           <Button
@@ -114,7 +114,7 @@ export function InventoryComparisonScreen({
         </Alert>
       )}
 
-      <div className="overflow-x-auto rounded-xl border bg-card">
+      <div className="overflow-x-auto rounded-xl border bg-card shadow-raised">
         <Table>
           <TableHeader>
             <TableRow>

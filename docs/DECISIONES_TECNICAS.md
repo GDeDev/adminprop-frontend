@@ -575,3 +575,7 @@ No se suma ninguna dependencia: keyframes en CSS (solo `transform` y `opacity`, 
 ### DT-111 — La vitrina `/design-system` sale del grupo `(dashboard)`
 
 Estaba dentro del `SessionGate`, así que sin API no se podía abrir ni capturar. Pasa a `app/design-system/` (misma URL, sigue dando 404 en producción). El proxy igual pide cookie de sesión: para verla en desarrollo sin API alcanza una cookie `adminprop_bo_rt` cualquiera.
+
+### DT-112 — Diseño v2 como único sistema: adopción completa en backoffice y portal
+
+El dueño aprobó la v2 «entera». Se retiró `adminprop.css` (v1), las fuentes Outfit/Figtree de reserva y el test de paridad con v1 (ahora `design-rules.test.ts` congela la lista de nombres de token que usan las apps). Volver a v1 deja de ser un cambio de import: hay que recuperar el archivo del historial de git (ver `docs/tecnica/design-v2.md`, «Volver a v1»). La adopción pantalla por pantalla fue: paneles hechos a mano con `shadow-raised` (y `lift` los clickeables), KPIs con `StatCard`, títulos y cifras en la escala con nombre, montos en `font-display num`, `Button variant="ai"` y `AiBadge` solo en «Sugerir precio». `apps/sites` no se tocó. Una prueba (`apps-v2-language.test.ts`) impide que vuelvan `tabular-nums`, `text-xl` sobre `font-display`, paneles sin sombra, `transition-all` y `animate-pulse`. `StatCard` ya no duplica el valor para lectores de pantalla salvo mientras anima. Nota: si otra rama ya usó DT-112, renumerar al integrar.

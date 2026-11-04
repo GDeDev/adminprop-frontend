@@ -75,18 +75,18 @@ export function InternalAlerts() {
 
   return (
     <section
-      className="rounded-xl border bg-card p-4"
+      className="rounded-xl border bg-card p-4 shadow-raised"
       aria-labelledby="internal-alerts-title"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="internal-alerts-title"
-          className="flex items-center gap-2 font-display text-lg font-semibold"
+          className="flex items-center gap-2 font-display text-title-md font-semibold"
         >
           <Bell aria-hidden className="size-5 text-primary" />
           Avisos
           {query.isSuccess && total > 0 && (
-            <Badge variant="mantenimiento" className="tabular-nums">
+            <Badge variant="mantenimiento" className="num">
               {total}
             </Badge>
           )}

@@ -55,16 +55,18 @@ dos apps y `npm audit`.
 
 ## UI
 
-Reglas completas: `../adminprop-repo-files/packages-ui-source/ADMINPROP-UI.md`
-(leerlo antes de tocar cualquier pantalla).
+Reglas completas: `docs/design/source-v2/ADMINPROP-UI-v2.md` (diseño v2, el
+único vigente; leerlo antes de tocar cualquier pantalla).
 
-- Tokens: `packages/ui/src/styles/adminprop.css` es copia textual del sistema
-  de diseño. **No se edita**: si cambia el diseño, se vuelve a copiar entero.
+- Tokens: `packages/ui/src/styles/adminprop-v2.css` y `adminprop-v2-effects.css`
+  (copia en `docs/design/source-v2/`). Se editan junto con esa copia y con
+  `test/contrast.test.ts`.
 - Colores: solo clases semánticas (`bg-primary`, `bg-muted`, `text-success`,
   `bg-sidebar`…). Nunca un hex en un componente. `accent` es la arena de la
   marca, **no** el hover: el hover es `muted`.
-- Tipografía: `font-display` (Outfit: títulos y montos) y `font-sans`
-  (Figtree: el resto). Montos: `font-display tabular-nums`, a la derecha.
+- Tipografía: `font-display` (Bricolage Grotesque: títulos y montos), `font-sans`
+  (Geist) y `font-mono`. Escala con nombre (`text-title-md`, `text-display-md`…).
+  Montos: `font-display num`, a la derecha. KPIs: `StatCard`.
 - Estados del dominio: `<Badge variant="disponible|alquilada|mantenimiento|mora|borrador">`.
 - Navegación: `AppSidebar` (desde `md:`) y `BottomNav` (mobile, máx. 5).
 - Mobile = Drawer: para diálogos usar `ResponsiveDialog`.

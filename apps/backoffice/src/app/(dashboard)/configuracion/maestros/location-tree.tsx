@@ -134,7 +134,7 @@ export function LocationTree({ canEdit }: { canEdit: boolean }) {
           description="Se cargan con la importación de Tokko, o agregá un país a mano."
         />
       ) : (
-        <ul role="tree" className="rounded-xl border bg-card p-2">
+        <ul role="tree" className="rounded-xl border bg-card p-2 shadow-raised">
           {tree.data.map((node) => (
             <TreeNode
               key={node.id}

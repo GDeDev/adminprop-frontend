@@ -33,7 +33,7 @@ export function MigrationScreen() {
             Configuración
           </Link>
         </Button>
-        <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight">
+        <h1 className="mt-2 font-display text-title-lg font-semibold md:text-display-md">
           Migración de datos
         </h1>
         <p className="text-sm text-muted-foreground">

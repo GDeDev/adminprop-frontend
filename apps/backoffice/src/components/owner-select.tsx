@@ -114,7 +114,7 @@ export function OwnerSelect({
                       }
                     />
                     <span className="flex-1 truncate">{owner.fullName}</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="num text-xs text-muted-foreground">
                       {formatNationalId(owner.nationalId)}
                     </span>
                   </CommandItem>

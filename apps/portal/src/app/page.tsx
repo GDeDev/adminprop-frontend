@@ -93,7 +93,7 @@ export default async function HomePage(props: PageProps<"/">) {
                       <CardTitle className="font-display text-title-md">
                         {property.address}
                       </CardTitle>
-                      <p className="font-display text-xl font-semibold tabular-nums">
+                      <p className="font-display num text-title-md font-semibold">
                         {priceLabel(property.price, property.currency)}
                       </p>
                       <p className="text-sm text-muted-foreground">

@@ -42,7 +42,7 @@ export function OwnerPropertiesScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Hola, {me.data.fullName}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -74,7 +74,7 @@ function PropertyCard({ property }: { property: PortalOwnerProperty }) {
   return (
     <Link
       href={`/propietario/pagos?propertyId=${property.id}`}
-      className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="min-w-0">
         <p className="font-medium">{property.address}</p>
@@ -82,7 +82,7 @@ function PropertyCard({ property }: { property: PortalOwnerProperty }) {
           <p className="text-sm text-muted-foreground">
             {contract.renter.fullName} · hasta el {formatDate(contract.endDate)}{" "}
             ·{" "}
-            <span className="tabular-nums">
+            <span className="font-display num">
               {formatMoney(contract.currentRent, contract.currency)}
             </span>
             {contract.collectionMode === "OWNER_DIRECT" && " · cobrás directo"}

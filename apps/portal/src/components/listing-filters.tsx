@@ -4,7 +4,7 @@ import type { PublicFilters, PublicListingQuery } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
 
 const FIELD =
-  "h-11 w-full rounded-md border border-control bg-card px-3 text-sm shadow-xs transition-[border-color,box-shadow] outline-none hover:border-foreground/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25"
+  "h-11 w-full rounded-md border border-control bg-card px-3 text-sm shadow-edge transition-[border-color,box-shadow] outline-none hover:border-foreground/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25"
 
 /**
  * Filtros del listado: un formulario GET, así funcionan sin JavaScript y

@@ -40,7 +40,7 @@ export function NotificationsScreen() {
             Configuración
           </Link>
         </Button>
-        <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight">
+        <h1 className="mt-2 font-display text-title-lg font-semibold md:text-display-md">
           Notificaciones
         </h1>
         <p className="text-sm text-muted-foreground">

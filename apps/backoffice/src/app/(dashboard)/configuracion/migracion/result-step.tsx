@@ -85,7 +85,7 @@ export function ResultStep({ batch }: { batch: ImportBatchDetail }) {
       {(assets.migrated > 0 || assets.failed > 0 || assets.pending > 0) && (
         <section
           aria-labelledby="assets-title"
-          className="flex flex-col gap-2 rounded-xl border bg-card p-3"
+          className="flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-raised"
         >
           <h2 id="assets-title" className="font-medium">
             Fotos
@@ -165,11 +165,11 @@ function Stat({
   tone?: "error"
 }) {
   return (
-    <div className="rounded-xl border bg-card p-3">
+    <div className="rounded-xl border bg-card p-3 shadow-raised">
       <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd
         className={
-          "text-2xl font-semibold " +
+          "font-display num text-title-lg font-semibold " +
           (tone === "error" && value > 0 ? "text-destructive" : "")
         }
       >

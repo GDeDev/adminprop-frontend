@@ -1,10 +1,9 @@
-# Adminprop — UI v2: reglas para el repo ("Cobre sobre tinta")
+# Adminprop — UI: reglas para el repo ("Cobre sobre tinta")
 
-Propuesta de reemplazo de `ADMINPROP-UI.md`. Mismo stack (Next.js App Router +
-Tailwind v4 + shadcn/ui), mismas reglas de producto; cambia el lenguaje visual:
-paleta en OKLCH, superficies con profundidad, tipografía con jerarquía fuerte y
-movimiento coreografiado. Mientras el dueño no la apruebe, **la fuente de
-verdad sigue siendo `ADMINPROP-UI.md`**.
+Reemplaza a `ADMINPROP-UI.md` (v1): el dueño aprobó este sistema y es el único
+vigente. Mismo stack (Next.js App Router + Tailwind v4 + shadcn/ui), mismas
+reglas de producto; cambia el lenguaje visual: paleta en OKLCH, superficies con
+profundidad, tipografía con jerarquía fuerte y movimiento coreografiado.
 
 ## Fuente de verdad
 
@@ -60,8 +59,8 @@ letra.
 - **El chrome oscuro no es tema.** Sidebar, bottom-nav y los logins usan
   `sidebar*` en claro y en oscuro.
 - **Mobile primero**, 44 px de área táctil, foco visible, texto 4.5:1.
-- **Montos**: `font-display`, tabulares (`num`), alineados a la derecha. El
-  frontend no los calcula: la API manda strings.
+- **Montos**: `font-display num`, alineados a la derecha. El frontend no los
+  calcula: la API manda strings. Las cifras clave (KPIs) van en `StatCard`.
 - **Carga**: `Skeleton` con la forma del contenido. Sin spinners centrados.
 - **Mobile = Drawer** para lo que en desktop es `Dialog` o menú largo.
 
@@ -229,14 +228,9 @@ de producto: validar el color al guardarlo.
 - `prefers-reduced-motion`: sin animaciones, sin contador, sin shimmer.
 - Los contadores animados exponen el valor final a lectores de pantalla.
 
-## Activar la v2 / volver a v1
+## Volver a v1
 
-En `packages/ui/src/styles/globals.css`:
-
-```css
-@import "./adminprop-v2.css"; /* v2 (activa en esta rama) */
-/* @import "./adminprop.css";    v1 */
-```
-
-Ver `docs/tecnica/design-v2.md` para los límites de la vuelta atrás por un solo
-import.
+No hay marcha atrás por un import: `adminprop.css` (v1) se retiró del frontend y
+los componentes y pantallas usan clases que solo existen en v2 (`shadow-raised`,
+`lift`, `num`, `text-title-*`, `bg-overlay`). El detalle está en
+`docs/tecnica/design-v2.md` del frontend, sección «Volver a v1».

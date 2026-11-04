@@ -219,7 +219,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
           <ChevronLeft aria-hidden className="size-4" />
           {editing ? "Volver a la ficha" : "Propiedades"}
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           {editing ? "Editar propiedad" : "Nueva propiedad"}
         </h1>
       </div>

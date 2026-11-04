@@ -43,6 +43,7 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 import { Tabs, TabsList, TabsTrigger } from "@adminprop/ui/components/tabs"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { LoadMore } from "@/components/load-more"
 import {
@@ -84,7 +85,7 @@ export function BillingScreen() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Cobros
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -172,7 +173,7 @@ function PeriodPicker({
       >
         <ChevronRight aria-hidden />
       </Button>
-      <span className="font-display text-lg font-semibold capitalize">
+      <span className="font-display text-title-md font-semibold capitalize">
         {periodLabel(period)}
       </span>
     </div>
@@ -270,16 +271,8 @@ function Stat({
         ? "text-warning"
         : tone === "muted"
           ? "text-muted-foreground"
-          : ""
-  return (
-    <div className="rounded-xl border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={`font-display text-xl font-semibold tabular-nums ${color}`}>
-        {value}
-      </p>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
-  )
+          : undefined
+  return <StatCard label={label} value={value} hint={hint} className={color} />
 }
 
 function InstallmentList({
@@ -460,10 +453,10 @@ function InstallmentRow({ installment }: { installment: InstallmentSummary }) {
       <TableCell className="text-muted-foreground">
         {COLLECTION_MODE_SHORT[installment.collectionMode]}
       </TableCell>
-      <TableCell className="text-right tabular-nums">
+      <TableCell className="text-right font-display num">
         {money(installment.baseAmount)}
       </TableCell>
-      <TableCell className="text-right font-medium tabular-nums">
+      <TableCell className="text-right font-display num font-medium">
         {money(installment.totalDue)}
       </TableCell>
       <TableCell>
@@ -478,7 +471,7 @@ function InstallmentCard({ installment }: { installment: InstallmentSummary }) {
   return (
     <Link
       href={`/cobros/${installment.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">
@@ -491,10 +484,10 @@ function InstallmentCard({ installment }: { installment: InstallmentSummary }) {
         {COLLECTION_MODE_SHORT[installment.collectionMode]}
       </p>
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span className="text-muted-foreground tabular-nums">
+        <span className="num text-muted-foreground">
           Alquiler {money(installment.baseAmount)}
         </span>
-        <span className="font-display font-medium tabular-nums">
+        <span className="font-display num font-medium">
           Saldo {money(installment.totalDue)}
         </span>
       </div>

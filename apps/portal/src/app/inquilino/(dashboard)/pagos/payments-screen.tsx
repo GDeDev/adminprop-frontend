@@ -41,7 +41,7 @@ export function RenterPaymentsScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Pagos
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -109,13 +109,13 @@ function InstallmentRow({
     <button
       type="button"
       onClick={onOpen}
-      className="flex w-full items-center justify-between gap-3 rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex w-full lift items-center justify-between gap-3 rounded-xl border bg-card p-4 text-left shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="min-w-0">
         <p className="font-medium capitalize">
           {periodLabel(installment.period)}
         </p>
-        <p className="text-sm text-muted-foreground tabular-nums">
+        <p className="num text-sm text-muted-foreground">
           {money(installment.baseAmount)}
           {!isZero(installment.lateFeeAccrued) &&
             ` + punitorio ${money(installment.lateFeeAccrued)}`}
@@ -183,7 +183,7 @@ function InstallmentDialog({
                     className="flex flex-wrap items-center justify-between gap-2 py-2"
                   >
                     <div>
-                      <p className="font-medium tabular-nums">
+                      <p className="font-display num font-medium">
                         {formatMoney(payment.amount, payment.paidCurrency)}
                         <span className="font-normal text-muted-foreground">
                           {" "}

@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { conversionLabel, crmApiError, STAGE_LABELS, STAGES } from "@/lib/crm"
 import { usePropertyAnalytics } from "@/lib/crm-api"
@@ -46,11 +47,11 @@ export function PublicationSection({ propertyId }: { propertyId: string }) {
     <div className="flex flex-col gap-4">
       <section
         aria-labelledby="publication-title"
-        className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+        className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
       >
         <h2
           id="publication-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Publicación
         </h2>
@@ -229,12 +230,7 @@ function ListingCard({
 }
 
 function Figure({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border p-3">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
-    </div>
-  )
+  return <StatCard label={label} value={value} className="p-4" />
 }
 
 const RANGE_DAYS = 30
@@ -250,9 +246,12 @@ function Analytics({ propertyId }: { propertyId: string }) {
   return (
     <section
       aria-labelledby="analytics-title"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
-      <h2 id="analytics-title" className="font-display text-lg font-semibold">
+      <h2
+        id="analytics-title"
+        className="font-display text-title-md font-semibold"
+      >
         Interés en la propiedad
       </h2>
       {analytics.isPending && <Skeleton className="h-20" />}

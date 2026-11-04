@@ -147,7 +147,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               Cuota de {periodLabel(installment.period)}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -248,7 +248,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
               </p>
             </dd>
             <dt className="text-muted-foreground">Devengados</dt>
-            <dd className="tabular-nums">
+            <dd className="font-display num">
               {money(installment.feeOnCollected)} sobre lo cobrado
               <p className="text-xs text-muted-foreground">
                 {money(installment.feeOnBase)} sobre el alquiler completo
@@ -257,7 +257,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
             <dt className="text-muted-foreground">Punitorio</dt>
             <dd>
               {installment.lateFeePercentage} % diario desde el{" "}
-              <span className="tabular-nums">
+              <span className="num">
                 {formatDate(addDays(installment.graceEndDate, 1))}
               </span>
               <p className="text-xs text-muted-foreground">
@@ -318,7 +318,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium tabular-nums">
+                    <span className="font-display num font-medium">
                       {money(charge.amount)}
                     </span>
                     {!charge.voidedAt && installment.status !== "PAID" && (
@@ -359,7 +359,7 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
                         ` · ${adjustment.createdBy.fullName}`}
                     </p>
                   </div>
-                  <span className="font-medium tabular-nums">
+                  <span className="font-display num font-medium">
                     −{money(adjustment.amount)}
                   </span>
                 </li>
@@ -449,38 +449,38 @@ function Breakdown({ installment }: { installment: InstallmentDetail }) {
     <Section title="Desglose">
       <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 text-sm">
         <dt className="text-muted-foreground">Alquiler</dt>
-        <dd className="text-right tabular-nums">
+        <dd className="text-right font-display num">
           {money(installment.baseAmount)}
         </dd>
         <dt className="text-muted-foreground">Cargos</dt>
-        <dd className="text-right tabular-nums">
+        <dd className="text-right font-display num">
           {money(installment.chargesTotal)}
         </dd>
         <dt className="text-muted-foreground">
           Punitorio devengado
           {installment.feeDays > 0 && ` (${daysLabel(installment.feeDays)})`}
         </dt>
-        <dd className="text-right tabular-nums">
+        <dd className="text-right font-display num">
           {money(installment.lateFeeAccrued)}
         </dd>
         {!isZero(installment.lateFeeAdjusted) && (
           <>
             <dt className="text-muted-foreground">Ajustes de punitorio</dt>
-            <dd className="text-right tabular-nums">
+            <dd className="text-right font-display num">
               −{money(installment.lateFeeAdjusted)}
             </dd>
           </>
         )}
         <dt className="text-muted-foreground">Pagado</dt>
-        <dd className="text-right tabular-nums">
+        <dd className="text-right font-display num">
           −{money(installment.paidTotal)}
         </dd>
         <dt className="border-t pt-2 font-medium">Saldo</dt>
-        <dd className="border-t pt-2 text-right font-display text-xl font-semibold tabular-nums">
+        <dd className="border-t pt-2 text-right font-display num text-title-md font-semibold">
           {money(installment.totalDue)}
         </dd>
       </dl>
-      <p className="mt-2 text-xs text-muted-foreground tabular-nums">
+      <p className="mt-2 num text-xs text-muted-foreground">
         Alquiler {money(installment.rentBalance)} · punitorio{" "}
         {money(installment.lateFeeBalance)} · cargos{" "}
         {money(installment.chargesBalance)}
@@ -506,16 +506,16 @@ function Breakdown({ installment }: { installment: InstallmentDetail }) {
             <TableBody>
               {installment.lateFeeDays.map((day) => (
                 <TableRow key={day.dayNumber}>
-                  <TableCell className="tabular-nums">
+                  <TableCell className="num">
                     {day.dayNumber} · {formatDate(day.day)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right font-display num">
                     {money(day.outstandingBase)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {day.dailyPercentage} %
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right font-display num">
                     {money(day.amount)}
                   </TableCell>
                 </TableRow>
@@ -552,7 +552,7 @@ function PaymentRows({
           <li key={payment.id} className="flex flex-col gap-1 py-3">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-medium tabular-nums">
+                <p className="font-display num font-medium">
                   {formatMoney(payment.amount, payment.paidCurrency)}
                   {foreign && ` = ${money(payment.amountInContractCurrency)}`}
                   <span className="font-normal text-muted-foreground">
@@ -569,7 +569,7 @@ function PaymentRows({
                   {payment.registeredBy &&
                     ` · ${payment.registeredBy.fullName}`}
                 </p>
-                <p className="text-xs text-muted-foreground tabular-nums">
+                <p className="num text-xs text-muted-foreground">
                   Imputado: punitorio {money(payment.lateFeeApplied)} · alquiler{" "}
                   {money(payment.rentApplied)} · cargos{" "}
                   {money(payment.chargesApplied)}
@@ -664,9 +664,9 @@ function Section({
   return (
     <section
       aria-labelledby={id}
-      className={`rounded-xl border bg-card p-4 ${className ?? ""}`}
+      className={`rounded-xl border bg-card p-4 shadow-raised ${className ?? ""}`}
     >
-      <h2 id={id} className="mb-3 font-display text-lg font-semibold">
+      <h2 id={id} className="mb-3 font-display text-title-md font-semibold">
         {title}
       </h2>
       {children}

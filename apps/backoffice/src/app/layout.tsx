@@ -4,7 +4,7 @@ import "@adminprop/ui/globals.css"
 import { cn } from "@adminprop/ui/lib/utils"
 import { tenantThemeStyle } from "@adminprop/ui/lib/tenant-theme"
 
-import { display, legacyDisplay, legacySans, mono, sans } from "@/lib/fonts"
+import { display, mono, sans } from "@/lib/fonts"
 import { getTenantBranding } from "@/lib/tenant-branding"
 
 import { Providers } from "./providers"
@@ -33,13 +33,7 @@ export default async function RootLayout({
     // suppressHydrationWarning: next-themes pone la clase `dark` antes de hidratar.
     <html
       lang="es"
-      className={cn(
-        display.variable,
-        sans.variable,
-        mono.variable,
-        legacyDisplay.variable,
-        legacySans.variable
-      )}
+      className={cn(display.variable, sans.variable, mono.variable)}
       style={tenantThemeStyle(branding?.primaryColor)}
       suppressHydrationWarning
     >

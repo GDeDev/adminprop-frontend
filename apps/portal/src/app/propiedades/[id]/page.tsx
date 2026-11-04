@@ -67,10 +67,10 @@ export default async function PropertyPage(
           <p className="text-sm text-accent">
             {property.propertyType} · {property.location}
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight">
+          <h1 className="text-title-lg font-semibold md:text-display-md">
             {property.address}
           </h1>
-          <p className="font-display text-2xl font-semibold tabular-nums">
+          <p className="font-display num text-title-lg font-semibold">
             {priceLabel(property.price, property.currency)}
           </p>
           {property.amenities.length > 0 && (
@@ -91,7 +91,7 @@ export default async function PropertyPage(
         )}
 
         {property.features.length > 0 && (
-          <dl className="grid grid-cols-2 gap-3 rounded-xl border bg-card p-4 text-sm sm:grid-cols-3">
+          <dl className="grid grid-cols-2 gap-3 rounded-xl border bg-card p-4 text-sm shadow-raised sm:grid-cols-3">
             {property.features.map((feature) => (
               <div key={feature.label}>
                 <dt className="text-muted-foreground">{feature.label}</dt>

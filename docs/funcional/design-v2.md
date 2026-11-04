@@ -1,6 +1,6 @@
 # Diseño v2 — qué cambia para quien usa el sistema
 
-Propuesta de rediseño visual de Adminprop ("Cobre sobre tinta"). No cambia
+Rediseño visual de Adminprop ("Cobre sobre tinta"), aprobado y aplicado a todo el backoffice y el portal. No cambia
 ninguna regla de negocio, ningún dato ni ninguna pantalla nueva: cambia cómo se
 ve y cómo se mueve lo que ya existe. Hasta que se apruebe, no se reemplaza nada.
 
