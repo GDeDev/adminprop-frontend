@@ -37,7 +37,7 @@ export function OwnerSettlementsScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Liquidaciones
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -119,7 +119,7 @@ export function SettlementRow({
           <span className="capitalize">{periodLabel(settlement.period)}</span>
           {settlement.sequence > 1 && ` (${settlement.sequence})`}
         </p>
-        <p className="text-sm text-muted-foreground tabular-nums">
+        <p className="num text-sm text-muted-foreground">
           Neto {money(settlement.netAmount)}
           {!isZero(settlement.transferredTotal) &&
             ` · transferido ${money(settlement.transferredTotal)}`}
@@ -180,7 +180,7 @@ function StatementRow({ statement }: { statement: OwnerStatementSummary }) {
           {statement.closedAt &&
             ` · cerrado el ${formatDate(statement.closedAt)}`}
         </p>
-        <p className="text-sm tabular-nums">
+        <p className="num text-sm">
           {statement.totals
             .map((t) => `Neto ${formatMoney(t.netTotal, t.currency)}`)
             .join(" · ")}

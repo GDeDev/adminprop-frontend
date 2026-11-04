@@ -51,7 +51,7 @@ export function CrmOverview() {
                   className="flex items-center justify-between gap-3 py-2 hover:underline"
                 >
                   <span className="min-w-0 truncate">{property.address}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                  <span className="shrink-0 num text-xs text-muted-foreground">
                     {property.inquiries} consultas · {property.views} vistas
                   </span>
                 </Link>

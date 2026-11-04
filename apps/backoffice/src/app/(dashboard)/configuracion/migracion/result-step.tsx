@@ -169,7 +169,7 @@ function Stat({
       <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd
         className={
-          "text-2xl font-semibold " +
+          "font-display num text-title-lg font-semibold " +
           (tone === "error" && value > 0 ? "text-destructive" : "")
         }
       >

@@ -85,7 +85,7 @@ export function BillingScreen() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Cobros
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -173,7 +173,7 @@ function PeriodPicker({
       >
         <ChevronRight aria-hidden />
       </Button>
-      <span className="font-display text-lg font-semibold capitalize">
+      <span className="font-display text-title-md font-semibold capitalize">
         {periodLabel(period)}
       </span>
     </div>
@@ -453,10 +453,10 @@ function InstallmentRow({ installment }: { installment: InstallmentSummary }) {
       <TableCell className="text-muted-foreground">
         {COLLECTION_MODE_SHORT[installment.collectionMode]}
       </TableCell>
-      <TableCell className="text-right tabular-nums">
+      <TableCell className="text-right num">
         {money(installment.baseAmount)}
       </TableCell>
-      <TableCell className="text-right font-medium tabular-nums">
+      <TableCell className="text-right num font-medium">
         {money(installment.totalDue)}
       </TableCell>
       <TableCell>
@@ -484,10 +484,10 @@ function InstallmentCard({ installment }: { installment: InstallmentSummary }) {
         {COLLECTION_MODE_SHORT[installment.collectionMode]}
       </p>
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span className="text-muted-foreground tabular-nums">
+        <span className="num text-muted-foreground">
           Alquiler {money(installment.baseAmount)}
         </span>
-        <span className="font-display font-medium tabular-nums">
+        <span className="font-display num font-medium">
           Saldo {money(installment.totalDue)}
         </span>
       </div>

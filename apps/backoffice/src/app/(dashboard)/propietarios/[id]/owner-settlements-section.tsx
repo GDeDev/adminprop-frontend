@@ -46,7 +46,7 @@ export function OwnerSettlementsSection({ owner }: { owner: OwnerDetail }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="owner-settlements-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Historial de liquidaciones
         </h2>
@@ -90,7 +90,7 @@ export function OwnerSettlementsSection({ owner }: { owner: OwnerDetail }) {
                       {settlement.property?.address ?? "Propiedad eliminada"} ·{" "}
                       {settlementLabel(settlement)}
                     </Link>
-                    <p className="text-xs text-muted-foreground tabular-nums">
+                    <p className="num text-xs text-muted-foreground">
                       Alquiler {money(settlement.rentTotal)} · honorarios{" "}
                       {money(settlement.feeTotal)}
                       {!isZero(settlement.transferredTotal) &&
@@ -98,7 +98,7 @@ export function OwnerSettlementsSection({ owner }: { owner: OwnerDetail }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium tabular-nums">
+                    <span className="num font-medium">
                       {money(settlement.netAmount)}
                     </span>
                     <Badge variant={meta.badge}>{meta.label}</Badge>
@@ -147,7 +147,7 @@ export function OwnerFeeAccountSection({
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="owner-fees-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Honorarios
         </h2>
@@ -225,7 +225,7 @@ export function OwnerFeeAccountSection({
                         · cuota {receivable.installmentPeriod}
                       </span>
                       <span className="flex items-center gap-2">
-                        <span className="tabular-nums">
+                        <span className="num">
                           {formatMoney(receivable.amount, receivable.currency)}
                         </span>
                         <Badge variant={meta.badge}>{meta.label}</Badge>
@@ -256,13 +256,13 @@ export function OwnerFeeAccountSection({
                         className="flex justify-between gap-2 py-1.5"
                       >
                         <span>
-                          <span className="text-muted-foreground tabular-nums">
+                          <span className="num text-muted-foreground">
                             {formatDate(movement.date)}
                           </span>{" "}
                           {FEE_MOVEMENT_LABELS[movement.type]} ·{" "}
                           {movement.description}
                         </span>
-                        <span className="tabular-nums">
+                        <span className="num">
                           {movement.debit &&
                             `+${formatMoney(movement.debit, movement.currency)}`}
                           {movement.credit &&
@@ -304,27 +304,27 @@ function Totals({ total }: { total: OwnerFeeAccountTotals }) {
         <dt className="text-xs text-muted-foreground">
           Devengados · {total.currency}
         </dt>
-        <dd className="font-display font-semibold tabular-nums">
+        <dd className="font-display num font-semibold">
           {money(total.accrued)}
         </dd>
       </div>
       <div>
         <dt className="text-xs text-muted-foreground">Cobrados</dt>
-        <dd className="font-display font-semibold tabular-nums">
+        <dd className="font-display num font-semibold">
           {money(total.collected)}
         </dd>
       </div>
       <div>
         <dt className="text-xs text-muted-foreground">Pendientes</dt>
         <dd
-          className={`font-display font-semibold tabular-nums ${isZero(total.pending) ? "" : "text-warning"}`}
+          className={`font-display num font-semibold ${isZero(total.pending) ? "" : "text-warning"}`}
         >
           {money(total.pending)}
         </dd>
       </div>
       <div>
         <dt className="text-xs text-muted-foreground">A cuenta</dt>
-        <dd className="font-display font-semibold tabular-nums">
+        <dd className="font-display num font-semibold">
           {money(total.unallocated)}
         </dd>
       </div>

@@ -39,7 +39,7 @@ export function OwnerAccountScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Estado de cuenta
         </h1>
         <div className="mt-2 flex items-center gap-2">
@@ -51,7 +51,7 @@ export function OwnerAccountScreen() {
           >
             <ChevronLeft aria-hidden />
           </Button>
-          <span className="font-display text-lg font-semibold capitalize">
+          <span className="font-display text-title-md font-semibold capitalize">
             {periodLabel(period)}
           </span>
           <Button
@@ -152,7 +152,7 @@ function Account({ account }: { account: PortalOwnerAccount }) {
                               ` · ${settlement.sequence}`}
                           </Link>
                           <span className="flex items-center gap-2">
-                            <span className="tabular-nums">
+                            <span className="num">
                               {money(settlement.netAmount)}
                             </span>
                             <Badge variant={meta.badge}>{meta.label}</Badge>
@@ -170,12 +170,12 @@ function Account({ account }: { account: PortalOwnerAccount }) {
 
       {account.fees.some((f) => !isZero(f.pending)) && (
         <section className="rounded-xl border bg-card p-4 text-sm shadow-raised">
-          <h2 className="font-display text-base font-semibold">
+          <h2 className="font-display text-title-sm font-semibold">
             Honorarios de la inmobiliaria
           </h2>
           <ul className="mt-2 flex flex-col gap-1">
             {account.fees.map((fee) => (
-              <li key={fee.currency} className="tabular-nums">
+              <li key={fee.currency} className="num">
                 {fee.currency}: devengados{" "}
                 {formatMoney(fee.accrued, fee.currency)} · pagados{" "}
                 {formatMoney(fee.collected, fee.currency)} · pendientes{" "}
@@ -214,7 +214,7 @@ function Item({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="tabular-nums">{value}</dd>
+      <dd className="num">{value}</dd>
     </div>
   )
 }

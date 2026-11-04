@@ -39,7 +39,7 @@ export function OwnerList() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Propietarios
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -136,7 +136,7 @@ export function OwnerList() {
                         {owner.fullName}
                       </Link>
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="num">
                       {formatNationalId(owner.nationalId)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -200,7 +200,7 @@ function OwnerCard({ owner }: { owner: OwnerSummary }) {
           />
         )}
       </div>
-      <p className="text-sm text-muted-foreground tabular-nums">
+      <p className="num text-sm text-muted-foreground">
         {formatNationalId(owner.nationalId)}
         {owner.email && ` · ${owner.email}`}
       </p>

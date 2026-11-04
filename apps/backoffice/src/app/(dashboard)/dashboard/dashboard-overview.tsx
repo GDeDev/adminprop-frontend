@@ -109,7 +109,10 @@ function Overview({ report }: { report: DashboardReport }) {
   return (
     <div className="flex flex-col gap-6">
       <section aria-labelledby="month-title" className="flex flex-col gap-3">
-        <h2 id="month-title" className="font-display text-lg font-semibold">
+        <h2
+          id="month-title"
+          className="font-display text-title-md font-semibold"
+        >
           {periodLabel(report.period)}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -155,7 +158,7 @@ function Overview({ report }: { report: DashboardReport }) {
         >
           <h2
             id="todo-title"
-            className="mb-2 font-display text-lg font-semibold"
+            className="mb-2 font-display text-title-md font-semibold"
           >
             Para hoy
           </h2>
@@ -172,7 +175,7 @@ function Overview({ report }: { report: DashboardReport }) {
                     className="flex min-h-11 items-center justify-between py-2 text-sm hover:underline md:min-h-9"
                   >
                     {item.label}
-                    <span className="font-semibold tabular-nums">
+                    <span className="num font-semibold">
                       {report.todo[item.key]}
                     </span>
                   </Link>
@@ -188,7 +191,7 @@ function Overview({ report }: { report: DashboardReport }) {
         >
           <h2
             id="expiring-title"
-            className="mb-2 font-display text-lg font-semibold"
+            className="mb-2 font-display text-title-md font-semibold"
           >
             Contratos por vencer
           </h2>
@@ -225,7 +228,7 @@ function Overview({ report }: { report: DashboardReport }) {
       >
         <h2
           id="history-title"
-          className="mb-3 font-display text-lg font-semibold"
+          className="mb-3 font-display text-title-md font-semibold"
         >
           Devengado y cobrado, últimos meses
         </h2>

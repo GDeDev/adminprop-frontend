@@ -35,7 +35,10 @@ export function AppraisalSection({
       className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="appraisal-title" className="font-display text-lg font-semibold">
+        <h2
+          id="appraisal-title"
+          className="font-display text-title-md font-semibold"
+        >
           Historial de tasaciones
         </h2>
         <Button variant="outline" onClick={() => setOpen(true)}>
@@ -71,12 +74,12 @@ export function AppraisalSection({
                 className="flex flex-col gap-1 py-2 text-sm first:pt-0 last:pb-0"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-display font-semibold tabular-nums">
+                  <span className="font-display num font-semibold">
                     {money(item.suggestedPriceRounded)}
                   </span>
                   <Badge variant={confidence.badge}>{confidence.label}</Badge>
                 </div>
-                <p className="text-muted-foreground tabular-nums">
+                <p className="num text-muted-foreground">
                   Rango {money(item.minPrice)} a {money(item.maxPrice)}
                 </p>
                 <p className="text-xs text-muted-foreground">

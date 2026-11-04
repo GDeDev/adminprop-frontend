@@ -121,9 +121,7 @@ export function TerminateDialog({
               aria-label="Vista previa de la rescisión"
             >
               <dt className="text-muted-foreground">Alquiler vigente</dt>
-              <dd className="tabular-nums">
-                {money(preview.data.currentRent)}
-              </dd>
+              <dd className="num">{money(preview.data.currentRent)}</dd>
               <dt className="text-muted-foreground">Falta hasta el fin</dt>
               <dd>
                 {preview.data.remainingMonths}{" "}
@@ -132,9 +130,9 @@ export function TerminateDialog({
                   ` y ${preview.data.remainingDays} ${preview.data.remainingDays === 1 ? "día" : "días"}`}
               </dd>
               <dt className="text-muted-foreground">Alquiler futuro</dt>
-              <dd className="tabular-nums">{money(preview.data.futureRent)}</dd>
+              <dd className="num">{money(preview.data.futureRent)}</dd>
               <dt className="text-muted-foreground">Multa (10 %)</dt>
-              <dd className="font-display text-lg font-semibold tabular-nums">
+              <dd className="font-display num text-title-md font-semibold">
                 {money(preview.data.penalty)}
               </dd>
             </dl>

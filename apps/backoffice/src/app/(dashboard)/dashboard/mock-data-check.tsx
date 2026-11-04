@@ -36,7 +36,7 @@ export function MockDataCheck() {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold">Datos de ejemplo</h2>
+      <h2 className="text-title-md font-semibold">Datos de ejemplo</h2>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {isPending
           ? Array.from({ length: 4 }, (_, i) => (
@@ -46,7 +46,7 @@ export function MockDataCheck() {
               <Card key={item.label}>
                 <CardHeader>
                   <CardDescription>{item.label}</CardDescription>
-                  <CardTitle className="font-display text-3xl text-accent tabular-nums">
+                  <CardTitle className="font-display num text-display-md text-accent">
                     {item.value}
                   </CardTitle>
                 </CardHeader>

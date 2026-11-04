@@ -158,7 +158,7 @@ export function TemplateEditor({
         className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-raised"
       >
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="font-display text-lg font-semibold">
+          <h2 className="font-display text-title-md font-semibold">
             {template.title}
           </h2>
           <Badge variant={template.isCustomized ? "alquilada" : "borrador"}>
@@ -320,7 +320,9 @@ function Preview({
       className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">Vista previa</h2>
+        <h2 className="font-display text-title-md font-semibold">
+          Vista previa
+        </h2>
         <div role="group" aria-label="Formato" className="flex gap-1">
           <Button
             size="sm"

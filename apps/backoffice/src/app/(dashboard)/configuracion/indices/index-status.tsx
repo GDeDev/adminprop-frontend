@@ -52,7 +52,7 @@ export function IndexStatusPanel({ canRun }: { canRun: boolean }) {
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="index-status-title"
-          className="font-display text-base font-semibold"
+          className="font-display text-title-sm font-semibold"
         >
           Actualización automática
         </h2>

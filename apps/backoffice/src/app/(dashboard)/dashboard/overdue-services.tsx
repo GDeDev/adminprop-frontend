@@ -40,12 +40,12 @@ export function OverdueServices() {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="overdue-services-title"
-          className="flex items-center gap-2 font-display text-lg font-semibold"
+          className="flex items-center gap-2 font-display text-title-md font-semibold"
         >
           <AlertTriangle aria-hidden className="size-5 text-destructive" />
           Servicios vencidos
           {query.isSuccess && total > 0 && (
-            <Badge variant="mora" className="tabular-nums">
+            <Badge variant="mora" className="num">
               {total}
             </Badge>
           )}
@@ -108,7 +108,7 @@ function OverdueRow({ service }: { service: OverdueService }) {
         <p className="text-muted-foreground">
           {service.serviceType?.name ?? "Servicio"} · paga el{" "}
           {SERVICE_PAYER_LABELS[service.paidBy].toLowerCase()} · venció el{" "}
-          <span className="tabular-nums">{formatDate(service.dueDate)}</span>
+          <span className="num">{formatDate(service.dueDate)}</span>
         </p>
       </div>
       <Badge variant="mora">{daysOverdueLabel(service.daysOverdue)}</Badge>

@@ -71,7 +71,7 @@ export function AccountSection({
     >
       <h2
         id="contract-account-title"
-        className="mb-3 font-display text-lg font-semibold"
+        className="mb-3 font-display text-title-md font-semibold"
       >
         Cuenta corriente
       </h2>
@@ -167,7 +167,7 @@ function Account({
           hint={`${money(totals.feeAccruedOnBase)} sobre el total`}
         />
       </dl>
-      <p className="text-xs text-muted-foreground tabular-nums">
+      <p className="num text-xs text-muted-foreground">
         {COLLECTION_MODE_LABELS[account.contract.collectionMode]} ·{" "}
         {FEE_MODE_LABELS[account.contract.feeMode]}
         {!isZero(totals.collectedByOwner) &&
@@ -189,7 +189,7 @@ function Account({
         {deposit.returned && (
           <p className="mt-1">
             Devuelto el {formatDate(deposit.returned.returnedAt)}:{" "}
-            <span className="tabular-nums">
+            <span className="num">
               {formatMoney(deposit.returned.returnedAmount, deposit.currency)}
             </span>
             {deposit.returned.deductions.length > 0 &&
@@ -219,7 +219,7 @@ function Account({
             <TableBody>
               {visible.map((movement, index) => (
                 <TableRow key={`${movement.date}-${movement.type}-${index}`}>
-                  <TableCell className="tabular-nums">
+                  <TableCell className="num">
                     {formatDate(movement.date)}
                   </TableCell>
                   <TableCell>
@@ -239,13 +239,13 @@ function Account({
                       )}
                     </p>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {movement.debit ? money(movement.debit) : ""}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {movement.credit ? money(movement.credit) : ""}
                   </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
+                  <TableCell className="text-right num font-medium">
                     {money(movement.balance)}
                   </TableCell>
                 </TableRow>
@@ -278,7 +278,7 @@ function Total({
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd
-        className={`font-display font-semibold tabular-nums ${
+        className={`font-display num font-semibold ${
           tone === "warning" ? "text-warning" : ""
         }`}
       >

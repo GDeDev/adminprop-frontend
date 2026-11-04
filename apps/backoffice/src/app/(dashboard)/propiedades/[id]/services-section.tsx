@@ -82,7 +82,7 @@ export function ServicesSection({
   return (
     <section className="rounded-xl border bg-card p-4 shadow-raised md:col-span-2">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">Servicios</h2>
+        <h2 className="font-display text-title-md font-semibold">Servicios</h2>
         {propertyId && (
           <Button
             variant="outline"
@@ -184,7 +184,7 @@ function ServiceRows({
               </div>
               <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                 <dt>Vence</dt>
-                <dd className="tabular-nums">{dueDateLabel(service)}</dd>
+                <dd className="num">{dueDateLabel(service)}</dd>
                 <dt>Aumenta</dt>
                 <dd>{increaseLabel(service)}</dd>
               </dl>
@@ -220,9 +220,7 @@ function ServiceRows({
                   <TableCell>
                     {SERVICE_PAYER_LABELS[service.paidBy]} · {service.currency}
                   </TableCell>
-                  <TableCell className="tabular-nums">
-                    {dueDateLabel(service)}
-                  </TableCell>
+                  <TableCell className="num">{dueDateLabel(service)}</TableCell>
                   <TableCell>
                     {status ? (
                       <Badge variant={status.badge}>{status.label}</Badge>

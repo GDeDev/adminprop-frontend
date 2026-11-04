@@ -124,7 +124,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               Consolidado de{" "}
               <span className="capitalize">
                 {periodLabel(statement.period)}
@@ -225,7 +225,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
       >
         <h2
           id="statement-settlements"
-          className="mb-3 font-display text-lg font-semibold"
+          className="mb-3 font-display text-title-md font-semibold"
         >
           Liquidaciones incluidas
         </h2>
@@ -270,16 +270,16 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                         {settlementLabel(settlement)}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right num">
                       {money(settlement.rentTotal)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right num">
                       {money(settlement.feeTotal)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right num">
                       {money(settlement.expensesTotal)}
                     </TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">
+                    <TableCell className="text-right num font-medium">
                       {money(settlement.netAmount)}
                     </TableCell>
                     <TableCell>
@@ -414,7 +414,7 @@ function AddSettlementsDialog({
                         {settlement.property?.address ?? "Propiedad eliminada"}{" "}
                         · {settlementLabel(settlement)}
                       </span>
-                      <span className="tabular-nums">
+                      <span className="num">
                         {formatMoney(settlement.netAmount, settlement.currency)}
                       </span>
                     </Label>

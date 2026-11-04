@@ -80,7 +80,7 @@ export function AdvanceExpensesSection({
   return (
     <section className="rounded-xl border bg-card p-4 shadow-raised md:col-span-2">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">
+        <h2 className="font-display text-title-md font-semibold">
           Gastos adelantados
         </h2>
         <Button
@@ -140,13 +140,13 @@ export function AdvanceExpensesSection({
                 <dt className="text-xs text-muted-foreground">
                   Pendiente de descuento
                 </dt>
-                <dd className="font-display text-lg font-semibold tabular-nums">
+                <dd className="font-display num text-title-md font-semibold">
                   {formatMoney(query.data.pendingTotal, contract.currency)}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Ya descontado</dt>
-                <dd className="font-display text-lg font-semibold tabular-nums">
+                <dd className="font-display num text-title-md font-semibold">
                   {formatMoney(query.data.settledTotal, contract.currency)}
                 </dd>
               </div>
@@ -204,13 +204,13 @@ function ExpenseRows({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="font-medium">{expense.description}</p>
-                <p className="text-muted-foreground tabular-nums">
+                <p className="num text-muted-foreground">
                   {formatDate(expense.expenseDate)}
                   {expense.registeredBy &&
                     ` · ${expense.registeredBy.fullName}`}
                 </p>
               </div>
-              <span className="font-display font-medium tabular-nums">
+              <span className="font-display num font-medium">
                 {formatMoney(expense.amount, expense.currency)}
               </span>
             </div>
@@ -245,7 +245,7 @@ function ExpenseRows({
           <TableBody>
             {expenses.map((expense) => (
               <TableRow key={expense.id}>
-                <TableCell className="tabular-nums">
+                <TableCell className="num">
                   {formatDate(expense.expenseDate)}
                 </TableCell>
                 <TableCell>
@@ -256,7 +256,7 @@ function ExpenseRows({
                     </p>
                   )}
                 </TableCell>
-                <TableCell className="text-right font-display font-medium tabular-nums">
+                <TableCell className="text-right font-display num font-medium">
                   {formatMoney(expense.amount, expense.currency)}
                 </TableCell>
                 <TableCell>

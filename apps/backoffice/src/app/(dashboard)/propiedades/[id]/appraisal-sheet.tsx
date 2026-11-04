@@ -261,7 +261,7 @@ export function ResultView({ result }: { result: ValuationResult }) {
     <div className="flex flex-col gap-4" aria-live="polite">
       <div>
         <p className="text-xs text-muted-foreground">Precio sugerido</p>
-        <p className="font-display text-3xl font-semibold tabular-nums">
+        <p className="font-display num text-display-md font-semibold">
           {money(result.suggestedPriceRounded)}
         </p>
         <p className="text-xs text-muted-foreground">
@@ -281,7 +281,7 @@ export function ResultView({ result }: { result: ValuationResult }) {
             style={{ left: `${position}%` }}
           />
         </div>
-        <div className="mt-2 flex justify-between text-sm tabular-nums">
+        <div className="mt-2 flex justify-between num text-sm">
           <span>{money(result.minPrice)}</span>
           <span>{money(result.maxPrice)}</span>
         </div>

@@ -96,7 +96,7 @@ export function AutomationsScreen() {
           Configuración
         </Link>
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Automatizaciones
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -152,7 +152,9 @@ function JobCard({ job, onRun }: { job: Job; onRun: () => void }) {
     <article className="flex h-full flex-col gap-2 rounded-xl border bg-card p-4 shadow-raised">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="font-display text-base font-semibold">{job.title}</h2>
+          <h2 className="font-display text-title-sm font-semibold">
+            {job.title}
+          </h2>
           <p className="text-sm text-muted-foreground">{job.description}</p>
         </div>
         <Button
@@ -277,7 +279,7 @@ function ExecutionHistory({ jobs }: { jobs: Job[] }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2
           id="executions-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Historial de ejecuciones
         </h2>
@@ -371,7 +373,7 @@ function ExecutionRow({
   const meta = EXECUTION_STATUS_META[execution.status]
   return (
     <TableRow>
-      <TableCell className="tabular-nums">
+      <TableCell className="num">
         {formatDateTime(execution.startedAt)}
       </TableCell>
       <TableCell className="font-medium">

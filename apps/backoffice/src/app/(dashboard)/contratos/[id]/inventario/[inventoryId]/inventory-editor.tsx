@@ -235,7 +235,7 @@ function Editor({
           </Link>
         </Button>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             {INVENTORY_TYPE_LABELS[detail.type]}
           </h1>
           <Badge variant={status.variant}>{status.label}</Badge>
@@ -279,7 +279,7 @@ function Editor({
           className="rounded-xl border bg-card p-4 shadow-raised"
           aria-label={category}
         >
-          <h2 className="mb-3 font-display text-lg font-semibold">
+          <h2 className="mb-3 font-display text-title-md font-semibold">
             {category}
           </h2>
           <ul className="flex flex-col gap-4">

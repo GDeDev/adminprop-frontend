@@ -118,7 +118,7 @@ export function RenterSelect({
                       }
                     />
                     <span className="flex-1 truncate">{renter.fullName}</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="num text-xs text-muted-foreground">
                       {formatNationalId(renter.nationalId)}
                     </span>
                   </CommandItem>

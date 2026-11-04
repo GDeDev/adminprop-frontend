@@ -175,7 +175,7 @@ export function RenterForm({ renter }: { renter?: RenterDetail }) {
           <ChevronLeft aria-hidden className="size-4" />
           {editing ? renter.fullName : "Inquilinos"}
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           {editing ? "Editar inquilino" : "Nuevo inquilino"}
         </h1>
       </div>

@@ -123,7 +123,7 @@ export function GuarantorSelect({
                     <span className="flex-1 truncate">
                       {guarantor.fullName}
                     </span>
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="num text-xs text-muted-foreground">
                       {formatNationalId(guarantor.nationalId)}
                     </span>
                   </CommandItem>

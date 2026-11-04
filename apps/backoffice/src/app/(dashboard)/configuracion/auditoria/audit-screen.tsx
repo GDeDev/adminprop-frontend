@@ -104,7 +104,7 @@ export function AuditScreen() {
           </Link>
         </Button>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Auditoría
           </h1>
           <Button variant="outline" onClick={() => void exportXlsx()}>

@@ -82,7 +82,7 @@ export function IndicesScreen() {
           <ChevronLeft aria-hidden className="size-4" />
           Configuración
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Índices
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -152,10 +152,10 @@ function IndexTable({ type }: { type: IndexType }) {
         <TableBody>
           {query.data.map((value) => (
             <TableRow key={value.id}>
-              <TableCell className="font-medium tabular-nums">
+              <TableCell className="num font-medium">
                 {formatPeriod(value.period)}
               </TableCell>
-              <TableCell className="text-right font-display tabular-nums">
+              <TableCell className="text-right font-display num">
                 {value.value}
               </TableCell>
               <TableCell className="text-muted-foreground">
@@ -253,7 +253,7 @@ function RegisterForm({
       className="rounded-xl border bg-card p-4 shadow-raised"
       aria-label="Cargar un valor"
     >
-      <h2 className="mb-3 font-display text-lg font-semibold">
+      <h2 className="mb-3 font-display text-title-md font-semibold">
         Cargar un valor
       </h2>
       {error && (

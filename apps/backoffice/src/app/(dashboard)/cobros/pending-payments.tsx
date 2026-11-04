@@ -89,7 +89,7 @@ export function PendingPayments() {
                   {periodLabel(payment.period)}
                 </p>
               </div>
-              <span className="font-display font-medium tabular-nums">
+              <span className="font-display num font-medium">
                 {formatMoney(payment.amount, payment.paidCurrency)}
               </span>
             </div>
@@ -144,10 +144,10 @@ export function PendingPayments() {
                     <ExternalLink aria-hidden className="size-3" />
                   </Link>
                 </TableCell>
-                <TableCell className="tabular-nums">
+                <TableCell className="num">
                   {formatDate(payment.paidAt)}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right num">
                   {formatMoney(payment.amount, payment.paidCurrency)}
                   {exchangeRateLabel(payment, formatDate) && (
                     <p className="text-xs text-muted-foreground">

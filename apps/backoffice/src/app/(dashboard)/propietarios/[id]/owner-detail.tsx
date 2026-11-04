@@ -80,10 +80,10 @@ function Detail({ owner }: { owner: OwnerDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {owner.fullName}
             </h1>
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="num text-sm text-muted-foreground">
               DNI/CUIT {formatNationalId(owner.nationalId)} ·{" "}
               {portfolioLabel(owner)}
             </p>
@@ -178,7 +178,7 @@ function Section({
   return (
     <section className="rounded-xl border bg-card p-4 shadow-raised">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
+        <h2 className="font-display text-title-md font-semibold">{title}</h2>
         {action}
       </div>
       {children}
@@ -216,9 +216,7 @@ function BankAccountSection({ owner }: { owner: OwnerDetail }) {
       ) : (
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
           <dt className="text-muted-foreground">CBU</dt>
-          <dd className="tabular-nums">
-            {account.cbu ? formatCbu(account.cbu) : "—"}
-          </dd>
+          <dd className="num">{account.cbu ? formatCbu(account.cbu) : "—"}</dd>
           <dt className="text-muted-foreground">Alias</dt>
           <dd>{account.alias ?? "—"}</dd>
           <dt className="text-muted-foreground">Banco</dt>

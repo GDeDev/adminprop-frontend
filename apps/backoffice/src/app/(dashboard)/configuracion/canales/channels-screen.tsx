@@ -57,7 +57,7 @@ export function ChannelsScreen() {
           <ChevronLeft aria-hidden className="size-4" />
           Configuración
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Canales de publicación
         </h1>
         <p className="text-sm text-muted-foreground">

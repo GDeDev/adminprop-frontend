@@ -76,7 +76,7 @@ export function MyNotifications() {
       <div>
         <h2
           id="my-notifications-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Mis notificaciones
         </h2>

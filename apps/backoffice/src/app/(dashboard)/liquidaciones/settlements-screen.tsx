@@ -87,7 +87,7 @@ export function SettlementsScreen() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Liquidaciones
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -284,18 +284,18 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
       <TableCell>
         {settlement.property?.address ?? "Propiedad eliminada"}
       </TableCell>
-      <TableCell className="capitalize tabular-nums">
+      <TableCell className="num capitalize">
         {settlementLabel(settlement)}
       </TableCell>
-      <TableCell className="text-right tabular-nums">
+      <TableCell className="text-right num">
         {money(settlement.rentTotal)}
       </TableCell>
-      <TableCell className="text-right tabular-nums">
+      <TableCell className="text-right num">
         {settlement.feeDeducted
           ? `−${money(settlement.feeTotal)}`
           : money(settlement.feeTotal)}
       </TableCell>
-      <TableCell className="text-right font-medium tabular-nums">
+      <TableCell className="text-right num font-medium">
         {money(settlement.netAmount)}
         {!isZero(settlement.transferredTotal) && (
           <p className="text-xs text-muted-foreground">
@@ -328,10 +328,10 @@ function SettlementCard({ settlement }: { settlement: SettlementSummary }) {
         {settlementLabel(settlement)}
       </p>
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span className="text-muted-foreground tabular-nums">
+        <span className="num text-muted-foreground">
           Alquiler {money(settlement.rentTotal)}
         </span>
-        <span className="font-display font-medium tabular-nums">
+        <span className="font-display num font-medium">
           Neto {money(settlement.netAmount)}
         </span>
       </div>
@@ -418,7 +418,7 @@ function StatementCard({ statement }: { statement: OwnerStatementSummary }) {
         {statement.closedAt &&
           ` · cerrado el ${formatDate(statement.closedAt.slice(0, 10))}`}
       </p>
-      <p className="text-sm tabular-nums">
+      <p className="num text-sm">
         {statement.totals.length === 0
           ? "Sin totales todavía"
           : statement.totals
@@ -576,7 +576,7 @@ function FeeReceivableList() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium tabular-nums">
+                    <span className="num font-medium">
                       {formatMoney(receivable.amount, receivable.currency)}
                       {!isZero(receivable.paidAmount) && (
                         <span className="text-xs font-normal text-muted-foreground">

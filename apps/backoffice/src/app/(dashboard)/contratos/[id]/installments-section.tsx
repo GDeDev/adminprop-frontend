@@ -42,7 +42,7 @@ export function InstallmentsSection({
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="contract-installments-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Estado mes a mes
         </h2>
@@ -77,7 +77,7 @@ export function InstallmentsSection({
                   </Link>
                   <InstallmentBadges installment={installment} />
                 </div>
-                <p className="text-muted-foreground tabular-nums">
+                <p className="num text-muted-foreground">
                   {money(installment.baseAmount)} · pagado{" "}
                   {money(installment.paidTotal)} · saldo{" "}
                   {money(installment.totalDue)}
@@ -113,16 +113,16 @@ export function InstallmentsSection({
                         </p>
                       )}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right num">
                       {money(installment.baseAmount)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right num">
                       {money(installment.lateFeeAccrued)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right num">
                       {money(installment.paidTotal)}
                     </TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">
+                    <TableCell className="text-right num font-medium">
                       {money(installment.totalDue)}
                     </TableCell>
                     <TableCell>

@@ -63,7 +63,7 @@ export function BillingTermsSection({
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="billing-terms-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Términos de cobro
         </h2>
@@ -117,7 +117,7 @@ export function BillingTermsSection({
           </p>
         </dd>
         <dt className="text-muted-foreground">Vigentes desde</dt>
-        <dd className="tabular-nums">{formatDate(terms.effectiveFrom)}</dd>
+        <dd className="num">{formatDate(terms.effectiveFrom)}</dd>
       </dl>
       {history.length > 1 && (
         <div className="mt-3 text-sm">
@@ -134,7 +134,7 @@ export function BillingTermsSection({
             <ul className="mt-2 flex flex-col divide-y">
               {history.map((row) => (
                 <li key={row.id} className="py-2">
-                  <p className="font-medium tabular-nums">
+                  <p className="num font-medium">
                     Desde {formatDate(row.effectiveFrom)}
                     {row.changedBy && (
                       <span className="font-normal text-muted-foreground">

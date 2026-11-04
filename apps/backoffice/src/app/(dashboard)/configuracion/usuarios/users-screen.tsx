@@ -132,7 +132,7 @@ function UsersManager({ meId }: { meId: string }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Usuarios
           </h1>
           <p className="text-sm text-muted-foreground">

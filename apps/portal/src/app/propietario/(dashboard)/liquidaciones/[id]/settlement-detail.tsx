@@ -69,7 +69,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
           <ChevronLeft aria-hidden className="size-4" />
           Liquidaciones
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           {settlement.property?.address ?? "Propiedad"}
         </h1>
         <p className="text-sm text-muted-foreground capitalize">
@@ -90,7 +90,10 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
         className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="breakdown-title"
       >
-        <h2 id="breakdown-title" className="font-display text-lg font-semibold">
+        <h2
+          id="breakdown-title"
+          className="font-display text-title-md font-semibold"
+        >
           Desglose
         </h2>
         <dl className="mt-3 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 text-sm">
@@ -132,7 +135,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
             />
           )}
           <dt className="border-t pt-2 font-medium">Neto a transferirte</dt>
-          <dd className="border-t pt-2 text-right font-display text-xl font-semibold tabular-nums">
+          <dd className="border-t pt-2 text-right font-display num text-title-md font-semibold">
             {money(settlement.netAmount)}
           </dd>
         </dl>
@@ -147,7 +150,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
 
       {settlement.expenses.length > 0 && (
         <section className="rounded-xl border bg-card p-5 text-sm shadow-raised">
-          <h2 className="font-display text-base font-semibold">
+          <h2 className="font-display text-title-sm font-semibold">
             Gastos descontados
           </h2>
           <ul className="mt-2 flex flex-col divide-y">
@@ -162,7 +165,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
                     · {formatDate(expense.expenseDate)}
                   </span>
                 </span>
-                <span className="tabular-nums">−{money(expense.amount)}</span>
+                <span className="num">−{money(expense.amount)}</span>
               </li>
             ))}
           </ul>
@@ -175,7 +178,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
       >
         <h2
           id="transfers-title"
-          className="font-display text-base font-semibold"
+          className="font-display text-title-sm font-semibold"
         >
           Transferencias
         </h2>
@@ -196,7 +199,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
                   {formatDate(transfer.transferredAt)} ·{" "}
                   {PAYMENT_METHOD_LABELS[transfer.method]}
                 </span>
-                <span className="tabular-nums">{money(transfer.amount)}</span>
+                <span className="num">{money(transfer.amount)}</span>
               </li>
             ))}
           </ul>
@@ -229,7 +232,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <>
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="text-right tabular-nums">{value}</dd>
+      <dd className="text-right num">{value}</dd>
     </>
   )
 }

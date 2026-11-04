@@ -21,7 +21,7 @@ export function UnattendedInquiries() {
     >
       <p className="text-sm text-muted-foreground">Consultas sin atender</p>
       <p
-        className={`font-display text-2xl font-semibold tabular-nums ${count > 0 ? "text-destructive" : ""}`}
+        className={`font-display num text-title-lg font-semibold ${count > 0 ? "text-destructive" : ""}`}
       >
         {count}
         {isLowerBound && "+"}

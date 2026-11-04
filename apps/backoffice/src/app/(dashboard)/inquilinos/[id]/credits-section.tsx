@@ -67,7 +67,7 @@ export function RenterBillingSection({ renterId }: { renterId: string }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="renter-billing-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Pagos y saldos
         </h2>
@@ -105,7 +105,7 @@ export function RenterBillingSection({ renterId }: { renterId: string }) {
             <span className="text-muted-foreground">
               Saldo a favor disponible:{" "}
             </span>
-            <span className="font-medium tabular-nums">
+            <span className="num font-medium">
               {formatMoneyList(
                 credits.data.totals.map((t) => ({
                   currency: t.currency,
@@ -124,7 +124,7 @@ export function RenterBillingSection({ renterId }: { renterId: string }) {
                     className="flex flex-wrap items-center justify-between gap-2 py-2"
                   >
                     <div>
-                      <p className="font-medium tabular-nums">
+                      <p className="num font-medium">
                         {formatMoney(credit.remaining, credit.currency)}
                         {credit.remaining !== credit.amount && (
                           <span className="font-normal text-muted-foreground">

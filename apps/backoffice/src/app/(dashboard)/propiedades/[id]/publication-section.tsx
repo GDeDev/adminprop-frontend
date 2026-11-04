@@ -51,7 +51,7 @@ export function PublicationSection({ propertyId }: { propertyId: string }) {
       >
         <h2
           id="publication-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Publicación
         </h2>
@@ -248,7 +248,10 @@ function Analytics({ propertyId }: { propertyId: string }) {
       aria-labelledby="analytics-title"
       className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
-      <h2 id="analytics-title" className="font-display text-lg font-semibold">
+      <h2
+        id="analytics-title"
+        className="font-display text-title-md font-semibold"
+      >
         Interés en la propiedad
       </h2>
       {analytics.isPending && <Skeleton className="h-20" />}

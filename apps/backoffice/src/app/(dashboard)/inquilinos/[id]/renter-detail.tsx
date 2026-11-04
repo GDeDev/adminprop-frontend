@@ -79,10 +79,10 @@ function Detail({ renter }: { renter: RenterDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {renter.fullName}
             </h1>
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="num text-sm text-muted-foreground">
               DNI/CUIT {formatNationalId(renter.nationalId)}
               {renter.moveInDate &&
                 ` · Ingresó el ${formatDate(renter.moveInDate)}`}
@@ -205,7 +205,7 @@ function GuarantorSummaryCard({
         >
           {guarantor.fullName}
         </Link>
-        <span className="text-muted-foreground tabular-nums">
+        <span className="num text-muted-foreground">
           {formatNationalId(guarantor.nationalId)}
         </span>
       </div>
@@ -248,7 +248,7 @@ function Section({
   return (
     <section className="rounded-xl border bg-card p-4 shadow-raised">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
+        <h2 className="font-display text-title-md font-semibold">{title}</h2>
         {action}
       </div>
       {children}

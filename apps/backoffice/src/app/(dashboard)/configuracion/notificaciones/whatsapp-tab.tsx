@@ -96,7 +96,9 @@ export function WhatsAppTemplateCard({
       className="flex h-full flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-display text-lg font-semibold">{template.title}</h2>
+        <h2 className="font-display text-title-md font-semibold">
+          {template.title}
+        </h2>
         {template.isCustomized && (
           <Badge variant="alquilada">Personalizada</Badge>
         )}

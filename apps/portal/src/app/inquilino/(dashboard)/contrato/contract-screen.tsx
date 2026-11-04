@@ -52,7 +52,7 @@ function Contract({ contract }: { contract: PortalRenterContract }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           {contract.property.address}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -83,12 +83,15 @@ function Contract({ contract }: { contract: PortalRenterContract }) {
         className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="terms-title"
       >
-        <h2 id="terms-title" className="font-display text-lg font-semibold">
+        <h2
+          id="terms-title"
+          className="font-display text-title-md font-semibold"
+        >
           Condiciones
         </h2>
         <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
           <dt className="text-muted-foreground">Alquiler vigente</dt>
-          <dd className="font-display text-lg font-semibold tabular-nums">
+          <dd className="font-display num text-title-md font-semibold">
             {money(contract.currentRent)}
           </dd>
           <dt className="text-muted-foreground">Actualización</dt>
@@ -139,7 +142,10 @@ function Contract({ contract }: { contract: PortalRenterContract }) {
         className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="services-title"
       >
-        <h2 id="services-title" className="font-display text-lg font-semibold">
+        <h2
+          id="services-title"
+          className="font-display text-title-md font-semibold"
+        >
           Servicios
         </h2>
         {contract.services.length === 0 ? (
@@ -163,7 +169,7 @@ function Contract({ contract }: { contract: PortalRenterContract }) {
                       : "el propietario"}
                   </span>
                 </span>
-                <span className="text-muted-foreground tabular-nums">
+                <span className="num text-muted-foreground">
                   {service.hasDueDate && service.dueDate
                     ? `vence el ${formatDate(service.dueDate)}`
                     : "sin vencimiento"}

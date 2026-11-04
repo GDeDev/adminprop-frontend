@@ -24,7 +24,7 @@ export function MarketStatusCard() {
       <div>
         <h2
           id="market-status-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Datos de mercado
         </h2>
