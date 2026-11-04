@@ -61,11 +61,12 @@ export default async function PropertyPage({ params }: Props) {
   const kit = templateKit(site.template)
 
   // La ficha y las "parecidas" se piden a la vez: las parecidas no dependen de
-  // la ficha para pedirse (se filtran por operación después) y, si fallan, la
-  // ficha sale igual.
+  // la ficha para pedirse (se filtran por operación después). Si cualquiera de
+  // las dos falla se lanza: una ficha sin parecidas quedaría cacheada (ISR) como
+  // si fuera la buena. 404 solo cuando la API confirma que la ficha no existe.
   const [property, latest] = await Promise.all([
     getProperty(route, id),
-    getProperties(route, { limit: 8 }).catch(() => null),
+    getProperties(route, { limit: 8 }),
   ])
   if (!property) notFound()
 

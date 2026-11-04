@@ -35,12 +35,12 @@ export default async function FavoritesPage({ params, searchParams }: Props) {
   // Con `?ids=` es una lista que alguien compartió: se arma en el servidor y
   // no toca los favoritos de quien la abre. Sin ids, es «Mis favoritos».
   const shared = parseIdsParam((await searchParams).ids)
+  // Si la API falla, el error sube a `error.tsx`; `null` es «el sitio no existe».
   const result =
     shared.length > 0
-      ? await getProperties(route, { ids: shared, limit: shared.length }).catch(
-          () => null
-        )
+      ? await getProperties(route, { ids: shared, limit: shared.length })
       : null
+  if (shared.length > 0 && !result) notFound()
   const order = new Map(shared.map((id, i) => [id, i]))
   const properties = [...(result?.data ?? [])].sort(
     (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)
@@ -64,16 +64,6 @@ export default async function FavoritesPage({ params, searchParams }: Props) {
       >
         {shared.length === 0 ? (
           <FavoritesList site={site} route={route} />
-        ) : result === null ? (
-          <div
-            role="alert"
-            className="rounded-site border-site-border bg-site-surface border p-8 text-center"
-          >
-            <p className="text-lg font-semibold">No pudimos cargar la lista</p>
-            <p className="text-site-muted mt-2">
-              Probá de nuevo en un momento.
-            </p>
-          </div>
         ) : properties.length === 0 ? (
           <div className="rounded-site border-site-border bg-site-surface border p-8 text-center">
             <p className="text-lg font-semibold">

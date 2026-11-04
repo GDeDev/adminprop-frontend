@@ -58,15 +58,18 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
 
   // Un rango de precio sin moneda se compara en la de la inmobiliaria (lo
   // resuelve la API); acá solo se pasan los filtros.
-  // Si la API falla, el listado muestra su propio aviso en vez de la página de error.
+  // Si la API falla, `UpstreamError` sube a `error.tsx`: un listado vacío con
+  // 200 se podría cachear en un CDN y se confundiría con «no hay propiedades».
+  // `null` es la confirmación de la API de que el sitio no existe.
   const [result, filters] = await Promise.all([
-    getProperties(route, apiQuery).catch(() => null),
-    getFilters(route).catch(() => null),
+    getProperties(route, apiQuery),
+    getFilters(route),
   ])
+  if (!result) notFound()
 
   const action = hrefFor({ ...route, previewToken: null }, "/propiedades")
-  const properties = result?.data ?? []
-  const pagination = result?.pagination
+  const properties = result.data
+  const pagination = result.pagination
   const pageLink = (page: number) =>
     hrefFor(route, `/propiedades${listingSearch(query, { page })}`)
 
@@ -88,19 +91,7 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
         aria-label="Resultados"
         className="mx-auto max-w-6xl px-4 py-10 md:py-14"
       >
-        {result === null ? (
-          <div
-            role="alert"
-            className="rounded-site border-site-border bg-site-surface border p-8 text-center"
-          >
-            <p className="text-lg font-semibold">
-              No pudimos cargar las propiedades
-            </p>
-            <p className="text-site-muted mt-2">
-              Probá de nuevo en un momento.
-            </p>
-          </div>
-        ) : properties.length === 0 ? (
+        {properties.length === 0 ? (
           <div className="rounded-site border-site-border bg-site-surface border p-8 text-center">
             <p className="text-lg font-semibold">
               No hay propiedades con esos filtros
