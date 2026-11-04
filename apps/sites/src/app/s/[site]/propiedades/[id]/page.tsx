@@ -6,6 +6,8 @@ import { ContactForm } from "@/components/contact-form"
 import { FavoriteButton } from "@/components/favorite-button"
 import { Gallery } from "@/components/gallery"
 import { JsonLd } from "@/components/json-ld"
+import { PropertyMap } from "@/components/property-map"
+import { parseCoordinates } from "@/lib/osm"
 import { getProperties, getProperty } from "@/lib/api"
 import {
   CONSULT_PRICE_LABEL,
@@ -78,6 +80,8 @@ export default async function PropertyPage({ params }: Props) {
     `Hola, me interesa la propiedad ${property.title} (${property.location}). ¿Me pasan más información?`
   )
   const price = formatPrice(property.price, property.currency)
+  // Sin coordenadas válidas no hay mapa (ni hueco): la sección no se dibuja.
+  const coordinates = parseCoordinates(property.latitude, property.longitude)
 
   return (
     <>
@@ -141,6 +145,17 @@ export default async function PropertyPage({ params }: Props) {
               <p className="text-site-text/90 mt-3 whitespace-pre-line">
                 {property.publicDescription}
               </p>
+            </section>
+          )}
+
+          {coordinates && (
+            <section aria-labelledby="ubicacion" className="mt-8">
+              <h2 id="ubicacion" className="text-xl font-semibold">
+                Ubicación
+              </h2>
+              <div className="mt-3">
+                <PropertyMap coordinates={coordinates} title={property.title} />
+              </div>
             </section>
           )}
 
