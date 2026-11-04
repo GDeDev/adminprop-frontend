@@ -1,5 +1,6 @@
 import type { PublicPropertySummary } from "@adminprop/shared-types"
 
+import { FavoriteButton } from "@/components/favorite-button"
 import { CoverImage, Facts, placeOf } from "@/components/property-bits"
 import {
   CONSULT_PRICE_LABEL,
@@ -18,7 +19,7 @@ export function ModernPropertyCard({
   priority,
 }: SiteProps & { property: PublicPropertySummary; priority?: boolean }) {
   return (
-    <article className="group h-full">
+    <article className="group relative h-full">
       <a
         href={hrefFor(route, `/propiedades/${property.id}`)}
         className="flex h-full flex-col"
@@ -46,6 +47,12 @@ export function ModernPropertyCard({
           <Facts property={property} className="text-site-muted mt-2" />
         </div>
       </a>
+      <FavoriteButton
+        slug={route.slug}
+        propertyId={property.id}
+        title={property.title}
+        className="absolute top-3 right-3 z-10"
+      />
     </article>
   )
 }

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { MessageCircle } from "lucide-react"
 
 import { ContactForm } from "@/components/contact-form"
+import { FavoriteButton } from "@/components/favorite-button"
 import { Gallery } from "@/components/gallery"
 import { JsonLd } from "@/components/json-ld"
 import { getProperties, getProperty } from "@/lib/api"
@@ -87,9 +88,19 @@ export default async function PropertyPage({ params }: Props) {
           <p className="text-site-muted text-sm font-semibold tracking-widest uppercase">
             {operationLabel(property.operation)} · {property.propertyType}
           </p>
-          <h1 className="mt-2 text-3xl font-semibold md:text-4xl">
-            {property.title}
-          </h1>
+          <div className="mt-2 flex items-start justify-between gap-4">
+            <h1 className="text-3xl font-semibold md:text-4xl">
+              {property.title}
+            </h1>
+            <div className="relative shrink-0">
+              <FavoriteButton
+                slug={route.slug}
+                propertyId={property.id}
+                title={property.title}
+                className="border-site-border border"
+              />
+            </div>
+          </div>
           <p className="text-site-muted mt-1">
             {property.address}
             {property.location ? ` · ${property.location}` : ""}
