@@ -1,6 +1,5 @@
 import type {
   CollectionMode,
-  Currency,
   DepositReturnMode,
   InstallmentStatus,
   PaymentMethod,
@@ -12,23 +11,11 @@ import type {
 /**
  * Formato y etiquetas del portal. Copia mínima de los helpers del backoffice
  * (`lib/contracts.ts`, `lib/billing.ts`): sólo presentación, sin aritmética
- * (los montos los calcula la API). Consolidar en un paquete compartido cuando
- * la Fase 19 los necesite también para los reportes.
+ * (los montos los calcula la API). `formatMoney` ya vive en `@adminprop/ui`.
  */
 
-export function formatMoney(amount: string, currency: Currency): string {
-  return (
-    new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 2,
-    })
-      .format(Number(amount))
-      // Intl separa el símbolo con un espacio duro; se normaliza a uno común.
-      .split(String.fromCharCode(160))
-      .join(" ")
-  )
-}
+/** Una sola implementación en `@adminprop/ui`; se re-exporta para no tocar los imports. */
+export { formatMoney } from "@adminprop/ui/lib/format-money"
 
 /** `AAAA-MM-DD` → `dd/mm/aaaa`, sin desfase de zona horaria. */
 export function formatDate(iso: string): string {
