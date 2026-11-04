@@ -4,7 +4,7 @@ import type { PublicFilters, PublicListingQuery } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
 
 const FIELD =
-  "h-11 w-full rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "h-11 w-full rounded-md border border-input bg-card px-3 text-sm shadow-xs transition-[border-color,box-shadow] outline-none hover:border-foreground/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25"
 
 /**
  * Filtros del listado: un formulario GET, así funcionan sin JavaScript y
@@ -21,7 +21,7 @@ export function ListingFilters({
     <form
       action="/"
       method="get"
-      className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-6"
+      className="grid gap-3 rounded-xl border bg-card p-4 shadow-raised sm:grid-cols-2 lg:grid-cols-6"
     >
       <label className="flex flex-col gap-1 text-xs text-muted-foreground lg:col-span-2">
         Ubicación
