@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  AlertTriangle,
   Building2,
   FileText,
   Plus,
@@ -57,6 +58,7 @@ import {
 } from "@adminprop/ui/components/select"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 import { StatCard } from "@adminprop/ui/components/stat-card"
+import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Switch } from "@adminprop/ui/components/switch"
 import {
   Table,
@@ -542,6 +544,81 @@ function ComponentsPanel({ id }: { id: string }) {
   )
 }
 
+/** Los patrones que repiten las pantallas del backoffice y del portal. */
+function PatternsPanel() {
+  const [loading, setLoading] = React.useState(false)
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="flex flex-col gap-3 rounded-2xl border bg-background p-4 md:p-5">
+        <p className="text-label font-medium text-muted-foreground">
+          Montos: font-display, tabulares y a la derecha
+        </p>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Concepto</TableHead>
+              <TableHead className="text-right">Monto</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[
+              ["Alquiler", "$ 450.000,00"],
+              ["Expensas", "$ 38.500,00"],
+              ["Punitorios", "$ 12.000,00"],
+            ].map(([label, amount]) => (
+              <TableRow key={label}>
+                <TableCell>{label}</TableCell>
+                <TableCell className="text-right font-display num">
+                  {amount}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            loading={loading}
+            onClick={() => {
+              setLoading(true)
+              window.setTimeout(() => setLoading(false), 1500)
+            }}
+          >
+            Guardar cambios
+          </Button>
+          <Button variant="outline" loading>
+            Cargando
+          </Button>
+          <AiBadge>Sugerido por IA</AiBadge>
+        </div>
+        <a
+          href="#"
+          onClick={(event) => event.preventDefault()}
+          className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        >
+          <span className="text-label text-muted-foreground">
+            Tarjeta clickeable (lift)
+          </span>
+          <span className="font-display text-title-md font-semibold">
+            Av. Santa Fe 3253, Palermo
+          </span>
+        </a>
+      </div>
+      <div className="flex flex-col gap-3 rounded-2xl border bg-background p-4 md:p-5">
+        <p className="text-label font-medium text-muted-foreground">
+          Carga (skeleton con la forma del contenido) y error
+        </p>
+        <PageSkeleton cards={2} />
+        <EmptyState
+          icon={AlertTriangle}
+          title="No se pudieron cargar los propietarios"
+          description="Probá de nuevo en un rato."
+          action={<Button>Reintentar</Button>}
+        />
+      </div>
+    </div>
+  )
+}
+
 export function DesignSystemShowcase() {
   const [paletteOpen, setPaletteOpen] = React.useState(false)
   const [tenantStyle, setTenantStyle] = React.useState<TenantStyle>(undefined)
@@ -727,6 +804,13 @@ export function DesignSystemShowcase() {
             <ComponentsPanel id="dark" />
           </div>
         </div>
+      </Section>
+
+      <Section
+        title="Patrones de pantalla"
+        hint="Cómo se arman las pantallas reales: KPIs, montos, paneles, carga, vacío y error."
+      >
+        <PatternsPanel />
       </Section>
 
       <Section title="Mobile = Drawer, desktop = Dialog">
