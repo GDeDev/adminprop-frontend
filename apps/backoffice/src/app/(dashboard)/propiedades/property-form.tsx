@@ -42,6 +42,7 @@ import {
   useUpdateProperty,
   useUploadPropertyPhotos,
 } from "@/lib/properties-api"
+import { loadDraft, removeDraft, saveDraft } from "@/lib/form-draft"
 
 const countField = (max: number) =>
   z
@@ -107,6 +108,7 @@ const STEPS = [
 
 /** Borrador del alta en el navegador (spec 5.3). Sólo datos, no fotos. */
 const DRAFT_KEY = "adminprop:property-draft"
+const DRAFT_OMIT = ["notes"]
 
 /**
  * Un borrador está a medio cargar: se validan los tipos, no las reglas del
@@ -184,9 +186,9 @@ export function listingBody(data: FormValues, editing: boolean) {
 
 function readDraft(): FormValues | null {
   try {
-    const raw = window.localStorage.getItem(DRAFT_KEY)
+    const raw = loadDraft(DRAFT_KEY)
     if (!raw) return null
-    const parsed = draftSchema.safeParse(JSON.parse(raw))
+    const parsed = draftSchema.safeParse(raw)
     return parsed.success ? { ...EMPTY, ...parsed.data } : null
   } catch {
     return null
@@ -246,19 +248,12 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
   const values = useWatch({ control: form.control })
   React.useEffect(() => {
     if (editing) return
-    try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(values))
-    } catch {
-      // Sin storage (modo privado): el wizard funciona igual, sin borrador.
-    }
+    // Las notas internas no se guardan en el navegador.
+    saveDraft(DRAFT_KEY, values, DRAFT_OMIT)
   }, [editing, values])
 
   function discardDraft() {
-    try {
-      window.localStorage.removeItem(DRAFT_KEY)
-    } catch {
-      // nada que borrar
-    }
+    removeDraft(DRAFT_KEY)
     form.reset(EMPTY)
     setDraftRestored(false)
     setStep(0)
@@ -286,11 +281,7 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
         : await create.mutateAsync(body)
 
       if (!editing) {
-        try {
-          window.localStorage.removeItem(DRAFT_KEY)
-        } catch {
-          // ignorado
-        }
+        removeDraft(DRAFT_KEY)
       }
 
       if (photos.length > 0) {
