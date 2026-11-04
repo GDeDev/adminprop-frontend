@@ -183,7 +183,9 @@ function ListingCard({
       )}
       {listing.status === "ERROR" && listing.lastError && (
         <Alert variant="destructive" role="alert">
-          <AlertDescription>{listing.lastError}</AlertDescription>
+          <AlertDescription>
+            No se pudo publicar. Motivo informado: {listing.lastError}
+          </AlertDescription>
         </Alert>
       )}
       {!unavailable &&
