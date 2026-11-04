@@ -55,7 +55,7 @@ function StatCard({
     <div
       data-slot="stat-card"
       className={cn(
-        "flex lift flex-col gap-3 rounded-xl border bg-card p-5 text-card-foreground shadow-raised",
+        "@container flex lift flex-col gap-3 rounded-xl border bg-card p-5 text-card-foreground shadow-raised",
         ai && "ai-border",
         className
       )}
@@ -75,7 +75,7 @@ function StatCard({
           )
         )}
       </div>
-      <p className="font-display num text-display-md font-semibold">
+      <p className="font-display num text-title-lg font-semibold whitespace-nowrap @[17rem]:text-display-md">
         {/* Lo que lee un lector de pantalla es el valor final, no el animado. */}
         <span aria-hidden>{shown}</span>
         <span className="sr-only">{value}</span>
