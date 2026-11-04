@@ -17,6 +17,7 @@ export function navLinks(
       ? [{ href: hrefFor(route, "/nosotros"), label: "Nosotros" }]
       : []),
     { href: hrefFor(route, "/favoritos"), label: "Favoritos" },
+    { href: hrefFor(route, "/tasacion"), label: "Tasá tu propiedad" },
     { href: hrefFor(route, "/contacto"), label: "Contacto" },
   ]
 }
