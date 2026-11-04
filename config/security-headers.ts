@@ -22,6 +22,11 @@ export interface SecurityHeader {
 export interface SecurityHeadersOptions {
   /** `NEXT_PUBLIC_API_URL` (con prefijo de versión); de ahí sale el origen. */
   apiUrl?: string
+  /**
+   * `NEXT_PUBLIC_SITES_URL` (sitio web de las inmobiliarias): su origen se
+   * permite en `frame-src` para la vista previa del sitio en un iframe.
+   */
+  sitesUrl?: string
   /** Desarrollo: React/Next necesitan `eval` y websocket de HMR. */
   isDev?: boolean
 }
@@ -40,9 +45,11 @@ export function originOf(url: string | undefined): string | null {
 
 export function buildCsp({
   apiUrl,
+  sitesUrl,
   isDev = false,
 }: SecurityHeadersOptions = {}): string {
   const apiOrigin = originOf(apiUrl)
+  const sitesOrigin = originOf(sitesUrl)
   const connect = ["'self'", ...(apiOrigin ? [apiOrigin] : [])]
   if (isDev) connect.push("ws:", "wss:")
 
@@ -70,7 +77,7 @@ export function buildCsp({
     "form-action": ["'self'"],
     "frame-ancestors": ["'none'"],
     // La vista previa de emails usa un iframe `srcdoc` con sandbox.
-    "frame-src": ["'self'", "about:"],
+    "frame-src": ["'self'", "about:", ...(sitesOrigin ? [sitesOrigin] : [])],
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],
   }

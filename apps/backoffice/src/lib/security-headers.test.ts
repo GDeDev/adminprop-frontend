@@ -26,6 +26,15 @@ describe("security headers", () => {
     expect(csp).not.toContain("ws:")
   })
 
+  it("permite enmarcar el origen del sitio web sólo si se configura", () => {
+    const withSites = buildCsp({ sitesUrl: "https://sitios.ejemplo.com/x" })
+    expect(withSites).toContain(
+      "frame-src 'self' about: https://sitios.ejemplo.com"
+    )
+    expect(buildCsp()).toContain("frame-src 'self' about:;")
+    expect(buildCsp({ sitesUrl: "javascript:1" })).not.toContain("javascript")
+  })
+
   it("en desarrollo permite eval y websocket de HMR", () => {
     const csp = buildCsp({
       apiUrl: "http://localhost:3000/api/v1",

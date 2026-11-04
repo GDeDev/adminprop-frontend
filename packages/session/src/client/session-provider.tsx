@@ -3,7 +3,7 @@
 import * as React from "react"
 import type { AxiosInstance } from "axios"
 
-import type { ApiSuccess, AuthResult, User } from "@adminprop/shared-types"
+import type { AuthResult, MeResponse, User } from "@adminprop/shared-types"
 
 import {
   DEFAULT_SESSION_PATH,
@@ -80,7 +80,7 @@ export function SessionProvider({
             return
           }
         }
-        const { data } = await apiClient.get<ApiSuccess<User>>("/auth/me")
+        const { data } = await apiClient.get<MeResponse>("/auth/me")
         setUser(data.data)
         setStatus("authenticated")
       } catch {

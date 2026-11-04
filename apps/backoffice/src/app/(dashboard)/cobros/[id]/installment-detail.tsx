@@ -6,7 +6,6 @@ import {
   Ban,
   ChevronLeft,
   CircleDollarSign,
-  ExternalLink,
   PiggyBank,
   Plus,
   Scale,
@@ -23,7 +22,6 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 import {
   Table,
   TableBody,
@@ -54,6 +52,7 @@ import {
 } from "@/lib/billing-api"
 import { DownloadPdfButton } from "@/components/download-pdf-button"
 import { WhatsAppButton } from "@/components/whatsapp-button"
+import { PrivateFileLink } from "@/components/private-file-link"
 import { formatMoney } from "@/lib/contracts"
 import {
   addDays,
@@ -101,6 +100,9 @@ export function InstallmentDetailScreen({ id }: { id: string }) {
 }
 
 function Detail({ installment }: { installment: InstallmentDetail }) {
+  // La misma consulta de la pantalla (comparte caché): sirve para volver a pedir
+  // la URL firmada de un comprobante si venció.
+  const query = useInstallment(installment.id)
   const { user } = useSession()
   const isAdmin = user?.role === "ADMIN"
   const [dialog, setDialog] = React.useState<DialogState>(null)
@@ -286,6 +288,12 @@ function Detail({ installment }: { installment: InstallmentDetail }) {
               onVoid={(payment) => open({ kind: "void-payment", payment })}
               canVoid={isAdmin}
               confirming={confirm.isPending}
+              receivedAt={query.dataUpdatedAt}
+              refreshReceipt={async (paymentId) => {
+                const result = await query.refetch()
+                return result.data?.payments.find((p) => p.id === paymentId)
+                  ?.receiptUrl
+              }}
             />
           )}
         </Section>
@@ -535,7 +543,11 @@ function PaymentRows({
   onVoid,
   canVoid,
   confirming,
+  receivedAt,
+  refreshReceipt,
 }: {
+  receivedAt: number
+  refreshReceipt: (paymentId: string) => Promise<string | null | undefined>
   installment: InstallmentDetail
   onConfirm: (payment: Payment) => void
   onVoid: (payment: Payment) => void
@@ -603,16 +615,13 @@ function PaymentRows({
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={status.badge}>{status.label}</Badge>
                 {payment.receiptUrl && (
-                  <Button variant="ghost" size="sm" asChild>
-                    <a
-                      href={safeHttpUrl(payment.receiptUrl) ?? undefined}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink aria-hidden />
-                      Comprobante
-                    </a>
-                  </Button>
+                  <PrivateFileLink
+                    url={payment.receiptUrl}
+                    receivedAt={receivedAt}
+                    refresh={() => refreshReceipt(payment.id)}
+                  >
+                    Comprobante
+                  </PrivateFileLink>
                 )}
                 {payment.kind !== "CREDIT_APPLICATION" &&
                   payment.status !== "PENDING_CONFIRMATION" && (

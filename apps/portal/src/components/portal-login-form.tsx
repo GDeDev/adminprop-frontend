@@ -12,8 +12,7 @@ import {
   useSession,
 } from "@adminprop/session/client"
 import type {
-  ApiSuccess,
-  AuthResult,
+  PortalLoginResponse,
   PortalLoginRequest,
   PortalRole,
 } from "@adminprop/shared-types"
@@ -67,7 +66,7 @@ export function PortalLoginForm({
         tenantSlug,
         type: area.apiType,
       }
-      const { data } = await apiClient.post<ApiSuccess<AuthResult>>(
+      const { data } = await apiClient.post<PortalLoginResponse>(
         "/auth/portal-login",
         body,
         { skipAuthRefresh: true }

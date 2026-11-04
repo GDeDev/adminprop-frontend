@@ -227,10 +227,10 @@ describe("ContractDetailScreen", () => {
 
     expect(screen.getByText("Póliza vencida")).toBeInTheDocument()
     expect(screen.getByText("Caución vencida")).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Ver póliza" })).toHaveAttribute(
-      "href",
-      "https://files.example/poliza.pdf"
-    )
+    // URL firmada (DT-140): es un botón que abre la pestaña al hacer click.
+    expect(
+      screen.getByRole("button", { name: "Ver póliza" })
+    ).toBeInTheDocument()
   })
 
   it("un contrato rescindido muestra el bloque de rescisión y no las acciones", () => {
