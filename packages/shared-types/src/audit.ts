@@ -1,34 +1,16 @@
-import type { IsoDateTime, Uuid } from "./common"
+import type { ApiSchemas } from "./api"
 
-/** Contrato de la Fase 20 (REDISENO_FASE_19_20.md, sección 8). Escrito a mano hasta regenerar. */
-export type AuditAction =
-  | "CREATE"
-  | "UPDATE"
-  | "DELETE"
-  | "RESTORE"
-  | "LOGIN"
-  | "LOGIN_FAILED"
-  | "LOGOUT"
-  | "NOTIFICATION_SENT"
-  | "JOB_RUN"
-  | "EXPORT"
+/**
+ * Auditoría (Fase 20), tal como la devuelve la API. Es alias del OpenAPI salvo
+ * `AuditChange`: la API documenta `before`/`after` como `object | null` pero en
+ * runtime llevan cualquier valor JSON (strings, números, booleanos). Ver
+ * `docs/tecnica/shared-types-generados.md`.
+ */
+export type AuditEntry = ApiSchemas["AuditEntryDto"]
+export type AuditCatalog = ApiSchemas["AuditCatalogDto"]
 
-export type AuditActorKind =
-  "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
-
-export interface AuditEntry {
-  id: Uuid
-  entity: string
-  entityId: Uuid | null
-  action: AuditAction
-  summary: string
-  actorKind: AuditActorKind
-  userId: Uuid | null
-  userEmail: string | null
-  userName: string | null
-  ip: string | null
-  createdAt: IsoDateTime
-}
+export type AuditAction = AuditEntry["action"]
+export type AuditActorKind = AuditEntry["actorKind"]
 
 export interface AuditChange {
   field: string
@@ -41,9 +23,4 @@ export interface AuditChange {
 
 export interface AuditEntryDetail extends AuditEntry {
   changes: AuditChange[]
-}
-
-export interface AuditCatalog {
-  entities: string[]
-  actions: AuditAction[]
 }

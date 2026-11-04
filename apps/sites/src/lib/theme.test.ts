@@ -46,7 +46,8 @@ describe("theme", () => {
       primary: "red; background: url(//evil)",
       text: "expression(alert(1))",
       fontKey: "}</style><script>",
-      radius: 999,
+      // La API sólo manda 0|8|16|24; el test mete un valor fuera de la unión a propósito.
+      radius: 999 as unknown as SiteTheme["radius"],
     }) as Record<string, string>
     const joined = Object.values(style).join(" ")
     expect(joined).not.toMatch(/evil|expression|script|url\(/)
