@@ -38,14 +38,28 @@ describe("proxy del backoffice", () => {
   })
 })
 
-describe("matcher del proxy", () => {
+describe("matcher del proxy del backoffice", () => {
   const matcher = new RegExp(`^${config.matcher[0]}$`)
 
-  it("excluye el login y la API, pero no rutas que sólo empiezan igual", () => {
-    for (const path of ["/login", "/login/olvide", "/api/session"]) {
+  it("no protege el login, la API ni los assets", () => {
+    for (const path of [
+      "/login",
+      "/login/x",
+      "/api/session",
+      "/api",
+      "/logo.png",
+    ]) {
       expect(matcher.test(path), path).toBe(false)
     }
-    for (const path of ["/apiarios", "/logins", "/contratos", "/"]) {
+  })
+
+  it("sí protege rutas que solo empiezan igual que login o api", () => {
+    for (const path of [
+      "/apiarios",
+      "/login-historial",
+      "/apis/x",
+      "/propiedades",
+    ]) {
       expect(matcher.test(path), path).toBe(true)
     }
   })

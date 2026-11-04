@@ -2,7 +2,7 @@ import axios, { type AxiosError, type AxiosInstance } from "axios"
 
 import type { ApiError } from "@adminprop/shared-types"
 
-import { DEFAULT_SESSION_PATH, refreshAccessToken } from "./session-client"
+import { refreshAccessToken } from "./session-client"
 import { tokenStore } from "./token-store"
 
 declare module "axios" {
@@ -118,5 +118,3 @@ export function safeNextPath(
   }
   return next
 }
-
-export { DEFAULT_SESSION_PATH }
