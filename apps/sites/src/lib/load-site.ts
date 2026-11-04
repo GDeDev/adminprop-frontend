@@ -27,7 +27,12 @@ export const loadSite = cache(
   }
 )
 
-/** Destacadas (las últimas, o las elegidas a mano en su orden) y filtros del buscador. */
+/**
+ * Destacadas (las últimas, o las elegidas a mano en su orden) y filtros del
+ * buscador. Si la API falla (`UpstreamError`) NO se atrapa: la home se cachea
+ * por ISR y una home sin destacadas ni buscador quedaría publicada hasta la
+ * próxima revalidación. Lanzando, Next conserva la última versión buena.
+ */
 export async function loadHomeData(loaded: LoadedSite): Promise<HomeData> {
   const { route, site } = loaded
   const { featured: config, sections } = site.content
@@ -41,12 +46,11 @@ export async function loadHomeData(loaded: LoadedSite): Promise<HomeData> {
           ? getProperties(route, {
               ids: config.propertyIds,
               limit: config.propertyIds.length,
-            }).catch(() => null)
+            })
           : Promise.resolve(null)
-        : getProperties(route, { limit: config.count }).catch(() => null)
+        : getProperties(route, { limit: config.count })
       : Promise.resolve(null),
-    // Si la API falla acá, la home sale igual (sin destacadas ni opciones).
-    showSearch ? getFilters(route).catch(() => null) : Promise.resolve(null),
+    showSearch ? getFilters(route) : Promise.resolve(null),
   ])
 
   let featured = list?.data ?? []
