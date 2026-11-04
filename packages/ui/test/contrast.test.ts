@@ -85,6 +85,8 @@ const PAIRS: Array<[string, string, number, string]> = [
   ["accent", "sidebar", 3, "chrome: ícono activo"],
   ["ring", "background", 3, "anillo de foco"],
   ["ring", "card", 3, "anillo de foco sobre card"],
+  ["control", "card", 3, "borde de input/select sobre card"],
+  ["control", "background", 3, "borde de input/select sobre el fondo"],
 ]
 
 describe.each(["light", "dark"] as const)("contraste AA — %s", (mode) => {
