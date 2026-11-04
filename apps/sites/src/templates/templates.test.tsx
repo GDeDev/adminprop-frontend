@@ -71,6 +71,19 @@ describe.each(KEYS)("template %s", (key) => {
     expect(within(link).getByText("$ 420.000")).toBeInTheDocument()
   })
 
+  it("una propiedad sin precio dice 'Precio a consultar' en chico, no 'Consultar' como un título", () => {
+    const Featured = kit.sections.featured
+    render(
+      <Featured
+        {...props()}
+        featured={[{ ...PROPERTY, price: null, currency: null }]}
+      />
+    )
+    expect(screen.getByText("Precio a consultar")).toBeInTheDocument()
+    expect(screen.queryByText("Consultar")).toBeNull()
+    expect(screen.queryByText("$ 420.000")).toBeNull()
+  })
+
   it("sin propiedades las destacadas muestran un estado vacío", () => {
     const Featured = kit.sections.featured
     render(<Featured {...props()} featured={[]} />)

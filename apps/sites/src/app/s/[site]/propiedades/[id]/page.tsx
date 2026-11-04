@@ -6,7 +6,12 @@ import { ContactForm } from "@/components/contact-form"
 import { Gallery } from "@/components/gallery"
 import { JsonLd } from "@/components/json-ld"
 import { getProperties, getProperty } from "@/lib/api"
-import { formatPrice, operationLabel } from "@/lib/format"
+import {
+  CONSULT_PRICE_LABEL,
+  formatPrice,
+  hasPrice,
+  operationLabel,
+} from "@/lib/format"
 import { loadSite } from "@/lib/load-site"
 import { pageSeo } from "@/lib/seo"
 import { basePath, hrefFor } from "@/lib/site-route"
@@ -89,9 +94,14 @@ export default async function PropertyPage({ params }: Props) {
             {property.address}
             {property.location ? ` · ${property.location}` : ""}
           </p>
-          <p className="text-site-primary mt-4 text-3xl font-semibold [text-shadow:none]">
-            <span className="text-site-text">{price}</span>
-          </p>
+          {hasPrice(property.price) ? (
+            <p className="mt-4 text-3xl font-semibold">{price}</p>
+          ) : (
+            // Sin precio no hay nada que destacar: una línea chica, no un título.
+            <p className="text-site-muted mt-4 text-lg">
+              {CONSULT_PRICE_LABEL}
+            </p>
+          )}
 
           {property.features.length > 0 && (
             <section aria-labelledby="datos" className="mt-8">

@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest"
 
 import type { PublicPropertySummary } from "@adminprop/shared-types"
 
-import { cardFacts, formatArea, formatPrice, operationLabel } from "./format"
+import {
+  cardFacts,
+  CONSULT_PRICE_LABEL,
+  formatArea,
+  formatPrice,
+  hasPrice,
+  operationLabel,
+} from "./format"
 
 const property = (over: Partial<PublicPropertySummary>) =>
   ({
@@ -37,5 +44,13 @@ describe("format", () => {
         (f) => f.label
       )
     ).toEqual(["1 dormitorio", "2 baños", "70 m²"])
+  })
+
+  it("distingue una propiedad con precio de una a consultar", () => {
+    expect(hasPrice("150000.00")).toBe(true)
+    expect(hasPrice("0")).toBe(true)
+    expect(hasPrice(null)).toBe(false)
+    expect(hasPrice("abc")).toBe(false)
+    expect(CONSULT_PRICE_LABEL).toBe("Precio a consultar")
   })
 })

@@ -1,7 +1,12 @@
 import type { PublicPropertySummary } from "@adminprop/shared-types"
 
 import { CoverImage, Facts, placeOf } from "@/components/property-bits"
-import { formatPrice, operationLabel } from "@/lib/format"
+import {
+  CONSULT_PRICE_LABEL,
+  formatPrice,
+  hasPrice,
+  operationLabel,
+} from "@/lib/format"
 import { hrefFor } from "@/lib/site-route"
 
 import type { SiteProps } from "../types"
@@ -24,9 +29,15 @@ export function ClassicPropertyCard({
           <span className="bg-site-primary text-site-on-primary absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase">
             {operationLabel(property.operation)}
           </span>
-          <span className="bg-site-bg/90 absolute right-0 bottom-0 px-4 py-2 text-lg font-semibold">
-            {formatPrice(property.price, property.currency)}
-          </span>
+          {hasPrice(property.price) ? (
+            <span className="bg-site-bg/90 absolute right-0 bottom-0 px-4 py-2 text-lg font-semibold">
+              {formatPrice(property.price, property.currency)}
+            </span>
+          ) : (
+            <span className="bg-site-bg/90 text-site-muted absolute right-0 bottom-0 px-3 py-1.5 text-sm">
+              {CONSULT_PRICE_LABEL}
+            </span>
+          )}
         </div>
         <div className="space-y-2 p-4">
           <h3 className="text-lg leading-snug font-semibold">

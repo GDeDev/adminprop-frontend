@@ -1,7 +1,12 @@
 import type { PublicPropertySummary } from "@adminprop/shared-types"
 
 import { CoverImage, Facts, placeOf } from "@/components/property-bits"
-import { formatPrice, operationLabel } from "@/lib/format"
+import {
+  CONSULT_PRICE_LABEL,
+  formatPrice,
+  hasPrice,
+  operationLabel,
+} from "@/lib/format"
 import { hrefFor } from "@/lib/site-route"
 
 import type { SiteProps } from "../types"
@@ -29,9 +34,13 @@ export function ModernPropertyCard({
           </span>
         </div>
         <div className="flex flex-1 flex-col gap-1 pt-4">
-          <p className="text-2xl font-semibold tracking-tight">
-            {formatPrice(property.price, property.currency)}
-          </p>
+          {hasPrice(property.price) ? (
+            <p className="text-2xl font-semibold tracking-tight">
+              {formatPrice(property.price, property.currency)}
+            </p>
+          ) : (
+            <p className="text-site-muted text-base">{CONSULT_PRICE_LABEL}</p>
+          )}
           <h3 className="text-lg leading-snug font-medium">{property.title}</h3>
           <p className="text-site-muted">{placeOf(property)}</p>
           <Facts property={property} className="text-site-muted mt-2" />

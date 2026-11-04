@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react"
 import { useState } from "react"
 
 import { cn } from "@/lib/cn"
@@ -26,11 +26,14 @@ export function Gallery({
         role="img"
         aria-label={`${title}: sin fotos todavía`}
         className={cn(
-          "bg-site-surface text-site-muted flex aspect-[16/9] w-full items-center justify-center",
+          // Una franja baja: sin fotos no hay nada que mostrar y un bloque de
+          // 16:9 a todo el ancho (más de 700 px en escritorio) empujaba los datos.
+          "bg-site-surface text-site-muted flex h-36 w-full items-center justify-center gap-3 sm:h-44",
           className
         )}
       >
-        Esta propiedad todavía no tiene fotos
+        <ImageOff aria-hidden className="size-6 shrink-0" />
+        <span>Esta propiedad todavía no tiene fotos</span>
       </div>
     )
   }

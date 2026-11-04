@@ -1,5 +1,13 @@
 import type { PublicPropertySummary } from "@adminprop/shared-types"
 
+/** ¿La propiedad tiene un precio publicado? Sin precio no se muestra como un monto. */
+export function hasPrice(price: string | null): boolean {
+  return price !== null && Number.isFinite(Number(price))
+}
+
+/** Texto del precio que NO es un título: se usa cuando falta ("Precio a consultar"). */
+export const CONSULT_PRICE_LABEL = "Precio a consultar"
+
 /** "150000.00" + "USD" → "US$ 150.000". Sin precio es "Consultar". */
 export function formatPrice(
   price: string | null,
