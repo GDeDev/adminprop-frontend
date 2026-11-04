@@ -3343,6 +3343,241 @@ export interface paths {
     patch: operations["InquiriesController_updateStatus_api/v1"]
     trace?: never
   }
+  "/api/v1/site/templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Templates disponibles, con su tema por defecto */
+    get: operations["SiteController_templates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Configuración del sitio
+     * @description La primera vez la crea con el template CLASSIC y los datos de la inmobiliaria, deshabilitada.
+     */
+    get: operations["SiteController_settings_api/v1"]
+    /**
+     * Guardar el borrador (parcial)
+     * @description Cambia el borrador, no el sitio publicado. `subdomain` y `customDomain` se aplican al instante.
+     */
+    put: operations["SiteController_update_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/settings/reset-template": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Restaurar el tema (y opcionalmente el contenido) del template */
+    post: operations["SiteController_reset_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/publish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Publicar
+     * @description Valida el borrador completo, lo copia a lo publicado y prende el sitio.
+     */
+    post: operations["SiteController_publish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/unpublish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Despublicar
+     * @description El sitio pasa a 404. No se pierde nada de lo configurado.
+     */
+    post: operations["SiteController_unpublish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/assets": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Subir una imagen
+     * @description JPG, PNG o WebP de hasta 5 MB, validada por contenido. No se admite SVG.
+     */
+    post: operations["SiteController_upload_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/preview-token": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Token de vista previa
+     * @description JWT de 15 minutos que abre el borrador en el sitio con `?preview=<token>`.
+     */
+    get: operations["SiteController_previewToken_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/domain": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado del dominio propio
+     * @description Si está verificado y, si no, el registro TXT que hay que cargar en el DNS para demostrar que es tuyo.
+     */
+    get: operations["SiteController_domain_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/domain/verify": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Verificar el dominio propio
+     * @description Busca el registro TXT en el DNS. Hasta que se verifica, el dominio está reservado pero no resuelve el sitio.
+     */
+    post: operations["SiteController_verifyDomain_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/subdomain-availability": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Verifica si un subdominio es válido y está libre */
+    get: operations["SiteController_subdomainAvailability_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/site-by-host": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Resuelve el slug a partir del host
+     * @description `<subdominio>.<SITES_BASE_DOMAIN>` o un dominio propio. Lo usa el middleware de apps/sites.
+     */
+    get: operations["PublicSiteController_byHost_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/site": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * El sitio publicado de una inmobiliaria
+     * @description Con `?preview=<token>` (de GET /site/preview-token) devuelve el borrador, sin caché.
+     */
+    get: operations["PublicSiteController_site_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/notifications": {
     parameters: {
       query?: never
@@ -4265,6 +4500,8 @@ export interface components {
       /** @enum {string} */
       listingCurrency: "ARS" | "USD"
       publicDescription: string | null
+      /** @enum {string} */
+      listingOperation: "SALE" | "RENT"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
@@ -4303,6 +4540,8 @@ export interface components {
       /** @enum {string} */
       listingCurrency: "ARS" | "USD"
       publicDescription: string | null
+      /** @enum {string} */
+      listingOperation: "SALE" | "RENT"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
@@ -4313,6 +4552,14 @@ export interface components {
       amenities: components["schemas"]["AmenityRefDto"][]
       notes: string | null
       photos: components["schemas"]["PropertyPhotoDto"][]
+      bedrooms: number | null
+      bathrooms: number | null
+      rooms: number | null
+      totalAreaM2: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
+      latitude: number | null
+      longitude: number | null
     }
     CreatePropertyDto: {
       /** @example Av. Corrientes 1234, 5° B */
@@ -4339,6 +4586,27 @@ export interface components {
       listingCurrency?: "ARS" | "USD"
       /** @description Texto que ve el público en el portal. */
       publicDescription?: string | null
+      /**
+       * @description Venta o alquiler. Por defecto, alquiler.
+       * @enum {string}
+       */
+      listingOperation?: "SALE" | "RENT"
+      /** @example 3 */
+      bedrooms?: number | null
+      /** @example 2 */
+      bathrooms?: number | null
+      /** @example 4 */
+      rooms?: number | null
+      /** @example 85.5 */
+      totalAreaM2?: number | null
+      /** @example 70 */
+      coveredAreaM2?: number | null
+      /** @example 12 */
+      ageYears?: number | null
+      /** @example -34.6037 */
+      latitude?: number | null
+      /** @example -58.3816 */
+      longitude?: number | null
     }
     UpdatePropertyDto: {
       /** @example Av. Corrientes 1234, 5° B */
@@ -4365,6 +4633,27 @@ export interface components {
       listingCurrency?: "ARS" | "USD"
       /** @description Texto que ve el público en el portal. */
       publicDescription?: string | null
+      /**
+       * @description Venta o alquiler. Por defecto, alquiler.
+       * @enum {string}
+       */
+      listingOperation?: "SALE" | "RENT"
+      /** @example 3 */
+      bedrooms?: number | null
+      /** @example 2 */
+      bathrooms?: number | null
+      /** @example 4 */
+      rooms?: number | null
+      /** @example 85.5 */
+      totalAreaM2?: number | null
+      /** @example 70 */
+      coveredAreaM2?: number | null
+      /** @example 12 */
+      ageYears?: number | null
+      /** @example -34.6037 */
+      latitude?: number | null
+      /** @example -58.3816 */
+      longitude?: number | null
     }
     ChangePropertyStatusDto: {
       /**
@@ -7166,7 +7455,13 @@ export interface components {
       neighborhood: string | null
       bedrooms: number | null
       bathrooms: number | null
+      /** @description Superficie total */
       areaM2: number | null
+      /** @enum {string} */
+      operation: "SALE" | "RENT"
+      rooms: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
       /**
        * @description Null = "Consultar"
        * @example 150000.00
@@ -7194,7 +7489,13 @@ export interface components {
       neighborhood: string | null
       bedrooms: number | null
       bathrooms: number | null
+      /** @description Superficie total */
       areaM2: number | null
+      /** @enum {string} */
+      operation: "SALE" | "RENT"
+      rooms: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
       /**
        * @description Null = "Consultar"
        * @example 150000.00
@@ -7254,6 +7555,242 @@ export interface components {
     UpdateInquiryStatusDto: {
       /** @enum {string} */
       status: "NEW" | "CONTACTED" | "CLOSED"
+    }
+    SiteThemeDto: {
+      /** @example #B6A28E */
+      primary: string
+      secondary: string
+      background: string
+      surface: string
+      text: string
+      /** @example system */
+      fontKey: string
+      /** @enum {number} */
+      radius: 0 | 8 | 16 | 24
+    }
+    SiteFontOptionDto: {
+      key: string
+      label: string
+    }
+    SiteTemplateInfoDto: {
+      /** @enum {string} */
+      key: "CLASSIC" | "MODERN"
+      name: string
+      description: string
+      previewImageUrl: string | null
+      defaultTheme: components["schemas"]["SiteThemeDto"]
+      supportedSections: (
+        | "hero"
+        | "steps"
+        | "featured"
+        | "metrics"
+        | "services"
+        | "testimonials"
+        | "faqs"
+        | "about"
+        | "contact"
+      )[]
+      fontOptions: components["schemas"]["SiteFontOptionDto"][]
+    }
+    SiteBrandDto: {
+      displayName: string
+      tagline: string | null
+      logoUrl: string | null
+      faviconUrl: string | null
+    }
+    SiteSocialDto: {
+      /** @enum {string} */
+      network:
+        "FACEBOOK" | "INSTAGRAM" | "LINKEDIN" | "YOUTUBE" | "TIKTOK" | "X"
+      url: string
+    }
+    SiteContactDto: {
+      address: string | null
+      hours: string | null
+      phone: string | null
+      /** @description Solo dígitos con código de país */
+      whatsapp: string | null
+      whatsappMessage: string | null
+      email: string | null
+      socials: components["schemas"]["SiteSocialDto"][]
+    }
+    SiteHeroDto: {
+      title: string
+      subtitle: string | null
+      ctaLabel: string | null
+      backgroundImageUrl: string | null
+      showSearch: boolean
+    }
+    SiteStepDto: {
+      title: string
+      description: string
+      /** @enum {string} */
+      icon:
+        | "search"
+        | "home"
+        | "key"
+        | "handshake"
+        | "file-text"
+        | "calendar"
+        | "phone"
+        | "map-pin"
+        | "shield"
+        | "star"
+        | "camera"
+        | "smile"
+    }
+    SiteFeaturedDto: {
+      title: string
+      subtitle: string | null
+      count: number
+      /** @enum {string} */
+      mode: "LATEST" | "MANUAL"
+      propertyIds: string[]
+    }
+    SiteMetricDto: {
+      value: string
+      label: string
+    }
+    SiteServiceDto: {
+      title: string
+      description: string
+      imageUrl: string | null
+    }
+    SiteTestimonialDto: {
+      name: string
+      text: string
+      role: string | null
+      photoUrl: string | null
+    }
+    SiteFaqDto: {
+      question: string
+      answer: string
+    }
+    SiteAboutDto: {
+      title: string
+      body: string | null
+      imageUrl: string | null
+    }
+    SiteSeoDto: {
+      title: string
+      description: string
+      ogImageUrl: string | null
+    }
+    SiteSectionDto: {
+      /** @enum {string} */
+      key:
+        | "hero"
+        | "steps"
+        | "featured"
+        | "metrics"
+        | "services"
+        | "testimonials"
+        | "faqs"
+        | "about"
+        | "contact"
+      visible: boolean
+    }
+    SiteContentDto: {
+      brand: components["schemas"]["SiteBrandDto"]
+      contact: components["schemas"]["SiteContactDto"]
+      hero: components["schemas"]["SiteHeroDto"]
+      steps: components["schemas"]["SiteStepDto"][]
+      featured: components["schemas"]["SiteFeaturedDto"]
+      metrics: components["schemas"]["SiteMetricDto"][]
+      services: components["schemas"]["SiteServiceDto"][]
+      testimonials: components["schemas"]["SiteTestimonialDto"][]
+      faqs: components["schemas"]["SiteFaqDto"][]
+      about: components["schemas"]["SiteAboutDto"]
+      seo: components["schemas"]["SiteSeoDto"]
+      sections: components["schemas"]["SiteSectionDto"][]
+    }
+    SiteSettingsDraftDto: {
+      /** @enum {string} */
+      template: "CLASSIC" | "MODERN"
+      theme: components["schemas"]["SiteThemeDto"]
+      content: components["schemas"]["SiteContentDto"]
+    }
+    SiteSettingsDto: {
+      enabled: boolean
+      subdomain: string | null
+      customDomain: string | null
+      draft: components["schemas"]["SiteSettingsDraftDto"]
+      /** @description null = nunca publicado */
+      publishedAt: string | null
+      /** @description El borrador difiere de lo publicado (o nunca se publicó) */
+      hasUnpublishedChanges: boolean
+      publicUrl: string | null
+    }
+    UpdateSiteSettingsDto: {
+      /** @enum {string} */
+      template?: "CLASSIC" | "MODERN"
+      /** @description Parcial: solo los campos que se mandan cambian. */
+      theme?: components["schemas"]["SiteThemeDto"]
+      /** @description Parcial por bloque: cada bloque que se manda (brand, hero, steps…) reemplaza al anterior entero. */
+      content?: components["schemas"]["SiteContentDto"]
+      /**
+       * @description Único en todo el sistema. `null` lo quita. Se aplica al instante.
+       * @example mi-inmobiliaria
+       */
+      subdomain?: string | null
+      /**
+       * @description Dominio propio, sin https://. Hay que apuntar el DNS a mano. `null` lo quita.
+       * @example www.mi-inmobiliaria.com.ar
+       */
+      customDomain?: string | null
+    }
+    ResetSiteTemplateDto: {
+      /** @description true: conserva textos e imágenes y restaura solo el tema. */
+      keepContent: boolean
+    }
+    SiteAssetDto: {
+      id: string
+      url: string
+      width: number | null
+      height: number | null
+    }
+    SitePreviewTokenDto: {
+      /** @description JWT corto; se manda como ?preview= al sitio */
+      token: string
+      expiresAt: string
+    }
+    DomainRecordDto: {
+      /** @enum {string} */
+      type: "TXT"
+      /** @example _adminprop-verify.www.mi-inmobiliaria.com.ar */
+      host: string
+      /** @example adminprop-verify=0123456789abcdef0123456789abcdef */
+      value: string
+    }
+    SiteDomainDto: {
+      customDomain: string | null
+      /** @description Solo un dominio verificado resuelve el sitio */
+      verified: boolean
+      verifiedAt: string | null
+      /** @description false en desarrollo: el dominio se activa al cargarlo */
+      verificationRequired: boolean
+      record: components["schemas"]["DomainRecordDto"] | null
+    }
+    SubdomainAvailabilityDto: {
+      value: string
+      available: boolean
+      reason: string | null
+    }
+    SiteHostDto: {
+      slug: string
+    }
+    PublicSiteTenantDto: {
+      slug: string
+      name: string
+      logoUrl: string | null
+    }
+    PublicSiteDto: {
+      /** @enum {string} */
+      template: "CLASSIC" | "MODERN"
+      theme: components["schemas"]["SiteThemeDto"]
+      content: components["schemas"]["SiteContentDto"]
+      tenant: components["schemas"]["PublicSiteTenantDto"]
+      publishedAt: string
     }
     NotificationLogItemDto: {
       id: string
@@ -16462,6 +16999,14 @@ export interface operations {
         priceTo?: string
         /** @description Moneda del rango; por defecto, la de la inmobiliaria */
         currency?: "ARS" | "USD"
+        /** @description Venta (SALE) o alquiler (RENT) */
+        operation?: "SALE" | "RENT"
+        /** @description Dormitorios: este número o más */
+        bedrooms?: number
+        /** @description Baños: este número o más */
+        bathrooms?: number
+        /** @description Sólo estas propiedades (hasta 12, separadas por coma). Las no disponibles no vuelven. Lo usa el sitio web para las destacadas a mano. */
+        ids?: string[]
       }
       header?: never
       path: {
@@ -16715,6 +17260,447 @@ export interface operations {
           "application/json": components["schemas"]["ApiErrorDto"]
         }
       }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_templates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteTemplateInfoDto"][]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSiteSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description SUBDOMAIN_TAKEN o DOMAIN_TAKEN */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Errores por campo en `errors` */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_reset_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetSiteTemplateDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_publish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El borrador está incompleto o inválido */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_unpublish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_upload_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteAssetDto"]
+        }
+      }
+      /** @description No es una imagen válida o pesa más de 5 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_previewToken_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SitePreviewTokenDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_domain_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteDomainDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_verifyDomain_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description DOMAIN_TAKEN: otra inmobiliaria lo verificó primero */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description DOMAIN_NOT_VERIFIED o NO_CUSTOM_DOMAIN */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_subdomainAvailability_api/v1": {
+    parameters: {
+      query: {
+        value: unknown
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SubdomainAvailabilityDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicSiteController_byHost_api/v1": {
+    parameters: {
+      query: {
+        host: unknown
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteHostDto"]
+        }
+      }
+      /** @description SITE_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicSiteController_site_api/v1": {
+    parameters: {
+      query?: {
+        preview?: unknown
+      }
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicSiteDto"]
+        }
+      }
+      /** @description SITE_NOT_FOUND: no existe, no está publicado o el token no corresponde */
       404: {
         headers: {
           [name: string]: unknown

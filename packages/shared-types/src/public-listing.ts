@@ -14,6 +14,11 @@ export interface PublicPropertySummary {
   currency: Currency | null
   coverPhotoUrl: string | null
   amenities: string[]
+  /** Sitio web (spec web-inmobiliaria 4.3): campos aditivos. `areaM2` es la superficie total. */
+  operation: "SALE" | "RENT"
+  rooms: number | null
+  coveredAreaM2: number | null
+  ageYears: number | null
 }
 
 export interface PublicPropertyDetail extends PublicPropertySummary {
@@ -21,6 +26,12 @@ export interface PublicPropertyDetail extends PublicPropertySummary {
   photos: { id: Uuid; url: string }[]
   location: string
   features: { label: string; value: string }[]
+  /**
+   * Coordenadas (sitio web v1.1, aditivo y opcional: el backend las expone
+   * cuando la propiedad las tiene). Habilitan el mapa de la ficha.
+   */
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export interface PublicFilters {
@@ -38,11 +49,21 @@ export interface PublicContactRequest {
   website: string
 }
 
+/** Orden del listado público (sitio web v1.1). Sin `sort` es `recent`. */
+export type PublicListingSort = "recent" | "price_asc" | "price_desc"
+
 export interface PublicListingQuery {
   locationId?: string
   propertyTypeId?: string
   priceFrom?: string
   priceTo?: string
   currency?: Currency
+  /** Sitio web: venta o alquiler, mínimos de dormitorios y baños, y selección por ids. */
+  operation?: "SALE" | "RENT"
+  bedrooms?: number
+  bathrooms?: number
+  ids?: string[]
+  /** `recent` (por defecto): publicadas primero las más nuevas; precio ascendente o descendente. */
+  sort?: PublicListingSort
   page?: number
 }
