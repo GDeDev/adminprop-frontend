@@ -1,3 +1,5 @@
+import type { ApiSchemas } from "./api"
+
 /** UUID v4 como string. */
 export type Uuid = string
 
@@ -28,16 +30,15 @@ export interface Timestamps {
 }
 
 /** Detalle de un error puntual (por campo, en los de validación). */
-export interface ApiErrorDetail {
-  message: string
-  /** Regla que falló (ej. "isEmail"). */
-  code?: string
-  field?: string
-}
+export type ApiErrorDetail = ApiSchemas["ApiErrorDetailDto"]
 
 /**
  * Cuerpo de error de la API (adminprop-backend, `buildErrorBody`).
  * Ramificar por `code` (estable), nunca por `message` (texto para mostrar).
+ *
+ * Sigue escrito a mano: el OpenAPI cierra `code` en el catálogo de errores de
+ * infraestructura y no incluye los códigos de dominio (`CONTRACT_...`), y no
+ * puede expresar `success: false` (ver `docs/tecnica/shared-types-generados.md`).
  */
 export interface ApiError {
   success: false

@@ -243,7 +243,7 @@ function StepsBlock({ value, set }: BlockProps<"steps">) {
       itemLabel="Paso"
       addLabel="Agregar paso"
       emptyText="Sin pasos: la sección no se muestra."
-      makeItem={() => ({ title: "", description: "", icon: "search" })}
+      makeItem={() => ({ title: "", description: "", icon: "search" as const })}
       onChange={set}
       renderItem={(item, index, update) => (
         <FieldGroup>

@@ -1,3 +1,4 @@
+import type { ApiSchemas } from "./api"
 import type { SiteContent, SiteTemplateKey, SiteTheme } from "./site"
 
 /**
@@ -5,7 +6,13 @@ import type { SiteContent, SiteTemplateKey, SiteTheme } from "./site"
  * `docs/tecnica/web-inmobiliaria.md` del frontend, "Desvíos y ampliaciones").
  */
 
-/** Body de `PUT /site/settings`: parcial. `null` en un dominio lo quita. */
+/**
+ * Body de `PUT /site/settings`: parcial. `null` en un dominio lo quita.
+ *
+ * Sigue escrito a mano: el OpenAPI declara `theme` y `content` con todos sus
+ * campos requeridos, pero el endpoint acepta parciales (ver
+ * `docs/tecnica/shared-types-generados.md`).
+ */
 export interface UpdateSiteSettingsRequest {
   template?: SiteTemplateKey
   /** Parcial: solo cambian los campos que se mandan. */
@@ -16,44 +23,23 @@ export interface UpdateSiteSettingsRequest {
   customDomain?: string | null
 }
 
-export interface ResetSiteTemplateRequest {
-  keepContent: boolean
-}
+export type ResetSiteTemplateRequest = ApiSchemas["ResetSiteTemplateDto"]
 
 /** `GET /site/preview-token`. */
-export interface SitePreviewToken {
-  token: string
-  expiresAt: string
-}
+export type SitePreviewToken = ApiSchemas["SitePreviewTokenDto"]
 
 /** `GET /site/subdomain-availability?value=`. */
-export interface SubdomainAvailability {
-  value: string
-  available: boolean
-  reason: string | null
-}
+export type SubdomainAvailability = ApiSchemas["SubdomainAvailabilityDto"]
 
 /** `GET /public/site-by-host?host=`. */
-export interface SiteHost {
-  slug: string
-}
+export type SiteHost = ApiSchemas["SiteHostDto"]
 
 /** Registro DNS que prueba que un dominio propio es de la inmobiliaria. */
-export interface SiteDomainRecord {
-  type: "TXT"
-  host: string
-  value: string
-}
+export type SiteDomainRecord = ApiSchemas["DomainRecordDto"]
 
 /**
  * `GET /site/domain`. Solo un dominio verificado resuelve el sitio; hasta
  * entonces está reservado pero inactivo. Con `verificationRequired: false`
  * (desarrollo) se activa al cargarlo.
  */
-export interface SiteDomain {
-  customDomain: string | null
-  verified: boolean
-  verifiedAt: string | null
-  verificationRequired: boolean
-  record: SiteDomainRecord | null
-}
+export type SiteDomain = ApiSchemas["SiteDomainDto"]

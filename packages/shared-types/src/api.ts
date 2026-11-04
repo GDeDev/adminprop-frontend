@@ -30,11 +30,3 @@ export interface Paginated<T> {
   data: T[]
   pagination: PaginationMeta
 }
-
-// ---------------------------------------------------------------- Sitio web
-// Los tipos de `site.ts` son el contrato de la spec; estos alias son los que
-// genera el OpenAPI de la API. `site.contract.ts` verifica que coincidan.
-export type SiteSettingsSchema = ApiSchemas["SiteSettingsDto"]
-export type SiteTemplateInfoSchema = ApiSchemas["SiteTemplateInfoDto"]
-export type PublicSiteSchema = ApiSchemas["PublicSiteDto"]
-export type SiteAssetSchema = ApiSchemas["SiteAssetDto"]

@@ -1,47 +1,19 @@
-import type { IsoDateTime, Uuid } from "./common"
+import type { ApiSchemas } from "./api"
 
 /** Documentos PDF generados por la API (rediseño Fase 15, sección 7). */
-export type DocumentKind =
-  "SETTLEMENT" | "OWNER_STATEMENT" | "PAYMENT_RECEIPT" | "TERMINATION_NOTICE"
-
-export type DocumentStatus = "PENDING" | "READY" | "FAILED"
-
-export interface GeneratedDocument {
-  id: Uuid
-  kind: DocumentKind
-  entityId: Uuid
-  version: number
-  status: DocumentStatus
-  url: string | null
-  sizeBytes: number | null
-  error: string | null
-  generatedAt: IsoDateTime | null
-  requestedBy: { id: Uuid; fullName: string } | null
-  createdAt: IsoDateTime
-}
+export type GeneratedDocument = ApiSchemas["GeneratedDocumentDto"]
+export type DocumentKind = GeneratedDocument["kind"]
+export type DocumentStatus = GeneratedDocument["status"]
 
 /** `GET /tenants/current/settings` (admin). */
-export interface TenantSettings {
-  id: Uuid
-  name: string
-  slug: string
-  logoUrl: string | null
-  primaryColor: string | null
-  legalName: string | null
-  taxId: string | null
-  address: string | null
-  phone: string | null
-  email: string | null
-  whatsapp: string | null
-  bankAccountHolder: string | null
-  bankName: string | null
-  bankCbu: string | null
-  bankAlias: string | null
-  documentFooter: string | null
-  receiptSequence: number
-}
+export type TenantSettings = ApiSchemas["TenantSettingsDto"]
 
-/** Todos opcionales; `null` borra el valor. */
+/**
+ * Todos opcionales; `null` borra el valor.
+ *
+ * Sigue escrito a mano: el backoffice manda `name` y el `UpdateTenantSettingsDto`
+ * del OpenAPI no lo declara (ver `docs/tecnica/shared-types-generados.md`).
+ */
 export type UpdateTenantSettingsRequest = Partial<
   Omit<TenantSettings, "id" | "slug" | "logoUrl" | "receiptSequence">
 >

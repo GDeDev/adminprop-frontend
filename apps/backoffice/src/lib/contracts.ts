@@ -85,26 +85,8 @@ export function usesIndex(type: RentUpdateType): boolean {
   return type === "ICL" || type === "IPC"
 }
 
-/**
- * Monto de la API (string decimal) formateado para mostrar. Sólo formato:
- * la aritmética la hace la API (DT-11). Si no parece un número, se muestra
- * tal cual.
- */
-export function formatMoney(amount: string, currency: Currency): string {
-  const value = Number(amount)
-  if (amount.trim() === "" || Number.isNaN(value)) return amount
-  return (
-    new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency,
-      currencyDisplay: "symbol",
-    })
-      .format(value)
-      // Intl separa símbolo y número con un espacio duro; uno común se lee
-      // igual y los textos se buscan sin sorpresas.
-      .replace(/\s/g, " ")
-  )
-}
+/** Una sola implementación en `@adminprop/ui`; se re-exporta para no tocar los imports. */
+export { formatMoney } from "@adminprop/ui/lib/format-money"
 
 /** "150.333,33" o "150333.33" → "150333.33" para mandar a la API; null si no es un monto. */
 export function normalizeAmount(input: string): string | null {
