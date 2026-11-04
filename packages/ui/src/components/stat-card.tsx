@@ -75,10 +75,17 @@ function StatCard({
           )
         )}
       </div>
-      <p className="font-display num text-title-lg font-semibold whitespace-nowrap @[17rem]:text-display-md">
-        {/* Lo que lee un lector de pantalla es el valor final, no el animado. */}
-        <span aria-hidden>{shown}</span>
-        <span className="sr-only">{value}</span>
+      <p className="font-display num text-title-lg font-semibold text-balance @[17rem]:text-display-md">
+        {shown === value ? (
+          value
+        ) : (
+          <>
+            {/* Mientras corre la animación, un lector de pantalla lee el
+                valor final y no el intermedio. */}
+            <span aria-hidden>{shown}</span>
+            <span className="sr-only">{value}</span>
+          </>
+        )}
       </p>
       {(delta || hint) && (
         <div className="flex items-center gap-2 text-caption text-muted-foreground">
