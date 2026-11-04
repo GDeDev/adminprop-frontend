@@ -4,7 +4,8 @@ import Link from "next/link"
 
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 
-import { conversionLabel } from "@/lib/crm"
+import { CountBars } from "@/components/charts/count-bars"
+import { SOURCE_LABELS, STAGES, STAGE_LABELS, conversionLabel } from "@/lib/crm"
 import { useCrmOverview } from "@/lib/crm-api"
 
 function Figure({ label, value }: { label: string; value: string }) {
@@ -42,6 +43,33 @@ export function CrmOverview() {
           value={conversionLabel(data.conversionRate)}
         />
       </div>
+      <details className="rounded-xl border bg-card p-3 text-sm">
+        <summary className="min-h-11 cursor-pointer py-2 font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:min-h-0 md:py-0">
+          Embudo y orígenes
+        </summary>
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
+          <CountBars
+            title="Consultas por etapa"
+            items={STAGES.map((stage) => ({
+              key: stage,
+              label: STAGE_LABELS[stage],
+              value: data.byStage[stage] ?? 0,
+            }))}
+          />
+          <CountBars
+            title="Consultas por origen"
+            items={(
+              Object.keys(SOURCE_LABELS) as (keyof typeof SOURCE_LABELS)[]
+            )
+              .map((source) => ({
+                key: source,
+                label: SOURCE_LABELS[source],
+                value: data.bySource[source] ?? 0,
+              }))
+              .filter((item) => item.value > 0)}
+          />
+        </div>
+      </details>
       {data.topProperties.length > 0 && (
         <details className="rounded-xl border bg-card p-3 text-sm">
           <summary className="cursor-pointer font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
