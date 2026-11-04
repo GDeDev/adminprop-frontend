@@ -27,6 +27,7 @@ export async function GET(
     { path: "", lastmod: published },
     { path: "/propiedades" },
     { path: "/contacto", lastmod: published },
+    { path: "/tasacion", lastmod: published },
   ]
   if (site.content.sections.some((s) => s.key === "about" && s.visible)) {
     urls.push({ path: "/nosotros", lastmod: published })

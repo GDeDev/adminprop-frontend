@@ -2,11 +2,13 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { ListingFilters } from "@/components/listing-filters"
+import { SortLinks } from "@/components/sort-links"
 import { getFilters, getProperties } from "@/lib/api"
 import {
   listingSearch,
   pageWindow,
   parseListingQuery,
+  withSortCurrency,
 } from "@/lib/listing-query"
 import { loadSite } from "@/lib/load-site"
 import { isFilteredListing, pageSeo } from "@/lib/seo"
@@ -50,12 +52,15 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
   const { site, route } = loaded
   const kit = templateKit(site.template)
   const query = parseListingQuery(await searchParams)
+  // Ordenar por precio exige una moneda (el backend no mezcla ARS y USD).
+  const { query: apiQuery, defaulted: currencyDefaulted } =
+    withSortCurrency(query)
 
   // Un rango de precio sin moneda se compara en la de la inmobiliaria (lo
   // resuelve la API); acá solo se pasan los filtros.
   // Si la API falla, el listado muestra su propio aviso en vez de la página de error.
   const [result, filters] = await Promise.all([
-    getProperties(route, query).catch(() => null),
+    getProperties(route, apiQuery).catch(() => null),
     getFilters(route).catch(() => null),
   ])
 
@@ -112,11 +117,20 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
           </div>
         ) : (
           <>
-            <p className="text-site-muted mb-6" aria-live="polite">
-              {pagination?.total === 1
-                ? "1 propiedad"
-                : `${pagination?.total ?? properties.length} propiedades`}
-            </p>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-site-muted" aria-live="polite">
+                {pagination?.total === 1
+                  ? "1 propiedad"
+                  : `${pagination?.total ?? properties.length} propiedades`}
+              </p>
+              <SortLinks route={route} query={query} />
+            </div>
+            {currencyDefaulted && (
+              <p className="text-site-muted mb-6 text-sm">
+                Ordenado por precio en pesos. Para ver los precios en dólares,
+                elegí «Dólares» en «Moneda del precio» y buscá.
+              </p>
+            )}
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {properties.map((property, i) => (
                 <li key={property.id}>

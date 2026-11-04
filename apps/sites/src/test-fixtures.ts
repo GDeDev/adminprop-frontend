@@ -37,7 +37,7 @@ export const FILTERS: PublicFilters = {
 }
 
 export function makeSite(
-  template: "CLASSIC" | "MODERN" = "CLASSIC"
+  template: "CLASSIC" | "MODERN" | "LUXURY" = "CLASSIC"
 ): PublicSite {
   return {
     template,

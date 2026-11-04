@@ -39,9 +39,38 @@ export function parseListingQuery(params: RawParams): ListingQuery {
   if (Number.isInteger(bedrooms) && bedrooms >= 1 && bedrooms <= 20) {
     query.bedrooms = bedrooms
   }
+  // `recent` es el orden por defecto: no se guarda en la query (URLs limpias y
+  // un backend sin `sort` sigue funcionando para el caso común).
+  const sort = first(params.sort)
+  if (sort === "price_asc" || sort === "price_desc") query.sort = sort
   const page = Number(first(params.page))
   if (Number.isInteger(page) && page >= 1 && page <= 1000) query.page = page
   return query
+}
+
+/**
+ * Moneda con la que se ordena por precio cuando la persona no eligió una.
+ * El backend pide `currency` junto con `sort=price_*` para no mezclar pesos y
+ * dólares en el mismo orden; el sitio no conoce la moneda de la inmobiliaria,
+ * así que parte de pesos (la persona puede cambiarla en «Moneda del precio»).
+ */
+export const DEFAULT_SORT_CURRENCY = "ARS" as const
+
+/**
+ * La query que se manda a la API: con orden por precio y sin moneda elegida,
+ * agrega la de respaldo. `defaulted` avisa para decirlo en pantalla.
+ */
+export function withSortCurrency(query: ListingQuery): {
+  query: ListingQuery
+  defaulted: boolean
+} {
+  if (query.sort && !query.currency) {
+    return {
+      query: { ...query, currency: DEFAULT_SORT_CURRENCY },
+      defaulted: true,
+    }
+  }
+  return { query, defaulted: false }
 }
 
 /** Los filtros como `?a=1&b=2` (sin la página, que se agrega aparte). */
@@ -58,6 +87,7 @@ export function listingSearch(
     ["priceTo", query.priceTo],
     ["currency", query.currency],
     ["bedrooms", query.bedrooms],
+    ["sort", query.sort],
     ["page", extra.page && extra.page > 1 ? extra.page : undefined],
   ]
   for (const [key, value] of entries) {
@@ -66,6 +96,16 @@ export function listingSearch(
   const text = search.toString()
   return text ? `?${text}` : ""
 }
+
+/** Opciones de orden del listado, en el orden en que se muestran. */
+export const SORT_OPTIONS: {
+  value: "recent" | "price_asc" | "price_desc"
+  label: string
+}[] = [
+  { value: "recent", label: "Más recientes" },
+  { value: "price_asc", label: "Menor precio" },
+  { value: "price_desc", label: "Mayor precio" },
+]
 
 /**
  * Páginas a mostrar en la paginación: siempre la primera y la última, la actual

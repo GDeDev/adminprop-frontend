@@ -1,5 +1,6 @@
 import type { PublicPropertySummary } from "@adminprop/shared-types"
 
+import { FavoriteButton } from "@/components/favorite-button"
 import { CoverImage, Facts, placeOf } from "@/components/property-bits"
 import {
   CONSULT_PRICE_LABEL,
@@ -18,7 +19,7 @@ export function ClassicPropertyCard({
   priority,
 }: SiteProps & { property: PublicPropertySummary; priority?: boolean }) {
   return (
-    <article className="group rounded-site border-site-border bg-site-surface overflow-hidden border">
+    <article className="group rounded-site border-site-border bg-site-surface relative overflow-hidden border">
       <a href={hrefFor(route, `/propiedades/${property.id}`)} className="block">
         <div className="relative aspect-[4/3] overflow-hidden">
           <CoverImage
@@ -47,6 +48,12 @@ export function ClassicPropertyCard({
           <Facts property={property} className="text-site-muted pt-1" />
         </div>
       </a>
+      <FavoriteButton
+        slug={route.slug}
+        propertyId={property.id}
+        title={property.title}
+        className="absolute top-3 right-3 z-10"
+      />
     </article>
   )
 }

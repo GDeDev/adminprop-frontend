@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { listingSearch, pageWindow, parseListingQuery } from "./listing-query"
+import {
+  listingSearch,
+  pageWindow,
+  parseListingQuery,
+  withSortCurrency,
+} from "./listing-query"
 
 const ID = "11111111-1111-4111-8111-111111111111"
 
@@ -42,6 +47,36 @@ describe("listing query", () => {
       })
     ).toEqual({ page: 2 })
     expect(parseListingQuery({})).toEqual({})
+  })
+
+  it("lee el orden: recent es el default y no viaja, lo inválido se ignora", () => {
+    expect(parseListingQuery({ sort: "price_asc" })).toEqual({
+      sort: "price_asc",
+    })
+    expect(parseListingQuery({ sort: "price_desc" })).toEqual({
+      sort: "price_desc",
+    })
+    expect(parseListingQuery({ sort: "recent" })).toEqual({})
+    expect(parseListingQuery({ sort: "id; drop table" })).toEqual({})
+    expect(listingSearch({ operation: "SALE", sort: "price_desc" })).toBe(
+      "?operation=SALE&sort=price_desc"
+    )
+  })
+
+  it("al ordenar por precio manda siempre una moneda (la elegida o pesos)", () => {
+    expect(withSortCurrency({ sort: "price_asc" })).toEqual({
+      query: { sort: "price_asc", currency: "ARS" },
+      defaulted: true,
+    })
+    expect(withSortCurrency({ sort: "price_desc", currency: "USD" })).toEqual({
+      query: { sort: "price_desc", currency: "USD" },
+      defaulted: false,
+    })
+    // Sin orden por precio no se inventa ninguna moneda.
+    expect(withSortCurrency({ operation: "SALE" })).toEqual({
+      query: { operation: "SALE" },
+      defaulted: false,
+    })
   })
 
   it("arma la URL de nuevo, sin la página 1", () => {

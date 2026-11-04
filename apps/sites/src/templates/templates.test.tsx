@@ -5,7 +5,7 @@ import { FILTERS, makeSite, PROPERTY, ROUTE } from "@/test-fixtures"
 
 import { templateKit } from "."
 
-const KEYS = ["CLASSIC", "MODERN"] as const
+const KEYS = ["CLASSIC", "MODERN", "LUXURY"] as const
 const SECTION_KEYS = [
   "hero",
   "steps",
@@ -182,5 +182,48 @@ describe.each(KEYS)("template %s", (key) => {
     )
     rerender(<kit.Header site={hidden} route={ROUTE} />)
     expect(screen.queryByRole("link", { name: "Nosotros" })).toBeNull()
+  })
+})
+
+describe("template LUXURY", () => {
+  it("se resuelve por la clave en mayúscula o minúscula, y una desconocida cae en CLASSIC", () => {
+    expect(templateKit("LUXURY")).toBe(templateKit("luxury"))
+    expect(templateKit("LUXURY")).not.toBe(templateKit("CLASSIC"))
+    expect(templateKit("OTRO")).toBe(templateKit("CLASSIC"))
+  })
+
+  it("los títulos usan la serif del sistema (sin descargar fuentes)", () => {
+    const kit = templateKit("LUXURY")
+    const Hero = kit.sections.hero
+    render(
+      <Hero
+        site={makeSite("LUXURY")}
+        route={ROUTE}
+        featured={[]}
+        filters={FILTERS}
+      />
+    )
+    expect(screen.getByRole("heading", { level: 1 }).className).toContain(
+      "font-site-display"
+    )
+  })
+
+  it("cada tarjeta de cada template lleva el botón de favoritos", () => {
+    for (const key of KEYS) {
+      const kit = templateKit(key)
+      const { unmount } = render(
+        <kit.PropertyCard
+          site={makeSite(key)}
+          route={ROUTE}
+          property={PROPERTY}
+        />
+      )
+      expect(
+        screen.getByRole("button", {
+          name: /guardar calle 7 1234 en favoritos/i,
+        })
+      ).toBeInTheDocument()
+      unmount()
+    }
   })
 })

@@ -3,6 +3,7 @@ import "server-only"
 import type {
   ApiSuccess,
   Paginated,
+  PublicListingSort,
   PublicFilters,
   PublicPropertyDetail,
   PublicPropertySummary,
@@ -111,6 +112,8 @@ export interface ListingQuery {
   priceTo?: string
   currency?: "ARS" | "USD"
   bedrooms?: number
+  /** Solo viaja si no es el orden por defecto (`recent`). */
+  sort?: Exclude<PublicListingSort, "recent">
   page?: number
   limit?: number
   ids?: string[]

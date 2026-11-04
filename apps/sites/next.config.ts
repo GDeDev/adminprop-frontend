@@ -40,6 +40,9 @@ function csp(frameAncestors: string): string {
     `img-src 'self' https: data: blob:${extraImageSources ? ` ${extraImageSources}` : ""}`,
     "font-src 'self' data:",
     "connect-src 'self'",
+    // Solo el mapa embebido de la ficha (OpenStreetMap, sin API key). Es la
+    // única excepción: ningún otro origen puede abrirse en un iframe.
+    "frame-src https://www.openstreetmap.org",
     "form-action 'self'",
     "base-uri 'none'",
     "object-src 'none'",
