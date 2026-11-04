@@ -1,7 +1,8 @@
 import { type NextRequest } from "next/server"
 
-import { absoluteBase, escapeXml } from "@/lib/absolute-url"
+import { absoluteBase } from "@/lib/absolute-url"
 import { getProperties, getSite } from "@/lib/api"
+import { buildSitemap, type SitemapEntry } from "@/lib/sitemap"
 import { decodeSiteRoute } from "@/lib/site-route"
 
 const MAX_PAGES = 10
@@ -18,9 +19,17 @@ export async function GET(
   if (!site) return new Response("Not found", { status: 404 })
 
   const base = absoluteBase(request, route)
-  const urls = ["", "/propiedades", "/contacto"]
+  // `lastmod` solo donde hay una fecha real: las páginas del sitio cambian al
+  // publicar. Las fichas no llevan: la API pública no expone cuándo cambió cada
+  // propiedad, y una fecha inventada es peor que ninguna.
+  const published = site.publishedAt
+  const urls: SitemapEntry[] = [
+    { path: "", lastmod: published },
+    { path: "/propiedades" },
+    { path: "/contacto", lastmod: published },
+  ]
   if (site.content.sections.some((s) => s.key === "about" && s.visible)) {
-    urls.push("/nosotros")
+    urls.push({ path: "/nosotros", lastmod: published })
   }
 
   // Primera página para saber cuántas hay; el resto se pide en paralelo.
@@ -35,14 +44,12 @@ export async function GET(
     )
     for (const result of [first, ...(await Promise.all(rest))]) {
       for (const property of result?.data ?? []) {
-        urls.push(`/propiedades/${property.id}`)
+        urls.push({ path: `/propiedades/${property.id}` })
       }
     }
   }
 
-  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
-    .map((path) => `  <url><loc>${escapeXml(base + path)}</loc></url>`)
-    .join("\n")}\n</urlset>\n`
+  const body = buildSitemap(base, urls)
   return new Response(body, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
