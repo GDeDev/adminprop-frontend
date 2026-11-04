@@ -1,0 +1,356 @@
+/* Adminprop v2 — tokens del sistema de diseño ("Cobre sobre tinta").
+   Tailwind v4 + shadcn/ui. Reemplaza a adminprop.css (v1), que queda intacto
+   para comparar: se elige cuál con UN import en globals.css.
+
+   Reglas que se mantienen de v1:
+   - Ningún componente escribe un color: todo sale de estas variables.
+   - El tema por inmobiliaria pisa solo --primary y --primary-foreground en el
+     elemento raíz. Todo lo derivado (glow, degradés, anillos) se calcula con
+     color-mix() sobre --primary, así sigue al tenant sin que nadie se entere.
+   - accent es la marca (cobre), no el hover: el hover es muted.
+
+   Lo nuevo: paleta en OKLCH, 4 niveles de elevación con sombras de varias
+   capas, tokens de movimiento y de IA (--ai*). Los pares texto/fondo se
+   verifican en test/contrast.test.ts (WCAG AA). */
+
+@import "tailwindcss";
+@import "./adminprop-v2-effects.css";
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+
+  /* Superficies */
+  --background: oklch(0.978 0.006 85);
+  --foreground: oklch(0.21 0.03 258);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --surface-sunken: oklch(0.955 0.008 85);
+
+  /* Marca: marino (cambia por inmobiliaria) y cobre (luz de la marca) */
+  --primary: oklch(0.34 0.085 258);
+  --primary-foreground: oklch(0.985 0.005 250);
+  --primary-soft: oklch(0.94 0.02 255);
+  --secondary: oklch(0.945 0.008 85);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.945 0.008 85);
+  --muted-foreground: oklch(0.47 0.02 258);
+  --accent: oklch(0.72 0.15 52);
+  --accent-foreground: oklch(0.22 0.04 50);
+  --accent-soft: oklch(0.95 0.035 60);
+
+  /* Estados */
+  --destructive: oklch(0.5 0.19 24);
+  --destructive-foreground: oklch(0.985 0.01 20);
+  --destructive-soft: oklch(0.95 0.03 20);
+  --success: oklch(0.48 0.12 160);
+  --success-foreground: oklch(1 0 0);
+  --success-soft: oklch(0.95 0.04 160);
+  --warning: oklch(0.5 0.11 70);
+  --warning-foreground: oklch(1 0 0);
+  --warning-soft: oklch(0.96 0.045 85);
+  --info: oklch(0.48 0.12 245);
+  --info-soft: oklch(0.95 0.025 245);
+
+  /* IA: lo generado o sugerido por el sistema (nunca decoración) */
+  --ai: oklch(0.48 0.2 285);
+  --ai-foreground: oklch(0.99 0 0);
+  --ai-soft: oklch(0.95 0.035 290);
+  --ai-from: oklch(0.58 0.21 280);
+  --ai-via: oklch(0.64 0.2 325);
+  --ai-to: oklch(0.74 0.15 55);
+
+  /* Líneas: translúcidas, se adaptan a la superficie que tengan debajo */
+  --border: oklch(0.21 0.03 258 / 0.1);
+  --input: oklch(0.21 0.03 258 / 0.18);
+  --ring: var(--primary);
+
+  /* Chrome oscuro (sidebar, bottom-nav): no es tema, es igual en claro y oscuro */
+  --sidebar: oklch(0.2 0.04 258);
+  --sidebar-foreground: oklch(0.965 0.008 250);
+  --sidebar-muted: oklch(0.76 0.02 255);
+  --sidebar-border: oklch(0.29 0.045 258);
+
+  --chart-1: oklch(0.34 0.085 258);
+  --chart-2: oklch(0.72 0.15 52);
+  --chart-3: oklch(0.55 0.12 160);
+  --chart-4: oklch(0.7 0.07 255);
+  --chart-5: oklch(0.6 0.12 75);
+
+  /* Elevación: contacto + ambiente, tintadas con la tinta (no negro puro) */
+  --elev-1: 0 1px 2px oklch(0.2 0.03 258 / 0.06);
+  --elev-2:
+    0 1px 2px oklch(0.2 0.03 258 / 0.05),
+    0 3px 8px -2px oklch(0.2 0.03 258 / 0.07);
+  --elev-3:
+    0 1px 2px oklch(0.2 0.03 258 / 0.04),
+    0 6px 14px -4px oklch(0.2 0.03 258 / 0.08),
+    0 16px 32px -8px oklch(0.2 0.03 258 / 0.1);
+  --elev-4:
+    0 2px 4px oklch(0.2 0.03 258 / 0.05),
+    0 12px 24px -6px oklch(0.2 0.03 258 / 0.14),
+    0 32px 64px -16px oklch(0.2 0.03 258 / 0.22);
+  --edge-light: inset 0 1px 0 oklch(1 0 0 / 0.7);
+
+  /* Glow: solo para el elemento de máxima prioridad de la pantalla */
+  --glow-primary:
+    0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent),
+    0 6px 20px -4px color-mix(in oklab, var(--primary) 40%, transparent);
+  --glow-ai:
+    0 0 0 1px color-mix(in oklab, var(--ai) 30%, transparent),
+    0 6px 24px -4px color-mix(in oklab, var(--ai) 38%, transparent);
+
+  /* Movimiento: las curvas viven en @theme static (más abajo) */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-slower: 500ms;
+
+  /* Radios y espacio */
+  --radius: 0.625rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: oklch(0.16 0.02 262);
+  --foreground: oklch(0.95 0.008 250);
+  --card: oklch(0.2 0.022 262);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.235 0.025 262);
+  --popover-foreground: var(--foreground);
+  --surface-sunken: oklch(0.13 0.02 262);
+
+  --primary: oklch(0.72 0.13 255);
+  --primary-foreground: oklch(0.16 0.03 262);
+  --primary-soft: oklch(0.29 0.06 258);
+  --secondary: oklch(0.255 0.02 262);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.255 0.02 262);
+  --muted-foreground: oklch(0.72 0.02 258);
+  --accent: oklch(0.78 0.14 55);
+  --accent-foreground: oklch(0.2 0.04 50);
+  --accent-soft: oklch(0.31 0.05 55);
+
+  --destructive: oklch(0.7 0.18 22);
+  --destructive-foreground: oklch(0.18 0.03 20);
+  --destructive-soft: oklch(0.31 0.07 20);
+  --success: oklch(0.78 0.15 160);
+  --success-foreground: oklch(0.18 0.03 160);
+  --success-soft: oklch(0.3 0.06 160);
+  --warning: oklch(0.82 0.13 80);
+  --warning-foreground: oklch(0.2 0.04 80);
+  --warning-soft: oklch(0.32 0.06 80);
+  --info: oklch(0.78 0.11 240);
+  --info-soft: oklch(0.3 0.06 245);
+
+  --ai: oklch(0.78 0.14 290);
+  --ai-foreground: oklch(0.17 0.04 290);
+  --ai-soft: oklch(0.3 0.08 290);
+  --ai-from: oklch(0.68 0.19 280);
+  --ai-via: oklch(0.72 0.18 325);
+  --ai-to: oklch(0.8 0.13 60);
+
+  --border: oklch(1 0 0 / 0.09);
+  --input: oklch(1 0 0 / 0.15);
+  --ring: var(--primary);
+
+  --sidebar: oklch(0.14 0.022 262);
+  --sidebar-foreground: oklch(0.95 0.008 250);
+  --sidebar-muted: oklch(0.72 0.02 258);
+  --sidebar-border: oklch(0.25 0.03 262);
+
+  --chart-1: oklch(0.72 0.13 255);
+  --chart-2: oklch(0.78 0.14 55);
+  --chart-3: oklch(0.78 0.15 160);
+  --chart-4: oklch(0.75 0.07 255);
+  --chart-5: oklch(0.82 0.13 80);
+
+  /* En oscuro la sombra sola no alcanza: se suma un reborde de luz arriba */
+  --elev-1: 0 1px 2px oklch(0 0 0 / 0.4);
+  --elev-2: 0 1px 2px oklch(0 0 0 / 0.35), 0 4px 10px -2px oklch(0 0 0 / 0.4);
+  --elev-3:
+    0 1px 2px oklch(0 0 0 / 0.3), 0 8px 16px -4px oklch(0 0 0 / 0.45),
+    0 20px 40px -8px oklch(0 0 0 / 0.4);
+  --elev-4:
+    0 2px 4px oklch(0 0 0 / 0.3), 0 16px 32px -6px oklch(0 0 0 / 0.55),
+    0 40px 72px -16px oklch(0 0 0 / 0.5);
+  --edge-light: inset 0 1px 0 oklch(1 0 0 / 0.07);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-ai: var(--ai);
+  --color-ai-foreground: var(--ai-foreground);
+  --color-ai-soft: var(--ai-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Las utilidades shadow-* de siempre suben al sistema de elevación */
+  --shadow-xs: var(--elev-1);
+  --shadow-sm: var(--elev-2);
+  --shadow-md: var(--elev-3);
+  --shadow-lg: var(--elev-4);
+  --shadow-xl: var(--elev-4);
+
+  --font-sans:
+    var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --font-display:
+    var(--font-bricolage), var(--font-geist), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@theme static {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Resorte corto (rebote de ~8%) aproximado con linear() */
+  --ease-spring: linear(
+    0,
+    0.009,
+    0.035 2.1%,
+    0.141,
+    0.281 6.7%,
+    0.723 12.9%,
+    0.938 16.7%,
+    1.017,
+    1.077,
+    1.121,
+    1.149 24.3%,
+    1.159,
+    1.163,
+    1.161,
+    1.154 29.9%,
+    1.129 32.8%,
+    1.051 39.6%,
+    1.017 43.1%,
+    0.991,
+    0.977 51%,
+    0.974 53.8%,
+    0.975 57.1%,
+    0.997 69.8%,
+    1.003 76.9%,
+    1
+  );
+}
+
+/* Radios (se pisan los de Tailwind: rounded-md = controles, xl = superficies) */
+@theme {
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.75rem;
+
+  /* Escala tipográfica con nombre. El tracking baja a medida que sube el tamaño. */
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.1rem;
+  --text-caption--letter-spacing: 0.005em;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.25rem;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.5rem;
+  --text-title-sm: 1rem;
+  --text-title-sm--line-height: 1.375rem;
+  --text-title-sm--letter-spacing: -0.01em;
+  --text-title-md: 1.1875rem;
+  --text-title-md--line-height: 1.5rem;
+  --text-title-md--letter-spacing: -0.015em;
+  --text-title-lg: 1.5rem;
+  --text-title-lg--line-height: 1.75rem;
+  --text-title-lg--letter-spacing: -0.02em;
+  --text-display-md: 1.875rem;
+  --text-display-md--line-height: 2.125rem;
+  --text-display-md--letter-spacing: -0.028em;
+  --text-display-lg: 2.5rem;
+  --text-display-lg--line-height: 2.6rem;
+  --text-display-lg--letter-spacing: -0.035em;
+  --text-display-xl: 3.25rem;
+  --text-display-xl--line-height: 3.3rem;
+  --text-display-xl--letter-spacing: -0.04em;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--foreground) 25%, transparent)
+      transparent;
+  }
+  body {
+    @apply bg-background font-sans text-body text-foreground antialiased;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    font-optical-sizing: auto;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 28%, transparent);
+  }
+  /* Foco visible para todo lo que no declare el suyo */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* Cifras: montos siempre con números tabulares */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
