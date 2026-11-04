@@ -7,7 +7,9 @@ generan desde el OpenAPI, no se escriben a mano).
 ## De dónde salen los tipos generados
 
 `packages/shared-types/src/generated/api.ts` es el que está versionado en el repo
-(última regeneración: commit `113d240`, 2026-11-03). Se comparó contra
+(regenerado en `integration/frontend-3`, ver «Fases 21, 23 y 24»; la
+regeneración anterior fue el commit `113d240`, 2026-11-03). Lo que sigue hasta
+esa sección describe el estado previo. Se comparó contra
 `adminprop-backend/openapi.json` de la rama `feature/web-inmobiliaria-api` del
 backend (archivo del 2026-11-04, 283 esquemas): **los 283 esquemas están en el
 generado**, así que está al día con esa rama. No se regeneró nada.
@@ -70,17 +72,55 @@ Cambios de comportamiento en tipos al reemplazar (el generado es más estricto):
 | `CreateInventoryRequest`                                                                                                               | El manual no tenía `items`; el generado sí (opcional).                                                                                                                                                                      | El generado es un superconjunto compatible; se reemplazó.                                                                                                                                                                                                                                                                                                                                                        |
 | `Tenant` (`tenant.ts`)                                                                                                                 | Ni `TenantSettingsDto` ni `TenantBrandingDto` se le parecen (`Tenant` trae parámetros de negocio, `isActive`, `createdAt`).                                                                                                 | No corresponde a ningún endpoint. Sólo lo usa `packages/mocks/src/tenant.ts`. Candidato a borrar junto con el mock.                                                                                                                                                                                                                                                                                              |
 
-## Se quedan a mano: el OpenAPI no los tiene
+## Fases 21, 23 y 24 (`crm`, `listings`, `migration`, `valuation`)
 
-- `crm.ts` (Fase 23: pipeline, `InquiryCard`, `CrmOverviewDto`, ...): el OpenAPI
-  sólo tiene `PublicInquiryDto` con estados `NEW | CONTACTED | CLOSED`.
-- `listings.ts` (multipublicación, Fase 23).
-- `migration.ts` (Fase 21).
-- `valuation.ts` (Fase 24).
+Rama `integration/frontend-3`. `generated/api.ts` se regeneró contra el
+`openapi.json` de `integration/consolidado-2` del backend (234 rutas, 325
+esquemas), que ya publica `/crm`, `/listings`, `/migration` y `/valuation`. Los
+cuatro archivos se compararon tipo por tipo con el compilador (asignabilidad en
+los dos sentidos más diff propiedad por propiedad) y los equivalentes pasaron a
+alias con los mismos nombres públicos.
 
-Cuando el backend exporte esas rutas, regenerar (`npm run api:types`) y migrar
-estos cuatro archivos con el mismo procedimiento. Hasta entonces el guardia de
-`shared-types` (ver abajo) los tiene en una lista de excepciones explícita.
+Alias del generado: todo `listings.ts` y `valuation.ts`; en `crm.ts` los refs,
+`InquiryCard/Activity/Detail`, `PipelineColumn/Dto`, los requests,
+`WhatsAppLinkDto`, `CrmAssignee`, `CrmTopProperty`; en `migration.ts` todo salvo
+lo de abajo. Las uniones (`InquiryStage`, `ListingStatus`, `ImportEntity`, ...)
+se derivan de los campos del generado.
+
+Se quedan a mano, con la diferencia exacta:
+
+| Tipo                                         | Diferencia                                                                                                           | Lectura                                                                                                                                                           |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CrmOverviewDto`, `PropertyInquiryAnalytics` | `byStage`, `bySource`: manual `Record<InquiryStage / InquirySource, number>`; generado `{ [key: string]: number }`.  | El generado es más laxo (no obliga las claves). Backend: declarar las claves en `@ApiProperty` (o un esquema con propiedades) si se quiere que el tipo las exija. |
+| `ImportCounts`, `ImportBatchSummary`         | `byEntity`: manual `Record<ImportEntity, ImportEntityCounts>`; generado `{ [key: string]: ImportEntityCountsDto }`.  | Igual que arriba.                                                                                                                                                 |
+| `ImportBatchDetail`                          | El generado trae `errorMessage: string \| null` (requerido); el manual no lo tiene (y además hereda lo de `counts`). | **Diferencia real.** El front no muestra el mensaje de error del lote. Candidato a agregarlo a `ImportBatchDetail` y mostrarlo en la pantalla de migración.       |
+
+Hallazgos del contrato (backend o front), encontrados al regenerar:
+
+1. **OpenAPI inválido en el backend.** `ImportCountsDto.byEntity` referencia
+   `#/components/schemas/ImportEntityCountsDto`, que no está en
+   `components.schemas` (falta `@ApiExtraModels(ImportEntityCountsDto)` en
+   `migration.dtos.ts`). `openapi-typescript` aborta con "Can't resolve $ref".
+   Para generar se le agregó ese esquema (los 5 campos numéricos de la clase) a
+   una copia temporal del JSON; el `openapi.json` del backend no se tocó.
+   **Mientras no se arregle allá, `npm run api:types` falla.**
+2. **Coordenadas públicas.** El OpenAPI no publica `latitude`/`longitude` en
+   `PublicPropertyDetailDto` y el backend no las devuelve en el módulo `public`,
+   pero `apps/sites` (`propiedades/[id]/page.tsx`) las lee para el mapa. Hoy el
+   mapa nunca se muestra con datos reales. Los campos se declaran opcionales en
+   `public-listing.ts` (ya no se edita `generated/api.ts`). Hay que sumarlos en
+   el backend o sacar el mapa.
+3. **Enums nuevos** que el front tuvo que cubrir: `AlertType` /
+   `NotificationType` con `COMPARABLES_SOURCE_STALE`, `INQUIRY_FOLLOW_UP`,
+   `INQUIRY_ASSIGNED`, `LISTING_CHANNEL_ERROR` (etiquetas en
+   `automations.ts` y `notifications.ts`); códigos de error
+   `VALUATION_DAILY_LIMIT` y `LISTING_NOT_READY`.
+4. **`needsReview`** pasó a requerido en `PropertySummaryDto` y
+   `PropertyDetailDto` y es opcional en `UpdatePropertyDto` (migración).
+5. Los esquemas `PublicInquiryDto`, `InquiryPropertyDto` y
+   `UpdateInquiryStatusDto` (consultas viejas) ya no existen; ninguna app los
+   usaba.
+6. `LUXURY` ya lo publica el backend (se quitó el retoque manual).
 
 ## No son DTOs, se quedan
 

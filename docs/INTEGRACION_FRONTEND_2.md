@@ -114,7 +114,9 @@ Sin cambios respecto de la integración: `frame-src 'self' about:` más el orige
 
 ## Tipos generados (`generated/api.ts`)
 
-No se regeneró. El archivo está hecho contra el OpenAPI de la integración vieja del backend, con dos retoques manuales para que `apps/sites` v1.1 tipe (`LUXURY`, `latitude`/`longitude` públicos).
+> Actualizado en `integration/frontend-3`: ya se regeneró contra `integration/consolidado-2`; ver `docs/tecnica/shared-types-generados.md`.
+
+En `integration/frontend-2` no se regeneró. El archivo está hecho contra el OpenAPI de la integración vieja del backend, con dos retoques manuales para que `apps/sites` v1.1 tipe (`LUXURY`, `latitude`/`longitude` públicos).
 
 Cuando el backend nuevo (`integration/consolidado-2`) esté en GitHub:
 
