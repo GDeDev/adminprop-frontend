@@ -22,7 +22,7 @@ function ThemeToggle({
       data-slot="theme-toggle"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className={cn(
-        "inline-flex size-11 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring md:size-9 [&_svg]:size-5",
+        "inline-flex size-11 shrink-0 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring md:size-9 [&_svg]:size-5",
         className
       )}
       {...props}
