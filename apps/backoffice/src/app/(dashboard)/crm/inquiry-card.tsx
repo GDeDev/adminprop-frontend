@@ -108,7 +108,7 @@ export function InquiryCardView({
             type="button"
             {...dragHandle}
             aria-label={`Mover la consulta de ${card.name}`}
-            className="-ml-1 flex size-8 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            className="-ml-1 flex size-11 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:size-8"
           >
             <GripVertical aria-hidden className="size-4" />
           </button>
@@ -116,7 +116,7 @@ export function InquiryCardView({
         <button
           type="button"
           onClick={() => onOpen(card.id)}
-          className="min-w-0 flex-1 rounded text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="min-h-11 min-w-0 flex-1 rounded text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:min-h-0"
         >
           <span className="block truncate font-medium">{card.name}</span>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -157,6 +157,7 @@ export function InquiryCardView({
             type="button"
             size="sm"
             variant="outline"
+            className="min-h-11 md:min-h-8"
             onClick={() => void openWhatsApp(card.id)}
             aria-label={`WhatsApp a ${card.name}`}
           >
@@ -172,7 +173,7 @@ export function InquiryCardView({
             <SelectTrigger
               size="sm"
               aria-label={`Mover a… (${card.name})`}
-              className="ml-auto"
+              className="ml-auto min-h-11 md:min-h-8"
             >
               <SelectValue />
             </SelectTrigger>
