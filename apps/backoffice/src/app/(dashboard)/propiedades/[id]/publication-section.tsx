@@ -29,6 +29,7 @@ import {
   missingFromError,
 } from "@/lib/listings"
 import type { ListingAction } from "@/lib/listings"
+import { safeHttpUrl } from "@/lib/safe-url"
 import {
   listingsKey,
   startsJob,
@@ -159,9 +160,9 @@ function ListingCard({
           </Link>
         </p>
       )}
-      {listing.externalUrl && (
+      {safeHttpUrl(listing.externalUrl) && (
         <a
-          href={listing.externalUrl}
+          href={safeHttpUrl(listing.externalUrl) ?? undefined}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-primary underline"

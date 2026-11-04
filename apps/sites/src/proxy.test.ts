@@ -119,6 +119,57 @@ describe("proxy", () => {
     expect(rewriteOf(response)).toBe("/s/h~mi-inmo~mi-inmo.sites.test")
   })
 
+  it("la vista previa responde con Cache-Control: no-store y el sitio público no", async () => {
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
+    const preview = await proxy(
+      request(`/propiedades?preview=${TOKEN}`, "mi-inmo.sites.test")
+    )
+    expect(preview.headers.get("cache-control")).toBe("no-store")
+    const pub = await proxy(request("/propiedades", "mi-inmo.sites.test"))
+    expect(pub.headers.get("cache-control")).toBeNull()
+  })
+
+  it("?preview= solo vale en las rutas del sitio; en el resto se ignora", async () => {
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
+    for (const path of ["/propiedades/abc123", "/nosotros", "/contacto", "/"]) {
+      const r = await proxy(
+        request(`${path}?preview=${TOKEN}`, "mi-inmo.sites.test")
+      )
+      expect(rewriteOf(r)).toMatch(/^\/p\/hp~mi-inmo~/)
+    }
+    for (const path of [
+      "/cualquier/cosa",
+      "/propiedades/a/b",
+      "/sitemap.xml",
+    ]) {
+      const r = await proxy(
+        request(`${path}?preview=${TOKEN}`, "mi-inmo.sites.test")
+      )
+      expect(rewriteOf(r)).toMatch(/^\/s\/h~mi-inmo~/)
+    }
+  })
+
+  it("en producción ?preview= en una ruta no permitida no abre el acceso por slug", async () => {
+    vi.stubEnv("NODE_ENV", "production")
+    const r = await proxy(request(`/_s/mi-inmo/otra?preview=${TOKEN}`))
+    expect(rewriteOf(r)).toBe("/s/nf")
+  })
+
+  it("un token que no es un JWT de tres segmentos se ignora", async () => {
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
+    for (const bad of [
+      "a".repeat(30),
+      "aaaaaaaaaa.bbbbbbbbbbbb",
+      "aaaaaaaa.bbbbbbbb.cccccccc.dddddddd",
+      "aaaa.bbbb.cc cc",
+    ]) {
+      const r = await proxy(
+        request(`/?preview=${encodeURIComponent(bad)}`, "mi-inmo.sites.test")
+      )
+      expect(rewriteOf(r)).toBe("/s/h~mi-inmo~mi-inmo.sites.test")
+    }
+  })
+
   it("nadie entra directo al árbol interno /s/…", async () => {
     for (const path of [
       "/s",

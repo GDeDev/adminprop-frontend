@@ -29,6 +29,7 @@ import { FEE_MODE_LABELS, isZero, periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 import { PAYMENT_METHOD_LABELS } from "@/lib/billing"
+import { safeHttpUrl } from "@/lib/safe-url"
 import {
   ADJUSTMENT_CONCEPT_LABELS,
   adjustmentSubtracts,
@@ -471,10 +472,10 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {transfer.receiptUrl && (
+                    {safeHttpUrl(transfer.receiptUrl) && (
                       <Button variant="ghost" size="sm" asChild>
                         <a
-                          href={transfer.receiptUrl}
+                          href={safeHttpUrl(transfer.receiptUrl) ?? undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

@@ -10,6 +10,7 @@ import { TooltipProvider } from "@adminprop/ui/components/tooltip"
 
 import { apiClient } from "@/lib/api-client"
 import { LOGIN_PATH } from "@/lib/session"
+import { clearAllDrafts } from "@/lib/form-draft"
 
 function makeQueryClient() {
   return new QueryClient({
@@ -39,7 +40,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
           apiClient={apiClient}
           loginPath={LOGIN_PATH}
           // Que el próximo usuario en esta pestaña no vea datos cacheados del anterior.
-          onSignOut={() => queryClient.clear()}
+          onSignOut={() => {
+            queryClient.clear()
+            // Borradores de formularios: que el próximo usuario no los retome.
+            clearAllDrafts()
+          }}
         >
           <TooltipProvider>
             {children}

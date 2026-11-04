@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server"
 
+import { requestHost } from "./request-host"
 import { basePath, canonicalUrl, type SiteRoute } from "./site-route"
 
 /** Origen público del pedido (detrás de un proxy, el que mandó la plataforma) + prefijo del modo. */
@@ -9,13 +10,7 @@ export function absoluteBase(request: NextRequest, route: SiteRoute): string {
   // porque el proxy no mandó `X-Forwarded-Proto`.
   const canonical = canonicalUrl(route, "/")
   if (canonical) return canonical
-  const host = (
-    request.headers.get("x-forwarded-host") ??
-    request.headers.get("host") ??
-    request.nextUrl.host
-  )
-    .split(",")[0]
-    ?.trim()
+  const host = requestHost(request.headers) || request.nextUrl.host
   const proto =
     request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() ??
     request.nextUrl.protocol.replace(":", "")

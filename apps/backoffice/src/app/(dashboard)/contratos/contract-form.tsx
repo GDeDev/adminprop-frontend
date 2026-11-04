@@ -68,6 +68,7 @@ import {
 import { addDays, formatDate } from "@/lib/dates"
 import { useProperty } from "@/lib/properties-api"
 import { useRenter } from "@/lib/renters-api"
+import { loadDraft, removeDraft, saveDraft } from "@/lib/form-draft"
 
 import {
   BillingTermsFields,
@@ -185,6 +186,7 @@ function stepOf(field: string): number {
 
 /** Borrador del alta en el navegador (DT-36). Sólo datos, no el PDF. */
 const DRAFT_KEY = "adminprop:contract-draft"
+const DRAFT_OMIT = ["notes", "surety"]
 
 const EMPTY: FormValues = {
   propertyId: "",
@@ -263,9 +265,9 @@ const draftSchema = z
 
 function readDraft(): FormValues | null {
   try {
-    const raw = window.localStorage.getItem(DRAFT_KEY)
+    const raw = loadDraft(DRAFT_KEY)
     if (!raw) return null
-    const parsed = draftSchema.safeParse(JSON.parse(raw))
+    const parsed = draftSchema.safeParse(raw)
     if (!parsed.success) return null
     return {
       ...EMPTY,
@@ -412,11 +414,8 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
   const values = useWatch({ control: form.control })
   React.useEffect(() => {
     if (renewing) return
-    try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(values))
-    } catch {
-      // Sin storage (modo privado): el wizard funciona igual, sin borrador.
-    }
+    // Las notas y los datos de la póliza no se guardan en el navegador.
+    saveDraft(DRAFT_KEY, values, DRAFT_OMIT)
   }, [renewing, values])
 
   const propertyId = values.propertyId ?? ""
@@ -439,11 +438,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
   }, [renter.data, renterId, form])
 
   function discardDraft() {
-    try {
-      window.localStorage.removeItem(DRAFT_KEY)
-    } catch {
-      // nada que borrar
-    }
+    removeDraft(DRAFT_KEY)
     form.reset(EMPTY)
     setDraftRestored(false)
     setStep(0)
@@ -503,11 +498,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
         : await create.mutateAsync({ propertyId: data.propertyId, ...body })
 
       if (!renewing) {
-        try {
-          window.localStorage.removeItem(DRAFT_KEY)
-        } catch {
-          // ignorado
-        }
+        removeDraft(DRAFT_KEY)
       }
 
       if (pdf) {
