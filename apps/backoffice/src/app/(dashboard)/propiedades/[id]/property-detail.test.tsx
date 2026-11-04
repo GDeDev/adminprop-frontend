@@ -77,6 +77,7 @@ function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
     ageYears: null,
     latitude: null,
     longitude: null,
+    needsReview: false,
     ...overrides,
   }
 }

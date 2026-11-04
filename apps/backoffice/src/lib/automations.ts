@@ -41,6 +41,10 @@ export const ALERT_TYPE_LABELS: Record<AlertType, string> = {
   NOTIFICATION_FAILED: "Notificación no enviada",
   EMAIL_BOUNCED: "Email rebotado",
   PUBLIC_INQUIRY: "Consulta del portal",
+  COMPARABLES_SOURCE_STALE: "Fuente de comparables desactualizada",
+  INQUIRY_FOLLOW_UP: "Seguimiento de consulta",
+  INQUIRY_ASSIGNED: "Consulta asignada",
+  LISTING_CHANNEL_ERROR: "Error al publicar en un canal",
 }
 
 export type AlertIconKind = "delivery-failed" | "email-bounced" | "default"
