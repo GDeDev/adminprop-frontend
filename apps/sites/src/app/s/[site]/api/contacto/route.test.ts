@@ -85,7 +85,7 @@ describe("POST /api/contacto", () => {
   })
 
   it("la vista previa no envía", async () => {
-    const token = "t".repeat(30)
+    const token = "eyJhbGciOiJIUzI1NiJ9.eyJ0eXAiOiJzaXRlIn0.firma-del-token_123"
     const response = await POST(post({}), params(`dp~demo~${token}`))
     expect(response.status).toBe(403)
   })

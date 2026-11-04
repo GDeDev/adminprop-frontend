@@ -27,14 +27,24 @@ export interface SiteRoute {
 import { isPlausibleSiteHost, normalizeHost } from "./host-policy"
 
 const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/
-const TOKEN = /^[\w.-]{20,2000}$/
+// JWT compacto: tres segmentos base64url. Se exige la forma real y no solo
+// "algo largo", para que un valor inventado no llegue a gastar una llamada a la API.
+const TOKEN =
+  /^[A-Za-z0-9_-]{4,1000}\.[A-Za-z0-9_-]{4,1000}\.[A-Za-z0-9_-]{4,1000}$/
+const PREVIEW_PATHS =
+  /^(?:\/|\/propiedades|\/propiedades\/[A-Za-z0-9_-]{1,64}|\/nosotros|\/contacto|\/robots\.txt)$/
 
 export function isValidSlug(value: string): boolean {
   return SLUG.test(value)
 }
 
 export function isValidPreviewToken(value: string): boolean {
-  return TOKEN.test(value)
+  return value.length <= 2000 && TOKEN.test(value)
+}
+
+/** Rutas del sitio donde tiene sentido una vista previa; en el resto `?preview=` se ignora. */
+export function isPreviewablePath(path: string): boolean {
+  return PREVIEW_PATHS.test(path === "" ? "/" : path)
 }
 
 export function encodeSiteRoute(route: SiteRoute): string {
@@ -65,7 +75,7 @@ export function decodeSiteRoute(segment: string): SiteRoute | null {
       : null
   }
   if (tag === "hp" || tag === "dp") {
-    return token !== undefined && TOKEN.test(token)
+    return token !== undefined && isValidPreviewToken(token)
       ? { mode: tag === "hp" ? "host" : "dev", slug, previewToken: token }
       : null
   }
