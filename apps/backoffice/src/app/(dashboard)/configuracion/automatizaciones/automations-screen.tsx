@@ -149,7 +149,7 @@ function JobCard({ job, onRun }: { job: Job; onRun: () => void }) {
   const last = job.lastExecution
   const meta = last ? EXECUTION_STATUS_META[last.status] : null
   return (
-    <article className="flex h-full flex-col gap-2 rounded-xl border bg-card p-4">
+    <article className="flex h-full flex-col gap-2 rounded-xl border bg-card p-4 shadow-raised">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <h2 className="font-display text-base font-semibold">{job.title}</h2>

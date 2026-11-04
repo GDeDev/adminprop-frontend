@@ -111,7 +111,7 @@ export function SettlementRow({
   return (
     <Link
       href={`/propietario/liquidaciones/${settlement.id}`}
-      className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="min-w-0">
         <p className="font-medium">
@@ -169,7 +169,7 @@ function StatementList() {
 
 function StatementRow({ statement }: { statement: OwnerStatementSummary }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised">
       <div>
         <p className="font-medium capitalize">
           {periodLabel(statement.period)}

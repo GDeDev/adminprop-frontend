@@ -99,7 +99,7 @@ function ChannelCard({ channel }: { channel: ListingChannelDto }) {
     <section
       aria-labelledby={titleId}
       aria-disabled={unavailable || undefined}
-      className={`flex h-full flex-col gap-3 rounded-xl border bg-card p-4 ${unavailable ? "border-dashed text-muted-foreground" : ""}`}
+      className={`flex h-full flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised ${unavailable ? "border-dashed text-muted-foreground" : ""}`}
     >
       <div className="flex items-center justify-between gap-2">
         <h2 id={titleId} className="font-medium">

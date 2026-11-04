@@ -268,7 +268,9 @@ function State({
     )
   }
   return (
-    <div className="overflow-x-auto rounded-xl border bg-card">{children}</div>
+    <div className="overflow-x-auto rounded-xl border bg-card shadow-raised">
+      {children}
+    </div>
   )
 }
 

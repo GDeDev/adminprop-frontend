@@ -176,7 +176,7 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4">
+    <section className="rounded-xl border bg-card p-4 shadow-raised">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="font-display text-lg font-semibold">{title}</h2>
         {action}

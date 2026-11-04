@@ -315,7 +315,7 @@ function SettlementCard({ settlement }: { settlement: SettlementSummary }) {
   return (
     <Link
       href={`/liquidaciones/${settlement.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">
@@ -402,7 +402,7 @@ function StatementCard({ statement }: { statement: OwnerStatementSummary }) {
   return (
     <Link
       href={`/liquidaciones/consolidados/${statement.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">
@@ -541,7 +541,7 @@ function FeeReceivableList() {
             {pending.length} pendientes de {receivables.length}. El detalle por
             propietario está en su ficha, en «Cuenta de honorarios».
           </p>
-          <ul className="flex flex-col divide-y rounded-xl border bg-card px-4 text-sm">
+          <ul className="flex flex-col divide-y rounded-xl border bg-card px-4 text-sm shadow-raised">
             {receivables.map((receivable) => {
               const meta = FEE_RECEIVABLE_STATUS_META[receivable.status]
               return (

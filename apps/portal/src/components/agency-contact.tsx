@@ -25,7 +25,7 @@ export function AgencyContact({
           Cómo comunicarte con la inmobiliaria.
         </p>
       </div>
-      <section className="rounded-xl border bg-card p-5">
+      <section className="rounded-xl border bg-card p-5 shadow-raised">
         <ul className="flex flex-col gap-3 text-sm">
           {agency.phone && (
             <li className="flex items-center gap-3">

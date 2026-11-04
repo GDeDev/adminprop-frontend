@@ -61,7 +61,7 @@ export function RenterBillingSection({ renterId }: { renterId: string }) {
 
   return (
     <section
-      className="rounded-xl border bg-card p-4 md:col-span-2"
+      className="rounded-xl border bg-card p-4 shadow-raised md:col-span-2"
       aria-labelledby="renter-billing-title"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

@@ -85,7 +85,7 @@ export function MyNotifications() {
           Los obligatorios no se pueden apagar.
         </p>
       </div>
-      <ul className="divide-y rounded-xl border bg-card">
+      <ul className="divide-y rounded-xl border bg-card shadow-raised">
         {preferences.items.map((item) => (
           <PreferenceRow
             key={item.type}

@@ -109,7 +109,7 @@ function InstallmentRow({
     <button
       type="button"
       onClick={onOpen}
-      className="flex w-full items-center justify-between gap-3 rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex w-full lift items-center justify-between gap-3 rounded-xl border bg-card p-4 text-left shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="min-w-0">
         <p className="font-medium capitalize">

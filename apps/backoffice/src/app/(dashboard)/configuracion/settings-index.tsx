@@ -32,7 +32,7 @@ function SettingsLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift items-center gap-4 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <Icon aria-hidden className="size-5 text-primary" />
       <div className="flex-1">

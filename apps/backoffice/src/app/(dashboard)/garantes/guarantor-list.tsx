@@ -184,7 +184,7 @@ function GuarantorCard({ guarantor }: { guarantor: GuarantorSummary }) {
   return (
     <Link
       href={`/garantes/${guarantor.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">{guarantor.fullName}</p>

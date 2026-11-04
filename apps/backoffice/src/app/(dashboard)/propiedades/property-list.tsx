@@ -249,7 +249,7 @@ function PropertyCard({ property }: { property: PropertySummary }) {
   return (
     <Link
       href={`/propiedades/${property.id}`}
-      className="flex flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col overflow-hidden rounded-xl border bg-card shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <Thumbnail
         property={property}

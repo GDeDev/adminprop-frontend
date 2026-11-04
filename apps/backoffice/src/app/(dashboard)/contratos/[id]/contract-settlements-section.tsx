@@ -30,7 +30,7 @@ export function ContractSettlementsSection({
 
   return (
     <section
-      className="rounded-xl border bg-card p-4"
+      className="rounded-xl border bg-card p-4 shadow-raised"
       aria-labelledby="contract-settlements-title"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

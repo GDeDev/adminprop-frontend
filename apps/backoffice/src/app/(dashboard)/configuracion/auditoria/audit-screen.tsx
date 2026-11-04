@@ -212,7 +212,7 @@ export function AuditScreen() {
         />
       ) : (
         <>
-          <ul className="divide-y rounded-xl border bg-card">
+          <ul className="divide-y rounded-xl border bg-card shadow-raised">
             {entries.map((entry) => (
               <AuditRow
                 key={entry.id}

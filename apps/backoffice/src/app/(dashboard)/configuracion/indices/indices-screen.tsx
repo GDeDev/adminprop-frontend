@@ -250,7 +250,7 @@ function RegisterForm({
     <form
       onSubmit={form.handleSubmit(submit)}
       noValidate
-      className="rounded-xl border bg-card p-4"
+      className="rounded-xl border bg-card p-4 shadow-raised"
       aria-label="Cargar un valor"
     >
       <h2 className="mb-3 font-display text-lg font-semibold">

@@ -276,7 +276,7 @@ function Editor({
       {groups.map(([category, categoryItems]) => (
         <section
           key={category}
-          className="rounded-xl border bg-card p-4"
+          className="rounded-xl border bg-card p-4 shadow-raised"
           aria-label={category}
         >
           <h2 className="mb-3 font-display text-lg font-semibold">

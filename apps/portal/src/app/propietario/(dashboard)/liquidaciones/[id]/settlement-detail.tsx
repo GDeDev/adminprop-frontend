@@ -87,7 +87,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
       </div>
 
       <section
-        className="rounded-xl border bg-card p-5"
+        className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="breakdown-title"
       >
         <h2 id="breakdown-title" className="font-display text-lg font-semibold">
@@ -146,7 +146,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
       </section>
 
       {settlement.expenses.length > 0 && (
-        <section className="rounded-xl border bg-card p-5 text-sm">
+        <section className="rounded-xl border bg-card p-5 text-sm shadow-raised">
           <h2 className="font-display text-base font-semibold">
             Gastos descontados
           </h2>
@@ -170,7 +170,7 @@ export function OwnerSettlementDetailScreen({ id }: { id: string }) {
       )}
 
       <section
-        className="rounded-xl border bg-card p-5 text-sm"
+        className="rounded-xl border bg-card p-5 text-sm shadow-raised"
         aria-labelledby="transfers-title"
       >
         <h2

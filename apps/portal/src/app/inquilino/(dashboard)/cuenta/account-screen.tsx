@@ -88,7 +88,7 @@ function Account({
       <Header me={me} />
 
       <section
-        className="rounded-xl border bg-card p-5"
+        className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="current-title"
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -239,7 +239,7 @@ function PaymentInstructions({
 
   return (
     <section
-      className="rounded-xl border bg-card p-5"
+      className="rounded-xl border bg-card p-5 shadow-raised"
       aria-labelledby="pay-title"
     >
       <h2 id="pay-title" className="font-display text-lg font-semibold">

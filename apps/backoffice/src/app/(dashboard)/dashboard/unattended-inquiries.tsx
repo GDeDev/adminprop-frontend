@@ -17,7 +17,7 @@ export function UnattendedInquiries() {
   return (
     <Link
       href="/crm"
-      className="flex max-w-xs flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex max-w-xs lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <p className="text-sm text-muted-foreground">Consultas sin atender</p>
       <p

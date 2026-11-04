@@ -91,7 +91,7 @@ export default async function PropertyPage(
         )}
 
         {property.features.length > 0 && (
-          <dl className="grid grid-cols-2 gap-3 rounded-xl border bg-card p-4 text-sm sm:grid-cols-3">
+          <dl className="grid grid-cols-2 gap-3 rounded-xl border bg-card p-4 text-sm shadow-raised sm:grid-cols-3">
             {property.features.map((feature) => (
               <div key={feature.label}>
                 <dt className="text-muted-foreground">{feature.label}</dt>

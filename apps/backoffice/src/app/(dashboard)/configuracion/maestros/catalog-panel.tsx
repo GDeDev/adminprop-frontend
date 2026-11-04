@@ -90,7 +90,7 @@ export function CatalogPanel({
           description={canEdit ? "Agregá el primero." : undefined}
         />
       ) : (
-        <ul className="divide-y rounded-xl border bg-card">
+        <ul className="divide-y rounded-xl border bg-card shadow-raised">
           {items.data.map((item) => (
             <li
               key={item.id}

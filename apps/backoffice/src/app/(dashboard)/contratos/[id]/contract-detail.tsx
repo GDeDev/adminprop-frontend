@@ -374,7 +374,7 @@ function Timeline({
   const percent = Math.min(100, Math.max(0, contract.timeline.progressPercent))
   return (
     <section
-      className="rounded-xl border bg-card p-4"
+      className="rounded-xl border bg-card p-4 shadow-raised"
       aria-label="Línea de tiempo del contrato"
     >
       <div className="mb-2 flex items-baseline justify-between gap-2 text-sm">
@@ -559,7 +559,9 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className={`rounded-xl border bg-card p-4 ${className ?? ""}`}>
+    <section
+      className={`rounded-xl border bg-card p-4 shadow-raised ${className ?? ""}`}
+    >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-lg font-semibold">{title}</h2>
         {action}

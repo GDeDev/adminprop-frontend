@@ -74,7 +74,7 @@ function PropertyCard({ property }: { property: PortalOwnerProperty }) {
   return (
     <Link
       href={`/propietario/pagos?propertyId=${property.id}`}
-      className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="min-w-0">
         <p className="font-medium">{property.address}</p>

@@ -46,7 +46,7 @@ export function PublicationSection({ propertyId }: { propertyId: string }) {
     <div className="flex flex-col gap-4">
       <section
         aria-labelledby="publication-title"
-        className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+        className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
       >
         <h2
           id="publication-title"
@@ -250,7 +250,7 @@ function Analytics({ propertyId }: { propertyId: string }) {
   return (
     <section
       aria-labelledby="analytics-title"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <h2 id="analytics-title" className="font-display text-lg font-semibold">
         Interés en la propiedad

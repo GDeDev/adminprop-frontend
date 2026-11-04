@@ -68,7 +68,7 @@ function Contract({ contract }: { contract: PortalRenterContract }) {
         </p>
       </div>
 
-      <section className="rounded-xl border bg-card p-5">
+      <section className="rounded-xl border bg-card p-5 shadow-raised">
         <Progress
           value={contract.timeline.progressPercent}
           aria-label="Avance del contrato"
@@ -80,7 +80,7 @@ function Contract({ contract }: { contract: PortalRenterContract }) {
       </section>
 
       <section
-        className="rounded-xl border bg-card p-5"
+        className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="terms-title"
       >
         <h2 id="terms-title" className="font-display text-lg font-semibold">
@@ -136,7 +136,7 @@ function Contract({ contract }: { contract: PortalRenterContract }) {
       </section>
 
       <section
-        className="rounded-xl border bg-card p-5"
+        className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="services-title"
       >
         <h2 id="services-title" className="font-display text-lg font-semibold">

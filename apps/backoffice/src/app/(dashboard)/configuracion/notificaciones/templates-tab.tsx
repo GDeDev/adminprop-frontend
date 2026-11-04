@@ -155,7 +155,7 @@ export function TemplateEditor({
     <div className="grid gap-4 lg:grid-cols-2">
       <section
         aria-label="Editor"
-        className="flex flex-col gap-4 rounded-xl border bg-card p-4"
+        className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-raised"
       >
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="font-display text-lg font-semibold">
@@ -317,7 +317,7 @@ function Preview({
     <section
       aria-label="Vista previa"
       aria-live="polite"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-display text-lg font-semibold">Vista previa</h2>

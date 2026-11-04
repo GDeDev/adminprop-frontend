@@ -80,7 +80,7 @@ export function ServicesSection({
   }
 
   return (
-    <section className="rounded-xl border bg-card p-4 md:col-span-2">
+    <section className="rounded-xl border bg-card p-4 shadow-raised md:col-span-2">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-lg font-semibold">Servicios</h2>
         {propertyId && (

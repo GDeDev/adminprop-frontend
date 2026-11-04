@@ -604,7 +604,7 @@ function Section({
   return (
     <section
       aria-labelledby={id}
-      className={`rounded-xl border bg-card p-4 ${className ?? ""}`}
+      className={`rounded-xl border bg-card p-4 shadow-raised ${className ?? ""}`}
     >
       <h2 id={id} className="mb-3 font-display text-lg font-semibold">
         {title}

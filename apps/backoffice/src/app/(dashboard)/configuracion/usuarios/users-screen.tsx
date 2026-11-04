@@ -203,7 +203,10 @@ function UsersManager({ meId }: { meId: string }) {
           {/* Mobile: tarjetas. Desktop: tabla. */}
           <ul className="flex flex-col gap-3 md:hidden">
             {users.data.data.map((user) => (
-              <li key={user.id} className="rounded-xl border bg-card p-4">
+              <li
+                key={user.id}
+                className="rounded-xl border bg-card p-4 shadow-raised"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{displayName(user)}</p>

@@ -116,7 +116,7 @@ function Installments({ propertyId }: { propertyId: string }) {
           return (
             <li
               key={installment.id}
-              className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4"
+              className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised"
             >
               <div>
                 <p className="font-medium capitalize">

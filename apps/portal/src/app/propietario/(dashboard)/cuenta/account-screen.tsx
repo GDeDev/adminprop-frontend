@@ -124,7 +124,7 @@ function Account({ account }: { account: PortalOwnerAccount }) {
             return (
               <li
                 key={row.property.id}
-                className="rounded-xl border bg-card p-4"
+                className="rounded-xl border bg-card p-4 shadow-raised"
               >
                 <p className="font-medium">{row.property.address}</p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-4">
@@ -168,7 +168,7 @@ function Account({ account }: { account: PortalOwnerAccount }) {
       )}
 
       {account.fees.some((f) => !isZero(f.pending)) && (
-        <section className="rounded-xl border bg-card p-4 text-sm">
+        <section className="rounded-xl border bg-card p-4 text-sm shadow-raised">
           <h2 className="font-display text-base font-semibold">
             Honorarios de la inmobiliaria
           </h2>
@@ -200,7 +200,7 @@ function Stat({
   warn?: boolean
 }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-xl border bg-card p-4 shadow-raised">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p
         className={`font-display text-xl font-semibold tabular-nums ${warn ? "text-warning" : ""}`}

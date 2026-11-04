@@ -219,7 +219,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
       )}
 
       <section
-        className="rounded-xl border bg-card p-4"
+        className="rounded-xl border bg-card p-4 shadow-raised"
         aria-labelledby="statement-settlements"
       >
         <h2
@@ -333,7 +333,7 @@ function Stat({
   hint?: string
 }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-xl border bg-card p-4 shadow-raised">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
       {hint && (

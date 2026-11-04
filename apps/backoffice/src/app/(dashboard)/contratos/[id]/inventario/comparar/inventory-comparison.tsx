@@ -114,7 +114,7 @@ export function InventoryComparisonScreen({
         </Alert>
       )}
 
-      <div className="overflow-x-auto rounded-xl border bg-card">
+      <div className="overflow-x-auto rounded-xl border bg-card shadow-raised">
         <Table>
           <TableHeader>
             <TableRow>

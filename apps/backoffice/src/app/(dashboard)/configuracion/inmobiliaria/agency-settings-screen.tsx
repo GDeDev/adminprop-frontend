@@ -258,7 +258,7 @@ function LogoSection({ settings }: { settings: TenantSettings }) {
 
   const shown = preview ?? settings.logoUrl
   return (
-    <section className="flex items-center gap-4 rounded-xl border bg-card p-4">
+    <section className="flex items-center gap-4 rounded-xl border bg-card p-4 shadow-raised">
       <div className="flex size-20 items-center justify-center overflow-hidden rounded-lg border bg-muted">
         {shown ? (
           // eslint-disable-next-line @next/next/no-img-element

@@ -9,7 +9,7 @@ import { useCrmOverview } from "@/lib/crm-api"
 
 function Figure({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border bg-card p-3">
+    <div className="rounded-xl border bg-card p-3 shadow-raised">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
     </div>
@@ -43,7 +43,7 @@ export function CrmOverview() {
         />
       </div>
       {data.topProperties.length > 0 && (
-        <details className="rounded-xl border bg-card p-3 text-sm">
+        <details className="rounded-xl border bg-card p-3 text-sm shadow-raised">
           <summary className="cursor-pointer font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
             Propiedades más consultadas
           </summary>

@@ -205,7 +205,7 @@ export function NotificationCard({
 }) {
   const meta = notificationStatusMeta(item)
   return (
-    <li className="flex flex-col gap-2 rounded-xl border bg-card p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <li className="flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-raised sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-medium">{NOTIFICATION_TYPE_LABELS[item.type]}</p>
@@ -446,7 +446,7 @@ export function ResendFailedPanel({
         <div
           role="status"
           aria-live="polite"
-          className="flex flex-col gap-2 rounded-xl border bg-card p-3"
+          className="flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-raised"
         >
           {status.isError ? (
             <p className="text-sm text-destructive">

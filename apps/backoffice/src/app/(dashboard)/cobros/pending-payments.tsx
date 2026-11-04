@@ -74,7 +74,7 @@ export function PendingPayments() {
         {payments.map((payment) => (
           <li
             key={payment.id}
-            className="rounded-xl border bg-card p-4 text-sm"
+            className="rounded-xl border bg-card p-4 text-sm shadow-raised"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">

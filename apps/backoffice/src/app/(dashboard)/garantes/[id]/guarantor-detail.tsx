@@ -174,7 +174,7 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4">
+    <section className="rounded-xl border bg-card p-4 shadow-raised">
       <h2 className="mb-3 font-display text-lg font-semibold">{title}</h2>
       {children}
     </section>
