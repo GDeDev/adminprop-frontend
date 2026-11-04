@@ -7,16 +7,11 @@ import type { Currency, Uuid } from "./common"
  */
 export type PublicPropertySummary = ApiSchemas["PublicPropertySummaryDto"]
 /**
- * `latitude` y `longitude` los lee `apps/sites` (mapa de la ficha), pero el
- * OpenAPI de la API todavía no los publica en `PublicPropertyDetailDto`. Se
- * agregan acá, opcionales y fuera de `generated/api.ts` para que regenerar no
- * los pise. Ver `docs/tecnica/shared-types-generados.md` (hallazgo del
- * contrato).
+ * `latitude` y `longitude` ya vienen en el OpenAPI (D-226 del backend):
+ * aproximadas a 3 decimales (~100 m) y `null` si la propiedad no tiene
+ * coordenadas.
  */
-export type PublicPropertyDetail = ApiSchemas["PublicPropertyDetailDto"] & {
-  latitude?: number | null
-  longitude?: number | null
-}
+export type PublicPropertyDetail = ApiSchemas["PublicPropertyDetailDto"]
 export type PublicFilters = ApiSchemas["PublicFiltersDto"]
 
 /**

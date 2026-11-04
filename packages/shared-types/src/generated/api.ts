@@ -4921,6 +4921,18 @@ export interface components {
       bankCbu: string | null
       bankAlias: string | null
       documentFooter: string | null
+      /**
+       * @description Null = sin punitorio por defecto: cada contrato fija el suyo
+       * @example 0.50
+       */
+      dailyLateFeePercentage: string | null
+      /** @example 10 */
+      paymentGraceDays: number
+      /**
+       * @description Día del mes desde el que corre el punitorio (gracia + 1)
+       * @example 11
+       */
+      lateFeeStartDay: number
       /** @description Último número de recibo emitido */
       receiptSequence: number
     }
@@ -4961,6 +4973,16 @@ export interface components {
       bankAlias?: string | null
       /** @description Leyenda al pie de los PDFs */
       documentFooter?: string | null
+      /**
+       * @description Punitorio diario por defecto, en %. Lo heredan los contratos que no fijan el suyo; no puede quedar vacío una vez fijado (0 = sin punitorio).
+       * @example 0.50
+       */
+      dailyLateFeePercentage?: string
+      /**
+       * @description Días del mes sin punitorio por defecto (el punitorio corre desde el día siguiente).
+       * @example 10
+       */
+      paymentGraceDays?: number
     }
     AsyncJobStatusDto: {
       /** @example 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d */
@@ -5800,6 +5822,11 @@ export interface components {
       changedBy: components["schemas"]["ContractPartyRefDto"] | null
       /** Format: date-time */
       createdAt: string
+      /**
+       * @description Día del mes desde el que corre el punitorio (gracia + 1)
+       * @example 11
+       */
+      lateFeeStartDay: number
       /** @description El % de punitorio es el de la inmobiliaria */
       inheritedLateFeePercentage: boolean
       /** @description La gracia es la de la inmobiliaria */
@@ -5863,6 +5890,10 @@ export interface components {
       /** @description El % fijo aplicado (FIXED con fixedIncreasePercentage) */
       fixedPercentage: string | null
       appliedById: string | null
+      /** @description Ajuste manual: por qué se hizo (D-230) */
+      adjustmentReason: string | null
+      /** @description Ajuste manual: quién lo autorizó (D-230) */
+      authorizedBy: string | null
       /** Format: date-time */
       createdAt: string
     }
@@ -6042,7 +6073,7 @@ export interface components {
        */
       feeAmount?: string | null
       /**
-       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria.
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria; si la inmobiliaria no fijó uno, es obligatorio (422).
        * @example 5.00
        */
       lateFeePercentage?: string | null
@@ -6051,6 +6082,11 @@ export interface components {
        * @example 10
        */
       lateFeeGraceDays?: number | null
+      /**
+       * @description Día del mes desde el que corre el punitorio (1 a 31). Es la gracia dicha al revés (inicio = gracia + 1): no se combina con lateFeeGraceDays.
+       * @example 11
+       */
+      lateFeeStartDay?: number | null
     }
     ChangeBillingTermsDto: {
       /**
@@ -6069,7 +6105,7 @@ export interface components {
        */
       feeAmount?: string | null
       /**
-       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria.
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria; si la inmobiliaria no fijó uno, es obligatorio (422).
        * @example 5.00
        */
       lateFeePercentage?: string | null
@@ -6078,6 +6114,11 @@ export interface components {
        * @example 10
        */
       lateFeeGraceDays?: number | null
+      /**
+       * @description Día del mes desde el que corre el punitorio (1 a 31). Es la gracia dicha al revés (inicio = gracia + 1): no se combina con lateFeeGraceDays.
+       * @example 11
+       */
+      lateFeeStartDay?: number | null
       /**
        * Format: date
        * @description Desde cuándo rigen. Default hoy. No anterior a los términos vigentes y dentro del contrato.
@@ -6119,6 +6160,16 @@ export interface components {
        * @example 120000.00
        */
       newRent?: string
+      /**
+       * @description Obligatorio cuando viene newRent (ajuste manual): por qué se ajusta a mano.
+       * @example Acuerdo con el inquilino por refacciones a su cargo
+       */
+      reason?: string
+      /**
+       * @description Obligatorio cuando viene newRent (ajuste manual): quién lo autorizó.
+       * @example Juan Pérez (propietario)
+       */
+      authorizedBy?: string
     }
     TerminateContractDto: {
       /**
@@ -6207,7 +6258,7 @@ export interface components {
        */
       feeAmount?: string | null
       /**
-       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria.
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria; si la inmobiliaria no fijó uno, es obligatorio (422).
        * @example 5.00
        */
       lateFeePercentage?: string | null
@@ -6216,6 +6267,11 @@ export interface components {
        * @example 10
        */
       lateFeeGraceDays?: number | null
+      /**
+       * @description Día del mes desde el que corre el punitorio (1 a 31). Es la gracia dicha al revés (inicio = gracia + 1): no se combina con lateFeeGraceDays.
+       * @example 11
+       */
+      lateFeeStartDay?: number | null
       /** @description Otro inquilino (spec 7). Si no viene, el mismo. */
       renterId?: string
       /**
@@ -6805,6 +6861,10 @@ export interface components {
       description: string
       debit: string | null
       credit: string | null
+      /** @description Importe informativo de los movimientos del depósito; no entra en el saldo */
+      amount: string | null
+      /** @enum {string|null} */
+      amountCurrency: "ARS" | "USD" | null
       /** @description Saldo acumulado (deuda positiva) */
       balance: string
       installmentId: string | null
@@ -6827,6 +6887,9 @@ export interface components {
       depositAmount: string
       /** @enum {string} */
       depositCurrency: "ARS" | "USD"
+      /** @enum {string} */
+      mode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      referenceAmount: string
       returnedAmount: string
       /** @enum {string} */
       method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
@@ -6871,10 +6934,15 @@ export interface components {
        */
       returnedAt: string
       /**
-       * @description Lo que se le devuelve al inquilino; puede ser 0.
+       * @description Monto del que se descuentan las deducciones. FIXED: lo recibido; FOLLOWS_RENT: el alquiler vigente (misma moneda que el depósito). Obligatorio en MANUAL o si el alquiler está en otra moneda; en los automáticos, si viene, tiene que coincidir.
+       * @example 260000.00
+       */
+      referenceAmount?: string
+      /**
+       * @description Lo que se le devuelve al inquilino (puede ser 0). Se calcula como referencia menos deducciones; si se manda, tiene que coincidir.
        * @example 80000.00
        */
-      returnedAmount: string
+      returnedAmount?: string
       /** @enum {string} */
       method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
       notes?: string
@@ -7478,6 +7546,13 @@ export interface components {
        * @example bcra-indec
        */
       provider: string
+    }
+    ImportEntityCountsDto: {
+      total: number
+      valid: number
+      errors: number
+      conflicts: number
+      imported: number
     }
     StartMigrationResultDto: {
       batchId: string
@@ -9080,6 +9155,13 @@ export interface components {
       /** @description Barrio, ciudad */
       location: string
       features: components["schemas"]["PublicFeatureDto"][]
+      /**
+       * @description Aproximada (3 decimales, ~100 m) para mostrar la zona en un mapa. Null si la propiedad no tiene coordenadas.
+       * @example -34.604
+       */
+      latitude: number | null
+      /** @example -58.382 */
+      longitude: number | null
     }
     PublicFilterOptionDto: {
       id: string
@@ -9384,13 +9466,6 @@ export interface components {
        * @example 3f8c1b1e-3a6f-4f2e-9a1c-6d9f2b7c4e11
        */
       jobId: string
-    }
-    ImportEntityCountsDto: {
-      total: number
-      valid: number
-      errors: number
-      conflicts: number
-      imported: number
     }
   }
   responses: never

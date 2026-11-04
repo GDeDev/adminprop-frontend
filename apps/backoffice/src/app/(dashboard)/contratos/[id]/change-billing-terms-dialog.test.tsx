@@ -21,6 +21,7 @@ const terms: ContractCurrentBillingTerms = {
   feeAmount: null,
   lateFeePercentage: "5.00",
   lateFeeGraceDays: 10,
+  lateFeeStartDay: 11,
   inheritedLateFeePercentage: true,
   inheritedLateFeeGraceDays: true,
   notes: null,
