@@ -27,13 +27,6 @@ import {
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@adminprop/ui/components/select"
-import {
   Table,
   TableBody,
   TableCell,
@@ -44,6 +37,7 @@ import {
 import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { DownloadPdfButton } from "@/components/download-pdf-button"
+import { SendModeSelect } from "@/components/send-mode-select"
 import { periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -500,29 +494,18 @@ function CloseDialog({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Cerrar el consolidado</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Los totales quedan congelados. Qué se le envía al propietario se usa
-            cuando estén el PDF y el email (Fases 14 y 15).
+            Los totales quedan congelados y se avisa al propietario según lo que
+            elijas acá.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <div className="px-4 sm:px-0">
-          <Label htmlFor="statement-send-mode">Qué se envía</Label>
-          <Select
+          <SendModeSelect
+            id="statement-send-mode"
+            label="Qué se envía"
+            context="close"
             value={sendMode}
-            onValueChange={(value) => setSendMode(value as StatementSendMode)}
-          >
-            <SelectTrigger id="statement-send-mode" className="mt-1 w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(SEND_MODE_LABELS) as StatementSendMode[]).map(
-                (mode) => (
-                  <SelectItem key={mode} value={mode}>
-                    {SEND_MODE_LABELS[mode]}
-                  </SelectItem>
-                )
-              )}
-            </SelectContent>
-          </Select>
+            onChange={setSendMode}
+          />
         </div>
         <ResponsiveDialogFooter>
           <Button
