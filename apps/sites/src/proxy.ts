@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { resolveHost } from "@/lib/api"
 import { cachedHostLookup, HostLookupError } from "@/lib/host-cache"
 import { isPlausibleSiteHost, normalizeHost } from "@/lib/host-policy"
+import { requestHost } from "@/lib/request-host"
 import {
   encodeSiteRoute,
   isPreviewablePath,
@@ -69,14 +70,7 @@ export async function proxy(request: NextRequest) {
       rest = dev[2] ?? ""
     }
   } else {
-    const host =
-      (
-        request.headers.get("x-forwarded-host") ??
-        request.headers.get("host") ??
-        ""
-      )
-        .split(",")[0]
-        ?.trim() ?? ""
+    const host = requestHost(request.headers)
     let slug: string | null = null
     // Lo que jamás podría ser un sitio (IPs, `localhost`, nombres mal formados,
     // subdominios de dos niveles) se descarta sin llamar a la API.
