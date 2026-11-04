@@ -88,7 +88,7 @@ export function SettlementsScreen() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Liquidaciones
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -283,18 +283,16 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
       <TableCell>
         {settlement.property?.address ?? "Propiedad eliminada"}
       </TableCell>
-      <TableCell className="tabular-nums">
-        {settlementLabel(settlement)}
-      </TableCell>
-      <TableCell className="text-right tabular-nums">
+      <TableCell className="num">{settlementLabel(settlement)}</TableCell>
+      <TableCell className="text-right font-display num">
         {money(settlement.rentTotal)}
       </TableCell>
-      <TableCell className="text-right tabular-nums">
+      <TableCell className="text-right num">
         {settlement.feeDeducted
           ? `−${money(settlement.feeTotal)}`
           : money(settlement.feeTotal)}
       </TableCell>
-      <TableCell className="text-right font-medium tabular-nums">
+      <TableCell className="text-right font-display num font-medium">
         {money(settlement.netAmount)}
         {!isZero(settlement.transferredTotal) && (
           <p className="text-xs text-muted-foreground">
@@ -314,7 +312,7 @@ function SettlementCard({ settlement }: { settlement: SettlementSummary }) {
   return (
     <Link
       href={`/liquidaciones/${settlement.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">
@@ -327,10 +325,10 @@ function SettlementCard({ settlement }: { settlement: SettlementSummary }) {
         {settlementLabel(settlement)}
       </p>
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span className="text-muted-foreground tabular-nums">
+        <span className="num text-muted-foreground">
           Alquiler {money(settlement.rentTotal)}
         </span>
-        <span className="font-display font-medium tabular-nums">
+        <span className="font-display num font-medium">
           Neto {money(settlement.netAmount)}
         </span>
       </div>
@@ -399,7 +397,7 @@ function StatementCard({ statement }: { statement: OwnerStatementSummary }) {
   return (
     <Link
       href={`/liquidaciones/consolidados/${statement.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">
@@ -415,7 +413,7 @@ function StatementCard({ statement }: { statement: OwnerStatementSummary }) {
         {statement.closedAt &&
           ` · cerrado el ${formatDate(statement.closedAt.slice(0, 10))}`}
       </p>
-      <p className="text-sm tabular-nums">
+      <p className="num text-sm">
         {statement.totals.length === 0
           ? "Sin totales todavía"
           : statement.totals
@@ -536,7 +534,7 @@ function FeeReceivableList() {
             {pending.length} pendientes de {receivables.length}. El detalle por
             propietario está en su ficha, en «Cuenta de honorarios».
           </p>
-          <ul className="flex flex-col divide-y rounded-xl border bg-card px-4 text-sm">
+          <ul className="flex flex-col divide-y rounded-xl border bg-card px-4 text-sm shadow-raised">
             {receivables.map((receivable) => {
               const meta = FEE_RECEIVABLE_STATUS_META[receivable.status]
               return (
@@ -571,7 +569,7 @@ function FeeReceivableList() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium tabular-nums">
+                    <span className="font-display num font-medium">
                       {formatMoney(receivable.amount, receivable.currency)}
                       {!isZero(receivable.paidAmount) && (
                         <span className="text-xs font-normal text-muted-foreground">

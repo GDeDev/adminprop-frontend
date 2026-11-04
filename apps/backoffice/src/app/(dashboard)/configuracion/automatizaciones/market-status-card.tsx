@@ -19,12 +19,12 @@ export function MarketStatusCard() {
   return (
     <section
       aria-labelledby="market-status-title"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div>
         <h2
           id="market-status-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Datos de mercado
         </h2>

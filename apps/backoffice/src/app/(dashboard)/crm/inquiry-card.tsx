@@ -99,7 +99,7 @@ export function InquiryCardView({
   const due = isFollowUpDue(card, todayIso())
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-sm shadow-xs">
+    <div className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-sm shadow-edge">
       <div className="flex items-start gap-2">
         {dragHandle && (
           <button

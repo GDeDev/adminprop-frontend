@@ -73,7 +73,7 @@ export function PendingPayments() {
         {payments.map((payment) => (
           <li
             key={payment.id}
-            className="rounded-xl border bg-card p-4 text-sm"
+            className="rounded-xl border bg-card p-4 text-sm shadow-raised"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -88,7 +88,7 @@ export function PendingPayments() {
                   {periodLabel(payment.period)}
                 </p>
               </div>
-              <span className="font-display font-medium tabular-nums">
+              <span className="font-display num font-medium">
                 {formatMoney(payment.amount, payment.paidCurrency)}
               </span>
             </div>
@@ -143,10 +143,10 @@ export function PendingPayments() {
                     <ExternalLink aria-hidden className="size-3" />
                   </Link>
                 </TableCell>
-                <TableCell className="tabular-nums">
+                <TableCell className="num">
                   {formatDate(payment.paidAt)}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right font-display num">
                   {formatMoney(payment.amount, payment.paidCurrency)}
                   {exchangeRateLabel(payment, formatDate) && (
                     <p className="text-xs text-muted-foreground">

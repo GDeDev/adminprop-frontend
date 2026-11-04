@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     "@adminprop/mocks",
     "@adminprop/session",
   ],
+  poweredByHeader: false,
   async headers() {
     return [
       {

@@ -27,7 +27,7 @@ export function ProgressPanel({
     <div
       role="status"
       aria-live="polite"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <p className="font-medium">{title}</p>
       {status.isError ? (

@@ -108,7 +108,7 @@ function Detail({ contract }: { contract: ContractDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {contract.property?.address ?? "Propiedad eliminada"}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -231,15 +231,15 @@ function Detail({ contract }: { contract: ContractDetail }) {
         <Section title="Condiciones">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Alquiler vigente</dt>
-            <dd className="font-display text-lg font-semibold tabular-nums">
+            <dd className="font-display num text-title-md font-semibold">
               {money(contract.currentRent)}
             </dd>
             <dt className="text-muted-foreground">Alquiler inicial</dt>
-            <dd className="tabular-nums">{money(contract.initialRent)}</dd>
+            <dd className="font-display num">{money(contract.initialRent)}</dd>
             <dt className="text-muted-foreground">Moneda</dt>
             <dd>{CURRENCY_LABELS[contract.currency]}</dd>
             <dt className="text-muted-foreground">Depósito</dt>
-            <dd className="tabular-nums">{money(contract.deposit)}</dd>
+            <dd className="font-display num">{money(contract.deposit)}</dd>
             <dt className="text-muted-foreground">Actualización</dt>
             <dd>
               {RENT_UPDATE_TYPE_LABELS[contract.rentUpdateType]} ·{" "}
@@ -252,7 +252,7 @@ function Detail({ contract }: { contract: ContractDetail }) {
                 : "—"}
             </dd>
             <dt className="text-muted-foreground">Honorarios</dt>
-            <dd className="tabular-nums">{contract.feePercentage} %</dd>
+            <dd className="num">{contract.feePercentage} %</dd>
           </dl>
           <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
             <CalendarClock aria-hidden className="mt-0.5 size-4 shrink-0" />
@@ -303,11 +303,11 @@ function Detail({ contract }: { contract: ContractDetail }) {
               <dt className="text-muted-foreground">Rescindido el</dt>
               <dd>{formatDate(contract.termination.terminatedAt)}</dd>
               <dt className="text-muted-foreground">Alquiler futuro</dt>
-              <dd className="tabular-nums">
+              <dd className="font-display num">
                 {money(contract.termination.futureRent)}
               </dd>
               <dt className="text-muted-foreground">Multa</dt>
-              <dd className="font-display text-lg font-semibold tabular-nums">
+              <dd className="font-display num text-title-md font-semibold">
                 {money(contract.termination.penalty)}
               </dd>
             </dl>
@@ -384,16 +384,16 @@ function Timeline({
   const percent = Math.min(100, Math.max(0, contract.timeline.progressPercent))
   return (
     <section
-      className="rounded-xl border bg-card p-4"
+      className="rounded-xl border bg-card p-4 shadow-raised"
       aria-label="Línea de tiempo del contrato"
     >
       <div className="mb-2 flex items-baseline justify-between gap-2 text-sm">
-        <span className="tabular-nums">
+        <span className="num">
           <span className="text-muted-foreground">Inicio </span>
           {formatDate(contract.startDate)}
         </span>
         <span className="font-medium">{timelineLabel(contract.timeline)}</span>
-        <span className="tabular-nums">
+        <span className="num">
           <span className="text-muted-foreground">Fin </span>
           {formatDate(contract.endDate)}
         </span>
@@ -480,14 +480,14 @@ function RentHistory({ contract }: { contract: ContractDetail }) {
         {contract.rentUpdates.map((update) => (
           <li key={update.id} className="rounded-lg border p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium tabular-nums">
+              <span className="num font-medium">
                 {formatDate(update.effectiveFrom)}
               </span>
               <Badge variant="outline">
                 {RENT_UPDATE_SOURCE_LABELS[update.source]}
               </Badge>
             </div>
-            <p className="mt-1 tabular-nums">
+            <p className="mt-1 num">
               {update.previousRent ? `${money(update.previousRent)} → ` : ""}
               <span className="font-display font-medium">
                 {money(update.newRent)}
@@ -515,13 +515,13 @@ function RentHistory({ contract }: { contract: ContractDetail }) {
           <TableBody>
             {contract.rentUpdates.map((update) => (
               <TableRow key={update.id}>
-                <TableCell className="tabular-nums">
+                <TableCell className="num">
                   {formatDate(update.effectiveFrom)}
                 </TableCell>
-                <TableCell className="text-right text-muted-foreground tabular-nums">
+                <TableCell className="text-right num text-muted-foreground">
                   {update.previousRent ? money(update.previousRent) : "—"}
                 </TableCell>
-                <TableCell className="text-right font-display font-medium tabular-nums">
+                <TableCell className="text-right font-display num font-medium">
                   {money(update.newRent)}
                 </TableCell>
                 <TableCell>
@@ -575,9 +575,11 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className={`rounded-xl border bg-card p-4 ${className ?? ""}`}>
+    <section
+      className={`rounded-xl border bg-card p-4 shadow-raised ${className ?? ""}`}
+    >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
+        <h2 className="font-display text-title-md font-semibold">{title}</h2>
         {action}
       </div>
       {children}

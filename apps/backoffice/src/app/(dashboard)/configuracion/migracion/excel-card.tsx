@@ -56,7 +56,7 @@ export function ExcelCard() {
   return (
     <section
       aria-labelledby="excel-title"
-      className="flex flex-col gap-4 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div className="flex items-start gap-3">
         <FileSpreadsheet

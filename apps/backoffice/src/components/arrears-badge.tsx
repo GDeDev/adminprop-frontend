@@ -27,7 +27,7 @@ export function ArrearsBadge({
     <span className="inline-flex flex-wrap items-center gap-1.5">
       <Badge variant={meta.badge}>{meta.label}</Badge>
       {lateFee && (
-        <span className="text-xs text-muted-foreground tabular-nums">
+        <span className="num text-xs text-muted-foreground">
           Punitorio {lateFee}
         </span>
       )}

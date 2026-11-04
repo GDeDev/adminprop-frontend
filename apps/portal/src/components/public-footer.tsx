@@ -16,7 +16,9 @@ export async function PublicFooter() {
     <footer className="mt-8 border-t bg-sidebar text-sidebar-foreground">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2 text-sm">
-          <p className="font-display text-lg font-semibold">{branding.name}</p>
+          <p className="font-display text-title-md font-semibold">
+            {branding.name}
+          </p>
           {hasContact ? (
             <ul className="flex flex-col gap-1 text-sidebar-muted">
               {branding.phone && (

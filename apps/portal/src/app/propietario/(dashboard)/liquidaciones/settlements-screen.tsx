@@ -39,7 +39,7 @@ export function OwnerSettlementsScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Liquidaciones
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -111,7 +111,7 @@ export function SettlementRow({
   return (
     <Link
       href={`/propietario/liquidaciones/${settlement.id}`}
-      className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="min-w-0">
         <p className="font-medium">
@@ -119,7 +119,7 @@ export function SettlementRow({
           {periodLabel(settlement.period)}
           {settlement.sequence > 1 && ` (${settlement.sequence})`}
         </p>
-        <p className="text-sm text-muted-foreground tabular-nums">
+        <p className="num text-sm text-muted-foreground">
           Neto {money(settlement.netAmount)}
           {!isZero(settlement.transferredTotal) &&
             ` · transferido ${money(settlement.transferredTotal)}`}
@@ -167,7 +167,7 @@ function StatementList() {
 
 function StatementRow({ statement }: { statement: OwnerStatementSummary }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised">
       <div>
         <p className="font-medium">{periodTitle(statement.period)}</p>
         <p className="text-sm text-muted-foreground">
@@ -176,7 +176,7 @@ function StatementRow({ statement }: { statement: OwnerStatementSummary }) {
           {statement.closedAt &&
             ` · cerrado el ${formatDate(statement.closedAt)}`}
         </p>
-        <p className="text-sm tabular-nums">
+        <p className="num text-sm">
           {statement.totals
             .map((t) => `Neto ${formatMoney(t.netTotal, t.currency)}`)
             .join(" · ")}

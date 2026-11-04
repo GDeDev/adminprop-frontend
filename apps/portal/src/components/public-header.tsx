@@ -10,11 +10,11 @@ export async function PublicHeader() {
   const name = branding?.name ?? "Propiedades en alquiler"
 
   return (
-    <header className="sticky top-0 z-30 bg-sidebar pt-[env(safe-area-inset-top)] text-sidebar-foreground">
+    <header className="sticky top-0 z-30 border-b border-sidebar-border bg-sidebar chrome-glow pt-[env(safe-area-inset-top)] text-sidebar-foreground supports-[backdrop-filter]:bg-sidebar/85 supports-[backdrop-filter]:backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
         <Link
           href="/"
-          className="flex min-w-0 items-center gap-2 font-display text-xl font-semibold tracking-tight"
+          className="flex min-w-0 items-center gap-2 py-2.5 font-display text-title-lg font-semibold"
         >
           {branding?.logoUrl && (
             // Logo del tenant: host variable, sin next/image.
