@@ -7697,7 +7697,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AuthResultDto"]
+          "application/json": Omit<
+            components["schemas"]["ApiSuccessDto"],
+            "data"
+          > & {
+            data: components["schemas"]["AuthResultDto"]
+          }
         }
       }
       /** @description Credenciales inválidas, o cuenta/inmobiliaria deshabilitada (mismo mensaje) */
@@ -7748,7 +7753,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AuthResultDto"]
+          "application/json": Omit<
+            components["schemas"]["ApiSuccessDto"],
+            "data"
+          > & {
+            data: components["schemas"]["AuthResultDto"]
+          }
         }
       }
       /** @description Credenciales inválidas */
@@ -7790,7 +7800,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AuthTokensDto"]
+          "application/json": Omit<
+            components["schemas"]["ApiSuccessDto"],
+            "data"
+          > & {
+            data: components["schemas"]["AuthTokensDto"]
+          }
         }
       }
       /** @description Refresh token inválido, vencido o reusado */
@@ -7859,7 +7874,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["RevokedSessionsDto"]
+          "application/json": Omit<
+            components["schemas"]["ApiSuccessDto"],
+            "data"
+          > & {
+            data: components["schemas"]["RevokedSessionsDto"]
+          }
         }
       }
       /** @description Demasiadas solicitudes. Mirá el header Retry-After. */
@@ -7892,7 +7912,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["RevokedSessionsDto"]
+          "application/json": Omit<
+            components["schemas"]["ApiSuccessDto"],
+            "data"
+          > & {
+            data: components["schemas"]["RevokedSessionsDto"]
+          }
         }
       }
       /** @description La contraseña actual es incorrecta o la nueva es igual a la vigente */
@@ -7930,7 +7955,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["PublicUserDto"]
+          "application/json": Omit<
+            components["schemas"]["ApiSuccessDto"],
+            "data"
+          > & {
+            data: components["schemas"]["PublicUserDto"]
+          }
         }
       }
       /** @description No autenticado */

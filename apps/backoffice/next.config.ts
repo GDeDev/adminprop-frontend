@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: securityHeaders({
           apiUrl: process.env.NEXT_PUBLIC_API_URL,
+          sitesUrl: process.env.NEXT_PUBLIC_SITES_URL,
           isDev: process.env.NODE_ENV !== "production",
         }),
       },

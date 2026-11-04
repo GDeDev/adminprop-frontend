@@ -165,8 +165,8 @@ describe("InstallmentDetailScreen", () => {
       )
     ).toBeInTheDocument()
     expect(
-      within(pagos).getByRole("link", { name: /Comprobante/ })
-    ).toHaveAttribute("href", "https://files.test/recibo.pdf")
+      within(pagos).getByRole("button", { name: /Comprobante/ })
+    ).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Ajustar punitorio" })
     ).toBeInTheDocument()

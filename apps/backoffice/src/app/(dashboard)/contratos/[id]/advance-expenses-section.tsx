@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react"
+import { Pencil, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
@@ -19,8 +19,8 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 import { Tabs, TabsList, TabsTrigger } from "@adminprop/ui/components/tabs"
-import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 
+import { PrivateFileLink } from "@/components/private-file-link"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 import { expenseStatusMeta } from "@/lib/services"
@@ -122,6 +122,12 @@ export function AdvanceExpensesSection({
               <ExpenseRows
                 expenses={query.data.items}
                 canDelete={canDelete}
+                receivedAt={query.dataUpdatedAt}
+                refreshReceipt={async (expenseId) => {
+                  const result = await query.refetch()
+                  return result.data?.items.find((e) => e.id === expenseId)
+                    ?.receiptUrl
+                }}
                 onEdit={(expense) => open({ kind: "edit", expense })}
                 onDelete={(expense) => open({ kind: "delete", expense })}
               />
@@ -184,7 +190,11 @@ function ExpenseRows({
   canDelete,
   onEdit,
   onDelete,
+  receivedAt,
+  refreshReceipt,
 }: {
+  receivedAt: number
+  refreshReceipt: (expenseId: string) => Promise<string | null | undefined>
   expenses: AdvanceExpense[]
   canDelete: boolean
   onEdit: (expense: AdvanceExpense) => void
@@ -211,7 +221,13 @@ function ExpenseRows({
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
               <ExpenseStatus expense={expense} />
               <div className="flex items-center gap-1">
-                <ReceiptLink expense={expense} />
+                {expense.receiptUrl && (
+                  <ReceiptLink
+                    url={expense.receiptUrl}
+                    receivedAt={receivedAt}
+                    refresh={() => refreshReceipt(expense.id)}
+                  />
+                )}
                 <ExpenseActions
                   expense={expense}
                   canDelete={canDelete}
@@ -258,7 +274,13 @@ function ExpenseRows({
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-1">
-                    <ReceiptLink expense={expense} />
+                    {expense.receiptUrl && (
+                      <ReceiptLink
+                        url={expense.receiptUrl}
+                        receivedAt={receivedAt}
+                        refresh={() => refreshReceipt(expense.id)}
+                      />
+                    )}
                     <ExpenseActions
                       expense={expense}
                       canDelete={canDelete}
@@ -294,18 +316,19 @@ function ExpenseStatus({ expense }: { expense: AdvanceExpense }) {
   )
 }
 
-function ReceiptLink({ expense }: { expense: AdvanceExpense }) {
+function ReceiptLink({
+  url,
+  receivedAt,
+  refresh,
+}: {
+  url: string
+  receivedAt: number
+  refresh: () => Promise<string | null | undefined>
+}) {
   return (
-    <Button variant="ghost" size="sm" asChild>
-      <a
-        href={safeHttpUrl(expense.receiptUrl) ?? undefined}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <ExternalLink aria-hidden />
-        Ver comprobante
-      </a>
-    </Button>
+    <PrivateFileLink url={url} receivedAt={receivedAt} refresh={refresh}>
+      Ver comprobante
+    </PrivateFileLink>
   )
 }
 

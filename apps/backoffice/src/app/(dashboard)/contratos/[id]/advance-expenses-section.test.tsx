@@ -97,8 +97,8 @@ describe("AdvanceExpensesSection", () => {
       within(rows[0]!).getByText("Pendiente de descuento")
     ).toBeInTheDocument()
     expect(
-      within(rows[0]!).getByRole("link", { name: "Ver comprobante" })
-    ).toHaveAttribute("href", "https://files.example/canilla.jpg")
+      within(rows[0]!).getByRole("button", { name: "Ver comprobante" })
+    ).toBeInTheDocument()
     expect(
       within(rows[1]!).getByText("Descontado en liquidación")
     ).toBeInTheDocument()

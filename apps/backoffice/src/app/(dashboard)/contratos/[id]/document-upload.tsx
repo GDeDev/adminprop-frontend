@@ -1,12 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { ExternalLink, Upload } from "lucide-react"
+import { Upload } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
 import { Button } from "@adminprop/ui/components/button"
 
+import { PrivateFileLink } from "@/components/private-file-link"
 import { documentProblem } from "@/lib/contracts"
 import {
   useUploadContractDocument,
@@ -21,8 +22,13 @@ export function DocumentActions({
   contractId,
   kind,
   url,
+  receivedAt,
+  refresh,
   label,
 }: {
+  /** Cuándo llegó `url` (ms) y cómo volver a pedirla si ya venció. */
+  receivedAt: number
+  refresh: () => Promise<string | null | undefined>
   contractId: string
   kind: ContractDocumentKind
   url: string | null
@@ -51,12 +57,14 @@ export function DocumentActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {url && (
-        <Button variant="outline" size="sm" asChild>
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            <ExternalLink aria-hidden />
-            Ver {label === "contrato" ? "PDF" : "póliza"}
-          </a>
-        </Button>
+        <PrivateFileLink
+          url={url}
+          receivedAt={receivedAt}
+          refresh={refresh}
+          variant="outline"
+        >
+          Ver {label === "contrato" ? "PDF" : "póliza"}
+        </PrivateFileLink>
       )}
       <Button variant="outline" size="sm" asChild disabled={upload.isPending}>
         <label htmlFor={inputId} className="cursor-pointer">

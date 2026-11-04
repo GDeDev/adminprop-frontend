@@ -27,6 +27,18 @@ describe("apiErrorMessage", () => {
     expect(apiErrorCode(error)).toBe("INVALID_CREDENTIALS")
   })
 
+  it("muestra el motivo de un logo rechazado (TENANT_INVALID_LOGO)", () => {
+    const error = apiError(422, {
+      code: "TENANT_INVALID_LOGO",
+      message: "El SVG no puede contener scripts ni referencias externas.",
+    })
+
+    expect(apiErrorMessage(error, "No se pudo subir el logo.")).toBe(
+      "El SVG no puede contener scripts ni referencias externas."
+    )
+    expect(apiErrorCode(error)).toBe("TENANT_INVALID_LOGO")
+  })
+
   it("sin respuesta (red caída) explica que no hay conexión", () => {
     const error = new AxiosError("Network Error", "ERR_NETWORK")
 

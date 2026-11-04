@@ -6,7 +6,6 @@ import {
   Ban,
   CheckCircle2,
   ChevronLeft,
-  ExternalLink,
   Landmark,
   Plus,
   RefreshCw,
@@ -23,9 +22,9 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 
 import { DownloadPdfButton } from "@/components/download-pdf-button"
+import { PrivateFileLink } from "@/components/private-file-link"
 import { FEE_MODE_LABELS, isZero, periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -78,6 +77,7 @@ export function SettlementDetailScreen({ id }: { id: string }) {
 }
 
 function Detail({ settlement }: { settlement: SettlementDetail }) {
+  const query = useSettlement(settlement.id)
   const { user } = useSession()
   const isAdmin = user?.role === "ADMIN"
   const [dialog, setDialog] = React.useState<DialogState>(null)
@@ -473,16 +473,18 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                   </div>
                   <div className="flex items-center gap-2">
                     {transfer.receiptUrl && (
-                      <Button variant="ghost" size="sm" asChild>
-                        <a
-                          href={safeHttpUrl(transfer.receiptUrl) ?? undefined}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink aria-hidden />
-                          Comprobante
-                        </a>
-                      </Button>
+                      <PrivateFileLink
+                        url={transfer.receiptUrl}
+                        receivedAt={query.dataUpdatedAt}
+                        refresh={async () => {
+                          const result = await query.refetch()
+                          return result.data?.transfers.find(
+                            (t) => t.id === transfer.id
+                          )?.receiptUrl
+                        }}
+                      >
+                        Comprobante
+                      </PrivateFileLink>
                     )}
                     {isAdmin && !transfer.voidedAt && (
                       <Button
