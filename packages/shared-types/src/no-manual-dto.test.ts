@@ -29,6 +29,15 @@ const KNOWN_DIFFERENCES: Record<string, string> = {
     "extiende AuditEntry con AuditChange[], que se queda a mano (ver AuditChange)",
   ApiSuccess:
     "el sobre es genérico (`ApiSuccess<T>`); el generado trae `data: {}`",
+  CrmOverviewDto:
+    "el OpenAPI declara byStage/bySource como { [key: string]: number }, sin las claves",
+  PropertyInquiryAnalytics:
+    "el OpenAPI declara byStage/bySource como { [key: string]: number }, sin las claves",
+  ImportCounts:
+    "el OpenAPI declara byEntity como { [key: string]: ImportEntityCountsDto }, sin las cinco entidades",
+  ImportBatchSummary: "usa ImportCounts (ver ImportCounts)",
+  ImportBatchDetail:
+    "extiende ImportBatchSummary; además el OpenAPI trae errorMessage, que el manual no tiene",
   PortalRenterContract:
     "el OpenAPI declara string donde la API manda uniones cerradas (status, currency, ...)",
   PortalRenterAccount:
