@@ -8,6 +8,7 @@ import {
   listingSearch,
   pageWindow,
   parseListingQuery,
+  withSortCurrency,
 } from "@/lib/listing-query"
 import { loadSite } from "@/lib/load-site"
 import { isFilteredListing, pageSeo } from "@/lib/seo"
@@ -51,12 +52,15 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
   const { site, route } = loaded
   const kit = templateKit(site.template)
   const query = parseListingQuery(await searchParams)
+  // Ordenar por precio exige una moneda (el backend no mezcla ARS y USD).
+  const { query: apiQuery, defaulted: currencyDefaulted } =
+    withSortCurrency(query)
 
   // Un rango de precio sin moneda se compara en la de la inmobiliaria (lo
   // resuelve la API); acá solo se pasan los filtros.
   // Si la API falla, el listado muestra su propio aviso en vez de la página de error.
   const [result, filters] = await Promise.all([
-    getProperties(route, query).catch(() => null),
+    getProperties(route, apiQuery).catch(() => null),
     getFilters(route).catch(() => null),
   ])
 
@@ -121,6 +125,12 @@ export default async function PropertiesPage({ params, searchParams }: Props) {
               </p>
               <SortLinks route={route} query={query} />
             </div>
+            {currencyDefaulted && (
+              <p className="text-site-muted mb-6 text-sm">
+                Ordenado por precio en pesos. Para ver los precios en dólares,
+                elegí «Dólares» en «Moneda del precio» y buscá.
+              </p>
+            )}
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {properties.map((property, i) => (
                 <li key={property.id}>

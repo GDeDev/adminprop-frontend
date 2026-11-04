@@ -48,6 +48,31 @@ export function parseListingQuery(params: RawParams): ListingQuery {
   return query
 }
 
+/**
+ * Moneda con la que se ordena por precio cuando la persona no eligió una.
+ * El backend pide `currency` junto con `sort=price_*` para no mezclar pesos y
+ * dólares en el mismo orden; el sitio no conoce la moneda de la inmobiliaria,
+ * así que parte de pesos (la persona puede cambiarla en «Moneda del precio»).
+ */
+export const DEFAULT_SORT_CURRENCY = "ARS" as const
+
+/**
+ * La query que se manda a la API: con orden por precio y sin moneda elegida,
+ * agrega la de respaldo. `defaulted` avisa para decirlo en pantalla.
+ */
+export function withSortCurrency(query: ListingQuery): {
+  query: ListingQuery
+  defaulted: boolean
+} {
+  if (query.sort && !query.currency) {
+    return {
+      query: { ...query, currency: DEFAULT_SORT_CURRENCY },
+      defaulted: true,
+    }
+  }
+  return { query, defaulted: false }
+}
+
 /** Los filtros como `?a=1&b=2` (sin la página, que se agrega aparte). */
 export function listingSearch(
   query: ListingQuery,
