@@ -1,6 +1,8 @@
 /**
  * Contrato del sitio web de la inmobiliaria (spec `web-inmobiliaria.md`,
- * sección 5.1). Está escrito exactamente como la spec: si algo tiene que
+ * sección 5.1). Es equivalente en contenido a la spec: mismos tipos, campos y
+ * comentarios; Prettier reformateó el bloque (sin punto y coma, otros espacios)
+ * y se agregó este encabezado. Si algo tiene que
  * cambiar, se cambia primero allá y se anota como desvío.
  */
 export type SiteTemplateKey = "CLASSIC" | "MODERN"

@@ -9,7 +9,7 @@ Rama `feature/web-inmobiliaria-sites` → `dev`. Spec: `adminprop-repo-files/spe
 1. **`apps/sites`** (puerto 3003): el sitio público de cada inmobiliaria, con los dos templates (`CLASSIC` y `MODERN`), resolución por host o por `/_s/<slug>`, ISR, SEO, listado con filtros, ficha, contacto, sitemap y robots.
 2. **«Mi sitio web»** (`/sitio-web`, solo ADMIN) en el backoffice: estado, elección de template, pestañas Diseño / Contenido / Secciones / Dominio, vista previa en iframe con selector de ancho, guardar borrador, publicar y despublicar. _(Lo escribió un subagente; detalle en `docs/tecnica/web-inmobiliaria-backoffice.md`.)_
 3. **Campos de propiedad** en el wizard (paso «Publicación») y la ficha: operación, precio y moneda, descripción pública, ambientes, dormitorios, baños, superficies y antigüedad.
-4. `packages/shared-types/src/site.ts` **verbatim de la sección 5.1**, tipos regenerados desde el `openapi.json` real del backend y un chequeo de tipos que falla si la API deja de cumplir el contrato.
+4. `packages/shared-types/src/site.ts` **equivalente en contenido a la sección 5.1 de la spec (mismos tipos y campos; Prettier reformateó el bloque —sin punto y coma, otros espacios— y se agregó un comentario de cabecera)**, tipos regenerados desde el `openapi.json` real del backend y un chequeo de tipos que falla si la API deja de cumplir el contrato.
 
 ## Para revisar (lo más importante)
 
@@ -23,7 +23,7 @@ Rama `feature/web-inmobiliaria-sites` → `dev`. Spec: `adminprop-repo-files/spe
 
 ## Desvíos respecto del contrato
 
-- `site.ts` **sin desvíos** (es el bloque de la spec). La API es más estrecha que el contrato en `radius`, `template` y los `enum` (el chequeo es de un solo sentido a propósito).
+- `site.ts` **sin desvíos de contenido** (es equivalente al bloque de la spec; ver arriba). La API es más estrecha que el contrato en `radius`, `template` y los `enum` (el chequeo es de un solo sentido a propósito).
 - El listado no es ISR (DT-117); la vista previa usa `/p` en lugar de leer `?preview` en las mismas páginas (DT-116); selector de ubicación como `<select>` (A-SITES-2).
 - Se arregló el typecheck de backoffice y portal que había dejado roto la regeneración de los tipos (fixtures sin campos nuevos de la API) y se agregó la etiqueta «Consulta nueva del sitio» para el aviso `PUBLIC_INQUIRY` (texto que inventó el subagente: revisarlo).
 

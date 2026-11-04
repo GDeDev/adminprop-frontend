@@ -4,7 +4,7 @@ Spec: `adminprop-repo-files/specs/web-inmobiliaria.md` (sesión B). Backend: ram
 
 ## Qué se construyó
 
-- `packages/shared-types/src/site.ts`: **la sección 5.1 de la spec, verbatim** (se verificó byte a byte contra el bloque de la spec al crearlo). Extras del backend en `site-api.ts`; alias del OpenAPI y `site.contract.ts` (comprobación de tipos, un solo sentido). `generated/api.ts` regenerado desde el `openapi.json` real del backend.
+- `packages/shared-types/src/site.ts`: **equivalente en contenido a la sección 5.1 de la spec (mismos tipos y campos; Prettier reformateó el bloque —sin punto y coma, otros espacios— y se agregó un comentario de cabecera)** (se comparó por tokens contra el bloque de la spec: la única diferencia son los `;`). Extras del backend en `site-api.ts`; alias del OpenAPI y `site.contract.ts` (comprobación de tipos, un solo sentido). `generated/api.ts` regenerado desde el `openapi.json` real del backend.
 - `apps/sites` (puerto 3003): Next 16.3.5, Tailwind 4, sin NextUI/MUI, sin sesión ni cookies.
 - Pantalla «Mi sitio web» y campos de propiedad en el backoffice (ver doc del backoffice).
 
