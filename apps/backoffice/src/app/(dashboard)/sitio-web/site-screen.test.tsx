@@ -192,7 +192,7 @@ describe("Mi sitio web", () => {
       const user = userEvent.setup()
       const save = screen.getByRole("button", { name: "Guardar borrador" })
       expect(save).toBeDisabled()
-      expect(screen.getByText("Borrador guardado")).toBeInTheDocument()
+      expect(screen.getByText("Guardado")).toBeInTheDocument()
 
       // Un color del tema…
       const primary = screen.getByLabelText("Color principal")
@@ -218,7 +218,7 @@ describe("Mi sitio web", () => {
       )
       expect(body).not.toHaveProperty("template")
       await waitFor(() =>
-        expect(screen.getByText("Borrador guardado")).toBeInTheDocument()
+        expect(screen.getByText("Guardado")).toBeInTheDocument()
       )
     })
 
@@ -261,11 +261,127 @@ describe("Mi sitio web", () => {
       expect(screen.getByText("Algo no cerró.")).toBeInTheDocument()
       expect(screen.getByText(/Hay 2 cosas para corregir/)).toBeInTheDocument()
       // Sigue con cambios sin guardar.
-      expect(screen.getByText("Tenés cambios sin guardar")).toBeInTheDocument()
+      expect(screen.getByText(/Tenés cambios sin guardar/)).toBeInTheDocument()
 
       // Al corregir el campo, su error se va.
       await user.type(answer, "y")
       expect(screen.queryByText("La respuesta es muy larga.")).toBeNull()
+    })
+  })
+
+  describe("autoguardado", { timeout: 20_000 }, () => {
+    const WAIT = { timeout: 4000 }
+
+    async function editPrimary(
+      user: ReturnType<typeof userEvent.setup>,
+      value: string
+    ) {
+      const primary = screen.getByLabelText("Color principal")
+      await user.clear(primary)
+      await user.type(primary, value)
+    }
+
+    it("guarda solo, una vez, cuando se deja de escribir, y marca Guardado", async () => {
+      render(<SiteScreen />)
+      const user = userEvent.setup()
+      await editPrimary(user, "#000000")
+
+      // Mientras se escribe no guarda: el indicador avisa que hay cambios.
+      expect(update).not.toHaveBeenCalled()
+      expect(screen.getByText("Tenés cambios sin guardar")).toBeInTheDocument()
+
+      await waitFor(() => expect(update).toHaveBeenCalledTimes(1), WAIT)
+      expect(update.mock.calls[0]![0]).toEqual({
+        theme: { primary: "#000000" },
+      })
+      await waitFor(() =>
+        expect(screen.getByText("Guardado")).toBeInTheDocument()
+      )
+    })
+
+    it("si falla por la red, muestra Error al guardar y no reintenta solo en bucle", async () => {
+      update.mockRejectedValue(new Error("offline"))
+      render(<SiteScreen />)
+      const user = userEvent.setup()
+      await editPrimary(user, "#000000")
+
+      expect(
+        await screen.findByText(/Error al guardar/, undefined, WAIT)
+      ).toBeInTheDocument()
+      // Los mismos datos no se reenvían solos.
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      expect(update).toHaveBeenCalledTimes(1)
+
+      // «Reintentar» sí lo vuelve a intentar, y al salir bien queda Guardado.
+      update.mockResolvedValue(undefined)
+      await user.click(screen.getByRole("button", { name: "Reintentar" }))
+      await waitFor(() => expect(update).toHaveBeenCalledTimes(2))
+      await waitFor(() =>
+        expect(screen.getByText("Guardado")).toBeInTheDocument()
+      )
+    })
+
+    it("un 422 marca el campo sin cambiar de pestaña y no se vuelve a enviar lo inválido", async () => {
+      update.mockRejectedValue(
+        apiFailure([
+          {
+            field: "content.faqs[1].answer",
+            message: "La respuesta es muy larga.",
+          },
+        ])
+      )
+      render(<SiteScreen />)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole("tab", { name: "Contenido" }))
+      await openBlock(user, /^Preguntas frecuentes/)
+      const answer = screen.getAllByLabelText("Respuesta")[1]!
+      await user.type(answer, " x")
+
+      expect(
+        await screen.findByText("La respuesta es muy larga.", undefined, WAIT)
+      ).toBeInTheDocument()
+      expect(answer).toHaveAttribute("aria-invalid", "true")
+      // Sigue en la pestaña donde estaba escribiendo.
+      expect(screen.getByRole("tab", { name: "Contenido" })).toHaveAttribute(
+        "aria-selected",
+        "true"
+      )
+      // No se guardó nada: se dice, y no hay reintentos con lo mismo.
+      expect(
+        screen.getByText(/corregí los campos marcados/)
+      ).toBeInTheDocument()
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      expect(update).toHaveBeenCalledTimes(1)
+      expect(screen.getByText("La respuesta es muy larga.")).toBeInTheDocument()
+
+      // Al corregir el campo, el error se va y vuelve a guardar solo.
+      update.mockResolvedValue(undefined)
+      await user.type(answer, "y")
+      expect(screen.queryByText("La respuesta es muy larga.")).toBeNull()
+      await waitFor(() => expect(update).toHaveBeenCalledTimes(2), WAIT)
+    })
+
+    it("no pisa lo que se escribió mientras se guardaba", async () => {
+      let finish: () => void = () => {}
+      update.mockImplementationOnce(
+        () => new Promise<void>((resolve) => (finish = resolve))
+      )
+      render(<SiteScreen />)
+      const user = userEvent.setup()
+      await editPrimary(user, "#000000")
+      await waitFor(() => expect(update).toHaveBeenCalledTimes(1), WAIT)
+
+      // Se sigue escribiendo con el primer guardado en vuelo.
+      const secondary = screen.getByLabelText("Color secundario")
+      await user.clear(secondary)
+      await user.type(secondary, "#111111")
+      finish()
+
+      // El segundo cambio sigue pendiente (no se descartó) y se guarda después.
+      await waitFor(() => expect(update).toHaveBeenCalledTimes(2), WAIT)
+      expect(update.mock.calls[1]![0]).toEqual({
+        theme: { primary: "#000000", secondary: "#111111" },
+      })
     })
   })
 
@@ -579,7 +695,7 @@ describe("Mi sitio web", () => {
       expect(update).toHaveBeenCalledWith({ customDomain: "www.oppido.com.ar" })
     )
     // No ensució el borrador.
-    expect(screen.getByText("Borrador guardado")).toBeInTheDocument()
+    expect(screen.getByText("Guardado")).toBeInTheDocument()
   })
 
   it("los textos del editor son texto plano (no se interpreta HTML)", async () => {

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, CircleDot, Globe } from "lucide-react"
+import { Check, CircleDot, Globe, Loader2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
@@ -62,6 +62,9 @@ import { SectionsTab } from "./sections-tab"
 import { StatusCard } from "./status-card"
 import { TemplatePicker } from "./template-picker"
 import { useUnsavedGuard } from "./use-unsaved-guard"
+
+/** Cuánto se espera sin cambios antes de guardar el borrador solo. */
+const AUTOSAVE_DELAY_MS = 1500
 
 type TabKey = "diseno" | "contenido" | "secciones" | "dominio" | "vista"
 
@@ -170,6 +173,10 @@ function Editor({
 
   const guard = useUnsavedGuard(dirty)
 
+  // Autoguardado: el último error de red/servidor y los datos que ya fallaron.
+  const [autosaveError, setAutosaveError] = React.useState<string | null>(null)
+  const lastFailed = React.useRef<SiteSettingsDraft | null>(null)
+
   const [confirmPublish, setConfirmPublish] = React.useState(false)
   const [confirmUnpublish, setConfirmUnpublish] = React.useState(false)
   const [publishProblems, setPublishProblems] = React.useState<
@@ -181,6 +188,7 @@ function Editor({
   /* -------------------------- edición local -------------------------- */
 
   function edit(change: (current: SiteSettingsDraft) => SiteSettingsDraft) {
+    setAutosaveError(null)
     setLocal((prev) => change(prev ?? settings.draft))
   }
 
@@ -198,12 +206,17 @@ function Editor({
   /* ----------------------------- errores ----------------------------- */
 
   /** Muestra los errores por campo de un 422; devuelve la lista (vacía si no era de campos). */
-  function showFieldErrors(cause: unknown): SiteFieldError[] {
+  function showFieldErrors(
+    cause: unknown,
+    { navigate = true }: { navigate?: boolean } = {}
+  ): SiteFieldError[] {
     const list = siteErrorList(cause)
     if (list.length === 0) return list
     const mapped = mapFieldErrors(list)
     setErrors(mapped.byPath)
     setUnmapped(mapped.unmapped)
+    // El autoguardado no mueve a la persona de pestaña mientras escribe.
+    if (!navigate) return list
     const blocks = blocksWithErrors(mapped.byPath)
     const contentBlocks = blocks.filter((b) => b !== "sections")
     if (contentBlocks.length > 0) {
@@ -224,26 +237,66 @@ function Editor({
 
   /* ----------------------------- acciones ---------------------------- */
 
-  /** Guarda lo que cambió. `true` si no había nada o se guardó. */
-  async function save(): Promise<boolean> {
-    const patch = local ? buildDraftPatch(settings.draft, local) : null
+  /**
+   * Guarda lo que cambió. `true` si no había nada o se guardó. Con `silent`
+   * (autoguardado) no hay toasts ni se cambia de pestaña: un 422 solo marca los
+   * campos y deja de reintentar esos mismos datos hasta que se edite algo.
+   */
+  async function save({ silent = false } = {}): Promise<boolean> {
+    const snapshot = local
+    const patch = snapshot ? buildDraftPatch(settings.draft, snapshot) : null
     if (!patch) return true
+    setAutosaveError(null)
     try {
       await update.mutateAsync(patch)
-      setLocal(null)
+      // Si se siguió escribiendo mientras se guardaba, esa edición se conserva:
+      // `local` ya es otro objeto y su diferencia con lo guardado sigue marcada.
+      setLocal((current) => (current === snapshot ? null : current))
+      lastFailed.current = null
       resetErrors()
       setPreviewVersion((v) => v + 1)
-      toast.success("Borrador guardado.")
+      if (!silent) toast.success("Borrador guardado.")
       return true
     } catch (cause) {
-      if (showFieldErrors(cause).length > 0) {
-        toast.error("Revisá los campos marcados: no se pudo guardar.")
+      lastFailed.current = snapshot
+      const fieldErrors = showFieldErrors(cause, { navigate: !silent })
+      if (fieldErrors.length > 0) {
+        if (!silent) {
+          toast.error("Revisá los campos marcados: no se pudo guardar.")
+        }
       } else {
-        toast.error(apiErrorMessage(cause, "No se pudo guardar el borrador."))
+        const message = apiErrorMessage(
+          cause,
+          "No se pudo guardar el borrador."
+        )
+        if (silent) setAutosaveError(message)
+        else toast.error(message)
       }
       return false
     }
   }
+
+  // Siempre la última versión de `save` para el temporizador del autoguardado.
+  const saveRef = React.useRef(save)
+  React.useEffect(() => {
+    saveRef.current = save
+  })
+
+  /**
+   * Autoguardado del borrador: pasado un rato sin escribir, guarda solo. No
+   * corre si hay una operación en curso, si hay campos marcados con error (hay
+   * que corregirlos: guardar de todos modos reenviaría lo inválido) ni para
+   * reintentar los mismos datos que ya fallaron. «Guardar borrador» sigue ahí.
+   */
+  React.useEffect(() => {
+    if (!dirty || busy || errorCount > 0 || local === null) return
+    if (lastFailed.current === local) return
+    const timer = window.setTimeout(
+      () => void saveRef.current({ silent: true }),
+      AUTOSAVE_DELAY_MS
+    )
+    return () => window.clearTimeout(timer)
+  }, [dirty, busy, errorCount, local])
 
   async function confirmAndPublish() {
     setPublishProblems(null)
@@ -344,16 +397,51 @@ function Editor({
         />
 
         <div className="sticky top-14 z-20 -mx-4 flex flex-wrap items-center justify-between gap-2 border-y bg-background/95 px-4 py-2 backdrop-blur md:top-0 md:-mx-8 md:px-8">
-          <p role="status" className="flex items-center gap-1.5 text-sm">
-            {dirty ? (
+          <p
+            role="status"
+            data-autosave={
+              update.isPending
+                ? "saving"
+                : autosaveError
+                  ? "error"
+                  : dirty
+                    ? "pending"
+                    : "saved"
+            }
+            className="flex items-center gap-1.5 text-sm"
+          >
+            {update.isPending ? (
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Loader2 aria-hidden className="size-4 animate-spin" />
+                Guardando…
+              </span>
+            ) : autosaveError ? (
+              <>
+                <TriangleAlert
+                  aria-hidden
+                  className="size-4 text-destructive"
+                />
+                <span>Error al guardar. {autosaveError}</span>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto min-h-11 p-0 md:min-h-0"
+                  onClick={() => void save()}
+                >
+                  Reintentar
+                </Button>
+              </>
+            ) : dirty ? (
               <>
                 <CircleDot aria-hidden className="size-4 text-warning" />
-                Tenés cambios sin guardar
+                {errorCount > 0
+                  ? "Tenés cambios sin guardar: corregí los campos marcados"
+                  : "Tenés cambios sin guardar"}
               </>
             ) : (
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <Check aria-hidden className="size-4" />
-                Borrador guardado
+                Guardado
               </span>
             )}
           </p>
