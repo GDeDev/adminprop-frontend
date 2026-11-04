@@ -555,3 +555,168 @@ Ni el formulario de propiedad ni `PropertyDetail` tienen hoy `listingPrice`/`lis
 ### DT-106 — Superficie, barra de rango y permisos
 
 La ficha no guarda superficie ni ambientes (A-69), así que el sheet siempre los ofrece (superficie con la aclaración de que sin ella la sugerencia es menos precisa; moneda: la de la propiedad, ARS o USD). La superficie se normaliza con `normalizeAmount` y se manda como string. La posición del sugerido en la barra (`markerPosition`) es sólo layout, calculada con `Number` y acotada a 0–100: ningún monto se calcula en pantalla. `GET /valuation/market-coverage` se pide al abrir el sheet; si `enoughData` es falso se avisa pero el botón «Calcular» sigue activo. No hay entrada nueva de menú: la tasación está disponible para administrador y empleado en la ficha, y la tarjeta «Datos de mercado» (estado por fuente) está en Configuración → Automatizaciones, que ya es sólo de administradores.
+
+### DT-107 — «Mi sitio web»: una copia local del borrador y un PUT con solo lo que cambió
+
+El editor guarda una copia local del `draft` (`null` mientras no se toca nada) y «Guardar borrador» manda `buildDraftPatch(guardado, local)`: `template` si cambió, los campos del tema que cambiaron (la API los mezcla campo a campo) y cada bloque de `content` tocado **entero** (la API reemplaza el bloque completo, D-158). Tras guardar se descarta la copia y se vuelve a leer lo que devolvió la API. La consulta de `/site/settings` no se refresca al volver a la pestaña para que el borrador local no se pise solo.
+
+### DT-108 — Errores 422: del `field` de la API al input, y el resto en un resumen
+
+`resolveFieldPath` lleva `content.faqs[2].answer` al propio input; si el `field` no es un input (`content.faqs`, `content.faqs[3]`, `content.sections[1].key`) cae en el bloque que lo contiene, y lo que no se reconoce va a un resumen arriba. Al llegar errores se abren los acordeones afectados y se cambia a la pestaña que corresponde; el error de un campo se borra al editarlo y los de una lista al agregar, quitar o mover (las posiciones cambian). Los problemas de «Publicar» (422) se listan en el diálogo y además se marcan en los campos.
+
+### DT-109 — Cambio de template: guarda lo pendiente y después restaura (o no) el tema
+
+El contrato dice «PUT template y, si acepta, POST reset-template con `keepContent: true`». Se implementó tal cual y, como el PUT sale con `buildDraftPatch`, **también guarda los cambios sin guardar** que hubiera (el diálogo lo avisa). Si se restaura el tema, lo editado en el tema local se pierde por diseño. La API corrige sola la `fontKey` si el template nuevo no la tiene (D-158).
+
+### DT-110 — Vista previa: iframe escalado, token renovado y recarga por guardado
+
+URL: `${NEXT_PUBLIC_SITES_URL ?? "http://localhost:3003"}/_s/${slug}?preview=${token}`; el slug sale de `GET /tenants/current/settings` (`useTenantSettings`). El iframe se monta al ancho real del dispositivo (375/768/1280) y se escala con `transform: scale()` según el ancho medido del panel. El token se pide de nuevo un minuto antes de `expiresAt` (`refetchInterval`); como el `src` cambia con él, el iframe se recarga una vez cada ~14 minutos (se prefirió a congelar el token en un efecto). Cada guardado cambia la `key` del iframe y lo recarga. El iframe lleva `sandbox` y `referrerPolicy="no-referrer"`. En pantallas de 1536 px o más el panel va al costado; debajo, en la pestaña «Vista previa». No hay CSP propia en el backoffice que bloquee el iframe; `apps/sites` tiene que permitir ser embebida desde el origen del backoffice (`frame-ancestors`), cosa que no se pudo verificar acá.
+
+### DT-111 — Aviso al salir con cambios: `beforeunload` y click en links internos
+
+El App Router no expone un evento «antes de navegar». Con cambios sin guardar se escucha `beforeunload` (cerrar o recargar) y, en captura, el click en cualquier `<a>` interno (menú, «Volver», etc.), que se frena y abre el diálogo «¿Salir sin guardar?». **No se puede frenar el botón «atrás» del navegador** ni un `router.push` hecho por otro componente.
+
+### DT-112 — Dominio propio: instrucciones genéricas; destino del CNAME por variable
+
+La spec pide «instrucciones DNS» pero el destino del CNAME depende del despliegue de `apps/sites` y no está en el contrato. Las instrucciones son pasos genéricos (CNAME de `www`, redirección del dominio pelado, demora de hasta 24 h) y el destino se muestra si existe `NEXT_PUBLIC_SITES_DNS_TARGET`; si no, dice que lo pasa el equipo de Adminprop. Guardar el dominio no verifica el DNS (A-127 del backend). Subdominio y dominio se guardan al instante con su propio botón y su propio `PUT` (`{ subdomain }` / `{ customDomain }`), fuera del borrador; los conflictos 409 se distinguen por `code` (`SUBDOMAIN_TAKEN`, `DOMAIN_TAKEN`). La disponibilidad se consulta con debounce de 400 ms y solo si el formato es válido.
+
+### DT-113 — Campos de publicación de la propiedad: paso propio del wizard y `null` para borrar
+
+El wizard suma el paso «Publicación» (operación con Alquiler por defecto, precio y moneda, descripción pública, ambientes, dormitorios, baños, superficie total y cubierta, antigüedad); el formulario no tenía precio, moneda ni descripción pública, así que se agregaron junto con los demás (la API ya los aceptaba). Rangos del backend: enteros 0–99, superficies 0–99.999.999 con hasta 2 decimales, antigüedad 0–500, precio `\d{1,12}(\.\d{1,2})?` (se acepta «150.000,50»); descripción hasta 2000. Vacío = no cargado: al crear se omite y al editar se manda `null` para borrarlo. Latitud y longitud no se muestran ni se mandan (la edición manda `UpdatePropertyDto` sin ellas, así que se conservan). `DT-105` queda cubierta en lo que pedía: ya existen precio y moneda en el formulario; «Usar este precio» de la tasación sigue siendo opcional y no se conectó.
+
+### DT-114 — Accordion en `packages/ui` y un componente nuevo de menú
+
+`Accordion` se agregó con el patrón de shadcn sobre `radix-ui` (disparador de 44 px, solo tokens). «Mi sitio web» es una entrada de menú solo para administradores (`visibleNavItems`; hasta ahora ninguna entrada se filtraba por rol), también dentro de «Más» en mobile. Las pantallas siguen comprobando el rol además de ocultar el menú.
+
+## Sitios web de las inmobiliarias (`apps/sites`)
+
+### DT-115 — Un solo segmento `[site]` que codifica modo, slug y token
+
+El `proxy` (Next 16 lo llama así) reescribe cada pedido a `/s/<sitio>/…`, donde `<sitio>` es `h~slug` (por host), `d~slug` (por `/_s/slug`) o, con vista previa, `hp~slug~token` / `dp~slug~token`. Un solo segmento permite que cada combinación tenga su propia entrada de caché y que los links sepan su prefijo (`/_s/slug` solo en el modo `d`). Nada externo entra a `/s/…` ni a `/p/…`: el proxy lo manda a un 404 interno.
+
+### DT-116 — La vista previa vive en su propio árbol `/p/…`
+
+El borrador no puede cachearse y un `fetch` sin caché dentro de una ruta con ISR hace que Next falle en runtime («Page changed from static to dynamic»; lo vi en la primera prueba). La vista previa se reescribe a `/p/…`, un árbol `force-dynamic` que **reexporta las mismas páginas** de `/s/…`. Lo publicado conserva ISR; el borrador nunca se cachea ni se indexa (`noindex`, `robots` con `Disallow: /`).
+
+### DT-117 — ISR en home y ficha; listado dinámico
+
+Home, ficha, contacto y «nosotros» usan `revalidate = 60` con `generateStaticParams() => []` (se arman al primer pedido). El listado depende de la query (filtros y página) y es `force-dynamic`: la API cachea el listado un minuto, así que el costo es bajo. **Desvío leve de la spec** («render con ISR»): el listado no es ISR.
+
+### DT-118 — Tema por variables CSS, validado otra vez en el sitio
+
+`--site-primary/-secondary/-background/-surface/-text/-radius/-font` (+ `on-primary` y `on-secondary`, calculados por luminancia para que el texto de los botones siempre contraste). Tailwind las expone como `bg-site-primary`, `text-site-text`, `rounded-site`, `font-site`. Aunque la API ya valida, `themeStyle` revalida (hex, radio de la lista, fuente de la lista): a un atributo `style` nunca llega texto libre. El foco usa el color del texto, que siempre contrasta con el fondo.
+
+### DT-119 — Fuentes del sistema, sin `next/font`
+
+Las cuatro opciones (`system`, `serif`, `humanist`, `rounded`) son pilas de fuentes del sistema (D-185 del backend): cero descargas, mejor rendimiento y nada que falle en el build sin red.
+
+### DT-120 — `<img>` y no `next/image`
+
+Las fotos vienen del storage de cada inmobiliaria o de hosts permitidos; el optimizador de Next obligaría a listar todos los dominios y sería un proxy abierto. `SiteImage` es un `<img>` con `alt` obligatorio, `loading`, `fetchpriority` y `referrerpolicy="no-referrer"`, con un único `eslint-disable` comentado.
+
+### DT-121 — CSP con `'unsafe-inline'` en scripts
+
+Next inyecta scripts en línea para hidratar y un nonce por pedido obligaría a renderizar todo en cada visita (adiós ISR). A cambio: nada del usuario llega al DOM como HTML (todo es texto de React; el JSON-LD va como texto con `<` escapado), no hay cookies ni sesión, y el resto de las directivas queda cerrado (`default-src 'self'`, `connect-src 'self'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'`). Las imágenes admiten `https:`; en desarrollo `SITES_IMAGE_SOURCES` habilita `http://localhost:3000` (storage local).
+
+### DT-122 — `frame-ancestors` solo para la vista previa
+
+La regla general prohíbe embeber el sitio. Un segundo `headers()` con `has: query preview` (la última regla gana para la misma clave) lo permite para `SITES_PREVIEW_ANCESTORS` (default de desarrollo: `http://localhost:3001`, el backoffice). En producción **hay que cargar el origen del backoffice** o el iframe de la vista previa queda bloqueado.
+
+### DT-123 — El contacto pasa por el propio sitio
+
+`POST <base>/api/contacto` reenvía a `POST /public/:slug/contact` desde el servidor. Así el navegador nunca habla con la API desde un dominio propio (sin CORS que mantener por cada dominio) y se puede comprobar el `Origin`. Reenvía `X-Forwarded-For` con la IP del visitante para que el límite de 5 por hora de la API cuente personas y no al servidor (A-142 del backend: requiere `TRUST_PROXY=true`). En la vista previa no envía.
+
+### DT-124 — Resolución del host con caché en el proxy
+
+`resolveHost` (`GET /public/site-by-host`) con caché en memoria de 30 s (10 s los fallos). El `Host` se toma de `x-forwarded-host` si existe.
+
+### DT-125 — Aparición de secciones solo con CSS
+
+Las secciones aparecen con `animation-timeline: view()`: cero JavaScript, y sin soporte o con `prefers-reduced-motion` el contenido se ve de entrada (un primer intento con `IntersectionObserver` dejaba secciones invisibles hasta hidratar y costaba TBT). El buscador es un `<form method="get">` de servidor: funciona sin JS y cada búsqueda es una URL compartible.
+
+### DT-126 — Ampliaciones de `shared-types/public-listing.ts`
+
+`PublicPropertySummary` suma `operation`, `rooms`, `coveredAreaM2` y `ageYears`; `PublicListingQuery` suma `operation`, `bedrooms`, `bathrooms` e `ids`. Son aditivos y coinciden con el backend (D-187). `site.ts` es equivalente en contenido a la spec (5.1) y `site.contract.ts` falla el `tsc` si el OpenAPI deja de ser asignable al contrato (la comprobación es de un solo sentido: la API es más estrecha, p. ej. `radius: 0|8|16|24`).
+
+### Supuestos (sitios)
+
+- **A-SITES-1** · Los textos por defecto del sitio (pasos, servicios, preguntas) los fija el backend (D-186); `apps/sites` no inventa contenido.
+- **A-SITES-2** · Selector de ubicación como `<select>` (no autocompletado como en el sitio de referencia): es accesible y funciona sin JS; con cientos de zonas habría que pasar a un combobox.
+- **A-SITES-3** · Redes sociales con glifos propios en SVG (lucide ya no trae logos de marcas).
+- **A-SITES-4** · «Propiedades parecidas» = misma operación, sin la actual (la ficha pública no expone el id del tipo).
+- **A-SITES-5** · Variables de entorno nuevas de `apps/sites`: `API_URL` (o `NEXT_PUBLIC_API_URL`), `SITES_PREVIEW_ANCESTORS`, `SITES_ALLOW_SLUG_PATH`, `SITES_IMAGE_SOURCES`. **Pendiente de Giuliano**: crearlas en Doppler (config nueva para `sites`) y cargar `SITES_BASE_DOMAIN` en el backend.
+
+### Segunda ronda (revisión de los PR)
+
+Salió de revisar el código de los dos PR (seguridad, correctitud, usabilidad y rendimiento). Lo que sigue corrige o mejora lo de arriba.
+
+### DT-127 — Una falla de la API no se cachea como "no existe"
+
+`get()` devuelve `null` solo ante un 404; cualquier otra falla (red, 5xx, 429) lanza `UpstreamError`. Con ISR, si la regeneración falla Next sigue sirviendo la última versión buena. Para el host: `cachedHostLookup` distingue `found | missing | error`; ante `error` sirve el último valor conocido (hasta 10 min) y, si no hay ninguno, el `proxy` responde **503 con `Retry-After`** en vez de 404. Antes, un 429 por tráfico ajeno (600/min por IP) dejaba a los sitios reales en 404 durante el ataque. Destacadas, filtros y «parecidas» fallan en silencio (la página sale igual); el listado muestra su propio aviso.
+
+### DT-128 — IP del visitante: no se confía en el primer `X-Forwarded-For`
+
+El primer valor lo escribe el cliente: con `TRUST_PROXY=true` en la API alcanzaba para esquivar el límite de 5 consultas por hora. `lib/client-ip.ts` toma el header que fije `SITES_CLIENT_IP_HEADER` (el que garantice la plataforma) o, si no, cuenta desde la derecha según `SITES_TRUSTED_PROXY_HOPS` (default 1), y descarta lo que no sea una IP.
+
+### DT-129 — El tema va en `:root` (con `<style>`), no en un `div`
+
+Con las variables en un `div`, el `html` quedaba con el fondo de respaldo: en un sitio oscuro el rebote del scroll en el celular y las áreas seguras de iOS se veían blancas. Ahora `themeCss` genera `:root{…}` en un `<style>`. Para que React no escape nada, las pilas de fuentes van **sin comillas** y todos los valores salen de `themeStyle` (hex, px y pilas de la lista cerrada); hay tests de que no entra `" ' < > &`. Además `generateViewport` pone `theme-color` con el fondo del sitio.
+
+### DT-130 — Revalidación bajo demanda al publicar
+
+La API avisa con `POST /api/revalidate` (`Authorization: Bearer <SITES_REVALIDATE_SECRET>`, `{ slug }`) al publicar, despublicar y verificar un dominio. El endpoint invalida el tag `site:<slug>` con `revalidateTag(tag, { expire: 0 })` y vacía la caché de hosts; todas las llamadas a la API del sitio llevan ese tag. Antes un cambio podía tardar hasta ~2 minutos en verse (caché de la API + caché de fetch + ISR). Sin secreto el endpoint responde 404 (apagado); el secreto se compara con `timingSafeEqual` sobre hashes.
+
+### DT-131 — Animación de aparición acotada
+
+`animation-range: entry 0% cover 14%`: una sección más alta que la pantalla no queda a medio aparecer. Se midió con movimiento activo (no solo con `reduced-motion`): todas las secciones llegan a opacidad 1 al leerlas, incluso las de 2600 px.
+
+### DT-132 — Paginación numerada, rango de precio invertido y pedidos en paralelo
+
+Paginación con ventana (primera, última, actual y vecinas); un rango «desde» mayor que «hasta» se invierte en vez de dar un listado vacío; la ficha pide la propiedad y las «parecidas» a la vez; el sitemap pide el resto de las páginas en paralelo.
+
+### DT-133 — Backoffice: guarda de rol y verificación de dominio
+
+`AdminGate` muestra «Sólo para administradores» a un empleado que entra por URL (la API ya lo frenaba con 403; antes veía la pantalla llena de errores). La pestaña Dominio muestra si el dominio está verificado y, si no, el registro TXT con botones de copiar y «Verificar dominio». `useSiteDomain` / `useVerifySiteDomain` consumen los endpoints nuevos del backend (D-190); los tipos salen del OpenAPI regenerado y `SiteDomain` está en `site-api.ts`.
+
+### Qué NO se hizo de la revisión (y por qué)
+
+- **Favoritos**: opcional en la spec; necesitan una página que lea `localStorage` y pida propiedades desde el navegador (CORS por dominio propio o un proxy más).
+- **Autoguardado, deshacer, recorte de imágenes, miniaturas reales de los templates y orden por precio**: son producto, no correcciones; el orden por precio además necesita soporte en la API.
+- **Quitar `'unsafe-inline'` de `script-src`**: depende de que Next permita CSP por hash en rutas con ISR.
+
+### Revisión del PR (tercera ronda)
+
+### DT-134 — El render no confía en que la API validó los links
+
+`SocialLink` solo renderiza URLs `https:` (sin credenciales ni host vacío): `javascript:`, `data:`, `vbscript:`, `http:`, `mailto:` y rutas relativas no generan un `href` (devuelve `null`). Los `mailto:` de contacto pasan por `mailtoHref`: un email sin espacios, comillas, comas, `;` ni `?&=#%` (que permitirían agregar destinatarios o cabeceras). `mailto:` y `tel:` no corresponden a una red social, por eso `socialHref` no los acepta. Defensa en profundidad: la API ya valida (D-177 y D-181 del backend), esto cubre un dato guardado antes de esa validación o un cambio futuro.
+
+### DT-135 — `Origin: null` es un 403, no un 500
+
+`new URL(origin)` lanzaba con `Origin: null` (lo mandan los documentos sandboxeados y algunas redirecciones) y el contacto respondía 500. `isSameOrigin` rechaza un `Origin` ilegible; uno ausente (no es un navegador) se sigue aceptando.
+
+### DT-136 — Solo se le pregunta a la API por hosts que pueden ser un sitio
+
+`isPlausibleSiteHost` (antes de `resolveHost`): pasa un subdominio de **un solo nivel** de `SITES_BASE_DOMAIN` con etiqueta válida (3 a 63, sin guiones en los bordes), o un dominio propio con forma de dominio (no IP, no `localhost`, no colgado del dominio base, TLD no numérico). IPs, nombres mal formados y subdominios de dos niveles son 404 sin llamar a la API. **Límite honesto**: un subdominio al azar con forma válida sí se consulta (solo la API sabe si existe); a esos los frenan la caché de fallos de 10 s, el tope de la API y, si hace falta, un balanceador. No hay un tope local de consultas por segundo.
+
+### DT-137 — SEO: canonical, `og:url`, `noindex` en filtrados, descripciones, `lastmod`
+
+- **Canonical absoluto sin leer headers.** Leer `headers()` en `generateMetadata` haría dinámica la página y rompería el ISR. En cambio el proxy pone el **host del pedido** en el segmento de ruta del sitio público (`h~slug~host`, sin puerto; el borrador y el acceso por slug no lo llevan) y la página lo usa para armar `https://<host>/…`. Cada host tiene su propia entrada de caché. Con varios hosts para un mismo sitio (subdominio y dominio propio) cada uno es canónico de sí mismo; la API no expone cuál es el preferido (haría falta un campo aditivo `publicUrl` en `PublicSite`). En desarrollo y en la vista previa no se emite canonical.
+- **`openGraph` completo en cada página** (Next lo reemplaza entero, no lo mezcla con el del layout): sitio, idioma, título, descripción, imagen y `url`.
+- `/propiedades` filtrado o paginado: `robots: noindex, follow` (duplica al listado base); el listado sin filtros ni página se indexa. Contacto y «nosotros» tienen `description` (dirección y horarios; o el comienzo del texto).
+- **`lastmod`** del sitemap: las páginas del sitio llevan la fecha de publicación; **las fichas no llevan**, porque la API pública no expone cuándo cambió cada propiedad y una fecha inventada es peor que ninguna. Para tenerla hace falta un `updatedAt` aditivo en `PublicPropertySummary` (backend).
+
+### DT-138 — La vista previa conserva el `theme-color`
+
+El árbol `/p` reexportaba el layout y `generateMetadata` pero no `generateViewport`: la vista previa perdía el color de la barra del navegador. Un test fija qué reexporta.
+
+### DT-139 — Ficha: precio, «a consultar» y placeholder de fotos
+
+El precio tenía `text-site-primary` en un `<p>` y un `<span text-site-text>` adentro: la clase no hacía nada. Ahora el monto va en un solo elemento. **Sin precio** (ficha y las dos tarjetas) se muestra «Precio a consultar» en chico y gris, no «Consultar» como un título. El placeholder de «sin fotos» pasó de un bloque 16:9 a todo el ancho (más de 700 px en escritorio) a una franja de 144–176 px con ícono.
+
+### DT-140 — Ubicación: se queda el `<select>` (se evaluó `<datalist>`)
+
+Un `<input list>` obliga a resolver nombre → id en el servidor (el formulario GET manda el texto, no el id) y su soporte en lectores de pantalla y en Android es desigual: no es lo bastante barato ni accesible. Se deja el `<select>` (funciona sin JS, accesible). Con cientos de zonas habría que pasar a un combobox ARIA con JS.
+
+### Qué NO se hizo de esta ronda
+
+Las mejoras opcionales (autoguardado de borrador, miniaturas reales de los templates, orden por precio, favoritos): quedan para la versión 1.1. El orden por precio necesita soporte en la API; los favoritos necesitan una página que lea `localStorage` y pida propiedades desde el navegador.

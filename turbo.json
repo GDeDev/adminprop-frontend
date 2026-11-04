@@ -10,7 +10,19 @@
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": [".next/**", "!.next/cache/**"],
       "cache": false,
-      "env": ["NEXT_PUBLIC_*", "PORTAL_TENANT_SLUG"]
+      "env": [
+        "NEXT_PUBLIC_*",
+        "PORTAL_TENANT_SLUG",
+        "API_URL",
+        "SITES_PREVIEW_ANCESTORS",
+        "SITES_ALLOW_SLUG_PATH",
+        "SITES_IMAGE_SOURCES",
+        "SITES_REVALIDATE_SECRET",
+        "SITES_BASE_DOMAIN",
+        "SITES_PROTOCOL",
+        "SITES_CLIENT_IP_HEADER",
+        "SITES_TRUSTED_PROXY_HOPS"
+      ]
     },
     "lint": {
       "dependsOn": ["transit"]

@@ -204,6 +204,8 @@ describe("BillingScreen", () => {
     payments = [
       {
         id: "pay1",
+        receiptNumber: null,
+        receiptPdfUrl: null,
         installmentId: "i2",
         contractId: "c1",
         renterId: "r2",

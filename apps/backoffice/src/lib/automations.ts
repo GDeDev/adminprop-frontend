@@ -38,6 +38,7 @@ export const ALERT_TYPE_LABELS: Record<AlertType, string> = {
   STATEMENT_PENDING: "Consolidado pendiente de cerrar",
   DOCUMENT_FAILED: "Documento no generado",
   JOB_FAILED: "Automatización fallida",
+  PUBLIC_INQUIRY: "Consulta nueva del sitio",
   NOTIFICATION_FAILED: "Notificación no enviada",
   EMAIL_BOUNCED: "Email rebotado",
 }

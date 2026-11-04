@@ -50,6 +50,8 @@ vi.mock("@/lib/billing-api", () => ({
 function makePayment(overrides: Partial<Payment> = {}): Payment {
   return {
     id: "pay1",
+    receiptNumber: null,
+    receiptPdfUrl: null,
     installmentId: "i1",
     contractId: "c1",
     renterId: "r1",
