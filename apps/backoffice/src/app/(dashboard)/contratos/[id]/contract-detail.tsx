@@ -82,6 +82,7 @@ export function ContractDetailScreen({ id }: { id: string }) {
 type DialogKind = "edit" | "rent-update" | "terminate" | null
 
 function Detail({ contract }: { contract: ContractDetail }) {
+  const query = useContract(contract.id)
   const [dialog, setDialog] = React.useState<DialogKind>(null)
   // Cambia en cada apertura: el diálogo se monta de nuevo y arranca limpio.
   const [dialogKey, setDialogKey] = React.useState(0)
@@ -259,7 +260,14 @@ function Detail({ contract }: { contract: ContractDetail }) {
           </p>
         </Section>
 
-        <SuretySection contract={contract} today={today} />
+        <SuretySection
+          contract={contract}
+          today={today}
+          receivedAt={query.dataUpdatedAt}
+          refresh={async () =>
+            (await query.refetch()).data?.surety?.policyPdfUrl
+          }
+        />
 
         <BillingTermsSection
           contract={contract}
@@ -274,6 +282,8 @@ function Detail({ contract }: { contract: ContractDetail }) {
               contractId={contract.id}
               kind="contract"
               url={contract.contractPdfUrl}
+              receivedAt={query.dataUpdatedAt}
+              refresh={async () => (await query.refetch()).data?.contractPdfUrl}
               label="contrato"
             />
           }
@@ -402,7 +412,11 @@ function Timeline({
 function SuretySection({
   contract,
   today,
+  receivedAt,
+  refresh,
 }: {
+  receivedAt: number
+  refresh: () => Promise<string | null | undefined>
   contract: ContractDetail
   today: string
 }) {
@@ -418,6 +432,8 @@ function SuretySection({
             contractId={contract.id}
             kind="policy"
             url={surety?.policyPdfUrl ?? null}
+            receivedAt={receivedAt}
+            refresh={refresh}
             label="póliza"
           />
         )

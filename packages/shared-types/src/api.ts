@@ -30,3 +30,21 @@ export interface Paginated<T> {
   data: T[]
   pagination: PaginationMeta
 }
+
+type JsonBody<Operation> = Operation extends {
+  responses: { 200: { content: { "application/json": infer Body } } }
+}
+  ? Body
+  : never
+
+/**
+ * Respuestas de `/auth/*`: el sobre `{ success, message, data }` ya viene
+ * tipado desde el OpenAPI (pendientes de la auditoría). Se usan en lugar de
+ * `ApiSuccess<AuthResult>` y compañía.
+ */
+export type LoginResponse = JsonBody<paths["/api/v1/auth/login"]["post"]>
+export type PortalLoginResponse = JsonBody<
+  paths["/api/v1/auth/portal-login"]["post"]
+>
+export type RefreshResponse = JsonBody<paths["/api/v1/auth/refresh"]["post"]>
+export type MeResponse = JsonBody<paths["/api/v1/auth/me"]["get"]>
