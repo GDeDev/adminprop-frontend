@@ -86,3 +86,23 @@ estos cuatro archivos con el mismo procedimiento. Hasta entonces el guardia de
 
 `common.ts` (alias escalares, `Timestamps`), `user.ts` (`AccessTokenClaims` y
 roles de la URL), `PublicListingQuery` (parámetros de query) y `ReportFormat`.
+
+## Guardia contra tipos a mano
+
+`packages/shared-types/src/no-manual-dto.test.ts` (corre con `npm test`, o sea
+en el pre-commit y en `turbo test`) falla si alguien declara a mano una
+`interface` o un `type X = { ... }` cuyo nombre coincide con un esquema
+generado (`X` o `XDto`). Es un chequeo por nombre: no detecta un DTO a mano con
+otro nombre. Las excepciones viven en `KNOWN_DIFFERENCES`, con el motivo, y el
+test también falla si una entrada queda vieja.
+
+## `formatMoney`
+
+Hay una sola implementación en `packages/ui/src/lib/format-money.ts`
+(`@adminprop/ui/lib/format-money`). Backoffice (`lib/contracts.ts`) y portal
+(`lib/format.ts`) la re-exportan. Quedaron dos diferencias de comportamiento
+respecto de la copia del portal: ahora un texto que no es número se muestra tal
+cual (antes salía "NaN"), y se reemplaza cualquier espacio especial, no sólo el
+NBSP. `apps/sites` mantiene `formatPrice` a propósito: es otro formato (prefijo
+`US$`, sin decimales en enteros, "Consultar" sin precio) y esa app no depende de
+`@adminprop/ui`.
