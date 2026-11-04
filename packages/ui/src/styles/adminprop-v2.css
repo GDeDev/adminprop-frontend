@@ -93,6 +93,9 @@
     0 12px 24px -6px oklch(0.2 0.03 258 / 0.14),
     0 32px 64px -16px oklch(0.2 0.03 258 / 0.22);
   --edge-light: inset 0 1px 0 oklch(1 0 0 / 0.7);
+  --edge-primary: inset 0 1px 0 oklch(1 0 0 / 0.16);
+  /* Velo de diálogos y drawers: tinta del chrome, igual en claro y oscuro */
+  --overlay: color-mix(in oklab, var(--sidebar) 60%, transparent);
 
   /* Glow: solo para el elemento de máxima prioridad de la pantalla */
   --glow-primary:
@@ -186,6 +189,8 @@
     0 2px 4px oklch(0 0 0 / 0.3), 0 16px 32px -6px oklch(0 0 0 / 0.55),
     0 40px 72px -16px oklch(0 0 0 / 0.5);
   --edge-light: inset 0 1px 0 oklch(1 0 0 / 0.07);
+  --edge-primary: inset 0 1px 0 oklch(1 0 0 / 0.28);
+  --overlay: color-mix(in oklab, oklch(0 0 0) 62%, transparent);
 }
 
 @theme inline {
@@ -220,6 +225,7 @@
   --color-ai: var(--ai);
   --color-ai-foreground: var(--ai-foreground);
   --color-ai-soft: var(--ai-soft);
+  --color-overlay: var(--overlay);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

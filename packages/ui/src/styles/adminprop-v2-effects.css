@@ -98,6 +98,32 @@
 
 /* ---------- Superficies ---------- */
 
+/* Sombras con reborde de luz: las usan los componentes base */
+@utility shadow-edge {
+  box-shadow: var(--edge-light), var(--elev-1);
+}
+@utility shadow-raised {
+  box-shadow: var(--edge-light), var(--elev-2);
+}
+@utility shadow-float {
+  box-shadow: var(--edge-light), var(--elev-3);
+}
+@utility shadow-overlay {
+  box-shadow: var(--edge-light), var(--elev-4);
+}
+@utility shadow-primary-edge {
+  box-shadow: var(--edge-primary), var(--elev-1);
+}
+
+/* Chrome oscuro (sidebar): tinta con un resplandor de cobre en la esquina */
+@utility chrome-glow {
+  background-image: radial-gradient(
+    26rem 16rem at 0% 0%,
+    color-mix(in oklab, var(--accent) 16%, transparent),
+    transparent 70%
+  );
+}
+
 /* Card elevada: borde translúcido + sombra de capas + reborde de luz */
 @utility surface-raised {
   background-color: var(--card);
