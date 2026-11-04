@@ -28,3 +28,18 @@ Los dos muestran lo mismo; cambian el diseño. Los colores, la tipografía y las
 - Cuando la inmobiliaria publica un cambio, el sitio se actualiza en la próxima visita (antes podía tardar un par de minutos).
 - Si el servicio tiene un problema momentáneo, el sitio sigue mostrando la última versión buena en vez de un error.
 - La paginación del listado muestra los números de página, y un rango de precio al revés se corrige solo.
+
+## Novedades de la versión 1.1
+
+**Para quien visita**
+
+- **Orden del listado**: más recientes, menor precio o mayor precio. Al ordenar por precio se usa pesos salvo que elijas dólares en «Moneda del precio».
+- **Favoritos**: el corazón de cada propiedad la guarda en tu navegador (sin cuenta, hasta 30). «Favoritos» muestra la lista y permite **compartirla por WhatsApp** (con un link para que otra persona vea la misma selección) o consultar por esas propiedades a la inmobiliaria. Si tu navegador no deja guardar, la lista dura hasta que cerrás la página y se te avisa.
+- **Mapa**: si la propiedad tiene ubicación, la ficha trae un mapa de OpenStreetMap. Se carga solo si apretás «Ver mapa» (es un servicio externo) y siempre hay un link para abrirlo en OpenStreetMap.
+- **Tasá tu propiedad**: formulario para pedir una tasación (tipo, qué querés hacer, dirección y zona, superficie y dormitorios opcionales, tus datos). Llega a la bandeja de consultas como una consulta más, encabezada con «Solicitud de tasación».
+- **Tercer estilo, Lujo**: sobrio y elegante, con títulos en serif y líneas finas.
+
+**Para la inmobiliaria (Mi sitio web)**
+
+- Las tarjetas de **template** muestran una vista real de cada diseño.
+- El borrador se **guarda solo** unos segundos después de dejar de escribir. Arriba se ve el estado: _Guardado_, _Guardando…_ o _Error al guardar_ (con «Reintentar»). Si hay un campo con error, no se guarda hasta corregirlo, y los campos marcados no se pisan. «Guardar borrador» y «Publicar» siguen como antes.

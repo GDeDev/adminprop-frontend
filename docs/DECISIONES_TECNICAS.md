@@ -719,4 +719,42 @@ Un `<input list>` obliga a resolver nombre → id en el servidor (el formulario 
 
 ### Qué NO se hizo de esta ronda
 
-Las mejoras opcionales (autoguardado de borrador, miniaturas reales de los templates, orden por precio, favoritos): quedan para la versión 1.1. El orden por precio necesita soporte en la API; los favoritos necesitan una página que lea `localStorage` y pida propiedades desde el navegador.
+Las mejoras opcionales (autoguardado de borrador, miniaturas reales de los templates, orden por precio, favoritos): quedaron para la versión 1.1 (ver DT-141 a DT-149).
+
+## Sitio web v1.1 (rama `feature/web-inmobiliaria-v1-1-sites`)
+
+### DT-141 — Orden del listado: links, y `recent` no viaja
+
+`sort` toma `recent` (por defecto), `price_asc`, `price_desc`. Los tres son **links** (una URL compartible, sin JavaScript), no un `<select>`. `recent` no se guarda en la query ni se manda a la API: el caso común no depende de que el backend ya soporte `sort`, y las URLs quedan limpias. Un valor inválido se ignora (la API responde 400 si recibe otro). Un listado ordenado cuenta como filtrado: `noindex, follow`.
+
+### DT-142 — Ordenar por precio manda siempre una moneda
+
+El backend pide `currency` junto con `sort=price_*` para no mezclar ARS y USD. El sitio no conoce la moneda de la inmobiliaria, así que, si la persona no eligió una, manda **ARS** (`withSortCurrency`) y lo dice en pantalla («Ordenado por precio en pesos…»). **Límite**: una inmobiliaria que publica solo en dólares ve el listado vacío hasta elegir «Dólares». Lo correcto es que `PublicSite` exponga la moneda por defecto (campo aditivo, backend).
+
+### DT-143 — Favoritos: `localStorage` por sitio, con respaldo en memoria
+
+Lista de ids (máx. 30, lo último guardado primero) en `adminprop-sites:favorites:<slug>`. Lo leído se valida (solo UUID, sin repetir): el storage lo puede tocar cualquiera. Si `localStorage` falta o lanza (modo privado, cuota), la lista vive **en memoria** durante la visita y la página avisa que no se recordará. El estado se comparte entre botones con `useSyncExternalStore` (y el evento `storage` entre pestañas). La CSP solo permite `connect-src 'self'`, así que «Mis favoritos» pide las propiedades a `GET <base>/api/favoritos?ids=` del propio sitio, que revalida los ids y llama a la API.
+
+### DT-144 — Compartir por WhatsApp
+
+Texto plano (sin `*` ni `_`, que WhatsApp interpreta) y solo links `https`: con el origen en `http` (desarrollo) se omiten en vez de mandar uno roto. Un link `…/favoritos?ids=a,b` abre una **lista compartida** renderizada en el servidor, que no toca los favoritos de quien la abre. El número se sanea a dígitos (acepta `+54 9 221 555-0000`); si no queda uno de 8 a 15 dígitos se usa el selector de contactos (`wa.me/?text=`). El texto se recorta a 1500 puntos de código (no en medio de un emoji: `encodeURIComponent` lanzaría). «Favoritos» entra en el menú; la página es `noindex`.
+
+### DT-145 — Template `LUXURY`
+
+Mismo `TemplateKit` que classic y modern (header, footer, tarjeta, título de página y las nueve secciones), sin cambios de contrato. Clave `LUXURY` en mayúsculas (confirmada por el backend); `templateKit` compara sin distinguir mayúsculas y un template desconocido cae en CLASSIC. **Serif solo con fuentes del sistema**: la CSP tiene `font-src 'self' data:` y el repo no trae fuentes, así que los títulos usan la pila `--site-font-display` (Iowan Old Style, Palatino, Georgia…) definida en `globals.css`; no se descarga nada. Se probó con el tema por defecto del backend (oscuro, dorado, `radius 0`) y con uno claro. `SiteTemplateKey` suma `"LUXURY"` (la spec 5.1 dice dos): desvío aditivo.
+
+### DT-146 — Mapa OpenStreetMap: click para cargar, y única excepción de CSP
+
+`PublicPropertyDetail` suma `latitude`/`longitude` opcionales (aditivo; el contrato `PublicSite` no cambia). Sin coordenadas válidas (números, en rango, no 0,0) no hay sección. El mapa **no se carga hasta que la persona lo pide** (no hay pedido a un tercero ni se le cuenta la IP por defecto); el link a openstreetmap.org está siempre. El iframe va con `sandbox="allow-scripts allow-same-origin"` y `referrerpolicy="no-referrer"`, y las URLs se arman solo con números. **CSP de `apps/sites`: se agregó `frame-src https://www.openstreetmap.org`** (antes caía en `default-src 'self'`). La CSP del backoffice no se tocó. Un test fija que sea el único origen permitido.
+
+### DT-147 — «Tasá tu propiedad» sobre el contacto existente
+
+No hay backend de tasación en este checkout, así que no se inventó uno. `/tasacion` valida por campo y manda a `POST /api/contacto` (el mismo handler, con honeypot, comprobación de `Origin` y rate limit) un mensaje de texto plano con encabezado fijo «Solicitud de tasación» y una línea por dato. Llega al CRM como una consulta más. **Límite**: el tipo, la operación y la dirección quedan dentro del texto, no en campos; filtrarlas en la bandeja depende del encabezado. Cuando exista un endpoint de tasación (Fase 24) se reemplaza el destino.
+
+### DT-148 — Autoguardado del borrador (backoffice)
+
+Guarda tras 1,5 s sin escribir. Reglas: (1) **no reenvía lo inválido**: con campos marcados con error el autoguardado se pausa (reenviar daría el mismo 422) y el indicador dice «corregí los campos marcados»; al editar el campo su error se va y se reanuda; (2) **no pisa los errores por campo** ni cambia de pestaña mientras se escribe, y sin toasts; (3) **no repite datos que ya fallaron** (error de red): muestra «Error al guardar» con «Reintentar»; (4) **no descarta lo escrito durante un guardado en vuelo** (antes `setLocal(null)` lo perdía). El botón «Guardar borrador» sigue. Estados: Guardado, Guardando…, Tenés cambios sin guardar, Error al guardar.
+
+### DT-149 — Miniaturas de templates: capturas incluidas en la app
+
+Capturas reales (640×400) de cada template con datos de ejemplo en `apps/backoffice/public/templates/`. Una `previewImageUrl` de la API tiene prioridad; si la imagen falla cae a la mini-maqueta. **Hay que regenerarlas si cambia el diseño de un template** (procedimiento en `docs/tecnica/web-inmobiliaria-v1-1.md`).
