@@ -555,3 +555,19 @@ Ni el formulario de propiedad ni `PropertyDetail` tienen hoy `listingPrice`/`lis
 ### DT-106 — Superficie, barra de rango y permisos
 
 La ficha no guarda superficie ni ambientes (A-69), así que el sheet siempre los ofrece (superficie con la aclaración de que sin ella la sugerencia es menos precisa; moneda: la de la propiedad, ARS o USD). La superficie se normaliza con `normalizeAmount` y se manda como string. La posición del sugerido en la barra (`markerPosition`) es sólo layout, calculada con `Number` y acotada a 0–100: ningún monto se calcula en pantalla. `GET /valuation/market-coverage` se pide al abrir el sheet; si `enoughData` es falso se avisa pero el botón «Calcular» sigue activo. No hay entrada nueva de menú: la tasación está disponible para administrador y empleado en la ficha, y la tarjeta «Datos de mercado» (estado por fuente) está en Configuración → Automatizaciones, que ya es sólo de administradores.
+
+### DT-107 — Analítica: SVG propio y serie diaria completa
+
+Los gráficos de la analítica se dibujan con SVG propio (`DailyBarsChart`) y barras de CSS (`CountBars`); no se agregó ninguna librería de gráficos porque alcanzan dos tipos de gráfico simples y el monorepo no tenía ninguna. La API de analítica por propiedad devuelve `daily` y no se sabe si incluye los días sin movimiento, así que `fillDaily` rellena con 0 entre `from` y `to` para que el eje sea parejo. Vistas y consultas van en dos gráficos separados con escala propia: en una misma escala las consultas (pocas) quedarían planas al lado de las vistas. El período se elige entre 7, 30 y 90 días; el resumen del CRM (`/crm/analytics/overview`) se pide sin rango, como antes.
+
+### DT-108 — Accesibilidad de los gráficos
+
+El color no es el único canal. Cada gráfico tiene título, total escrito, valores de los ejes y fechas de los extremos; el SVG es `role="img"` con una descripción en texto; las barras de dos gráficos distintos usan `chart-1` y `chart-2` (tokens, nunca hex) y se distinguen por el título, no por el tono. La alternativa tabular es un `<details>` con una tabla (`Ver los datos en tabla`). `CountBars` escribe la cantidad al lado de cada etiqueta, de modo que la lista misma es la alternativa textual. La aclaración de que las vistas se cuentan desde la fecha de activación (A-83) está en el pie de la analítica; el contrato no trae esa fecha, así que el texto no la nombra.
+
+### DT-109 — Errores de canal y publicación: nunca texto crudo del portal
+
+`lastError` de canales y publicaciones lo guarda el servidor a partir de lo que contestó el portal y puede traer texto técnico (códigos HTTP, JSON, trazas). `friendlyRemoteError` lo muestra solo si parece un mensaje para personas (corto y sin patrones técnicos); si no, muestra un texto genérico con la sugerencia de reintentar o reconectar. Es una heurística, no una garantía: lo correcto a largo plazo es que el backend mande mensajes ya redactados.
+
+### DT-110 — Arrastre táctil y alternativa «Mover a…» también en escritorio
+
+Se suma `TouchSensor` (pausa de 250 ms, tolerancia de 8 px) para que arrastrar con el dedo no choque con el scroll, y el asa de arrastre mide 44 px en pantallas táctiles (`touch-none` para que el navegador no interprete el gesto como scroll). La tarjeta del tablero ofrece también «Mover a…» (antes solo en la vista mobile): es la ruta sin arrastre para teclado y lectores de pantalla, y `moveToStage` la comparte con la vista mobile. Registrar un llamado o un email como intento de contacto se hace desde el detalle (`POST …/contact-attempts` con `PHONE` o `EMAIL`); WhatsApp sigue registrándose al abrir el link.

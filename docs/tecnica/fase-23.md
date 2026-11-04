@@ -1,6 +1,6 @@
 # Fase 23 — CRM y multipublicación (frontend)
 
-Contrato: `adminprop-repo-files/docs/REDISENO_FASE_23.md`. Tipos a mano en `shared-types/src/crm.ts` y `listings.ts`. Decisiones DT-98 a DT-103.
+Contrato: `adminprop-repo-files/docs/REDISENO_FASE_23.md`. Tipos a mano en `shared-types/src/crm.ts` y `listings.ts`. Decisiones DT-98 a DT-103 y DT-107 a DT-110.
 
 - `lib/crm-api.ts` (TanStack Query, endpoints exactos del rediseño sección 5: pipeline, listado paginado, detalle, alta, edición, `stage`, `assign`, notas, `contact-attempts`, `whatsapp-link`, `assignees`, analíticas) y `lib/crm.ts` (etapas y etiquetas, `applyMove`, `neighborsAt`, `isFollowUpDue`, `unattendedCount`, textos de la línea de tiempo, mensajes de error por código). `lib/listings-api.ts` y `lib/listings.ts` para canales y publicaciones (sección 6.2).
 - `/crm` (admin y empleado): resumen (abiertas, sin asignar, primer contacto, conversión, propiedades más consultadas), filtros (búsqueda, asignado incluido «Sin asignar», canal, propiedad), tablero de seis columnas con `@dnd-kit` y teclado, pestañas + «Mover a…» en mobile, «Nueva consulta», panel de detalle (datos editables, etapa, asignación, seguimiento, WhatsApp con plantilla, historial con notas inmutables), diálogos de «Perdida» (motivo) y «Ganada» (contrato opcional). Actualización optimista con vuelta atrás.
@@ -10,3 +10,13 @@ Contrato: `adminprop-repo-files/docs/REDISENO_FASE_23.md`. Tipos a mano en `shar
 - Tests: `lib/crm.test.ts` (movimiento, vecinos, textos, acciones de publicación), `crm/crm-screen.test.tsx` (destino del arrastre, alta manual, tarjeta, WhatsApp, vista mobile), `canales/channels-screen.test.tsx`, `propiedades/[id]/publication-section.test.tsx`.
 - Depende del backend (aún no existe): todos los endpoints de `/crm/*` (incluido `/crm/assignees`, `/crm/analytics/*` y `/crm/channels/*`), `/jobs/:id/status` para `listing-publish`, el redirect del callback de OAuth a `/configuracion/canales?connected=mercadolibre`, y la plantilla `INQUIRY_FIRST_CONTACT`. Se asume el sentido de `beforeId`/`afterId` de DT-99 y que `POST …/publish` también actualiza (DT-102).
 - **No visto en un navegador** (sin API). El arrastre con mouse y teclado sólo está probado en la lógica de destino (`resolveDrop`), no en jsdom.
+
+## Ampliación: analítica con gráficos, táctil y pruebas
+
+- **Gráficos** (DT-107, DT-108): `lib/charts.ts` (`fillDaily`, `niceMax`, `layoutBars`, `shareOfMax`, puras y con tests), `components/charts/daily-bars-chart.tsx` (SVG propio, tokens `chart-1`/`chart-2`, `role="img"` con descripción, tabla alternativa en un `<details>`) y `components/charts/count-bars.tsx` (barras con la cantidad escrita). `components/property-analytics.tsx` reemplaza la sección anterior de la ficha: período de 7/30/90 días, vistas y consultas por día, consultas por etapa y por origen, y el aviso de que las vistas se cuentan desde la activación. El resumen de `/crm` suma «Embudo y orígenes» con el mismo componente.
+- **Tablero** (DT-110): `TouchSensor`, asa de 44 px, «Mover a…» también en escritorio (`moveToStage`), y estado vacío cuando no hay ninguna consulta ni filtros.
+- **Filtros**: `crm/inquiry-filters.tsx` (`InquiryFiltersBar`, `toApiFilters`) sale de `crm-screen.tsx`.
+- **Detalle**: registro manual de llamado y email como intento de contacto; mensaje de historial vacío.
+- **Errores de canal** (DT-109): `friendlyRemoteError` en `lib/listings.ts`, usado en Canales y en la ficha.
+- **Tests nuevos**: `lib/charts.test.ts`, `lib/crm-api.test.tsx` (movimiento optimista y rollback con la API mockeada), `lib/listings.test.ts`, `components/charts/charts.test.tsx`, `crm/board.test.tsx`, `crm/inquiry-filters.test.tsx`, `crm/inquiry-drawer.test.tsx`, `crm/crm-screen-states.test.tsx` y casos nuevos en `canales/channels-screen.test.tsx`. Los tests con `vi.fn` que devuelven una promesa rechazada hacen fallar el test por rechazo no manejado (vitest engancha un `.then` sin `.catch`): en `crm-api.test.tsx` la respuesta se arma fuera del espía.
+- **Sigue sin verse en un navegador.** El arrastre real (mouse, dedo, teclado) no se ejerce en jsdom; sólo la lógica de destino, `moveToStage`, el menú «Mover a…» y el rollback están probados. Los gráficos tampoco se vieron renderizados (contraste y escala en claro y oscuro sin revisar).
