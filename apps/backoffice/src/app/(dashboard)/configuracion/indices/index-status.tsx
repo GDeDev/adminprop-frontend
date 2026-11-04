@@ -46,13 +46,13 @@ export function IndexStatusPanel({ canRun }: { canRun: boolean }) {
 
   return (
     <section
-      className="rounded-xl border bg-card p-4"
+      className="rounded-xl border bg-card p-4 shadow-raised"
       aria-labelledby="index-status-title"
     >
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="index-status-title"
-          className="font-display text-base font-semibold"
+          className="font-display text-title-sm font-semibold"
         >
           Actualización automática
         </h2>

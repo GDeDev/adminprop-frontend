@@ -33,7 +33,7 @@ export function SectionsTab({
   return (
     <section className="flex flex-col gap-3">
       <div>
-        <h2 className="font-display text-lg font-semibold">Secciones</h2>
+        <h2 className="font-display text-title-md font-semibold">Secciones</h2>
         <p className="text-sm text-muted-foreground">
           Elegí cuáles se muestran y en qué orden aparecen en el inicio.
         </p>

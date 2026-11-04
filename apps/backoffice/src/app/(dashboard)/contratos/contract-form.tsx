@@ -548,7 +548,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
           <ChevronLeft aria-hidden className="size-4" />
           {renewing ? "Volver al contrato" : "Contratos"}
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           {renewing ? "Renovar contrato" : "Nuevo contrato"}
         </h1>
         {renewing && (
@@ -966,7 +966,7 @@ export function ContractForm({ original }: { original?: ContractDetail }) {
               )}
             />
           )}
-          <h3 className="font-display text-base font-semibold">
+          <h3 className="font-display text-title-sm font-semibold">
             Cobro y honorarios
           </h3>
           <BillingTermsFields

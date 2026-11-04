@@ -6,6 +6,12 @@ El sistema actual figura como cerrado y aprobado; el dueño pidió rehacerlo
 ("el mejor estilo visual del mercado 2026, bien IA… no quiero un software
 anticuado y aburrido").
 
+> **Actualización (adopción):** el dueño aprobó la v2 «entera». La rama
+> `feat/design-v2-adopcion` la completa: `StatCard` cableado (riesgo 8), paneles,
+> tipografía y montos migrados, v1 retirada (riesgo 4: la vuelta atrás ya no es
+> un import) y vitrina al día. Detalle en `docs/tecnica/design-v2.md`, sección
+> «Adopción en las pantallas», y DT-159.
+
 ## Qué se hizo
 
 - **Análisis** del sistema actual y dirección elegida:

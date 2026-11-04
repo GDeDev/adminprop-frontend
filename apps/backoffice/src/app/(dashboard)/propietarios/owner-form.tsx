@@ -199,7 +199,7 @@ export function OwnerForm({ owner }: { owner?: OwnerDetail }) {
           <ChevronLeft aria-hidden className="size-4" />
           {editing ? owner.fullName : "Propietarios"}
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           {editing ? "Editar propietario" : "Nuevo propietario"}
         </h1>
       </div>
@@ -324,7 +324,7 @@ export function OwnerForm({ owner }: { owner?: OwnerDetail }) {
           </p>
         ) : (
           <fieldset className="flex flex-col gap-4">
-            <legend className="mb-2 font-display text-lg font-semibold">
+            <legend className="mb-2 font-display text-title-md font-semibold">
               Cuenta bancaria{" "}
               <span className="text-sm font-normal text-muted-foreground">
                 (opcional, se puede cargar después)

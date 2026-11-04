@@ -33,13 +33,13 @@ export async function PortalLoginPage({ role }: { role: PortalRole }) {
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-8">
         <Link
           href="/"
-          className="py-2 text-center font-display text-3xl font-semibold tracking-tight"
+          className="py-2 text-center font-display text-display-md font-semibold"
         >
           {branding?.name ?? "Adminprop"}
         </Link>
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">
+            <CardTitle className="font-display text-title-md">
               <h1>{copy.title}</h1>
             </CardTitle>
             <CardDescription>{copy.description}</CardDescription>

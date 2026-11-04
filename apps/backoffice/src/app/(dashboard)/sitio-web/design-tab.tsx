@@ -125,8 +125,8 @@ export function DesignTab({
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
       <div className="flex flex-col gap-6">
-        <section className="flex flex-col gap-4 rounded-xl border bg-card p-4">
-          <h2 className="font-display text-lg font-semibold">Colores</h2>
+        <section className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-raised">
+          <h2 className="font-display text-title-md font-semibold">Colores</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {COLORS.map((color) => (
               <ColorField
@@ -141,8 +141,10 @@ export function DesignTab({
           </div>
         </section>
 
-        <section className="flex flex-col gap-4 rounded-xl border bg-card p-4">
-          <h2 className="font-display text-lg font-semibold">Tipografía</h2>
+        <section className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-raised">
+          <h2 className="font-display text-title-md font-semibold">
+            Tipografía
+          </h2>
           <Field data-invalid={fontError ? true : undefined}>
             <FieldLabel htmlFor={fieldId("theme.fontKey")}>Fuente</FieldLabel>
             <select
@@ -171,8 +173,8 @@ export function DesignTab({
           </Field>
         </section>
 
-        <section className="flex flex-col gap-4 rounded-xl border bg-card p-4">
-          <h2 className="font-display text-lg font-semibold">Esquinas</h2>
+        <section className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-raised">
+          <h2 className="font-display text-title-md font-semibold">Esquinas</h2>
           <div
             role="radiogroup"
             aria-label="Esquinas"
@@ -215,11 +217,11 @@ export function DesignTab({
       <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
         <section
           aria-labelledby="site-contrast-title"
-          className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+          className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
         >
           <h2
             id="site-contrast-title"
-            className="font-display text-lg font-semibold"
+            className="font-display text-title-md font-semibold"
           >
             Legibilidad (AA)
           </h2>

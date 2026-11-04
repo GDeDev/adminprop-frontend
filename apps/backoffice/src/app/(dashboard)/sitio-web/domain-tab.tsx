@@ -112,11 +112,11 @@ function SubdomainCard({ settings }: { settings: SiteSettings }) {
   return (
     <section
       aria-labelledby="site-subdomain-title"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <h2
         id="site-subdomain-title"
-        className="font-display text-lg font-semibold"
+        className="font-display text-title-md font-semibold"
       >
         Subdominio
       </h2>
@@ -234,9 +234,12 @@ function CustomDomainCard({ settings }: { settings: SiteSettings }) {
   return (
     <section
       aria-labelledby="site-domain-title"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
-      <h2 id="site-domain-title" className="font-display text-lg font-semibold">
+      <h2
+        id="site-domain-title"
+        className="font-display text-title-md font-semibold"
+      >
         Dominio propio
       </h2>
       <Field data-invalid={message ? true : undefined}>

@@ -54,7 +54,7 @@ export function TemplatePicker({
     >
       <h2
         id="site-template-title"
-        className="font-display text-lg font-semibold"
+        className="font-display text-title-md font-semibold"
       >
         Template
       </h2>
@@ -74,7 +74,7 @@ export function TemplatePicker({
               disabled={disabled}
               onClick={() => !selected && onSelect(template.key)}
               className={cn(
-                "flex flex-col gap-3 rounded-xl border bg-card p-3 text-left transition-colors hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60",
+                "flex flex-col gap-3 rounded-xl border bg-card p-3 text-left shadow-raised transition-colors hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60",
                 selected && "border-primary ring-1 ring-primary"
               )}
             >

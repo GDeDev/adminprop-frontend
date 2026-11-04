@@ -18,7 +18,7 @@ export default async function AuthLayout({
               className="max-h-16 w-auto max-w-48 object-contain"
             />
           )}
-          <p className="text-center font-display text-3xl font-semibold tracking-tight">
+          <p className="text-center font-display text-display-md font-semibold">
             {branding?.name ?? "Adminprop"}
           </p>
         </div>

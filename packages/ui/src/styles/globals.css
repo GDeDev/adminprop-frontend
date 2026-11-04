@@ -1,13 +1,10 @@
 /*
  * Punto de entrada de estilos de las dos apps.
  *
- * Los tokens viven en un archivo por versión del sistema de diseño. Se elige
- * cuál con UN import:
- *   - ./adminprop-v2.css  (v2, "Cobre sobre tinta") — activa
- *   - ./adminprop.css     (v1) — copia textual de
- *     adminprop-repo-files/packages-ui-source/globals.css; no se edita acá.
- * Para volver a v1: cambiar el import de abajo (y ver docs/design/README en
- * docs/tecnica/design-v2.md, "Volver a v1").
+ * Los tokens viven en adminprop-v2.css ("Cobre sobre tinta"), el único
+ * sistema de diseño. La v1 (adminprop.css, Outfit + Figtree) se retiró: está
+ * en el historial de git y en adminprop-repo-files/packages-ui-source/. Cómo
+ * volver, en docs/tecnica/design-v2.md ("Volver a v1").
  */
 @import "./adminprop-v2.css";
 @import "tw-animate-css";
@@ -17,7 +14,7 @@
 @source "../**/*.{ts,tsx}";
 
 @layer base {
-  /* Fuente de títulos (vale para v1 y v2). */
+  /* Fuente de títulos. */
   h1,
   h2,
   h3 {

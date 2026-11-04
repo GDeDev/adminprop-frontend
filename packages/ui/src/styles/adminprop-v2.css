@@ -1,6 +1,5 @@
 /* Adminprop v2 — tokens del sistema de diseño ("Cobre sobre tinta").
-   Tailwind v4 + shadcn/ui. Reemplaza a adminprop.css (v1), que queda intacto
-   para comparar: se elige cuál con UN import en globals.css.
+   Tailwind v4 + shadcn/ui. Reemplazó a adminprop.css (v1), ya retirada del repo.
 
    Reglas que se mantienen de v1:
    - Ningún componente escribe un color: todo sale de estas variables.

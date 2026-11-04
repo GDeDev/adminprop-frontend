@@ -679,7 +679,7 @@ export function ContentTab({
       type="multiple"
       value={open}
       onValueChange={onOpenChange}
-      className="rounded-xl border bg-card px-4"
+      className="rounded-xl border bg-card px-4 shadow-raised"
     >
       {BLOCKS.map(({ key, title, hint }) => (
         <AccordionItem key={key} value={key}>

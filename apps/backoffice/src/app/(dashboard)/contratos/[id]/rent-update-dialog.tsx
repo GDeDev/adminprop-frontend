@@ -104,7 +104,7 @@ export function RentUpdateDialog({
         <div className="flex flex-col gap-4 px-4 md:px-0">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-lg bg-muted p-3 text-sm">
             <dt className="text-muted-foreground">Alquiler vigente</dt>
-            <dd className="font-display tabular-nums">
+            <dd className="font-display num">
               {formatMoney(contract.currentRent, contract.currency)}
             </dd>
             <dt className="text-muted-foreground">Actualización</dt>

@@ -63,7 +63,7 @@ function Counter({ length, limit }: { length: number; limit: number }) {
   return (
     <span
       className={cn(
-        "text-xs tabular-nums",
+        "num text-xs",
         length > limit
           ? "font-medium text-destructive"
           : "text-muted-foreground"
@@ -439,7 +439,7 @@ export function ListEditor<T>({
           <Plus aria-hidden />
           {addLabel}
         </Button>
-        <span className="text-xs text-muted-foreground tabular-nums">
+        <span className="num text-xs text-muted-foreground">
           {items.length} de {max}
         </span>
       </div>

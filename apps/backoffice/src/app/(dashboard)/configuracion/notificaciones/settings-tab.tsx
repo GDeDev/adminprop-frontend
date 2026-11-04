@@ -66,7 +66,7 @@ export function SettingsTab() {
   }
 
   return (
-    <ul className="divide-y rounded-xl border bg-card">
+    <ul className="divide-y rounded-xl border bg-card shadow-raised">
       {settings.map((setting) => (
         <SettingRow
           key={setting.type}

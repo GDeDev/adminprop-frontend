@@ -75,21 +75,25 @@ describe("StatCard", () => {
       <StatCard label="Cobrado" value="$ 450.000,00" />
     )
     const visible = () =>
-      container.querySelector("[aria-hidden=true]")!.textContent
-    // El lector de pantalla siempre lee el valor final.
-    expect(
-      screen.getByText("$ 450.000,00", { selector: ".sr-only" })
-    ).toBeInTheDocument()
+      container.querySelector("[aria-hidden=true]")?.textContent
+    // Antes de animar y al terminar, el valor va una sola vez (sin duplicados
+    // para el lector de pantalla).
+    expect(screen.getAllByText("$ 450.000,00")).toHaveLength(1)
 
     await act(async () => {
       vi.advanceTimersByTime(100)
     })
     expect(visible()).not.toBe("$ 450.000,00")
+    // Mientras anima, el lector de pantalla lee el valor final.
+    expect(
+      screen.getByText("$ 450.000,00", { selector: ".sr-only" })
+    ).toBeInTheDocument()
 
     await act(async () => {
       vi.advanceTimersByTime(2000)
     })
-    expect(visible()).toBe("$ 450.000,00")
+    expect(visible()).toBeUndefined()
+    expect(screen.getAllByText("$ 450.000,00")).toHaveLength(1)
   })
 
   it("con ai marca el valor como estimado por el sistema", () => {

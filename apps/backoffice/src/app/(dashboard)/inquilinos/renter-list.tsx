@@ -42,7 +42,7 @@ export function RenterList() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Inquilinos
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -150,7 +150,7 @@ export function RenterList() {
                         {renter.fullName}
                       </Link>
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="num">
                       {formatNationalId(renter.nationalId)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -195,13 +195,13 @@ function RenterCard({
   return (
     <Link
       href={`/inquilinos/${renter.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">{renter.fullName}</p>
         <ArrearsBadge arrears={arrears} />
       </div>
-      <p className="text-sm text-muted-foreground tabular-nums">
+      <p className="num text-sm text-muted-foreground">
         {formatNationalId(renter.nationalId)}
         {renter.phone && ` · ${renter.phone}`}
       </p>

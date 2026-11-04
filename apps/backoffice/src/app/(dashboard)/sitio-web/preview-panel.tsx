@@ -66,12 +66,12 @@ export function PreviewPanel({
   return (
     <section
       aria-labelledby="site-preview-title"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2
           id="site-preview-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Vista previa
         </h2>

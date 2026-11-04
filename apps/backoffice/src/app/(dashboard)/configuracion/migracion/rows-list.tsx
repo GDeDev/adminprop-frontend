@@ -65,7 +65,7 @@ export function RowCard({
   return (
     <li
       className={
-        "flex flex-col gap-2 rounded-xl border bg-card p-3" +
+        "flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-raised" +
         (row.excluded ? " opacity-60" : "")
       }
     >

@@ -10,6 +10,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import {
   formatMoney,
@@ -38,7 +39,7 @@ export function OwnerAccountScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Estado de cuenta
         </h1>
         <div className="mt-2 flex items-center gap-2">
@@ -50,7 +51,7 @@ export function OwnerAccountScreen() {
           >
             <ChevronLeft aria-hidden />
           </Button>
-          <span className="font-display text-lg font-semibold">
+          <span className="font-display text-title-md font-semibold">
             {periodTitle(period)}
           </span>
           <Button
@@ -122,7 +123,7 @@ function Account({ account }: { account: PortalOwnerAccount }) {
             return (
               <li
                 key={row.property.id}
-                className="rounded-xl border bg-card p-4"
+                className="rounded-xl border bg-card p-4 shadow-raised"
               >
                 <p className="font-medium">{row.property.address}</p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-4">
@@ -149,7 +150,7 @@ function Account({ account }: { account: PortalOwnerAccount }) {
                               ` · ${settlement.sequence}`}
                           </Link>
                           <span className="flex items-center gap-2">
-                            <span className="tabular-nums">
+                            <span className="font-display num">
                               {money(settlement.netAmount)}
                             </span>
                             <Badge variant={meta.badge}>{meta.label}</Badge>
@@ -166,13 +167,13 @@ function Account({ account }: { account: PortalOwnerAccount }) {
       )}
 
       {account.fees.some((f) => !isZero(f.pending)) && (
-        <section className="rounded-xl border bg-card p-4 text-sm">
-          <h2 className="font-display text-base font-semibold">
+        <section className="rounded-xl border bg-card p-4 text-sm shadow-raised">
+          <h2 className="font-display text-title-sm font-semibold">
             Honorarios de la inmobiliaria
           </h2>
           <ul className="mt-2 flex flex-col gap-1">
             {account.fees.map((fee) => (
-              <li key={fee.currency} className="tabular-nums">
+              <li key={fee.currency} className="num">
                 {fee.currency}: devengados{" "}
                 {formatMoney(fee.accrued, fee.currency)} · pagados{" "}
                 {formatMoney(fee.collected, fee.currency)} · pendientes{" "}
@@ -198,17 +199,12 @@ function Stat({
   warn?: boolean
 }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p
-        className={`font-display text-xl font-semibold tabular-nums ${warn ? "text-warning" : ""}`}
-      >
-        {value}
-      </p>
-      {hint && (
-        <p className="text-xs text-muted-foreground tabular-nums">{hint}</p>
-      )}
-    </div>
+    <StatCard
+      label={label}
+      value={value}
+      hint={hint}
+      className={warn ? "text-warning" : undefined}
+    />
   )
 }
 
@@ -216,7 +212,7 @@ function Item({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="tabular-nums">{value}</dd>
+      <dd className="num">{value}</dd>
     </div>
   )
 }

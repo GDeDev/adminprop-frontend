@@ -1,10 +1,10 @@
 # Diseño v2 — documentación técnica
 
 Rama `feature/design-v2` (sobre `feature/fase-24-tasacion-automatica`).
-Propuesta implementada del rediseño del sistema de diseño; no reemplaza nada
-hasta que el dueño la apruebe. Análisis y justificación:
+Rediseño del sistema de diseño, **aprobado por el dueño y adoptado en backoffice
+y portal** (rama `feat/design-v2-adopcion`, DT-159). Análisis y justificación:
 `docs/design/ANALISIS_DESIGN_SYSTEM.md`. Fuente a llevar al repo de lineamientos:
-`docs/design/source-v2/`. Decisiones: DT-154 a DT-158.
+`docs/design/source-v2/`. Decisiones: DT-154 a DT-159.
 
 ## Qué se agregó
 
@@ -19,32 +19,45 @@ hasta que el dueño la apruebe. Análisis y justificación:
 | `apps/*/src/lib/fonts.ts`                                                                                      | Bricolage Grotesque + Geist + Geist Mono (y Outfit/Figtree sin precarga)        |
 | `apps/backoffice/src/app/design-system/`                                                                       | Vitrina (movida fuera de `(dashboard)`)                                         |
 
-`adminprop.css` (v1) no se tocó.
+`adminprop.css` (v1) se retiró en la adopción (ver «Volver a v1»).
 
-## Activar la v2 y volver a v1
+## Volver a v1
 
-`packages/ui/src/styles/globals.css`:
+La v2 es el único sistema: `globals.css` importa solo `adminprop-v2.css` y
+`adminprop.css` ya no está en el repo (tampoco Outfit/Figtree). Para volver:
 
-```css
-@import "./adminprop-v2.css"; /* v2 — activa */
-/* @import "./adminprop.css";    v1 */
-```
+1. Recuperar los tokens: `git show <commit-anterior-al-retiro>:packages/ui/src/styles/adminprop.css`
+   (el commit `refactor(ui): make v2 the only design system` lo borra; el
+   original también vive en `adminprop-repo-files/packages-ui-source/globals.css`).
+2. Cambiar el import de `globals.css` y volver a declarar Outfit y Figtree en
+   `apps/*/src/lib/fonts.ts` y en el `<html>` de cada layout.
+3. Revertir los commits de componentes (`feat(ui): restyle base components…`,
+   `feat(ui): add AiBadge…`) y de adopción: los componentes y las pantallas usan
+   `shadow-raised`, `pressable`, `lift`, `num`, `bg-overlay`, `text-title-*`,
+   que v1 no define. Con solo el import, se pierden sombras, velo de diálogos,
+   degradé y la escala tipográfica. En la práctica, no mergear esta rama.
 
-**Límite honesto de la vuelta atrás.** Cambiar el import devuelve los tokens
-(colores, radios, fuentes) a v1, pero los componentes de `packages/ui` ya
-tienen las clases v2 (`shadow-raised`, `pressable`, `bg-overlay`,
-`bg-primary-gradient`, `shimmer`…), que v1 no define: sin ellas se pierden
-sombras, velo de diálogos y degradé, y el skeleton queda sin animación. Para
-una vuelta atrás completa:
+## Adopción en las pantallas
 
-1. Cambiar el import (tokens v1).
-2. Revertir los commits `feat(ui): restyle base components…`,
-   `feat(ui): add AiBadge…`, `feat(backoffice,portal): apply design v2…` y
-   `feat(backoffice): rebuild the design-system showcase…` (o, más simple, no
-   mergear esta rama).
+Lo que se migró en `apps/backoffice` y `apps/portal` (no `apps/sites`):
 
-Las fuentes de v1 siguen declaradas (sin precarga), así que el paso 1 no deja
-la tipografía sin definir.
+- **Paneles** (`rounded-xl border bg-card`): `shadow-raised`; los que son links
+  (`transition-colors hover:bg-muted`) pasan a `lift`.
+- **KPIs**: `StatCard` en el dashboard (cobradas/parciales/pendientes/vencidas y
+  los totales del mes), el resumen de cobros, los totales del consolidado, el
+  resumen de CRM, las analíticas de la propiedad y el estado de cuenta del
+  propietario en el portal. El valor es siempre el string de la API; con
+  varias monedas no se anima.
+- **Tipografía**: títulos de pantalla `text-title-lg md:text-display-md`,
+  secciones `text-title-md`, `tabular-nums` → `num`.
+- **Montos** de celdas y filas de detalle en `font-display num`.
+- **IA**: `Button variant="ai"` y `AiBadge` en «Sugerir precio» (ficha de
+  propiedad). Es lo único asistido hoy; `Badge variant="ia"` queda disponible.
+- **Vitrina**: sección «Patrones de pantalla» (montos, botón `loading`, tarjeta
+  `lift`, skeleton, error con `EmptyState`).
+- **Estados**: los listados ya usaban `EmptyState` con «Reintentar» para el
+  error y `Skeleton` para la carga; no se cambió.
+- Prueba: `packages/ui/test/apps-v2-language.test.ts` lee las pantallas.
 
 ## Cómo se arma el CSS
 
@@ -122,10 +135,9 @@ React cuando deje de ser experimental en Next.
 
 ## Qué no se pudo verificar
 
-- Las pantallas reales del backoffice (dashboard, listados, fichas) y del
-  portal logueado: requieren sesión y API, que no hay en esta sesión. Se
-  verificó la vitrina, los logins y el listado público del portal (con la API
-  caída, así que se ve el estado vacío, no tarjetas de propiedades).
+- Las fichas de detalle (`[id]`), formularios largos, wizard de contrato y
+  diálogos abiertos con datos reales. En la adopción se revisaron los listados
+  y resúmenes con una API falsa descartable (`docs/design/capturas-adopcion/`).
 - Animaciones en movimiento real: las capturas se tomaron con
   `reducedMotion: reduce`. Los tests cubren la lógica, no la fluidez.
 - Rendimiento medido (FPS, INP) en dispositivos reales.

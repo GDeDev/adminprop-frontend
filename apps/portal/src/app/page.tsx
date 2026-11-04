@@ -98,7 +98,7 @@ export default async function HomePage(props: PageProps<"/">) {
                       <PriceText
                         price={property.price}
                         currency={property.currency}
-                        className="text-xl"
+                        className="text-title-md"
                       />
                       <p className="text-sm text-muted-foreground">
                         {[
