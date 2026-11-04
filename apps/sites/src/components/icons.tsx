@@ -17,6 +17,8 @@ import {
 
 import type { SiteContent } from "@adminprop/shared-types"
 
+import { socialHref } from "@/lib/safe-links"
+
 /** La lista cerrada de íconos de los pasos (la misma que valida la API). */
 const STEP_ICONS: Record<string, LucideIcon> = {
   search: Search,
@@ -84,9 +86,13 @@ export function SocialLink({
   url: string
   className?: string
 }) {
+  // Solo https: cualquier otro esquema (javascript:, data:, http:…) no se
+  // renderiza, aunque la API ya lo valide (defensa en profundidad).
+  const href = socialHref(url)
+  if (!href) return null
   return (
     <a
-      href={url}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={LABELS[network]}

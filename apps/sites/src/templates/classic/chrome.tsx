@@ -5,6 +5,7 @@ import { SocialLink } from "@/components/icons"
 import { MobileMenu } from "@/components/mobile-menu"
 import { navLinks } from "@/lib/site-links"
 import { hrefFor } from "@/lib/site-route"
+import { mailtoHref } from "@/lib/safe-links"
 import { telLink, whatsappLink } from "@/lib/whatsapp"
 
 import type { SiteProps } from "../types"
@@ -122,10 +123,10 @@ export function ClassicFooter({ site, route }: SiteProps) {
               </a>
             </p>
           )}
-          {contact.email && (
+          {mailtoHref(contact.email) && (
             <p>
               <a
-                href={`mailto:${contact.email}`}
+                href={mailtoHref(contact.email) ?? undefined}
                 className="inline-flex min-h-11 items-center break-all underline-offset-4 hover:underline"
               >
                 {contact.email}

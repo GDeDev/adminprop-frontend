@@ -7,6 +7,7 @@ import { Reveal } from "@/components/reveal"
 import { SiteImage } from "@/components/site-image"
 import { cn } from "@/lib/cn"
 import { basePath, hrefFor } from "@/lib/site-route"
+import { mailtoHref } from "@/lib/safe-links"
 import { telLink, whatsappLink } from "@/lib/whatsapp"
 
 import { ClassicPropertyCard } from "./card"
@@ -344,11 +345,11 @@ export function ClassicContactSection({ site, route }: SectionProps) {
               </a>
             </li>
           )}
-          {contact.email && (
+          {mailtoHref(contact.email) && (
             <li className="flex items-center gap-3">
               <Mail aria-hidden className="text-site-primary size-5 shrink-0" />
               <a
-                href={`mailto:${contact.email}`}
+                href={mailtoHref(contact.email) ?? undefined}
                 className="inline-flex min-h-11 items-center break-all underline-offset-4 hover:underline"
               >
                 {contact.email}
