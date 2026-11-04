@@ -14,6 +14,7 @@
         "NEXT_PUBLIC_*",
         "PORTAL_TENANT_SLUG",
         "API_URL",
+        "API_TIMEOUT_MS",
         "SITES_PREVIEW_ANCESTORS",
         "SITES_ALLOW_SLUG_PATH",
         "SITES_TRUST_FORWARDED_HOST",

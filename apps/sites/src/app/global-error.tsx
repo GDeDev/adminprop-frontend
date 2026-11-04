@@ -3,10 +3,10 @@
 import "./globals.css"
 
 export default function GlobalError({
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string }
-  reset: () => void
+  retry: () => void
 }) {
   return (
     <html lang="es">
@@ -21,7 +21,7 @@ export default function GlobalError({
           </p>
           <button
             type="button"
-            onClick={reset}
+            onClick={() => retry()}
             className="rounded-site bg-site-primary text-site-on-primary min-h-11 px-6 font-semibold"
           >
             Reintentar

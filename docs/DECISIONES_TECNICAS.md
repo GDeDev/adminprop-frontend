@@ -770,3 +770,17 @@ Guarda tras 1,5 s sin escribir. Reglas: (1) **no reenvía lo inválido**: con ca
 ### DT-149 — Miniaturas de templates: capturas incluidas en la app
 
 Capturas reales (640×400) de cada template con datos de ejemplo en `apps/backoffice/public/templates/`. Una `previewImageUrl` de la API tiene prioridad; si la imagen falla cae a la mini-maqueta. **Hay que regenerarlas si cambia el diseño de un template** (procedimiento en `docs/tecnica/web-inmobiliaria-v1-1.md`).
+
+### DT-153 — Una falla de la API nunca se publica como página vacía
+
+**Problema.** DT-127 cubrió el sitio (`loadSite`), pero la home, el listado, la ficha, las «parecidas», los favoritos compartidos y el sitemap atrapaban los errores con `.catch(() => null)` y renderizaban igual: una home sin destacadas, un listado vacío o un sitemap sin fichas. Con ISR esa respuesta degradada quedaba cacheada (60 s las páginas, 1 h el sitemap) y desplazaba a la última versión buena.
+
+**Decisión.**
+
+- `UpstreamError` (red, timeout, 5xx, 429, cuerpo ilegible, sin `data`) se lanza y no se atrapa en ninguna página, `generateMetadata` ni layout. En una regeneración ISR, Next conserva la última versión buena; sin versión previa, muestra `error.tsx` (500, no cacheable). Esto incluye pedidos secundarios (filtros del buscador, parecidas): es preferible no regenerar a cachear una página incompleta.
+- `null` (404 de la API) es lo único que da `notFound()`. «Sin datos» (listado vacío) es una página normal con 200.
+- El sitemap atrapa `UpstreamError` y responde 503 con `Cache-Control: no-store` y `Retry-After`; nunca un sitemap parcial.
+- El cliente corta a los 8 s (`AbortSignal.timeout`, configurable con `API_TIMEOUT_MS`, pensado para tests) para que un cuelgue sea una falla y no un render que no termina. Un 200 con cuerpo no JSON o sin `data` también es `UpstreamError`.
+- `error.tsx` usa `retry()` (vuelve a pedir los datos) y no `reset()`; se agregó `app/error.tsx` para fallas del layout del sitio.
+
+**Costo asumido.** Si la API cae y no hay versión previa (primer pedido de una página o caché vacío tras un deploy), el visitante ve la pantalla de error en lugar de una página parcial. Si el que falla es el layout, no hay sitio y por lo tanto tampoco tema: la pantalla de error sale con los colores por defecto. El listado y los favoritos son dinámicos (sin ISR), así que ahí el error se muestra siempre mientras la API esté caída.
