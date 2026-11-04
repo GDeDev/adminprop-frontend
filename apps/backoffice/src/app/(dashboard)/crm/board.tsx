@@ -6,6 +6,7 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   closestCorners,
   useDroppable,
   useSensor,
@@ -41,6 +42,21 @@ export type RequestMove = (
   target: InquiryCard[],
   index: number
 ) => void
+
+/**
+ * Alternativa al arrastre («Mover a…»): la tarjeta va al final de la etapa
+ * elegida. Es la misma ruta que usa el panel de detalle y la vista mobile.
+ */
+export function moveToStage(
+  pipeline: PipelineDto,
+  card: InquiryCard,
+  target: InquiryStage,
+  onMove: RequestMove
+) {
+  if (card.stage === target) return
+  const list = pipeline.columns.find((item) => item.stage === target)?.cards
+  onMove(card, target, list ?? [], (list ?? []).length)
+}
 
 const columnId = (stage: InquiryStage) => `column:${stage}`
 
@@ -89,6 +105,10 @@ export function Board({
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    // Con el dedo, una pausa corta distingue arrastrar de hacer scroll.
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 8 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -140,6 +160,9 @@ export function Board({
             column={column}
             filters={filters}
             onOpen={onOpen}
+            onMoveTo={(card, target) =>
+              moveToStage(pipeline, card, target, onMove)
+            }
           />
         ))}
       </div>
@@ -156,10 +179,12 @@ function BoardColumn({
   column,
   filters,
   onOpen,
+  onMoveTo,
 }: {
   column: PipelineColumn
   filters: InquiryFilters
   onOpen: (id: string) => void
+  onMoveTo: (card: InquiryCard, target: InquiryStage) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: columnId(column.stage) })
   const [expanded, setExpanded] = React.useState(false)
@@ -193,11 +218,20 @@ function BoardColumn({
       >
         <ul className="flex flex-col gap-2">
           {column.cards.map((card) => (
-            <SortableItem key={card.id} card={card} onOpen={onOpen} />
+            <SortableItem
+              key={card.id}
+              card={card}
+              onOpen={onOpen}
+              onMoveTo={onMoveTo}
+            />
           ))}
           {extras.map((card) => (
             <li key={card.id}>
-              <InquiryCardView card={card} onOpen={onOpen} />
+              <InquiryCardView
+                card={card}
+                onOpen={onOpen}
+                onMoveTo={(target) => onMoveTo(card, target)}
+              />
             </li>
           ))}
         </ul>
@@ -227,9 +261,11 @@ function BoardColumn({
 function SortableItem({
   card,
   onOpen,
+  onMoveTo,
 }: {
   card: InquiryCard
   onOpen: (id: string) => void
+  onMoveTo: (card: InquiryCard, target: InquiryStage) => void
 }) {
   const {
     attributes,
@@ -249,6 +285,7 @@ function SortableItem({
       <InquiryCardView
         card={card}
         onOpen={onOpen}
+        onMoveTo={(target) => onMoveTo(card, target)}
         dragHandle={{ ...attributes, ...listeners }}
       />
     </li>

@@ -18,6 +18,7 @@ import { STAGE_LABELS, stageMeta } from "@/lib/crm"
 import { useInfiniteInquiries } from "@/lib/crm-api"
 import type { InquiryFilters } from "@/lib/crm-api"
 
+import { moveToStage } from "./board"
 import type { RequestMove } from "./board"
 import { InquiryCardView } from "./inquiry-card"
 
@@ -118,13 +119,7 @@ function StageList({
             <InquiryCardView
               card={card}
               onOpen={onOpen}
-              onMoveTo={(target) => {
-                const destination = pipeline.columns.find(
-                  (item) => item.stage === target
-                )
-                const list = destination?.cards ?? []
-                onMove(card, target, list, list.length)
-              }}
+              onMoveTo={(target) => moveToStage(pipeline, card, target, onMove)}
             />
           </li>
         ))}
