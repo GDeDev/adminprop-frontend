@@ -683,3 +683,40 @@ Paginación con ventana (primera, última, actual y vecinas); un rango «desde»
 - **Favoritos**: opcional en la spec; necesitan una página que lea `localStorage` y pida propiedades desde el navegador (CORS por dominio propio o un proxy más).
 - **Autoguardado, deshacer, recorte de imágenes, miniaturas reales de los templates y orden por precio**: son producto, no correcciones; el orden por precio además necesita soporte en la API.
 - **Quitar `'unsafe-inline'` de `script-src`**: depende de que Next permita CSP por hash en rutas con ISR.
+
+### Revisión del PR (tercera ronda)
+
+### DT-134 — El render no confía en que la API validó los links
+
+`SocialLink` solo renderiza URLs `https:` (sin credenciales ni host vacío): `javascript:`, `data:`, `vbscript:`, `http:`, `mailto:` y rutas relativas no generan un `href` (devuelve `null`). Los `mailto:` de contacto pasan por `mailtoHref`: un email sin espacios, comillas, comas, `;` ni `?&=#%` (que permitirían agregar destinatarios o cabeceras). `mailto:` y `tel:` no corresponden a una red social, por eso `socialHref` no los acepta. Defensa en profundidad: la API ya valida (D-177 y D-181 del backend), esto cubre un dato guardado antes de esa validación o un cambio futuro.
+
+### DT-135 — `Origin: null` es un 403, no un 500
+
+`new URL(origin)` lanzaba con `Origin: null` (lo mandan los documentos sandboxeados y algunas redirecciones) y el contacto respondía 500. `isSameOrigin` rechaza un `Origin` ilegible; uno ausente (no es un navegador) se sigue aceptando.
+
+### DT-136 — Solo se le pregunta a la API por hosts que pueden ser un sitio
+
+`isPlausibleSiteHost` (antes de `resolveHost`): pasa un subdominio de **un solo nivel** de `SITES_BASE_DOMAIN` con etiqueta válida (3 a 63, sin guiones en los bordes), o un dominio propio con forma de dominio (no IP, no `localhost`, no colgado del dominio base, TLD no numérico). IPs, nombres mal formados y subdominios de dos niveles son 404 sin llamar a la API. **Límite honesto**: un subdominio al azar con forma válida sí se consulta (solo la API sabe si existe); a esos los frenan la caché de fallos de 10 s, el tope de la API y, si hace falta, un balanceador. No hay un tope local de consultas por segundo.
+
+### DT-137 — SEO: canonical, `og:url`, `noindex` en filtrados, descripciones, `lastmod`
+
+- **Canonical absoluto sin leer headers.** Leer `headers()` en `generateMetadata` haría dinámica la página y rompería el ISR. En cambio el proxy pone el **host del pedido** en el segmento de ruta del sitio público (`h~slug~host`, sin puerto; el borrador y el acceso por slug no lo llevan) y la página lo usa para armar `https://<host>/…`. Cada host tiene su propia entrada de caché. Con varios hosts para un mismo sitio (subdominio y dominio propio) cada uno es canónico de sí mismo; la API no expone cuál es el preferido (haría falta un campo aditivo `publicUrl` en `PublicSite`). En desarrollo y en la vista previa no se emite canonical.
+- **`openGraph` completo en cada página** (Next lo reemplaza entero, no lo mezcla con el del layout): sitio, idioma, título, descripción, imagen y `url`.
+- `/propiedades` filtrado o paginado: `robots: noindex, follow` (duplica al listado base); el listado sin filtros ni página se indexa. Contacto y «nosotros» tienen `description` (dirección y horarios; o el comienzo del texto).
+- **`lastmod`** del sitemap: las páginas del sitio llevan la fecha de publicación; **las fichas no llevan**, porque la API pública no expone cuándo cambió cada propiedad y una fecha inventada es peor que ninguna. Para tenerla hace falta un `updatedAt` aditivo en `PublicPropertySummary` (backend).
+
+### DT-138 — La vista previa conserva el `theme-color`
+
+El árbol `/p` reexportaba el layout y `generateMetadata` pero no `generateViewport`: la vista previa perdía el color de la barra del navegador. Un test fija qué reexporta.
+
+### DT-139 — Ficha: precio, «a consultar» y placeholder de fotos
+
+El precio tenía `text-site-primary` en un `<p>` y un `<span text-site-text>` adentro: la clase no hacía nada. Ahora el monto va en un solo elemento. **Sin precio** (ficha y las dos tarjetas) se muestra «Precio a consultar» en chico y gris, no «Consultar» como un título. El placeholder de «sin fotos» pasó de un bloque 16:9 a todo el ancho (más de 700 px en escritorio) a una franja de 144–176 px con ícono.
+
+### DT-140 — Ubicación: se queda el `<select>` (se evaluó `<datalist>`)
+
+Un `<input list>` obliga a resolver nombre → id en el servidor (el formulario GET manda el texto, no el id) y su soporte en lectores de pantalla y en Android es desigual: no es lo bastante barato ni accesible. Se deja el `<select>` (funciona sin JS, accesible). Con cientos de zonas habría que pasar a un combobox ARIA con JS.
+
+### Qué NO se hizo de esta ronda
+
+Las mejoras opcionales (autoguardado de borrador, miniaturas reales de los templates, orden por precio, favoritos): quedan para la versión 1.1. El orden por precio necesita soporte en la API; los favoritos necesitan una página que lea `localStorage` y pida propiedades desde el navegador.

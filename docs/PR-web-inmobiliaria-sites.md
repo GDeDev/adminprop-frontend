@@ -62,6 +62,26 @@ Resultados: `typecheck`, `lint` y `format:check` verdes; tests **sites 73**, **b
 
 **Sigue sin hacerse** (explicado en DT-133): favoritos, autoguardado, deshacer, recorte de imágenes, miniaturas reales y orden por precio.
 
+## Revisión del PR (tercera ronda, DT-134 a DT-140)
+
+| #   | Arreglo                                                                                                                                               | Dónde                                                                  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 1   | `SocialLink` solo renderiza `https:`; los `mailto:` se validan en el render                                                                           | DT-134, tests con `javascript:`, `data:`, `http:` en los dos templates |
+| 2   | `Origin: null` en el contacto es 403, no 500                                                                                                          | DT-135, test del route handler                                         |
+| 3   | Hosts imposibles se descartan sin llamar a la API                                                                                                     | DT-136 (`host-policy.ts`), tests del proxy                             |
+| 4   | Canonical + `og:url` en todas las páginas, `noindex` en listados filtrados o paginados, descripciones en contacto y nosotros, `lastmod` en el sitemap | DT-137 (dos commits)                                                   |
+| 5   | La vista previa conserva el `theme-color`                                                                                                             | DT-138                                                                 |
+| 6   | Precio de la ficha, «Precio a consultar», placeholder de fotos compacto                                                                               | DT-139; capturas regeneradas                                           |
+| 7   | Ubicación: se queda el `<select>`                                                                                                                     | DT-140 (evaluado y anotado)                                            |
+| 8   | «verbatim» corregido a «equivalente en contenido» (la única diferencia son los `;` de Prettier)                                                       | este PR, doc técnica y comentario de `site.ts`                         |
+| 9   | Nota para quien integra (abajo)                                                                                                                       | PR                                                                     |
+| 10  | Mejoras opcionales: **no hechas**                                                                                                                     | DT-140 / «Qué NO se hizo»                                              |
+
+**Notas de integración (para quien mergea; no se tocó nada de esto):**
+
+- **CSP del backoffice.** La rama `fix/front-security-audit` pone `frame-src 'self' about:` en la CSP del backoffice. Eso **bloqueará el iframe de la vista previa** del editor «Mi sitio web»: hay que agregar a `frame-src` el origen de `NEXT_PUBLIC_SITES_URL` (en desarrollo, `http://localhost:3003`). Del lado de `apps/sites` ya está resuelto con `frame-ancestors` para `SITES_PREVIEW_ANCESTORS` (el origen del backoffice).
+- Las decisiones del backend se renumeraron a D-177..D-196 y A-137..A-148; los docs del frontend ya usan los nuevos números.
+
 ## Lo que NO pude verificar
 
 - **El editor «Mi sitio web» en un navegador, logueado, contra la API real.** Solo está probado en jsdom con la API mockeada (25 tests de pantalla, 27 de helpers) y por typecheck. El responsive, el contraste y el foco del editor están cuidados por construcción pero no medidos.
