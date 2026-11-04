@@ -24,7 +24,11 @@ import { Skeleton } from "@adminprop/ui/components/skeleton"
 
 import { formatDateTime } from "@/lib/automations"
 import { crmApiError } from "@/lib/crm"
-import { CHANNEL_LABELS, channelStatusMeta } from "@/lib/listings"
+import {
+  CHANNEL_LABELS,
+  channelStatusMeta,
+  friendlyRemoteError,
+} from "@/lib/listings"
 import {
   useChannels,
   useConnectMercadoLibre,
@@ -127,7 +131,8 @@ function ChannelCard({ channel }: { channel: ListingChannelDto }) {
       {channel.status === "ERROR" && channel.lastError && (
         <Alert variant="destructive" role="alert">
           <AlertDescription>
-            {channel.lastError} Reconectá la cuenta para seguir publicando.
+            {friendlyRemoteError(channel.lastError)} Reconectá la cuenta para
+            seguir publicando.
           </AlertDescription>
         </Alert>
       )}
@@ -160,6 +165,7 @@ function MercadoLibreActions({ channel }: { channel: ListingChannelDto }) {
         onClick={() => void start()}
         disabled={connect.isPending}
         variant={isConnected ? "outline" : "default"}
+        className="min-h-11 md:min-h-9"
       >
         {connect.isPending ? (
           <Loader2 aria-hidden className="animate-spin" />
@@ -169,7 +175,11 @@ function MercadoLibreActions({ channel }: { channel: ListingChannelDto }) {
         {isConnected ? "Reconectar" : "Conectar"}
       </Button>
       {isConnected && (
-        <Button variant="outline" onClick={() => setConfirming(true)}>
+        <Button
+          variant="outline"
+          className="min-h-11 md:min-h-9"
+          onClick={() => setConfirming(true)}
+        >
           <Unlink aria-hidden />
           Desconectar
         </Button>

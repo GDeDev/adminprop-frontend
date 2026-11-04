@@ -92,3 +92,19 @@ export function missingFromError(error: unknown): string[] {
     ? missing.filter((item): item is string => typeof item === "string")
     : []
 }
+
+const TECHNICAL_ERROR =
+  /exception|error:|stack|prisma|econn|etimedout|status code|axios|\bat \S+\(|[{}<>]|\b[45]\d{2}\b/i
+
+/**
+ * `lastError` lo guarda el servidor a partir de lo que respondió el portal y
+ * puede traer texto técnico. Se muestra solo si parece un mensaje pensado para
+ * personas; si no, un texto genérico (DT-109).
+ */
+export function friendlyRemoteError(raw: string): string {
+  const text = raw.trim()
+  if (text === "" || text.length > 200 || TECHNICAL_ERROR.test(text)) {
+    return "El portal rechazó o no pudo procesar la operación. Probá de nuevo en unos minutos; si sigue igual, reconectá la cuenta."
+  }
+  return text
+}
