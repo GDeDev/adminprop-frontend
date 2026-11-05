@@ -4669,6 +4669,7 @@ export interface components {
         | "FEATURE_DISABLED"
         | "DATABASE_ERROR"
         | "UNIQUE_CONSTRAINT_VIOLATION"
+        | "CHECK_CONSTRAINT_VIOLATION"
         | "FOREIGN_KEY_CONSTRAINT_VIOLATION"
         | "RECORD_NOT_FOUND"
         | "RELATED_RECORDS_EXIST"
