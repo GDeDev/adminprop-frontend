@@ -143,7 +143,7 @@ function Account({
 
   return (
     <div className="flex flex-col gap-4">
-      <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
+      <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-4">
         <Total label="Devengado" value={money(totals.accrued)} />
         <Total label="Cobrado" value={money(totals.collected)} />
         <Total
@@ -166,7 +166,20 @@ function Account({
           value={money(totals.feeAccruedOnCollected)}
           hint={`${money(totals.feeAccruedOnBase)} sobre el total`}
         />
+        <Total
+          label="Por liquidar"
+          value={money(totals.pendingSettlement)}
+          hint="Bruto, antes de honorarios y gastos"
+          describedBy="pending-settlement-help"
+        />
       </dl>
+      <p id="pending-settlement-help" className="text-xs text-muted-foreground">
+        <strong className="font-medium">Por liquidar</strong> es lo que cobró la
+        inmobiliaria y todavía no está en una liquidación confirmada (alquiler,
+        punitorios y cargos del propietario). Es un monto bruto: no descuenta
+        honorarios ni gastos, así que no es lo que se le va a transferir al
+        propietario.
+      </p>
       <p className="num text-xs text-muted-foreground">
         {COLLECTION_MODE_LABELS[account.contract.collectionMode]} ·{" "}
         {FEE_MODE_LABELS[account.contract.feeMode]}
@@ -280,16 +293,20 @@ function Total({
   value,
   hint,
   tone,
+  describedBy,
 }: {
   label: string
   value: string
   hint?: string
   tone?: "warning"
+  /** Id del texto de ayuda que explica este total. */
+  describedBy?: string
 }) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd
+        aria-describedby={describedBy}
         className={`font-display num font-semibold ${
           tone === "warning" ? "text-warning" : ""
         }`}

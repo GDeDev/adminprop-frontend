@@ -24,7 +24,7 @@ const totals = Object.fromEntries(
 
 const account = {
   contract: { currency: "ARS", collectionMode: "AGENCY", feeMode: "DEDUCTED" },
-  totals,
+  totals: { ...totals, pendingSettlement: "123456.00" },
   installments: [],
   movements: [
     {
@@ -72,5 +72,20 @@ describe("AccountSection", () => {
     )
     expect(screen.getByText(/Importe:/)).toHaveTextContent(/US\$|USD/)
     expect(screen.getByText(/monto de referencia: .*260\.000/)).toBeVisible()
+  })
+
+  it("muestra «Por liquidar» como monto bruto, con su explicación", () => {
+    render(
+      <AccountSection
+        contract={{ id: "c1", currency: "ARS", status: "ACTIVE" }}
+      />
+    )
+    const value = screen.getByText(/123\.456,00/)
+    expect(value).toHaveAccessibleDescription(
+      /monto bruto: no descuenta honorarios/
+    )
+    expect(
+      screen.getByText("Bruto, antes de honorarios y gastos")
+    ).toBeVisible()
   })
 })
