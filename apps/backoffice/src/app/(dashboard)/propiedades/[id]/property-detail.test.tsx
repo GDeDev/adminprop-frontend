@@ -68,6 +68,16 @@ function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
     amenities: [{ id: "a1", name: "Pileta", isActive: true, icon: "waves" }],
     notes: "Llave en portería",
     photos: [],
+    listingOperation: "RENT",
+    bedrooms: null,
+    bathrooms: null,
+    rooms: null,
+    totalAreaM2: null,
+    coveredAreaM2: null,
+    ageYears: null,
+    latitude: null,
+    longitude: null,
+    needsReview: false,
     ...overrides,
   }
 }
@@ -98,7 +108,37 @@ describe("Ficha de propiedad", () => {
     expect(screen.getByText("(desactivado)")).toBeInTheDocument()
   })
 
-  it("ofrece solo las transiciones de estado permitidas", async () => {
+  it("muestra operación, precio y características; sin cargar, «Consultar»", () => {
+    property = makeProperty()
+    const { unmount } = render(<PropertyDetailScreen id="p1" />)
+    expect(screen.getByText("Alquiler")).toBeInTheDocument()
+    expect(screen.getByText("Consultar")).toBeInTheDocument()
+    expect(screen.queryByText("Dormitorios")).toBeNull()
+    unmount()
+
+    property = makeProperty({
+      listingOperation: "SALE",
+      listingPrice: "150000.00",
+      listingCurrency: "USD",
+      bedrooms: 3,
+      rooms: 4,
+      totalAreaM2: 85.5,
+      ageYears: 1,
+    })
+    render(<PropertyDetailScreen id="p1" />)
+    expect(screen.getByText("Venta")).toBeInTheDocument()
+    expect(screen.getByText(/150\.000/)).toBeInTheDocument()
+    expect(screen.getByText("Dormitorios").nextSibling).toHaveTextContent("3")
+    expect(screen.getByText("Superficie total").nextSibling).toHaveTextContent(
+      "85,5 m²"
+    )
+    expect(screen.getByText("Antigüedad").nextSibling).toHaveTextContent(
+      "1 año"
+    )
+    expect(screen.queryByText("Baños")).toBeNull()
+  })
+
+  it("ofrece sólo las transiciones de estado permitidas", async () => {
     property = makeProperty({ status: "MAINTENANCE" })
     render(<PropertyDetailScreen id="p1" />)
     const user = userEvent.setup()

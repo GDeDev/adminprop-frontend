@@ -50,7 +50,10 @@ export function CountsSummary({
           {rows.map((entity) => {
             const c = batch.counts.byEntity[entity]
             return (
-              <li key={entity} className="rounded-xl border bg-card p-3">
+              <li
+                key={entity}
+                className="rounded-xl border bg-card p-3 shadow-raised"
+              >
                 <p className="font-medium">{ENTITY_LABELS[entity]}</p>
                 <dl className="mt-1 grid grid-cols-[1fr_auto] gap-x-4 text-sm">
                   <dt className="text-muted-foreground">Total</dt>

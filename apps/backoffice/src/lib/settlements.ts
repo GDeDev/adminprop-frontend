@@ -44,8 +44,8 @@ export const STATEMENT_STATUS_META: Record<StatementStatus, BadgeMeta> = {
 
 export const SEND_MODE_LABELS: Record<StatementSendMode, string> = {
   SUMMARY: "Solo el resumen",
-  RECEIPTS: "Solo los comprobantes",
-  BOTH: "Resumen y comprobantes",
+  RECEIPTS: "Comprobantes individuales",
+  BOTH: "Ambos: resumen y comprobantes",
 }
 
 export const FEE_SOURCE_LABELS: Record<FeeReceivableSource, string> = {
@@ -80,6 +80,46 @@ export const FEE_MOVEMENT_LABELS: Record<FeeAccountMovementType, string> = {
   PAYMENT: "Pago de honorarios",
   PAYMENT_VOIDED: "Pago anulado",
   RECEIVABLE_VOIDED: "Honorario anulado",
+}
+
+/**
+ * Retenciones, adelantos y otros ajustes de una liquidación o de un total del
+ * consolidado. Vienen de la API con signo (negativo = descuenta) y suman
+ * `adjustmentsTotal`, que sigue siendo el total. Acá solo se ordenan: el
+ * frontend no suma.
+ */
+export const ADJUSTMENT_BREAKDOWN_FIELDS = [
+  { key: "withholdingsTotal", label: "Retenciones" },
+  { key: "advancesTotal", label: "Adelantos" },
+  { key: "otherAdjustmentsTotal", label: "Otros ajustes" },
+] as const
+
+export type AdjustmentBreakdownSource = {
+  withholdingsTotal: string
+  advancesTotal: string
+  otherAdjustmentsTotal: string
+}
+
+export function adjustmentBreakdown(
+  source: AdjustmentBreakdownSource
+): { key: string; label: string; amount: string }[] {
+  return ADJUSTMENT_BREAKDOWN_FIELDS.map(({ key, label }) => ({
+    key,
+    label,
+    amount: source[key],
+  }))
+}
+
+/** Importe con signo: los negativos salen con "−" delante del símbolo de moneda. */
+export function signedMoney(
+  amount: string,
+  currency: string,
+  format: (amount: string, currency: string) => string
+): string {
+  const trimmed = amount.trim()
+  return trimmed.startsWith("-")
+    ? `−${format(trimmed.slice(1), currency)}`
+    : format(amount, currency)
 }
 
 /** "Liquidación 2026-10 · 2" cuando hay más de una en el mes. */

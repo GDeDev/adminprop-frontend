@@ -31,7 +31,9 @@ import { formatDate } from "@/lib/dates"
 import { PAYMENT_METHOD_LABELS } from "@/lib/billing"
 import {
   ADJUSTMENT_CONCEPT_LABELS,
+  adjustmentBreakdown,
   adjustmentSubtracts,
+  signedMoney,
   settlementLabel,
 } from "@/lib/settlements"
 import {
@@ -125,7 +127,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               Liquidación {settlementLabel(settlement)}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -282,15 +284,28 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
               value={`−${money(settlement.expensesTotal)}`}
             />
             <Row
-              label="Ajustes"
-              value={
-                settlement.adjustmentsTotal.startsWith("-")
-                  ? `−${money(settlement.adjustmentsTotal.slice(1))}`
-                  : money(settlement.adjustmentsTotal)
-              }
+              label="Ajustes (total)"
+              value={signedMoney(
+                settlement.adjustmentsTotal,
+                settlement.currency,
+                formatMoney
+              )}
             />
+            {adjustmentBreakdown(settlement).map((item) => (
+              <Row
+                key={item.key}
+                label={item.label}
+                indent
+                muted={isZero(item.amount)}
+                value={signedMoney(
+                  item.amount,
+                  settlement.currency,
+                  formatMoney
+                )}
+              />
+            ))}
             <dt className="border-t pt-2 font-medium">Neto a transferir</dt>
-            <dd className="border-t pt-2 text-right font-display text-xl font-semibold tabular-nums">
+            <dd className="border-t pt-2 text-right font-display num text-title-md font-semibold">
               {money(settlement.netAmount)}
             </dd>
             {!isZero(settlement.transferredTotal) && (
@@ -328,7 +343,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                     <p className="font-medium">
                       Cuota de {periodLabel(payment.installmentPeriod)}
                     </p>
-                    <p className="text-xs text-muted-foreground tabular-nums">
+                    <p className="num text-xs text-muted-foreground">
                       Pagado el {formatDate(payment.paidAt)} · alquiler{" "}
                       {money(payment.rentApplied)}
                       {!isZero(payment.lateFeeApplied) &&
@@ -363,7 +378,9 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                       · {formatDate(expense.expenseDate)}
                     </span>
                   </span>
-                  <span className="tabular-nums">−{money(expense.amount)}</span>
+                  <span className="font-display num">
+                    −{money(expense.amount)}
+                  </span>
                 </li>
               ))}
               {settlement.skippedExpenses.map((expense) => (
@@ -374,7 +391,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                   <span>
                     {expense.description} · en otra moneda, no se descuenta acá
                   </span>
-                  <span className="tabular-nums">
+                  <span className="font-display num">
                     {formatMoney(
                       expense.amount,
                       expense.currency ?? settlement.currency
@@ -415,7 +432,7 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium tabular-nums">
+                    <span className="num font-medium">
                       {adjustmentSubtracts(adjustment.concept) ? "−" : "+"}
                       {money(adjustment.amount)}
                     </span>
@@ -577,17 +594,20 @@ function Row({
   label,
   value,
   muted,
+  indent,
 }: {
   label: string
   value: string
   muted?: boolean
+  /** Sub-concepto del renglón de arriba (no suma aparte). */
+  indent?: boolean
 }) {
   return (
     <>
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd
-        className={`text-right tabular-nums ${muted ? "text-muted-foreground" : ""}`}
-      >
+      <dt className={`text-muted-foreground ${indent ? "pl-4 text-xs" : ""}`}>
+        {label}
+      </dt>
+      <dd className={`text-right num ${muted ? "text-muted-foreground" : ""}`}>
         {value}
       </dd>
     </>
@@ -607,9 +627,9 @@ function Section({
   return (
     <section
       aria-labelledby={id}
-      className={`rounded-xl border bg-card p-4 ${className ?? ""}`}
+      className={`rounded-xl border bg-card p-4 shadow-raised ${className ?? ""}`}
     >
-      <h2 id={id} className="mb-3 font-display text-lg font-semibold">
+      <h2 id={id} className="mb-3 font-display text-title-md font-semibold">
         {title}
       </h2>
       {children}

@@ -166,6 +166,12 @@ export function useGenerateInstallments() {
 export interface RegisterPaymentVariables extends RegisterPaymentRequest {
   installmentId: string
   file?: File | null
+  /**
+   * `Idempotency-Key` (D-243): un uuid por envío del formulario. Repetir el
+   * pedido con la misma clave devuelve el pago ya registrado en vez de crear
+   * otro (doble click, reintento de red).
+   */
+  idempotencyKey?: string
 }
 
 /** Multipart (spec 3.3): el comprobante es opcional (D-74). */
@@ -176,6 +182,7 @@ export function useRegisterPayment() {
       file,
       allocation,
       applyCredit,
+      idempotencyKey,
       ...fields
     }: RegisterPaymentVariables) => {
       const form = new FormData()
@@ -189,7 +196,13 @@ export function useRegisterPayment() {
         form.append("applyCredit", String(applyCredit))
       if (file) form.append("file", file)
       return unwrap<RegisterPaymentResult>(
-        apiClient.post(`/billing/installments/${installmentId}/payments`, form)
+        apiClient.post(
+          `/billing/installments/${installmentId}/payments`,
+          form,
+          idempotencyKey
+            ? { headers: { "Idempotency-Key": idempotencyKey } }
+            : undefined
+        )
       )
     }
   )

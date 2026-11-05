@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "api:types": "openapi-typescript ../../../adminprop-backend/openapi.json --output src/generated/api.ts && prettier --write src/generated/api.ts"
+    "api:types": "openapi-typescript ../../../adminprop-backend/openapi.json --output src/generated/api.ts && prettier --write src/generated/api.ts",
+    "test": "vitest run"
   },
   "exports": {
     ".": "./src/index.ts"
@@ -14,8 +15,10 @@
   "devDependencies": {
     "@adminprop/eslint-config": "*",
     "@adminprop/typescript-config": "*",
+    "@types/node": "^20",
     "eslint": "^9",
     "openapi-typescript": "^7.13.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.1"
   }
 }

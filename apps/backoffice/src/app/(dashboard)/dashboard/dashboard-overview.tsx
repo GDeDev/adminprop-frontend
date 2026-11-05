@@ -11,6 +11,7 @@ import type {
 } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
 
 import { currentPeriod, formatMoneyList, periodLabel } from "@/lib/billing"
@@ -59,17 +60,20 @@ function BucketCard({
   return (
     <Link
       href={href}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
-      <p className="text-sm text-muted-foreground">{title}</p>
-      <p
-        className={`font-display text-2xl font-semibold tabular-nums ${tone === "danger" && bucket.count > 0 ? "text-destructive" : ""}`}
-      >
-        {bucket.count}
-      </p>
-      <p className="text-xs text-muted-foreground tabular-nums">
-        {formatMoneyList(bucket.amounts)}
-      </p>
+      <StatCard
+        label={title}
+        value={String(bucket.count)}
+        hint={
+          <span className="font-display num">
+            {formatMoneyList(bucket.amounts)}
+          </span>
+        }
+        className={
+          tone === "danger" && bucket.count > 0 ? "text-destructive" : undefined
+        }
+      />
     </Link>
   )
 }
@@ -109,7 +113,10 @@ function Overview({ report }: { report: DashboardReport }) {
   return (
     <div className="flex flex-col gap-6">
       <section aria-labelledby="month-title" className="flex flex-col gap-3">
-        <h2 id="month-title" className="font-display text-lg font-semibold">
+        <h2
+          id="month-title"
+          className="font-display text-title-md font-semibold"
+        >
           {periodLabel(report.period)}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -150,12 +157,12 @@ function Overview({ report }: { report: DashboardReport }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section
-          className="rounded-xl border bg-card p-4"
+          className="min-w-0 rounded-xl border bg-card p-4 shadow-raised"
           aria-labelledby="todo-title"
         >
           <h2
             id="todo-title"
-            className="mb-2 font-display text-lg font-semibold"
+            className="mb-2 font-display text-title-md font-semibold"
           >
             Para hoy
           </h2>
@@ -169,10 +176,10 @@ function Overview({ report }: { report: DashboardReport }) {
                 <li key={item.key}>
                   <Link
                     href={item.href}
-                    className="flex items-center justify-between py-2 text-sm hover:underline"
+                    className="flex min-h-11 items-center justify-between py-2 text-sm hover:underline md:min-h-9"
                   >
                     {item.label}
-                    <span className="font-semibold tabular-nums">
+                    <span className="num font-semibold">
                       {report.todo[item.key]}
                     </span>
                   </Link>
@@ -183,12 +190,12 @@ function Overview({ report }: { report: DashboardReport }) {
         </section>
 
         <section
-          className="rounded-xl border bg-card p-4"
+          className="min-w-0 rounded-xl border bg-card p-4 shadow-raised"
           aria-labelledby="expiring-title"
         >
           <h2
             id="expiring-title"
-            className="mb-2 font-display text-lg font-semibold"
+            className="mb-2 font-display text-title-md font-semibold"
           >
             Contratos por vencer
           </h2>
@@ -202,7 +209,7 @@ function Overview({ report }: { report: DashboardReport }) {
                 <li key={row.contractId}>
                   <Link
                     href={`/contratos/${row.contractId}`}
-                    className="flex items-center justify-between gap-3 py-2 text-sm hover:underline"
+                    className="flex min-h-11 items-center justify-between gap-3 py-2 text-sm hover:underline md:min-h-9"
                   >
                     <span className="min-w-0 truncate">
                       {row.propertyAddress} · {row.renterName}
@@ -220,12 +227,12 @@ function Overview({ report }: { report: DashboardReport }) {
       </div>
 
       <section
-        className="rounded-xl border bg-card p-4"
+        className="rounded-xl border bg-card p-4 shadow-raised"
         aria-labelledby="history-title"
       >
         <h2
           id="history-title"
-          className="mb-3 font-display text-lg font-semibold"
+          className="mb-3 font-display text-title-md font-semibold"
         >
           Devengado y cobrado, últimos meses
         </h2>
@@ -269,12 +276,9 @@ function Figure({
   label: string
   amounts: CurrencyAmount[]
 }) {
+  const value = formatMoneyList(amounts)
+  // Con varias monedas el contador solo animaría la primera: queda estático.
   return (
-    <div className="rounded-xl border bg-card p-4">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="font-display text-lg font-semibold tabular-nums">
-        {formatMoneyList(amounts)}
-      </p>
-    </div>
+    <StatCard label={label} value={value} animate={!value.includes(" · ")} />
   )
 }

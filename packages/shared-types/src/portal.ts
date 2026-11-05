@@ -1,3 +1,4 @@
+import type { ApiSchemas } from "./api"
 import type {
   CollectionMode,
   DepositReturnMode,
@@ -13,47 +14,21 @@ import type {
   RentUpdateFrequency,
   RentUpdateType,
 } from "./contract"
-import type { BankAccount } from "./owner"
 import type { ContractService } from "./service"
-import type {
-  OwnerStatementSummary,
-  SettlementSummary,
-  StatementSendMode,
-} from "./settlements"
+import type { OwnerStatementSummary, SettlementSummary } from "./settlements"
 
 /**
  * Portales de inquilinos y propietarios (Fases 18 y 17), sólo lectura.
  * Nombres acordados en `REDISENO_FASE_17_18.md`, sección 4.
  *
- * TODO(fase-18): reemplazar por alias a `ApiSchemas["…Dto"]` cuando el
- * `openapi.json` de la rama del portal esté exportado.
+ * Los DTOs que coinciden con el OpenAPI son alias. Los demás siguen a mano
+ * porque el OpenAPI declara `string` donde la API manda una unión cerrada
+ * (`status`, `currency`, `collectionMode`…); ver
+ * `docs/tecnica/shared-types-generados.md`.
  */
 
-export interface PortalAgency {
-  name: string
-  slug: string
-  logoUrl: string | null
-  primaryColor: string | null
-  phone: string | null
-  email: string | null
-  /** Sólo dígitos, con código de país. */
-  whatsapp: string | null
-  address: string | null
-  bankAccount: {
-    holder: string | null
-    bank: string | null
-    cbu: string | null
-    alias: string | null
-  } | null
-}
-
-export interface PortalRenterMe {
-  id: string
-  fullName: string
-  email: string | null
-  phone: string | null
-  agency: PortalAgency
-}
+export type PortalAgency = ApiSchemas["PortalAgencyDto"]
+export type PortalRenterMe = ApiSchemas["PortalRenterMeDto"]
 
 export interface PortalRenterContract {
   id: string
@@ -78,10 +53,8 @@ export interface PortalRenterContract {
   timeline: ContractTimeline
 }
 
-export interface PortalPaymentInstructions {
-  kind: CollectionMode
-  bankAccount: PortalAgency["bankAccount"]
-}
+export type PortalPaymentInstructions =
+  ApiSchemas["PortalPaymentInstructionsDto"]
 
 export interface PortalRenterAccount {
   contract: { id: string; status: ContractStatus } | null
@@ -91,14 +64,7 @@ export interface PortalRenterAccount {
   paymentInstructions: PortalPaymentInstructions
 }
 
-export interface PortalOwnerMe {
-  id: string
-  fullName: string
-  email: string | null
-  bankAccount: BankAccount | null
-  statementSendMode: StatementSendMode
-  agency: PortalAgency
-}
+export type PortalOwnerMe = ApiSchemas["PortalOwnerMeDto"]
 
 export interface PortalOwnerProperty {
   id: string

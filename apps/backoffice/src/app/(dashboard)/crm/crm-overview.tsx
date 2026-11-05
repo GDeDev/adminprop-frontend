@@ -3,17 +3,13 @@
 import Link from "next/link"
 
 import { Skeleton } from "@adminprop/ui/components/skeleton"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { conversionLabel } from "@/lib/crm"
 import { useCrmOverview } from "@/lib/crm-api"
 
 function Figure({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border bg-card p-3">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
-    </div>
-  )
+  return <StatCard label={label} value={value} className="p-4" />
 }
 
 /** Resumen del embudo y propiedades más consultadas (`/crm/analytics/overview`). */
@@ -43,7 +39,7 @@ export function CrmOverview() {
         />
       </div>
       {data.topProperties.length > 0 && (
-        <details className="rounded-xl border bg-card p-3 text-sm">
+        <details className="rounded-xl border bg-card p-3 text-sm shadow-raised">
           <summary className="cursor-pointer font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
             Propiedades más consultadas
           </summary>
@@ -55,7 +51,7 @@ export function CrmOverview() {
                   className="flex items-center justify-between gap-3 py-2 hover:underline"
                 >
                   <span className="min-w-0 truncate">{property.address}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                  <span className="shrink-0 num text-xs text-muted-foreground">
                     {property.inquiries} consultas · {property.views} vistas
                   </span>
                 </Link>

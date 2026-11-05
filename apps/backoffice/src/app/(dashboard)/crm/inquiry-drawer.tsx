@@ -400,7 +400,10 @@ function Timeline({ inquiry }: { inquiry: InquiryDetail }) {
 
   return (
     <section aria-labelledby={`${id}-title`} className="flex flex-col gap-3">
-      <h3 id={`${id}-title`} className="font-display text-base font-semibold">
+      <h3
+        id={`${id}-title`}
+        className="font-display text-title-sm font-semibold"
+      >
         Historial
       </h3>
       <form onSubmit={(event) => void submit(event)} className="grid gap-2">
