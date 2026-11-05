@@ -10,6 +10,7 @@ describe("X-Sites-Secret hacia la API", () => {
 
   beforeEach(() => {
     vi.stubEnv("API_URL", "http://api.test/api/v1")
+    vi.stubEnv("SITES_SERVER_SECRET", "")
     vi.stubEnv("SITES_REVALIDATE_SECRET", "s3cret")
     fetchMock.mockReset()
     fetchMock.mockResolvedValue(
@@ -33,6 +34,15 @@ describe("X-Sites-Secret hacia la API", () => {
     await resolveHost("demo.example.com")
     const init = fetchMock.mock.calls[0]?.[1] as RequestInit
     expect(init.headers).toEqual({ "X-Sites-Secret": "s3cret" })
+  })
+
+  it("SITES_SERVER_SECRET tiene prioridad sobre SITES_REVALIDATE_SECRET", () => {
+    vi.stubEnv("SITES_SERVER_SECRET", "server")
+    expect(trustedServerHeaders()).toEqual({ "X-Sites-Secret": "server" })
+  })
+
+  it("con SITES_SERVER_SECRET vacío cae a SITES_REVALIDATE_SECRET", () => {
+    expect(trustedServerHeaders()).toEqual({ "X-Sites-Secret": "s3cret" })
   })
 
   it("sin secreto configurado no manda el header", () => {
