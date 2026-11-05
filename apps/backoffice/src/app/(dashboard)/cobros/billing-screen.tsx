@@ -52,8 +52,8 @@ import {
   currentPeriod,
   INSTALLMENT_STATUS_META,
   installmentStatusMeta,
+  generationMessage,
   isZero,
-  periodLabel,
   shiftPeriod,
 } from "@/lib/billing"
 import {
@@ -505,13 +505,7 @@ function GenerateDialog({
   async function confirm() {
     try {
       const result = await generate.mutateAsync(period)
-      toast.success(
-        result.created === 0
-          ? `Las ${result.skipped} cuotas de ${periodLabel(result.period)} ya estaban generadas.`
-          : `${result.created} cuotas generadas para ${periodLabel(result.period)}${
-              result.skipped > 0 ? ` (${result.skipped} ya existían)` : ""
-            }.`
-      )
+      toast.success(generationMessage(result))
       onOpenChange(false)
     } catch (cause) {
       toast.error(apiErrorMessage(cause, "No se pudieron generar las cuotas."))

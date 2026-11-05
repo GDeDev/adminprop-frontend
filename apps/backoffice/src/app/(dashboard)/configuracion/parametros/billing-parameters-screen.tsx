@@ -23,6 +23,7 @@ import {
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { StatCard } from "@adminprop/ui/components/stat-card"
+import { Switch } from "@adminprop/ui/components/switch"
 
 import {
   billingSettingsErrorMessage,
@@ -74,6 +75,9 @@ function ParametersForm({ settings }: { settings: TenantSettings }) {
   const [graceDays, setGraceDays] = React.useState(
     String(settings.paymentGraceDays)
   )
+  const [autoApplyCredit, setAutoApplyCredit] = React.useState(
+    settings.autoApplyCreditOnGeneration
+  )
   const [errors, setErrors] = React.useState<{
     percentage?: string
     graceDays?: string
@@ -107,6 +111,10 @@ function ParametersForm({ settings }: { settings: TenantSettings }) {
     if ("error" in grace) next.graceDays = grace.error
     else if (grace.value !== settings.paymentGraceDays) {
       body.paymentGraceDays = grace.value
+    }
+
+    if (autoApplyCredit !== settings.autoApplyCreditOnGeneration) {
+      body.autoApplyCreditOnGeneration = autoApplyCredit
     }
 
     setErrors(next)
@@ -218,6 +226,26 @@ function ParametersForm({ settings }: { settings: TenantSettings }) {
                 punitorio corre desde el día siguiente.
               </FieldDescription>
             )}
+          </Field>
+          <Field orientation="horizontal">
+            <Switch
+              id="auto-apply-credit"
+              checked={autoApplyCredit}
+              onCheckedChange={setAutoApplyCredit}
+              aria-describedby="auto-apply-credit-help"
+            />
+            <div className="flex flex-col gap-1">
+              <FieldLabel htmlFor="auto-apply-credit">
+                Aplicar el saldo a favor al generar la cuota
+              </FieldLabel>
+              <FieldDescription id="auto-apply-credit-help">
+                Apagado (lo normal): el saldo a favor del inquilino se aplica a
+                mano o al registrar un pago. Encendido: al generar la cuota del
+                mes se descuenta solo, de los créditos más viejos a los más
+                nuevos y hasta lo que debe la cuota. Aplica solo a las cuotas
+                que se generen de ahí en adelante.
+              </FieldDescription>
+            </div>
           </Field>
         </FieldGroup>
         {formError && (

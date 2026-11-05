@@ -20,6 +20,7 @@ function baseSettings(): TenantSettings {
     dailyLateFeePercentage: "0.50",
     paymentGraceDays: 10,
     lateFeeStartDay: 11,
+    autoApplyCreditOnGeneration: false,
     ...settings,
   } as TenantSettings
 }
@@ -85,6 +86,33 @@ describe("BillingParametersScreen", () => {
     await user.click(screen.getByRole("button", { name: "Guardar" }))
 
     expect(update).toHaveBeenCalledWith({ dailyLateFeePercentage: "1.25" })
+  })
+
+  it("el interruptor del saldo a favor arranca apagado, se explica y se guarda", async () => {
+    update.mockResolvedValue(baseSettings())
+    render(<BillingParametersScreen />)
+    const user = userEvent.setup()
+
+    const toggle = screen.getByRole("switch", {
+      name: "Aplicar el saldo a favor al generar la cuota",
+    })
+    expect(toggle).not.toBeChecked()
+    expect(toggle).toHaveAccessibleDescription(/a mano o al registrar un pago/)
+
+    await user.click(toggle)
+    await user.click(screen.getByRole("button", { name: "Guardar" }))
+    expect(update).toHaveBeenCalledWith({ autoApplyCreditOnGeneration: true })
+  })
+
+  it("con el saldo a favor automático encendido, apagarlo manda false", async () => {
+    settings = { autoApplyCreditOnGeneration: true }
+    update.mockResolvedValue(baseSettings())
+    render(<BillingParametersScreen />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole("switch"))
+    await user.click(screen.getByRole("button", { name: "Guardar" }))
+    expect(update).toHaveBeenCalledWith({ autoApplyCreditOnGeneration: false })
   })
 
   it("no deja quitar el porcentaje una vez fijado", async () => {
