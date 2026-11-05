@@ -39,6 +39,50 @@ describe("apiErrorMessage", () => {
     expect(apiErrorCode(error)).toBe("TENANT_INVALID_LOGO")
   })
 
+  it("traduce los códigos de únicos y CHECK, que traen texto técnico", () => {
+    const unique = apiError(409, {
+      code: "UNIQUE_CONSTRAINT_VIOLATION",
+      message:
+        "Ya existe un registro con ese valor en: contractId, effectiveFrom",
+    })
+    expect(apiErrorMessage(unique, "Algo falló")).toMatch(
+      /Ya existe un registro igual.*misma fecha/
+    )
+    expect(apiErrorMessage(unique, "Algo falló")).not.toMatch(/contractId/)
+
+    const check = apiError(422, {
+      code: "CHECK_CONSTRAINT_VIOLATION",
+      message: 'new row violates check constraint "rent_amount_positive"',
+    })
+    expect(apiErrorMessage(check, "Algo falló")).toBe(
+      "Algún dato no cumple las reglas del sistema (un monto, porcentaje o fecha fuera de rango). Revisalo y volvé a intentar."
+    )
+    expect(apiErrorMessage(check, "Algo falló")).not.toMatch(/rent_amount/)
+
+    const db = apiError(500, {
+      code: "DATABASE_ERROR",
+      message: "P1001: can't reach database",
+    })
+    expect(apiErrorMessage(db, "Algo falló")).toMatch(/problema del sistema/)
+    expect(apiErrorMessage(db, "Algo falló")).not.toMatch(/P1001/)
+
+    expect(
+      apiErrorMessage(
+        apiError(409, { code: "IDEMPOTENCY_KEY_REUSED", message: "x" }),
+        "Algo falló"
+      )
+    ).toMatch(/otros datos/)
+    expect(
+      apiErrorMessage(
+        apiError(403, {
+          code: "CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY",
+          message: "x",
+        }),
+        "Algo falló"
+      )
+    ).toMatch(/administrador/)
+  })
+
   it("sin respuesta (red caída) explica que no hay conexión", () => {
     const error = new AxiosError("Network Error", "ERR_NETWORK")
 

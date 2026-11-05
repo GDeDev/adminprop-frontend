@@ -27,13 +27,6 @@ import {
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@adminprop/ui/components/select"
-import {
   Table,
   TableBody,
   TableCell,
@@ -41,17 +34,22 @@ import {
   TableHeader,
   TableRow,
 } from "@adminprop/ui/components/table"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { DownloadPdfButton } from "@/components/download-pdf-button"
+import { SendModeSelect } from "@/components/send-mode-select"
 import { periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 import {
+  adjustmentBreakdown,
   SEND_MODE_LABELS,
   SETTLEMENT_STATUS_META,
+  signedMoney,
   settlementLabel,
   STATEMENT_STATUS_META,
 } from "@/lib/settlements"
+import { AdjustmentBreakdownCell } from "../../adjustment-breakdown-cell"
 import {
   useAddStatementSettlements,
   useCloseStatement,
@@ -133,7 +131,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               Consolidado de {periodLabel(statement.period)}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -198,40 +196,42 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
         </div>
       </div>
 
-      {statement.totals.length > 0 && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {statement.totals.map((total) => (
-            <React.Fragment key={total.currency}>
-              <Stat
-                label={`Alquileres · ${total.currency}`}
-                value={formatMoney(total.rentTotal, total.currency)}
-              />
-              <Stat
-                label="Honorarios"
-                value={formatMoney(total.feeTotal, total.currency)}
-              />
-              <Stat
-                label="Gastos y ajustes"
-                value={formatMoney(total.expensesTotal, total.currency)}
-                hint={`ajustes ${formatMoney(total.adjustmentsTotal, total.currency)}`}
-              />
-              <Stat
-                label="Neto"
-                value={formatMoney(total.netTotal, total.currency)}
-                hint={`transferido ${formatMoney(total.transferredTotal, total.currency)}`}
-              />
-            </React.Fragment>
-          ))}
-        </div>
-      )}
+      {statement.totals.map((total) => (
+        <section
+          key={total.currency}
+          aria-label={`Totales en ${total.currency}`}
+          className="flex flex-col gap-3"
+        >
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat
+              label={`Alquileres · ${total.currency}`}
+              value={formatMoney(total.rentTotal, total.currency)}
+            />
+            <Stat
+              label="Honorarios"
+              value={formatMoney(total.feeTotal, total.currency)}
+            />
+            <Stat
+              label="Gastos adelantados"
+              value={formatMoney(total.expensesTotal, total.currency)}
+            />
+            <Stat
+              label="Neto"
+              value={formatMoney(total.netTotal, total.currency)}
+              hint={`transferido ${formatMoney(total.transferredTotal, total.currency)}`}
+            />
+          </div>
+          <AdjustmentTotals total={total} />
+        </section>
+      ))}
 
       <section
-        className="rounded-xl border bg-card p-4"
+        className="rounded-xl border bg-card p-4 shadow-raised"
         aria-labelledby="statement-settlements"
       >
         <h2
           id="statement-settlements"
-          className="mb-3 font-display text-lg font-semibold"
+          className="mb-3 font-display text-title-md font-semibold"
         >
           Liquidaciones incluidas
         </h2>
@@ -249,6 +249,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                 <TableHead className="text-right">Alquiler</TableHead>
                 <TableHead className="text-right">Honorarios</TableHead>
                 <TableHead className="text-right">Gastos</TableHead>
+                <TableHead className="text-right">Ajustes</TableHead>
                 <TableHead className="text-right">Neto</TableHead>
                 <TableHead>Estado</TableHead>
                 {open && (
@@ -265,7 +266,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                 const status = SETTLEMENT_STATUS_META[settlement.status]
                 return (
                   <TableRow key={settlement.id}>
-                    <TableCell>
+                    <TableCell className="max-w-56 whitespace-normal">
                       {settlement.property?.address ?? "Propiedad eliminada"}
                     </TableCell>
                     <TableCell>
@@ -276,16 +277,19 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                         {settlementLabel(settlement)}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.rentTotal)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.feeTotal)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.expensesTotal)}
                     </TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">
+                    <TableCell className="text-right">
+                      <AdjustmentBreakdownCell settlement={settlement} />
+                    </TableCell>
+                    <TableCell className="text-right font-display num font-medium">
                       {money(settlement.netAmount)}
                     </TableCell>
                     <TableCell>
@@ -349,6 +353,36 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
   )
 }
 
+type StatementTotal = OwnerStatementDetail["totals"][number]
+
+/**
+ * Retenciones, adelantos y otros ajustes en renglones separados, con signo
+ * (negativo = se descuenta al propietario). `adjustmentsTotal` sigue siendo el
+ * total de los tres.
+ */
+function AdjustmentTotals({ total }: { total: StatementTotal }) {
+  return (
+    <div role="group" aria-label={`Ajustes en ${total.currency}`}>
+      <dl className="grid gap-x-6 gap-y-2 rounded-xl border bg-card p-4 text-sm shadow-raised sm:grid-cols-4">
+        {adjustmentBreakdown(total).map((item) => (
+          <div key={item.key}>
+            <dt className="text-muted-foreground">{item.label}</dt>
+            <dd className="font-display num font-medium">
+              {signedMoney(item.amount, total.currency, formatMoney)}
+            </dd>
+          </div>
+        ))}
+        <div>
+          <dt className="text-muted-foreground">Ajustes (total)</dt>
+          <dd className="font-display num font-semibold">
+            {signedMoney(total.adjustmentsTotal, total.currency, formatMoney)}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  )
+}
+
 function Stat({
   label,
   value,
@@ -358,15 +392,7 @@ function Stat({
   value: string
   hint?: string
 }) {
-  return (
-    <div className="rounded-xl border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
-      {hint && (
-        <p className="text-xs text-muted-foreground tabular-nums">{hint}</p>
-      )}
-    </div>
-  )
+  return <StatCard label={label} value={value} hint={hint} />
 }
 
 /** Las confirmadas del propietario que todavía no están en ningún consolidado. */
@@ -447,7 +473,7 @@ function AddSettlementsDialog({
                         {settlement.property?.address ?? "Propiedad eliminada"}{" "}
                         · {settlementLabel(settlement)}
                       </span>
-                      <span className="tabular-nums">
+                      <span className="font-display num">
                         {formatMoney(settlement.netAmount, settlement.currency)}
                       </span>
                     </Label>
@@ -507,29 +533,39 @@ function CloseDialog({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Cerrar el consolidado</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Los totales quedan congelados. Qué se le envía al propietario se usa
-            cuando estén el PDF y el email (Fases 14 y 15).
+            Los totales quedan congelados y se avisa al propietario según lo que
+            elijas acá.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="px-4 sm:px-0">
-          <Label htmlFor="statement-send-mode">Qué se envía</Label>
-          <Select
+        <div className="flex flex-col gap-4 px-4 sm:px-0">
+          {statement.totals.map((total) => (
+            <div key={total.currency} className="flex flex-col gap-1">
+              <p className="text-sm font-medium">
+                Lo que se congela · {total.currency}
+              </p>
+              <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 rounded-lg bg-muted p-3 text-sm">
+                {adjustmentBreakdown(total).map((item) => (
+                  <React.Fragment key={item.key}>
+                    <dt className="text-muted-foreground">{item.label}</dt>
+                    <dd className="text-right num">
+                      {signedMoney(item.amount, total.currency, formatMoney)}
+                    </dd>
+                  </React.Fragment>
+                ))}
+                <dt className="border-t pt-1 font-medium">Neto</dt>
+                <dd className="border-t pt-1 text-right font-display num font-semibold">
+                  {formatMoney(total.netTotal, total.currency)}
+                </dd>
+              </dl>
+            </div>
+          ))}
+          <SendModeSelect
+            id="statement-send-mode"
+            label="Qué se envía"
+            context="close"
             value={sendMode}
-            onValueChange={(value) => setSendMode(value as StatementSendMode)}
-          >
-            <SelectTrigger id="statement-send-mode" className="mt-1 w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(SEND_MODE_LABELS) as StatementSendMode[]).map(
-                (mode) => (
-                  <SelectItem key={mode} value={mode}>
-                    {SEND_MODE_LABELS[mode]}
-                  </SelectItem>
-                )
-              )}
-            </SelectContent>
-          </Select>
+            onChange={setSendMode}
+          />
         </div>
         <ResponsiveDialogFooter>
           <Button

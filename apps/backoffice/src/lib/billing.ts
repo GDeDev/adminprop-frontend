@@ -16,6 +16,7 @@ import type {
   RenterArrears,
 } from "@adminprop/shared-types"
 
+import { periodLabel as formatPeriodLabel } from "@adminprop/ui/lib/format"
 import { formatMoney, type BadgeMeta } from "./contracts"
 
 /** Estado de la cuota (spec 5.1): gris pendiente, ámbar parcial, rojo vencida, verde cobrada. */
@@ -191,4 +192,30 @@ export function shiftPeriod(period: string, months: number): string {
 /** La otra moneda: para ofrecer "pagó en pesos" en un contrato en dólares. */
 export function otherCurrency(currency: Currency): Currency {
   return currency === "ARS" ? "USD" : "ARS"
+}
+
+/**
+ * Aviso al terminar de generar las cuotas del mes. `creditsApplied` es una
+ * cantidad (no un monto): cuántas cuotas nuevas se cubrieron solas con saldo a
+ * favor, solo si la inmobiliaria eligió ese modo.
+ */
+export function generationMessage(result: {
+  period: string
+  created: number
+  skipped: number
+  creditsApplied: number
+}): string {
+  const month = formatPeriodLabel(result.period)
+  const base =
+    result.created === 0
+      ? `Las ${result.skipped} cuotas de ${month} ya estaban generadas.`
+      : `${result.created} cuotas generadas para ${month}${
+          result.skipped > 0 ? ` (${result.skipped} ya existían)` : ""
+        }.`
+  if (result.creditsApplied <= 0) return base
+  const credits =
+    result.creditsApplied === 1
+      ? "Se aplicó 1 saldo a favor"
+      : `Se aplicaron ${result.creditsApplied} saldos a favor`
+  return `${base} ${credits} a las cuotas nuevas.`
 }

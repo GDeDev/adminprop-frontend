@@ -61,6 +61,9 @@ function makeSettlement(
     feeDeducted: true,
     expensesTotal: "15000.00",
     adjustmentsTotal: "-5000.00",
+    withholdingsTotal: "-5000.00",
+    advancesTotal: "0.00",
+    otherAdjustmentsTotal: "0.00",
     netAmount: "220000.00",
     transferredTotal: "0.00",
     statementId: null,
@@ -136,6 +139,13 @@ describe("SettlementDetailScreen", () => {
     expect(
       within(desglose).getByText(/30\.000,00 cobrados por servicios no entran/)
     ).toBeInTheDocument()
+    // Retenciones, adelantos y otros ajustes van en renglones separados; el
+    // total sigue siendo la suma que manda la API.
+    expect(within(desglose).getByText("Ajustes (total)")).toBeInTheDocument()
+    expect(within(desglose).getByText("Retenciones")).toBeInTheDocument()
+    expect(within(desglose).getByText("Adelantos")).toBeInTheDocument()
+    expect(within(desglose).getByText("Otros ajustes")).toBeInTheDocument()
+    expect(within(desglose).getAllByText("−$ 5.000,00")).toHaveLength(2)
     expect(screen.getByText(/no tiene cuenta bancaria/)).toBeInTheDocument()
     expect(screen.getByText("Retención IIBB")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument()

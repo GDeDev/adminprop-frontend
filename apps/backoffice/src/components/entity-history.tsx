@@ -37,9 +37,12 @@ function HistoryList({
   const [openId, setOpenId] = React.useState<string | null>(null)
 
   return (
-    <section className="rounded-xl border bg-card p-4" aria-label="Historial">
+    <section
+      className="rounded-xl border bg-card p-4 shadow-raised"
+      aria-label="Historial"
+    >
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">Historial</h2>
+        <h2 className="font-display text-title-md font-semibold">Historial</h2>
         <Link
           href={`/configuracion/auditoria?entity=${encodeURIComponent(entity)}&entityId=${encodeURIComponent(entityId)}`}
           className="text-sm underline"

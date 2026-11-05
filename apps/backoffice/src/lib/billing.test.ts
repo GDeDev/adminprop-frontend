@@ -5,6 +5,7 @@ import {
   currentPeriod,
   exchangeRateLabel,
   formatMoneyList,
+  generationMessage,
   installmentStatusMeta,
   isZero,
   otherCurrency,
@@ -106,5 +107,27 @@ describe("períodos", () => {
   it("la otra moneda", () => {
     expect(otherCurrency("ARS")).toBe("USD")
     expect(otherCurrency("USD")).toBe("ARS")
+  })
+})
+
+describe("generationMessage", () => {
+  const base = { period: "2026-11", created: 3, skipped: 1, creditsApplied: 0 }
+
+  it("avisa cuántas cuotas creó y cuántas ya existían", () => {
+    expect(generationMessage(base)).toBe(
+      "3 cuotas generadas para noviembre de 2026 (1 ya existían)."
+    )
+    expect(generationMessage({ ...base, created: 0 })).toBe(
+      "Las 1 cuotas de noviembre de 2026 ya estaban generadas."
+    )
+  })
+
+  it("suma cuántos saldos a favor se aplicaron solos", () => {
+    expect(generationMessage({ ...base, creditsApplied: 2 })).toContain(
+      "Se aplicaron 2 saldos a favor a las cuotas nuevas."
+    )
+    expect(generationMessage({ ...base, creditsApplied: 1 })).toContain(
+      "Se aplicó 1 saldo a favor"
+    )
   })
 })

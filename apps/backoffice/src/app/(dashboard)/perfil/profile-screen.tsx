@@ -14,7 +14,7 @@ export function ProfileScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Mi perfil
         </h1>
         {user && (

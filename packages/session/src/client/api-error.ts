@@ -6,6 +6,31 @@ const NETWORK_MESSAGE =
   "No se pudo conectar con el servidor. Revisá tu conexión y probá de nuevo."
 
 /**
+ * Códigos cuyo mensaje del servidor es técnico (nombres de campos, constraints
+ * de la base) o demasiado genérico para una persona. Se reemplazan siempre,
+ * aunque la API mande texto. Los códigos de dominio ya llegan con un mensaje
+ * en español pensado para el usuario y no van acá.
+ */
+const FRIENDLY_MESSAGES: Record<string, string> = {
+  // Único de la base (D-240): por ejemplo, un segundo aumento del mismo
+  // contrato y fecha, o un doble click que repite el alta.
+  UNIQUE_CONSTRAINT_VIOLATION:
+    "Ya existe un registro igual (por ejemplo, un aumento del mismo contrato con la misma fecha). Recargá la pantalla para ver el que ya está cargado.",
+  // CHECK de la base: montos negativos, porcentajes fuera de 0 a 100, fechas
+  // en desorden. La API responde 422 con este código estable y nunca expone
+  // el nombre del constraint (DT-174).
+  CHECK_CONSTRAINT_VIOLATION:
+    "Algún dato no cumple las reglas del sistema (un monto, porcentaje o fecha fuera de rango). Revisalo y volvé a intentar.",
+  // Error de base genérico (5xx): no es un dato inválido del usuario.
+  DATABASE_ERROR:
+    "No se pudo guardar por un problema del sistema. Probá de nuevo en unos minutos y, si sigue pasando, avisá a soporte.",
+  IDEMPOTENCY_KEY_REUSED:
+    "Ese pedido ya se envió con otros datos. Recargá la pantalla para ver si quedó registrado.",
+  CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY:
+    "Cargar el alquiler a mano lo hace un administrador.",
+}
+
+/**
  * Mensaje para mostrarle al usuario a partir de un error de la API.
  *
  * La API ya manda los mensajes en español y pensados para el usuario
@@ -15,6 +40,10 @@ const NETWORK_MESSAGE =
 export function apiErrorMessage(error: unknown, fallback: string): string {
   if (!isAxiosError<ApiError>(error)) return fallback
   if (!error.response) return NETWORK_MESSAGE
+  const code = error.response.data?.code
+  if (typeof code === "string" && code in FRIENDLY_MESSAGES) {
+    return FRIENDLY_MESSAGES[code]!
+  }
   const message = error.response.data?.message
   if (typeof message !== "string" || message.length === 0) return fallback
   // Nunca mostrar errores crudos del servidor ("Cannot GET /api/v1/...").

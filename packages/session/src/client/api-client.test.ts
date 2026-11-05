@@ -185,6 +185,7 @@ describe("safeNextPath", () => {
       "\\/evil.example",
       "\\\\evil.example",
       "http:evil.example",
+      "/ok\u007f",
     ]
     for (const next of payloads) {
       expect(safeNextPath(next, "/dashboard")).toBe("/dashboard")

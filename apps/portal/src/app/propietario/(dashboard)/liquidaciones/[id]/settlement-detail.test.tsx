@@ -31,10 +31,10 @@ describe("OwnerSettlementDetailScreen", () => {
   it("muestra el desglose, el PDF y el acuse de recibo de una transferida", async () => {
     settlement = {
       id: "s1",
+      pdfUrl: null,
       period: "2026-10",
       sequence: 1,
       status: "TRANSFERRED",
-      pdfUrl: null,
       contract: { id: "c1" },
       property: { id: "p1", address: "Calle 1 100" },
       owner: { id: "o1", fullName: "Juan Pérez" },
@@ -48,6 +48,9 @@ describe("OwnerSettlementDetailScreen", () => {
       feeDeducted: true,
       expensesTotal: "15000.00",
       adjustmentsTotal: "0.00",
+      withholdingsTotal: "0.00",
+      advancesTotal: "0.00",
+      otherAdjustmentsTotal: "0.00",
       netAmount: "175000.00",
       transferredTotal: "175000.00",
       statementId: null,

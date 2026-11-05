@@ -4,7 +4,7 @@ import { cn } from "cn"
 import { Slot } from "radix-ui"
 
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2.5 py-0.5 text-xs font-medium tracking-[0.005em] whitespace-nowrap transition-[color,box-shadow,background-color] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
@@ -19,11 +19,16 @@ const badgeVariants = cva(
         link: "text-primary underline-offset-4 [a&]:hover:underline",
         // Estados del dominio (ADMINPROP-UI.md, "Estados del dominio → tokens").
         // Un estado nuevo se agrega acá, nunca con clases sueltas en el uso.
-        disponible: "bg-success-soft text-success",
-        alquilada: "bg-info-soft text-info",
-        mantenimiento: "bg-warning-soft text-warning",
-        mora: "bg-destructive-soft text-destructive",
-        borrador: "bg-muted text-muted-foreground",
+        disponible:
+          "bg-success-soft text-success ring-1 ring-success/15 ring-inset",
+        alquilada: "bg-info-soft text-info ring-1 ring-info/15 ring-inset",
+        mantenimiento:
+          "bg-warning-soft text-warning ring-1 ring-warning/15 ring-inset",
+        mora: "bg-destructive-soft text-destructive ring-1 ring-destructive/15 ring-inset",
+        borrador:
+          "bg-muted text-muted-foreground ring-1 ring-foreground/5 ring-inset",
+        // Contenido generado o sugerido por IA (ver AiBadge).
+        ia: "bg-ai-soft text-ai ring-1 ring-ai/20 ring-inset",
       },
     },
     defaultVariants: {

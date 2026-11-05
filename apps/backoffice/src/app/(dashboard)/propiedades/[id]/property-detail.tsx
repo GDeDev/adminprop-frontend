@@ -30,8 +30,15 @@ import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { AmenityIcon } from "@/components/amenity-icon"
+import { formatMoney } from "@/lib/contracts"
 import { OVERSIZED_PHOTO_MESSAGE, splitOversizedPhotos } from "@/lib/photos"
-import { MANUAL_TRANSITIONS, MAX_PHOTOS, STATUS_META } from "@/lib/properties"
+import {
+  MANUAL_TRANSITIONS,
+  MAX_PHOTOS,
+  OPERATION_LABELS,
+  STATUS_META,
+  listingFacts,
+} from "@/lib/properties"
 import {
   useChangePropertyStatus,
   useDeleteProperty,
@@ -85,7 +92,7 @@ function Detail({ property }: { property: PropertyDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {property.address}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -126,6 +133,30 @@ function Detail({ property }: { property: PropertyDetail }) {
               <StatusBadge status={property.status} />
             </dd>
           </dl>
+          <h3 className="mt-4 mb-2 text-xs font-medium text-muted-foreground">
+            Publicación
+          </h3>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-muted-foreground">Operación</dt>
+            <dd>{OPERATION_LABELS[property.listingOperation]}</dd>
+            <dt className="text-muted-foreground">Precio</dt>
+            <dd>
+              {property.listingPrice
+                ? formatMoney(property.listingPrice, property.listingCurrency)
+                : "Consultar"}
+            </dd>
+            {listingFacts(property).map(([label, value]) => (
+              <React.Fragment key={label}>
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd>{value}</dd>
+              </React.Fragment>
+            ))}
+          </dl>
+          {property.publicDescription && (
+            <p className="mt-3 text-sm whitespace-pre-line">
+              {property.publicDescription}
+            </p>
+          )}
           {property.notes && (
             <div className="mt-4 rounded-lg bg-muted p-3 text-sm whitespace-pre-line">
               <p className="mb-1 text-xs font-medium text-muted-foreground">
@@ -226,8 +257,8 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4">
-      <h2 className="mb-3 font-display text-lg font-semibold">{title}</h2>
+    <section className="rounded-xl border bg-card p-4 shadow-raised">
+      <h2 className="mb-3 font-display text-title-md font-semibold">{title}</h2>
       {children}
     </section>
   )

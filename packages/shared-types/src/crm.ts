@@ -1,155 +1,41 @@
-import type { IsoDate, IsoDateTime, Uuid } from "./common"
+import type { ApiSchemas } from "./api"
 
 /**
- * Contrato de la Fase 23 (REDISENO_FASE_23.md, secciones 5, 5.1 y 7). Escrito a
- * mano hasta regenerar desde el OpenAPI del backend.
+ * Contrato de la Fase 23 (REDISENO_FASE_23.md, secciones 5, 5.1 y 7), tal como
+ * lo publica el OpenAPI de la API. Los alias reemplazan a los tipos que antes
+ * estaban escritos a mano. `CrmOverviewDto` y `PropertyInquiryAnalytics` siguen
+ * a mano: ver el comentario de cada uno y `docs/tecnica/shared-types-generados.md`.
  */
-export type InquiryStage =
-  | "NEW"
-  | "CONTACTED"
-  | "VISIT_SCHEDULED"
-  | "PROPOSAL_SENT"
-  | "CLOSED_WON"
-  | "CLOSED_LOST"
+export type InquiryPropertyRef = ApiSchemas["InquiryPropertyRefDto"]
+export type InquiryUserRef = ApiSchemas["InquiryUserRefDto"]
+export type InquiryCard = ApiSchemas["InquiryCardDto"]
+export type InquiryActivity = ApiSchemas["InquiryActivityDto"]
+export type InquiryDetail = ApiSchemas["InquiryDetailDto"]
+export type PipelineColumn = ApiSchemas["PipelineColumnDto"]
+export type PipelineDto = ApiSchemas["PipelineDto"]
 
-export type InquirySource =
-  | "PORTAL"
-  | "MERCADOLIBRE"
-  | "ZONAPROP"
-  | "ARGENPROP"
-  | "WHATSAPP"
-  | "PHONE"
-  | "MANUAL"
+export type InquiryStage = InquiryCard["stage"]
+export type InquirySource = InquiryCard["source"]
+export type InquiryActivityType = InquiryActivity["type"]
+export type ContactChannel = ApiSchemas["ContactAttemptDto"]["channel"]
 
-export type InquiryActivityType =
-  | "CREATED"
-  | "STAGE_CHANGED"
-  | "ASSIGNED"
-  | "NOTE"
-  | "CONTACT_ATTEMPT"
-  | "FOLLOW_UP_SET"
-  | "EDITED"
+export type CreateInquiryRequest = ApiSchemas["CreateInquiryDto"]
+export type UpdateInquiryRequest = ApiSchemas["UpdateInquiryDto"]
+export type MoveInquiryRequest = ApiSchemas["MoveInquiryDto"]
+export type AssignInquiryRequest = ApiSchemas["AssignInquiryDto"]
+export type AddInquiryNoteRequest = ApiSchemas["AddInquiryNoteDto"]
+export type ContactAttemptRequest = ApiSchemas["ContactAttemptDto"]
+export type WhatsAppLinkDto = ApiSchemas["WhatsAppLinkDto"]
+export type CrmAssignee = ApiSchemas["CrmAssigneeDto"]
+export type CrmTopProperty = ApiSchemas["CrmTopPropertyDto"]
+export type PropertyInquiryDailyPoint =
+  ApiSchemas["PropertyInquiryAnalyticsDto"]["daily"][number]
 
-export type ContactChannel = "WHATSAPP" | "PHONE" | "EMAIL"
-
-export interface InquiryPropertyRef {
-  id: Uuid
-  address: string
-}
-
-export interface InquiryUserRef {
-  id: Uuid
-  fullName: string
-}
-
-export interface InquiryCard {
-  id: Uuid
-  name: string
-  email: string | null
-  phone: string | null
-  /** Primeros 140 caracteres. */
-  message: string
-  stage: InquiryStage
-  /** Decimal para ordenar dentro de la columna (A-82). */
-  boardPosition: number
-  source: InquirySource
-  property: InquiryPropertyRef | null
-  assignedTo: InquiryUserRef | null
-  nextActionAt: IsoDate | null
-  lastContactAt: IsoDateTime | null
-  createdAt: IsoDateTime
-  ageHours: number
-  hasWhatsApp: boolean
-}
-
-export interface InquiryActivity {
-  id: Uuid
-  type: InquiryActivityType
-  /** Null = el sistema. */
-  author: InquiryUserRef | null
-  /** `{ from, to }`, `{ body }`, `{ channel }`... según el tipo. */
-  payload: Record<string, unknown>
-  createdAt: IsoDateTime
-}
-
-export interface InquiryDetail extends InquiryCard {
-  /** Mensaje completo. */
-  message: string
-  lostReason: string | null
-  closedAt: IsoDateTime | null
-  contractId: Uuid | null
-  activities: InquiryActivity[]
-}
-
-export interface PipelineColumn {
-  stage: InquiryStage
-  total: number
-  /** Hasta 50, ordenadas por `boardPosition`. */
-  cards: InquiryCard[]
-}
-
-export interface PipelineDto {
-  columns: PipelineColumn[]
-}
-
-export interface CreateInquiryRequest {
-  name: string
-  email?: string
-  phone?: string
-  message?: string
-  propertyId?: Uuid
-  source: "WHATSAPP" | "PHONE" | "MANUAL" | "ZONAPROP" | "ARGENPROP"
-  assignedToId?: Uuid
-}
-
-export interface UpdateInquiryRequest {
-  name?: string
-  email?: string
-  phone?: string
-  propertyId?: Uuid
-  nextActionAt?: IsoDate | null
-}
-
-export interface MoveInquiryRequest {
-  stage: InquiryStage
-  beforeId?: Uuid
-  afterId?: Uuid
-  /** Obligatorio para `CLOSED_LOST`. */
-  lostReason?: string
-  contractId?: Uuid
-}
-
-export interface AssignInquiryRequest {
-  userId: Uuid | null
-}
-
-export interface AddInquiryNoteRequest {
-  /** Máx. 2000. */
-  body: string
-}
-
-export interface ContactAttemptRequest {
-  channel: ContactChannel
-}
-
-export interface WhatsAppLinkDto {
-  url: string | null
-  message: string
-}
-
-export interface CrmAssignee {
-  id: Uuid
-  fullName: string
-  role: string
-}
-
-export interface CrmTopProperty {
-  propertyId: Uuid
-  address: string
-  inquiries: number
-  views: number
-}
-
+/**
+ * Sigue a mano: el OpenAPI declara `byStage` y `bySource` como
+ * `{ [key: string]: number }`, sin las claves. Acá se cierran por etapa y por
+ * origen, que es lo que la API manda siempre (un `Record` completo).
+ */
 export interface CrmOverviewDto {
   openCount: number
   byStage: Record<InquiryStage, number>
@@ -161,12 +47,7 @@ export interface CrmOverviewDto {
   topProperties: CrmTopProperty[]
 }
 
-export interface PropertyInquiryDailyPoint {
-  date: IsoDate
-  views: number
-  inquiries: number
-}
-
+/** Sigue a mano por lo mismo que `CrmOverviewDto` (`byStage`, `bySource`). */
 export interface PropertyInquiryAnalytics {
   views: number
   inquiries: number

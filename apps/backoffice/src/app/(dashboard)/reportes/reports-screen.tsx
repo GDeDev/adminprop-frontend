@@ -35,6 +35,7 @@ import {
   periodLabel,
   shiftPeriod,
 } from "@/lib/billing"
+import { IncomeByReceiverTable, IncomeTotals } from "./income-by-receiver"
 import { PeriodInput } from "@/components/period-input"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -98,7 +99,7 @@ export function ReportsScreen() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Reportes
         </h1>
         <div className="flex gap-2">
@@ -265,7 +266,7 @@ function State({
     )
   }
   return (
-    <div className="rounded-xl border bg-card">
+    <div className="rounded-xl border bg-card shadow-raised">
       <p className="px-3 pt-2 text-xs text-muted-foreground lg:hidden">
         Deslizá hacia el costado para ver todas las columnas.
       </p>
@@ -303,6 +304,7 @@ function IncomeTable({ range }: { range: RangeFilters }) {
   const rows = query.data?.rows ?? []
   return (
     <State query={query} empty={rows.length === 0}>
+      <IncomeTotals totals={query.data?.totals ?? []} />
       <Table>
         <Head
           columns={[
@@ -340,7 +342,7 @@ function IncomeTable({ range }: { range: RangeFilters }) {
                 row.netSettled,
                 row.netTransferred,
               ].map((amount, index) => (
-                <TableCell key={index} className="text-right tabular-nums">
+                <TableCell key={index} className="text-right font-display num">
                   {formatMoney(amount, row.currency)}
                 </TableCell>
               ))}
@@ -348,6 +350,7 @@ function IncomeTable({ range }: { range: RangeFilters }) {
           ))}
         </TableBody>
       </Table>
+      <IncomeByReceiverTable rows={rows} />
       <p className="p-3 text-xs text-muted-foreground">
         Los ingresos se cuentan por fecha de pago, no por el período de la cuota
         (A-38).
@@ -381,7 +384,7 @@ function PaymentsTable({ range }: { range: RangeFilters }) {
               <TableCell>{row.renterName}</TableCell>
               <TableCell>{row.propertyAddress}</TableCell>
               <TableCell>{row.ownerName}</TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right font-display num">
                 {formatMoney(row.amount, row.currency)}
               </TableCell>
             </TableRow>
@@ -423,21 +426,21 @@ function ArrearsTable({ minDays }: { minDays: number }) {
               </TableCell>
               <TableCell>{row.propertyAddress}</TableCell>
               <TableCell>{row.ownerName}</TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right num">
                 {row.overdueInstallments}
               </TableCell>
               <TableCell>{daysLabel(row.maxDaysOverdue)}</TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right font-display num">
                 {formatMoneyList(row.balance)}
               </TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right font-display num">
                 {formatMoneyList(row.lateFee)}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <p className="p-3 text-sm font-medium tabular-nums">
+      <p className="p-3 num text-sm font-medium">
         Total adeudado: {formatMoneyList(query.data?.totals ?? [])}
       </p>
     </State>
@@ -472,7 +475,7 @@ function PropertiesTable({ status }: { status: "RENTED" | "AVAILABLE" }) {
               {status === "RENTED" ? (
                 <>
                   <TableCell>{row.renterName ?? "—"}</TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {row.rent
                       ? formatMoney(row.rent.amount, row.rent.currency)
                       : "—"}
@@ -484,7 +487,7 @@ function PropertiesTable({ status }: { status: "RENTED" | "AVAILABLE" }) {
                   </TableCell>
                 </>
               ) : (
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right num">
                   {row.daysVacant ?? "—"}
                 </TableCell>
               )}
@@ -519,9 +522,7 @@ function ExpiringTable({ withinDays }: { withinDays: number }) {
               </TableCell>
               <TableCell>{row.renterName}</TableCell>
               <TableCell>{formatDate(row.endDate)}</TableCell>
-              <TableCell className="text-right tabular-nums">
-                {row.daysLeft} d
-              </TableCell>
+              <TableCell className="text-right num">{row.daysLeft} d</TableCell>
               <TableCell>{row.renewalInProgress ? "En curso" : "—"}</TableCell>
             </TableRow>
           ))}

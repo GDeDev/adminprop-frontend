@@ -9,6 +9,7 @@ import {
   Building2,
   History,
   ListTree,
+  SlidersHorizontal,
   Timer,
   TrendingUp,
   Users,
@@ -31,7 +32,7 @@ function SettingsLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift items-center gap-4 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <Icon aria-hidden className="size-5 text-primary" />
       <div className="flex-1">
@@ -49,7 +50,7 @@ export function SettingsIndex() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">
+      <h1 className="font-display text-title-lg font-semibold md:text-display-md">
         Configuración
       </h1>
       <ul className="grid gap-3 sm:grid-cols-2">
@@ -69,6 +70,14 @@ export function SettingsIndex() {
                 icon={Building2}
                 title="Inmobiliaria"
                 description="Razón social, CUIT, datos bancarios, logo y color que salen en los PDF."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/parametros"
+                icon={SlidersHorizontal}
+                title="Parámetros de cobro"
+                description="Punitorio diario y días de gracia por defecto de la inmobiliaria."
               />
             </li>
             <li>

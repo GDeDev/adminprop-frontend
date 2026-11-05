@@ -66,12 +66,12 @@ export function AccountSection({
 
   return (
     <section
-      className="rounded-xl border bg-card p-4 lg:col-span-2"
+      className="rounded-xl border bg-card p-4 shadow-raised lg:col-span-2"
       aria-labelledby="contract-account-title"
     >
       <h2
         id="contract-account-title"
-        className="mb-3 font-display text-lg font-semibold"
+        className="mb-3 font-display text-title-md font-semibold"
       >
         Cuenta corriente
       </h2>
@@ -143,7 +143,7 @@ function Account({
 
   return (
     <div className="flex flex-col gap-4">
-      <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
+      <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-4">
         <Total label="Devengado" value={money(totals.accrued)} />
         <Total label="Cobrado" value={money(totals.collected)} />
         <Total
@@ -166,8 +166,21 @@ function Account({
           value={money(totals.feeAccruedOnCollected)}
           hint={`${money(totals.feeAccruedOnBase)} sobre el total`}
         />
+        <Total
+          label="Por liquidar"
+          value={money(totals.pendingSettlement)}
+          hint="Bruto, antes de honorarios y gastos"
+          describedBy="pending-settlement-help"
+        />
       </dl>
-      <p className="text-xs text-muted-foreground tabular-nums">
+      <p id="pending-settlement-help" className="text-xs text-muted-foreground">
+        <strong className="font-medium">Por liquidar</strong> es lo que cobró la
+        inmobiliaria y todavía no está en una liquidación confirmada (alquiler,
+        punitorios y cargos del propietario). Es un monto bruto: no descuenta
+        honorarios ni gastos, así que no es lo que se le va a transferir al
+        propietario.
+      </p>
+      <p className="num text-xs text-muted-foreground">
         {COLLECTION_MODE_LABELS[account.contract.collectionMode]} ·{" "}
         {FEE_MODE_LABELS[account.contract.feeMode]}
         {!isZero(totals.collectedByOwner) &&
@@ -184,12 +197,12 @@ function Account({
           {DEPOSIT_RETURN_MODE_LABELS[deposit.returnMode]}
           {deposit.suggestedReturn &&
             !deposit.returned &&
-            ` · a devolver hoy: ${formatMoney(deposit.suggestedReturn, deposit.currency)}`}
+            ` · monto de referencia: ${formatMoney(deposit.suggestedReturn, deposit.currency)}`}
         </p>
         {deposit.returned && (
           <p className="mt-1">
             Devuelto el {formatDate(deposit.returned.returnedAt)}:{" "}
-            <span className="tabular-nums">
+            <span className="font-display num">
               {formatMoney(deposit.returned.returnedAmount, deposit.currency)}
             </span>
             {deposit.returned.deductions.length > 0 &&
@@ -219,7 +232,7 @@ function Account({
             <TableBody>
               {visible.map((movement, index) => (
                 <TableRow key={`${movement.date}-${movement.type}-${index}`}>
-                  <TableCell className="tabular-nums">
+                  <TableCell className="num">
                     {formatDate(movement.date)}
                   </TableCell>
                   <TableCell>
@@ -238,14 +251,26 @@ function Account({
                         movement.description
                       )}
                     </p>
+                    {movement.amount && (
+                      // Los movimientos del depósito traen su importe aparte:
+                      // es informativo y no entra en el saldo.
+                      <p className="num text-xs text-muted-foreground">
+                        Importe:{" "}
+                        {formatMoney(
+                          movement.amount,
+                          movement.amountCurrency ?? account.contract.currency
+                        )}{" "}
+                        (no modifica el saldo)
+                      </p>
+                    )}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {movement.debit ? money(movement.debit) : ""}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {movement.credit ? money(movement.credit) : ""}
                   </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
+                  <TableCell className="text-right font-display num font-medium">
                     {money(movement.balance)}
                   </TableCell>
                 </TableRow>
@@ -268,17 +293,21 @@ function Total({
   value,
   hint,
   tone,
+  describedBy,
 }: {
   label: string
   value: string
   hint?: string
   tone?: "warning"
+  /** Id del texto de ayuda que explica este total. */
+  describedBy?: string
 }) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd
-        className={`font-display font-semibold tabular-nums ${
+        aria-describedby={describedBy}
+        className={`font-display num font-semibold ${
           tone === "warning" ? "text-warning" : ""
         }`}
       >

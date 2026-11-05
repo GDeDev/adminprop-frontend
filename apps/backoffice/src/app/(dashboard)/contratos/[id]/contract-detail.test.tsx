@@ -4,9 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import type { ContractDetail } from "@adminprop/shared-types"
 
+import { AxiosError } from "axios"
+
 import { ContractDetailScreen } from "./contract-detail"
 
 let contract: ContractDetail
+let sessionRole: "ADMIN" | "EMPLOYEE" = "ADMIN"
 let previewState: {
   isPending: boolean
   isError: boolean
@@ -17,6 +20,16 @@ let previewState: {
 const terminate = vi.fn()
 const applyRentUpdate = vi.fn()
 const previewHook = vi.fn()
+
+function axiosError(status: number, code: string, message: string) {
+  return new AxiosError("x", String(status), undefined, undefined, {
+    status,
+    statusText: "Error",
+    headers: {},
+    config: {} as never,
+    data: { success: false, code, message },
+  })
+}
 
 function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
   return {
@@ -55,6 +68,7 @@ function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
       feeAmount: null,
       lateFeePercentage: null,
       lateFeeGraceDays: null,
+      lateFeeStartDay: 1,
       inheritedLateFeePercentage: true,
       inheritedLateFeeGraceDays: true,
       notes: null,
@@ -88,6 +102,8 @@ function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
         indexToValue: "1150.000000",
         appliedById: "u1",
         fixedPercentage: null,
+        adjustmentReason: null,
+        authorizedBy: null,
         createdAt: "2025-06-01T00:00:00.000Z",
       },
       {
@@ -103,6 +119,8 @@ function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
         indexToValue: null,
         appliedById: null,
         fixedPercentage: null,
+        adjustmentReason: null,
+        authorizedBy: null,
         createdAt: "2025-03-01T00:00:00.000Z",
       },
     ],
@@ -172,7 +190,7 @@ vi.mock("@/lib/services-api", () => ({
 }))
 vi.mock("@adminprop/session/client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@adminprop/session/client")>()),
-  useSession: () => ({ user: { id: "u1", role: "EMPLOYEE" } }),
+  useSession: () => ({ user: { id: "u1", role: sessionRole } }),
 }))
 vi.mock("@/components/guarantor-select", () => ({
   GuarantorSelect: (props: { id?: string; value: string | null }) => (
@@ -187,9 +205,36 @@ vi.mock("@/components/guarantor-select", () => ({
 
 afterEach(() => {
   vi.clearAllMocks()
+  sessionRole = "ADMIN"
 })
 
 describe("ContractDetailScreen", () => {
+  it("muestra el motivo y quién autorizó un ajuste manual en el historial", () => {
+    const base = makeContract()
+    contract = makeContract({
+      rentUpdates: [
+        {
+          ...base.rentUpdates[0]!,
+          id: "u3",
+          source: "MANUAL",
+          indexType: null,
+          adjustmentReason: "Acuerdo por refacciones",
+          authorizedBy: "María Fernández",
+        },
+        ...base.rentUpdates,
+      ],
+    })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    render(<ContractDetailScreen id="c1" />)
+    const history = screen.getByRole("table")
+    expect(
+      within(history).getByText("Motivo: Acuerdo por refacciones")
+    ).toBeInTheDocument()
+    expect(
+      within(history).getByText("Autorizado por: María Fernández")
+    ).toBeInTheDocument()
+  })
+
   it("muestra la línea de tiempo, las partes con link y el historial de aumentos", () => {
     contract = makeContract()
     previewState = { isPending: true, isError: false, isSuccess: false }
@@ -318,12 +363,100 @@ describe("ContractDetailScreen", () => {
 
     await user.type(screen.getByLabelText("Nuevo alquiler"), "600.000,00")
     await user.click(dialogButton)
+    // Un monto a mano es un ajuste manual: sin motivo ni autorizante no sale.
+    expect(
+      await screen.findByText("Indicá el motivo del ajuste manual.")
+    ).toBeInTheDocument()
+    expect(screen.getByText("Indicá quién autorizó el ajuste.")).toBeVisible()
+    expect(applyRentUpdate).not.toHaveBeenCalled()
+
+    await user.type(
+      screen.getByLabelText("Motivo del ajuste"),
+      "Acuerdo por refacciones"
+    )
+    await user.type(
+      screen.getByLabelText("Autorizado por"),
+      "María Fernández (propietaria)"
+    )
+    await user.click(dialogButton)
     expect(applyRentUpdate).toHaveBeenCalledWith({
       id: "c1",
       newRent: "600000.00",
+      reason: "Acuerdo por refacciones",
+      authorizedBy: "María Fernández (propietaria)",
     })
     expect(
       await screen.findByText("No se pudo aplicar el aumento.")
+    ).toBeInTheDocument()
+  })
+
+  it("a un empleado le oculta el monto a mano y no deja aplicar un contrato de actualización manual", async () => {
+    sessionRole = "EMPLOYEE"
+    contract = makeContract({ rentUpdateType: "FIXED" })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    render(<ContractDetailScreen id="c1" />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole("button", { name: "Aplicar aumento" }))
+    const field = await screen.findByLabelText("Nuevo alquiler a mano")
+    expect(field).toBeDisabled()
+    expect(screen.getByText(/Lo hace un administrador\./)).toBeInTheDocument()
+    expect(
+      await screen.findByRole("button", {
+        name: "Aplicar aumento",
+        hidden: false,
+      })
+    ).toBeDisabled()
+    expect(applyRentUpdate).not.toHaveBeenCalled()
+  })
+
+  it("a un empleado con índice le deja aplicar el aumento sin monto", async () => {
+    sessionRole = "EMPLOYEE"
+    contract = makeContract({ rentUpdateType: "ICL" })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    applyRentUpdate.mockResolvedValue({
+      currentRent: "600000.00",
+      currency: "ARS",
+    })
+    render(<ContractDetailScreen id="c1" />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole("button", { name: "Aplicar aumento" }))
+    expect(await screen.findByLabelText("Nuevo alquiler a mano")).toBeDisabled()
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Aplicar aumento",
+        hidden: false,
+      })
+    )
+    expect(applyRentUpdate).toHaveBeenCalledWith({ id: "c1" })
+  })
+
+  it("si la API responde 403 de ajuste manual, lo explica", async () => {
+    contract = makeContract({ rentUpdateType: "ICL" })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    applyRentUpdate.mockRejectedValue(
+      axiosError(
+        403,
+        "CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY",
+        "Solo un administrador puede cargar el alquiler a mano"
+      )
+    )
+    render(<ContractDetailScreen id="c1" />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole("button", { name: "Aplicar aumento" }))
+    await user.type(await screen.findByLabelText(/Nuevo alquiler/), "600000")
+    await user.type(screen.getByLabelText("Motivo del ajuste"), "Acuerdo")
+    await user.type(screen.getByLabelText("Autorizado por"), "Propietaria")
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Aplicar aumento",
+        hidden: false,
+      })
+    )
+    expect(
+      await screen.findByText(/lo hace un administrador/i)
     ).toBeInTheDocument()
   })
 })
