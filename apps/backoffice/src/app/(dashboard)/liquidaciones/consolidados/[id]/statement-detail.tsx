@@ -49,6 +49,7 @@ import {
   settlementLabel,
   STATEMENT_STATUS_META,
 } from "@/lib/settlements"
+import { AdjustmentBreakdownCell } from "../../adjustment-breakdown-cell"
 import {
   useAddStatementSettlements,
   useCloseStatement,
@@ -248,9 +249,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                 <TableHead className="text-right">Alquiler</TableHead>
                 <TableHead className="text-right">Honorarios</TableHead>
                 <TableHead className="text-right">Gastos</TableHead>
-                <TableHead className="text-right">Retenciones</TableHead>
-                <TableHead className="text-right">Adelantos</TableHead>
-                <TableHead className="text-right">Otros ajustes</TableHead>
+                <TableHead className="text-right">Ajustes</TableHead>
                 <TableHead className="text-right">Neto</TableHead>
                 <TableHead>Estado</TableHead>
                 {open && (
@@ -267,7 +266,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                 const status = SETTLEMENT_STATUS_META[settlement.status]
                 return (
                   <TableRow key={settlement.id}>
-                    <TableCell>
+                    <TableCell className="max-w-56 whitespace-normal">
                       {settlement.property?.address ?? "Propiedad eliminada"}
                     </TableCell>
                     <TableCell>
@@ -287,18 +286,9 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                     <TableCell className="text-right font-display num">
                       {money(settlement.expensesTotal)}
                     </TableCell>
-                    {adjustmentBreakdown(settlement).map((item) => (
-                      <TableCell
-                        key={item.key}
-                        className="text-right font-display num"
-                      >
-                        {signedMoney(
-                          item.amount,
-                          settlement.currency,
-                          formatMoney
-                        )}
-                      </TableCell>
-                    ))}
+                    <TableCell className="text-right">
+                      <AdjustmentBreakdownCell settlement={settlement} />
+                    </TableCell>
                     <TableCell className="text-right font-display num font-medium">
                       {money(settlement.netAmount)}
                     </TableCell>

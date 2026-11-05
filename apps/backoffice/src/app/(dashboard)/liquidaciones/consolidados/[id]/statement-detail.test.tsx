@@ -121,17 +121,16 @@ describe("StatementDetailScreen", () => {
     expect(within(adjustments).getByText("Ajustes (total)")).toBeInTheDocument()
     expect(within(adjustments).getByText("−$ 30.000,00")).toBeInTheDocument()
 
-    // La tabla de liquidaciones tiene sus tres columnas.
+    // La tabla de liquidaciones lista los tres, solo los que no son cero.
     const table = screen.getByRole("table")
     expect(
-      within(table).getByRole("columnheader", { name: "Retenciones" })
+      within(table).getByRole("columnheader", { name: "Ajustes" })
     ).toBeInTheDocument()
-    expect(
-      within(table).getByRole("columnheader", { name: "Adelantos" })
-    ).toBeInTheDocument()
-    expect(
-      within(table).getByRole("columnheader", { name: "Otros ajustes" })
-    ).toBeInTheDocument()
+    const row = within(table).getAllByRole("row")[1]!
+    expect(within(row).getByText("Retenciones")).toBeInTheDocument()
+    expect(within(row).getByText("−$ 4.000,00")).toBeInTheDocument()
+    expect(within(row).getByText("Adelantos")).toBeInTheDocument()
+    expect(within(row).getByText("Otros ajustes")).toBeInTheDocument()
   })
 
   it("el diálogo de cierre repite el desglose que se va a congelar", async () => {

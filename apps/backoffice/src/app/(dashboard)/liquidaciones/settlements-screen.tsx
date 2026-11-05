@@ -61,6 +61,8 @@ import {
   settlementLabel,
   STATEMENT_STATUS_META,
 } from "@/lib/settlements"
+
+import { AdjustmentBreakdownCell } from "./adjustment-breakdown-cell"
 import {
   useCreateStatement,
   useInfiniteFeeReceivables,
@@ -226,9 +228,7 @@ function SettlementList() {
                   <TableHead>Mes</TableHead>
                   <TableHead className="text-right">Alquiler</TableHead>
                   <TableHead className="text-right">Honorarios</TableHead>
-                  <TableHead className="text-right">Retenciones</TableHead>
-                  <TableHead className="text-right">Adelantos</TableHead>
-                  <TableHead className="text-right">Otros ajustes</TableHead>
+                  <TableHead className="text-right">Ajustes</TableHead>
                   <TableHead className="text-right">Neto</TableHead>
                   <TableHead>Estado</TableHead>
                 </TableRow>
@@ -277,7 +277,7 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
   const money = (amount: string) => formatMoney(amount, settlement.currency)
   return (
     <TableRow>
-      <TableCell>
+      <TableCell className="max-w-48 whitespace-normal">
         <Link
           href={`/liquidaciones/${settlement.id}`}
           className="font-medium hover:underline"
@@ -285,7 +285,7 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
           {settlement.owner?.fullName ?? "Sin propietario"}
         </Link>
       </TableCell>
-      <TableCell>
+      <TableCell className="max-w-56 whitespace-normal">
         {settlement.property?.address ?? "Propiedad eliminada"}
       </TableCell>
       <TableCell className="num">{settlementLabel(settlement)}</TableCell>
@@ -297,14 +297,9 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
           ? `−${money(settlement.feeTotal)}`
           : money(settlement.feeTotal)}
       </TableCell>
-      {adjustmentBreakdown(settlement).map((item) => (
-        <TableCell
-          key={item.key}
-          className={`text-right num ${isZero(item.amount) ? "text-muted-foreground" : ""}`}
-        >
-          {signedMoney(item.amount, settlement.currency, formatMoney)}
-        </TableCell>
-      ))}
+      <TableCell className="text-right">
+        <AdjustmentBreakdownCell settlement={settlement} />
+      </TableCell>
       <TableCell className="text-right font-display num font-medium">
         {money(settlement.netAmount)}
         {!isZero(settlement.transferredTotal) && (

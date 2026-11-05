@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -122,14 +122,44 @@ describe("SettlementsScreen", () => {
       screen.getAllByRole("link", { name: "Juan Pérez" })[0]
     ).toHaveAttribute("href", "/liquidaciones/s1")
     expect(screen.getAllByText("−$ 10.000,00").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("Retenciones").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("Adelantos").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("Otros ajustes").length).toBeGreaterThan(0)
+    expect(
+      screen.getByRole("columnheader", { name: "Ajustes" })
+    ).toBeInTheDocument()
     expect(screen.getAllByText("Pendiente").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Transferida").length).toBeGreaterThan(0)
     expect(screen.getAllByText("En consolidado").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Con pago anulado").length).toBeGreaterThan(0)
     expect(screen.getAllByText("2026-10 · 2").length).toBeGreaterThan(0)
+  })
+
+  it("separa retenciones, adelantos y otros ajustes de cada liquidación", () => {
+    settlements = [
+      makeSettlement({
+        adjustmentsTotal: "-30000.00",
+        withholdingsTotal: "-4000.00",
+        advancesTotal: "-25000.00",
+        otherAdjustmentsTotal: "-1000.00",
+      }),
+    ]
+    render(<SettlementsScreen />)
+
+    const table = screen.getByRole("table")
+    const row = within(table).getAllByRole("row")[1]!
+    expect(within(row).getByText("Retenciones")).toBeInTheDocument()
+    expect(within(row).getByText("−$ 4.000,00")).toBeInTheDocument()
+    expect(within(row).getByText("Adelantos")).toBeInTheDocument()
+    expect(within(row).getByText("−$ 25.000,00")).toBeInTheDocument()
+    expect(within(row).getByText("Otros ajustes")).toBeInTheDocument()
+    expect(within(row).getByText("−$ 1.000,00")).toBeInTheDocument()
+  })
+
+  it("sin ajustes la celda lo dice sin ocupar lugar", () => {
+    settlements = [makeSettlement()]
+    render(<SettlementsScreen />)
+    const row = within(screen.getByRole("table")).getAllByRole("row")[1]!
+    expect(
+      within(row).getByText("Sin retenciones, adelantos ni otros ajustes")
+    ).toBeInTheDocument()
   })
 
   it("la pestaña de consolidados muestra el estado y los netos por moneda", async () => {
