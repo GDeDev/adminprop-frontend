@@ -4,9 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import type { ContractDetail } from "@adminprop/shared-types"
 
+import { AxiosError } from "axios"
+
 import { ContractDetailScreen } from "./contract-detail"
 
 let contract: ContractDetail
+let sessionRole: "ADMIN" | "EMPLOYEE" = "ADMIN"
 let previewState: {
   isPending: boolean
   isError: boolean
@@ -17,6 +20,16 @@ let previewState: {
 const terminate = vi.fn()
 const applyRentUpdate = vi.fn()
 const previewHook = vi.fn()
+
+function axiosError(status: number, code: string, message: string) {
+  return new AxiosError("x", String(status), undefined, undefined, {
+    status,
+    statusText: "Error",
+    headers: {},
+    config: {} as never,
+    data: { success: false, code, message },
+  })
+}
 
 function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
   return {
@@ -177,7 +190,7 @@ vi.mock("@/lib/services-api", () => ({
 }))
 vi.mock("@adminprop/session/client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@adminprop/session/client")>()),
-  useSession: () => ({ user: { id: "u1", role: "EMPLOYEE" } }),
+  useSession: () => ({ user: { id: "u1", role: sessionRole } }),
 }))
 vi.mock("@/components/guarantor-select", () => ({
   GuarantorSelect: (props: { id?: string; value: string | null }) => (
@@ -192,6 +205,7 @@ vi.mock("@/components/guarantor-select", () => ({
 
 afterEach(() => {
   vi.clearAllMocks()
+  sessionRole = "ADMIN"
 })
 
 describe("ContractDetailScreen", () => {
@@ -373,6 +387,76 @@ describe("ContractDetailScreen", () => {
     })
     expect(
       await screen.findByText("No se pudo aplicar el aumento.")
+    ).toBeInTheDocument()
+  })
+
+  it("a un empleado le oculta el monto a mano y no deja aplicar un contrato de actualización manual", async () => {
+    sessionRole = "EMPLOYEE"
+    contract = makeContract({ rentUpdateType: "FIXED" })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    render(<ContractDetailScreen id="c1" />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole("button", { name: "Aplicar aumento" }))
+    const field = await screen.findByLabelText("Nuevo alquiler a mano")
+    expect(field).toBeDisabled()
+    expect(screen.getByText(/Lo hace un administrador\./)).toBeInTheDocument()
+    expect(
+      await screen.findByRole("button", {
+        name: "Aplicar aumento",
+        hidden: false,
+      })
+    ).toBeDisabled()
+    expect(applyRentUpdate).not.toHaveBeenCalled()
+  })
+
+  it("a un empleado con índice le deja aplicar el aumento sin monto", async () => {
+    sessionRole = "EMPLOYEE"
+    contract = makeContract({ rentUpdateType: "ICL" })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    applyRentUpdate.mockResolvedValue({
+      currentRent: "600000.00",
+      currency: "ARS",
+    })
+    render(<ContractDetailScreen id="c1" />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole("button", { name: "Aplicar aumento" }))
+    expect(await screen.findByLabelText("Nuevo alquiler a mano")).toBeDisabled()
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Aplicar aumento",
+        hidden: false,
+      })
+    )
+    expect(applyRentUpdate).toHaveBeenCalledWith({ id: "c1" })
+  })
+
+  it("si la API responde 403 de ajuste manual, lo explica", async () => {
+    contract = makeContract({ rentUpdateType: "ICL" })
+    previewState = { isPending: true, isError: false, isSuccess: false }
+    applyRentUpdate.mockRejectedValue(
+      axiosError(
+        403,
+        "CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY",
+        "Solo un administrador puede cargar el alquiler a mano"
+      )
+    )
+    render(<ContractDetailScreen id="c1" />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole("button", { name: "Aplicar aumento" }))
+    await user.type(await screen.findByLabelText(/Nuevo alquiler/), "600000")
+    await user.type(screen.getByLabelText("Motivo del ajuste"), "Acuerdo")
+    await user.type(screen.getByLabelText("Autorizado por"), "Propietaria")
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Aplicar aumento",
+        hidden: false,
+      })
+    )
+    expect(
+      await screen.findByText(/lo hace un administrador/i)
     ).toBeInTheDocument()
   })
 })

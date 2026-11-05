@@ -3,7 +3,11 @@
 import * as React from "react"
 import { toast } from "sonner"
 
-import { apiErrorCode, apiErrorMessage } from "@adminprop/session/client"
+import {
+  apiErrorCode,
+  apiErrorMessage,
+  useSession,
+} from "@adminprop/session/client"
 import type { ContractDetail } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
@@ -50,6 +54,11 @@ export function RentUpdateDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const apply = useApplyRentUpdate()
+  const { user } = useSession()
+  // Cargar el monto a mano es solo de administradores (el backend responde 403
+  // CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY); un empleado aplica los
+  // aumentos por índice o por % fijo.
+  const canAdjustManually = user?.role === "ADMIN"
   const indexed = usesIndex(contract.rentUpdateType)
   const fixedPercentage =
     contract.rentUpdateType === "FIXED"
@@ -71,13 +80,18 @@ export function RentUpdateDialog({
   // Todo monto a mano es un ajuste manual: exige motivo y quién lo autorizó
   // (D-230). Los aumentos por índice o por % fijo no los piden.
   const manual = requiresAmount || newRent.trim() !== ""
+  const blockedByRole = !canAdjustManually && requiresAmount
 
   async function confirm() {
+    if (blockedByRole) return
     setError(null)
     setFieldError(null)
     setReasonError(null)
     setAuthorizedByError(null)
-    const amount = newRent.trim() === "" ? null : normalizeAmount(newRent)
+    const amount =
+      !canAdjustManually || newRent.trim() === ""
+        ? null
+        : normalizeAmount(newRent)
     if (newRent.trim() !== "" && amount === null) {
       setFieldError("El monto no es válido.")
       return
@@ -115,6 +129,12 @@ export function RentUpdateDialog({
       onOpenChange(false)
     } catch (cause) {
       if (
+        apiErrorCode(cause) === "CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY"
+      ) {
+        setError(
+          "Cargar el alquiler a mano lo hace un administrador. Pedile que lo aplique."
+        )
+      } else if (
         apiErrorCode(cause) ===
         "CONTRACT_MANUAL_ADJUSTMENT_JUSTIFICATION_REQUIRED"
       ) {
@@ -133,11 +153,13 @@ export function RentUpdateDialog({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Aplicar aumento</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            {requiresAmount
-              ? "El contrato tiene actualización manual: cargá el alquiler nuevo."
-              : indexed
-                ? `El alquiler nuevo sale del ${RENT_UPDATE_TYPE_LABELS[contract.rentUpdateType]} del mes. Si falta cargar el índice, se avisa. Podés cargar un monto a mano como ajuste autorizado.`
-                : `El alquiler sube ${fixedPercentage} % (porcentaje fijo del contrato). Podés cargar otro monto a mano como ajuste autorizado.`}
+            {blockedByRole
+              ? "El contrato tiene actualización manual y cargar el alquiler lo hace un administrador."
+              : requiresAmount
+                ? "El contrato tiene actualización manual: cargá el alquiler nuevo."
+                : indexed
+                  ? `El alquiler nuevo sale del ${RENT_UPDATE_TYPE_LABELS[contract.rentUpdateType]} del mes. Si falta cargar el índice, se avisa. Podés cargar un monto a mano como ajuste autorizado.`
+                  : `El alquiler sube ${fixedPercentage} % (porcentaje fijo del contrato). Podés cargar otro monto a mano como ajuste autorizado.`}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -159,7 +181,7 @@ export function RentUpdateDialog({
                 : "No quedan aumentos"}
             </dd>
           </dl>
-          {
+          {canAdjustManually ? (
             <Field data-invalid={fieldError !== null}>
               <FieldLabel htmlFor="rent-update-new-rent">
                 {requiresAmount
@@ -182,7 +204,26 @@ export function RentUpdateDialog({
                 </FieldDescription>
               )}
             </Field>
-          }
+          ) : (
+            <Field data-disabled>
+              <FieldLabel htmlFor="rent-update-new-rent">
+                Nuevo alquiler a mano
+              </FieldLabel>
+              <Input
+                id="rent-update-new-rent"
+                disabled
+                value=""
+                placeholder="Solo administradores"
+                aria-describedby="rent-update-new-rent-help"
+              />
+              <FieldDescription id="rent-update-new-rent-help">
+                Lo hace un administrador.
+                {requiresAmount
+                  ? " Este contrato se actualiza a mano, así que el aumento queda para él."
+                  : " Vos podés aplicar el aumento que sale del índice o del porcentaje del contrato."}
+              </FieldDescription>
+            </Field>
+          )}
           {manual && (
             <>
               <Field data-invalid={reasonError !== null}>
@@ -242,7 +283,10 @@ export function RentUpdateDialog({
           >
             Cancelar
           </Button>
-          <Button onClick={() => void confirm()} disabled={apply.isPending}>
+          <Button
+            onClick={() => void confirm()}
+            disabled={apply.isPending || blockedByRole}
+          >
             {apply.isPending ? "Aplicando…" : "Aplicar aumento"}
           </Button>
         </ResponsiveDialogFooter>
