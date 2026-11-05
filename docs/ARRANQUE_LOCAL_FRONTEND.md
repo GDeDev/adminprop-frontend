@@ -57,25 +57,26 @@ doppler login        # una vez por máquina (abre el navegador)
 
 Proyecto `admin-prop`. Mapeo **real** de configs:
 
-| Carpeta                              | Config Doppler   | Estado                                                                         |
-| ------------------------------------ | ---------------- | ------------------------------------------------------------------------------ |
-| `adminprop-frontend/apps/backoffice` | `dev_backoffice` | Confirmado.                                                                    |
-| `adminprop-frontend/apps/portal`     | `dev_portal`     | Confirmado.                                                                    |
-| `adminprop-backend` (raíz)           | `dev_backend`    | Confirmado.                                                                    |
-| `adminprop-frontend/apps/sites`      | **a confirmar**  | No hay una config confirmada para sitios. Sugerencia: crear `dev_sites` vacía. |
+| Carpeta                              | Config Doppler         | Estado                                                                   |
+| ------------------------------------ | ---------------------- | ------------------------------------------------------------------------ |
+| `adminprop-frontend/apps/backoffice` | `dev_backoffice`       | Confirmado.                                                              |
+| `adminprop-frontend/apps/portal`     | `dev_portal`           | Confirmado.                                                              |
+| `adminprop-backend` (raíz)           | `dev_backend`          | Confirmado.                                                              |
+| `adminprop-frontend/apps/sites`      | `dev_sites` (sugerida) | Sin config confirmada: crearla (ver abajo). Hasta entonces, a confirmar. |
 
 Vincular **cada carpeta** (el vínculo de Doppler es por directorio):
 
 ```bash
 cd adminprop-frontend/apps/backoffice && doppler setup   # admin-prop / dev_backoffice
 cd ../portal                          && doppler setup   # admin-prop / dev_portal
-cd ../sites                           && doppler setup   # admin-prop / dev_sites (a confirmar, ver abajo)
+cd ../sites                           && doppler setup   # admin-prop / dev_sites (sugerida, ver abajo)
 cd ../../../adminprop-backend         && doppler setup   # admin-prop / dev_backend
 ```
 
-Para `apps/sites`: si `dev_sites` no existe todavía, crearla desde el panel de
-Doppler (vacía) antes de correr `doppler setup` ahí. Sin config, `sites` igual
-corre pasando las variables por la terminal (sección 6).
+Para `apps/sites` no hay una config confirmada en Doppler; se sugiere crear
+`dev_sites` (desde el panel: proyecto `admin-prop`, ambiente de desarrollo) antes
+de correr `doppler setup` ahí. Sin config, `sites` igual corre pasando las
+variables por la terminal (sección 6).
 
 ### Reglas del dueño para las variables
 
@@ -87,7 +88,10 @@ corre pasando las variables por la terminal (sección 6).
   doppler secrets set NOMBRE="" --project admin-prop --config dev_backoffice
   ```
 
-  y el valor lo carga el dueño después.
+  y el valor lo carga el dueño después. Config según la app: `dev_backoffice`,
+  `dev_portal`, `dev_sites` (sugerida) o `dev_backend` (las variables nuevas del
+  backend también se crean vacías; el backend, tras su arreglo de arranque, trata
+  una variable vacía como no definida).
 
 - `NEXT_PUBLIC_*` **solo para valores no sensibles**: terminan en el bundle del
   navegador. Los secretos, solo en variables sin ese prefijo (Server Actions,
@@ -95,6 +99,24 @@ corre pasando las variables por la terminal (sección 6).
 - `build` no se cachea en turbo (`cache: false`): las variables entran por
   Doppler dentro del script y turbo no las ve, así que un caché podría servir un
   bundle con una `NEXT_PUBLIC_API_URL` vieja.
+
+### CORS en el backend (obligatorio)
+
+El navegador llama a la API directo desde el backoffice (`http://localhost:3001`)
+y el portal (`http://localhost:3002`); los puertos salen de los scripts
+`dev`/`start` de `apps/backoffice/package.json` y `apps/portal/package.json`. El
+backend deja CORS cerrado si no tiene `CORS_ORIGINS`, así que **en `dev_backend`
+tiene que existir**:
+
+```bash
+doppler secrets set CORS_ORIGINS="http://localhost:3001,http://localhost:3002" --project admin-prop --config dev_backend
+```
+
+Sin esto ni el login del backoffice entra: la consola del navegador muestra un
+error de CORS (`blocked by CORS policy: No 'Access-Control-Allow-Origin' header`)
+y la petición a `/auth/login` falla. Hay que reiniciar el backend después de
+cargarla. (Es una variable del backend, no de las apps de este repo; `apps/sites`
+llama a la API desde el servidor y no la necesita.)
 
 ## 5. Variables por app
 
@@ -119,26 +141,23 @@ Sin valores. "Dónde se lee" es el archivo que lo usa; si un nombre figura solo 
 | `PORTAL_TENANT_SLUG`  | Sí (en la práctica) | Slug de la inmobiliaria dueña de este portal (`src/lib/tenant-branding.ts`). Sin valor, el login del portal avisa que no hay inmobiliaria configurada. Debe existir en la API (el seed de desarrollo crea `demo`). |
 | `APP_ORIGINS`         |         No          | Igual que en el backoffice.                                                                                                                                                                                        |
 
-### Sitios (`apps/sites`, config **a confirmar**)
+### Sitios (`apps/sites`, config `dev_sites` sugerida)
 
-| Variable                     |     Obligatoria     | Qué es / dónde se lee                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ---------------------------- | :-----------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `API_URL`                    | Sí (o la siguiente) | URL base de la API con `/api/v1`, solo servidor (`src/lib/api.ts`). Tiene prioridad sobre `NEXT_PUBLIC_API_URL`. Sin ninguna de las dos, la app no puede pedir nada a la API.                                                                                                                                                                                                                                                                                   |
-| `NEXT_PUBLIC_API_URL`        |     Alternativa     | Respaldo de `API_URL` (`src/lib/api.ts`).                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `API_TIMEOUT_MS`             |         No          | Timeout en milisegundos de las llamadas a la API (`src/lib/api.ts`); por defecto 8000.                                                                                                                                                                                                                                                                                                                                                                          |
-| `SITES_REVALIDATE_SECRET`    |    No (secreto)     | Secreto compartido con la API. Prende el endpoint `POST /api/revalidate` (sin él responde 404) y viaja como header `X-Sites-Secret` en las lecturas del servidor (`src/lib/api.ts`, `src/app/api/revalidate/route.ts`). Solo servidor: nunca `NEXT_PUBLIC_`. **A confirmar** que el valor sea el mismo `SITES_REVALIDATE_SECRET` del backend (el comentario del código lo dice así; la guía del backend también menciona `SITES_SERVER_SECRET` para el header). |
-| `SITES_BASE_DOMAIN`          |         No          | Dominio base de los subdominios `<sub>.<dominio>` (`src/lib/host-policy.ts`). Sin valor, solo se resuelven dominios propios y el acceso por slug.                                                                                                                                                                                                                                                                                                               |
-| `SITES_PROTOCOL`             |         No          | `http` o, por defecto, `https`; arma el canonical (`src/lib/site-route.ts`).                                                                                                                                                                                                                                                                                                                                                                                    |
-| `SITES_TRUST_FORWARDED_HOST` |         No          | `true` para confiar en `X-Forwarded-Host` (solo detrás de un proxy propio que lo fija) (`src/lib/request-host.ts`). Por defecto vale `Host`.                                                                                                                                                                                                                                                                                                                    |
-| `SITES_ALLOW_SLUG_PATH`      |         No          | `true` habilita en producción el acceso `/_s/<slug>` (en desarrollo siempre está habilitado) (`src/proxy.ts`).                                                                                                                                                                                                                                                                                                                                                  |
-| `SITES_PREVIEW_ANCESTORS`    |         No          | Orígenes del backoffice que pueden embeber la vista previa en un iframe; en desarrollo vale `http://localhost:3001 http://127.0.0.1:3001` (`next.config.ts`). En producción, sin valor, ninguno.                                                                                                                                                                                                                                                                |
-| `SITES_IMAGE_SOURCES`        |         No          | Orígenes extra de imágenes para la CSP (`img-src`), separados por espacio o coma; en desarrollo incluye el almacenamiento local del backend (`next.config.ts`).                                                                                                                                                                                                                                                                                                 |
-| `SITES_CLIENT_IP_HEADER`     |   **a confirmar**   | Aparece **solo en `turbo.json`** (lista de variables del build). No lo lee ningún archivo de este repo: probablemente es de la API. Confirmar antes de cargarla.                                                                                                                                                                                                                                                                                                |
-| `SITES_TRUSTED_PROXY_HOPS`   |   **a confirmar**   | Igual que la anterior: solo en `turbo.json`, sin lectura en el código del frontend.                                                                                                                                                                                                                                                                                                                                                                             |
-
-Variables que `turbo.json` declara para el build y que ninguna app lee (puede
-ignorarse): `SITES_CLIENT_IP_HEADER`, `SITES_TRUSTED_PROXY_HOPS`. `NODE_ENV` lo
-fija Next.
+| Variable                     |     Obligatoria     | Qué es / dónde se lee                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------- | :-----------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `API_URL`                    | Sí (o la siguiente) | URL base de la API con `/api/v1`, solo servidor (`src/lib/api.ts`). Tiene prioridad sobre `NEXT_PUBLIC_API_URL`. Sin ninguna de las dos, la app no puede pedir nada a la API.                                                                                                                                                                                                                                                                                                                                                              |
+| `NEXT_PUBLIC_API_URL`        |     Alternativa     | Respaldo de `API_URL` (`src/lib/api.ts`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `API_TIMEOUT_MS`             |         No          | Timeout en milisegundos de las llamadas a la API (`src/lib/api.ts`); por defecto 8000.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `SITES_SERVER_SECRET`        |    No (secreto)     | Secreto que `apps/sites` manda a la API como header `X-Sites-Secret` en las lecturas del servidor (`src/lib/api.ts`); con él la API no cuenta esas lecturas contra el tope por IP. Se lee primero esta; si falta, se usa `SITES_REVALIDATE_SECRET`. La API acepta su propio `SITES_SERVER_SECRET` o `SITES_REVALIDATE_SECRET` (el que coincida). Solo servidor: nunca `NEXT_PUBLIC_`. Sin ninguno, no se manda el header y las lecturas quedan limitadas por IP.                                                                           |
+| `SITES_REVALIDATE_SECRET`    |    No (secreto)     | Prende el endpoint `POST /api/revalidate` (sin él responde 404), que la API llama con `Authorization: Bearer` (`src/app/api/revalidate/route.ts`). También es el respaldo de `SITES_SERVER_SECRET` para el header `X-Sites-Secret`. Solo servidor: nunca `NEXT_PUBLIC_`.                                                                                                                                                                                                                                                                   |
+| `SITES_BASE_DOMAIN`          |         No          | Dominio base de los subdominios `<sub>.<dominio>` (`src/lib/host-policy.ts`). Sin valor, solo se resuelven dominios propios y el acceso por slug.                                                                                                                                                                                                                                                                                                                                                                                          |
+| `SITES_PROTOCOL`             |         No          | `http` o, por defecto, `https`; arma el canonical (`src/lib/site-route.ts`).                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `SITES_TRUST_FORWARDED_HOST` |         No          | `true` para confiar en `X-Forwarded-Host` (solo detrás de un proxy propio que lo fija) (`src/lib/request-host.ts`). Por defecto vale `Host`.                                                                                                                                                                                                                                                                                                                                                                                               |
+| `SITES_ALLOW_SLUG_PATH`      |         No          | `true` habilita en producción el acceso `/_s/<slug>` (en desarrollo siempre está habilitado) (`src/proxy.ts`).                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `SITES_PREVIEW_ANCESTORS`    |         No          | Orígenes del backoffice que pueden embeber la vista previa en un iframe; en desarrollo vale `http://localhost:3001 http://127.0.0.1:3001` (`next.config.ts`). En producción, sin valor, ninguno.                                                                                                                                                                                                                                                                                                                                           |
+| `SITES_IMAGE_SOURCES`        |         No          | Orígenes extra de imágenes para la CSP (`img-src`), separados por espacio o coma; en desarrollo incluye el almacenamiento local del backend (`next.config.ts`).                                                                                                                                                                                                                                                                                                                                                                            |
+| `SITES_CLIENT_IP_HEADER`     |         No          | Header que trae la IP real del visitante y que fija la plataforma de despliegue (`x-real-ip`, `cf-connecting-ip`, `x-vercel-forwarded-for`…). La lee `src/lib/client-ip.ts` para pasarle a la API la IP de quien envía el formulario de contacto (`src/app/s/[site]/api/contacto/route.ts`), de modo que el límite de envíos sea por visitante. Si falta, se usa `X-Forwarded-For` contando desde la derecha (ver la siguiente). Solo poner un header que el proxy garantice: cualquiera puede escribir los demás. En local no hace falta. |
+| `SITES_TRUSTED_PROXY_HOPS`   |         No          | Cuántos proxies propios hay delante de la app (por defecto 1). `client-ip.ts` toma de `X-Forwarded-For` el valor que agregó el proxy más cercano, contando desde la derecha; el primer valor lo escribe el cliente y no se usa. Se ignora si hay `SITES_CLIENT_IP_HEADER`. Si ambas faltan no pasa nada grave: rige el valor 1, y si no hay una IP válida el formulario se envía igual y la API cuenta por la IP del servidor, es decir, el límite pasa a ser compartido por todos los visitantes. En local no hace falta.                 |
 
 ## 6. Puertos, comandos y URLs
 
@@ -215,10 +234,12 @@ deshabilitado sin cambios y manda solo lo que cambió` falló alguna vez bajo la
 - **`next typegen`**: `npm run typecheck` lo corre antes de `tsc`. Un `tsc`
   suelto en una app protestará por `PageProps` hasta que existan los tipos de
   rutas generados.
-- **El login no entra o el navegador bloquea llamadas**: revisar que
-  `NEXT_PUBLIC_API_URL` apunte a la API local y que el backend permita el origen:
-  según su guía, sin `CORS_ORIGINS` el CORS queda cerrado. **A confirmar** qué
-  valor trae `dev_backend` para `http://localhost:3001` y `http://localhost:3002`.
+- **El login del backoffice no entra y la consola del navegador muestra un error
+  de CORS** (`Access to fetch at 'http://localhost:3000/api/v1/...' from origin
+'http://localhost:3001' has been blocked by CORS policy`): falta
+  `CORS_ORIGINS` en `dev_backend` (el backend deja CORS cerrado si no está). Ver
+  «CORS en el backend» en la sección 4. Si además falla `NEXT_PUBLIC_API_URL`,
+  debe apuntar a la API local con `/api/v1`.
 - **El portal dice «no hay inmobiliaria configurada»**: falta
   `PORTAL_TENANT_SLUG` en `dev_portal`, o el slug no existe en la API.
 - **«Mi sitio web»: la vista previa no se ve**: `apps/sites` no está levantada,
@@ -234,7 +255,12 @@ deshabilitado sin cambios y manda solo lo que cambió` falló alguna vez bajo la
 - Ninguno de estos comandos se corrió con Doppler real ni contra el backend en
   una máquina limpia: la guía se contrastó contra `package.json`, `turbo.json`,
   los `next.config.ts`, los `.env.example` y el código.
-- La config de Doppler de `apps/sites` y el repositorio `adminprop-repo-files`
-  (URL) figuran como **a confirmar**.
-- Las variables `SITES_CLIENT_IP_HEADER` y `SITES_TRUSTED_PROXY_HOPS` solo
-  existen en `turbo.json`.
+- Que exista la config `dev_sites` en Doppler (es una sugerencia), la URL del
+  repositorio `adminprop-repo-files` y el problema de symlinks con Turbopack en
+  tu máquina siguen **a confirmar**.
+
+Ya confirmado (y fuera de «a confirmar»): el mapeo de configs
+`dev_backoffice` / `dev_portal` / `dev_backend`; que `SITES_CLIENT_IP_HEADER` y
+`SITES_TRUSTED_PROXY_HOPS` las lee `apps/sites` (`client-ip.ts`); que
+`CORS_ORIGINS` es obligatoria en `dev_backend`; y que el secreto de sitios es
+`SITES_SERVER_SECRET` o, de respaldo, `SITES_REVALIDATE_SECRET` (DT-166).

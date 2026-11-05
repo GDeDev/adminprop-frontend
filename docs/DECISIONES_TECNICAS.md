@@ -837,3 +837,7 @@ Backend D-229: el modo ya gobierna los emails. `SendModeSelect` reemplaza los do
 ### DT-165 — Coordenadas de la propiedad: las dos o ninguna, hasta 6 decimales
 
 Backend D-226. El formulario acepta latitud (−90 a 90) y longitud (−180 a 180) con coma o punto y hasta 6 decimales (como la API); vacío las borra al editar. La API admite cargar una sola, pero el sitio público solo muestra el mapa con las dos, así que el formulario pide las dos o ninguna (regla del frontend, no del backend). Se avisa que el sitio público las redondea a ~100 m. No hay geocodificación ni mapa en el formulario.
+
+### DT-166 — Secreto de servidor de `apps/sites`: `SITES_SERVER_SECRET` primero, `SITES_REVALIDATE_SECRET` de respaldo
+
+`apps/sites` manda un secreto como header `X-Sites-Secret` para que la API no cuente sus lecturas (hechas en nombre de todos los visitantes, desde una sola IP) contra el tope por IP. La API acepta ese valor como `SITES_SERVER_SECRET` o como `SITES_REVALIDATE_SECRET`. Decisión: `trustedServerHeaders` lee `SITES_SERVER_SECRET` primero y, si está vacío o ausente, `SITES_REVALIDATE_SECRET`, así un despliegue ya configurado con el nombre viejo sigue andando. Solo servidor, nunca `NEXT_PUBLIC_`. El endpoint `POST /api/revalidate` sigue usando solo `SITES_REVALIDATE_SECRET` (es el secreto del aviso de la API, otro uso). Supuesto: ambos nombres pueden valer lo mismo o distinto; si valen distinto, el header lleva el de `SITES_SERVER_SECRET` y es ese el que debe conocer la API.

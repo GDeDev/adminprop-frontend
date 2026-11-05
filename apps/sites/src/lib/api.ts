@@ -44,12 +44,14 @@ export function apiUrl(): string | null {
  * Con este header la API deja de contar nuestras lecturas contra el tope por
  * IP: este servidor pide en nombre de todos los visitantes de todos los sitios
  * desde una sola IP, y sin él un bot contra un sitio agotaría el cupo de todos.
- * Es el mismo valor que `SITES_REVALIDATE_SECRET` de la API. Solo servidor:
+ * Se lee `SITES_SERVER_SECRET` y, si no está, `SITES_REVALIDATE_SECRET` (la API
+ * acepta cualquiera de los dos). Solo servidor:
  * nunca `NEXT_PUBLIC_`, y no se manda en el formulario de contacto (ese sí
  * debe seguir limitado por visitante).
  */
 export function trustedServerHeaders(): Record<string, string> {
-  const secret = process.env.SITES_REVALIDATE_SECRET
+  const secret =
+    process.env.SITES_SERVER_SECRET || process.env.SITES_REVALIDATE_SECRET
   return secret ? { "X-Sites-Secret": secret } : {}
 }
 
