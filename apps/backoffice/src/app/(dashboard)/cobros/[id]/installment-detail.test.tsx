@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { AxiosError } from "axios"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import type { InstallmentDetail, Payment } from "@adminprop/shared-types"
@@ -277,6 +278,96 @@ describe("InstallmentDetailScreen", () => {
       kind: "WAIVE",
       amount: undefined,
       reason: "Acuerdo con el inquilino",
+    })
+  })
+
+  describe("Idempotency-Key al registrar un pago", () => {
+    const UUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
+    function axiosError(status: number, code: string, message: string) {
+      return new AxiosError("x", String(status), undefined, undefined, {
+        status,
+        statusText: "Error",
+        headers: {},
+        config: {} as never,
+        data: { success: false, code, message },
+      })
+    }
+
+    async function openAndFill(user: ReturnType<typeof userEvent.setup>) {
+      await user.click(screen.getByRole("button", { name: "Registrar pago" }))
+      const dialog = screen.getByRole("dialog")
+      await user.type(within(dialog).getByLabelText("Monto pagado"), "1000")
+      return dialog
+    }
+
+    it("manda un uuid, lo reusa en el reintento y estrena otro al abrir de nuevo", async () => {
+      installment = makeInstallment()
+      registerPayment
+        .mockRejectedValueOnce(new Error("red caída"))
+        .mockResolvedValueOnce({
+          payment: makePayment({ creditGenerated: "0.00" }),
+          creditApplications: [],
+          installment,
+        })
+        .mockResolvedValue({
+          payment: makePayment({ creditGenerated: "0.00" }),
+          creditApplications: [],
+          installment,
+        })
+      const user = userEvent.setup()
+      render(<InstallmentDetailScreen id="i1" />)
+
+      const dialog = await openAndFill(user)
+      const submit = within(dialog).getByRole("button", {
+        name: "Registrar pago",
+      })
+      await user.click(submit)
+      expect(
+        await within(dialog).findByText("No se pudo registrar el pago.")
+      ).toBeInTheDocument()
+      await user.click(submit)
+      await vi.waitFor(() => expect(registerPayment).toHaveBeenCalledTimes(2))
+
+      const first = registerPayment.mock.calls[0]![0].idempotencyKey
+      const second = registerPayment.mock.calls[1]![0].idempotencyKey
+      expect(first).toMatch(UUID)
+      expect(second).toBe(first)
+
+      // El diálogo se cerró al registrar: abrirlo de nuevo es un envío nuevo.
+      await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
+      await openAndFill(user)
+      await user.click(
+        within(screen.getByRole("dialog")).getByRole("button", {
+          name: "Registrar pago",
+        })
+      )
+      await vi.waitFor(() => expect(registerPayment).toHaveBeenCalledTimes(3))
+      const third = registerPayment.mock.calls[2]![0].idempotencyKey
+      expect(third).toMatch(UUID)
+      expect(third).not.toBe(first)
+    })
+
+    it("explica el 409 IDEMPOTENCY_KEY_REUSED", async () => {
+      installment = makeInstallment()
+      registerPayment.mockRejectedValue(
+        axiosError(
+          409,
+          "IDEMPOTENCY_KEY_REUSED",
+          "La clave de idempotencia ya se usó con otro pedido"
+        )
+      )
+      const user = userEvent.setup()
+      render(<InstallmentDetailScreen id="i1" />)
+
+      const dialog = await openAndFill(user)
+      await user.click(
+        within(dialog).getByRole("button", { name: "Registrar pago" })
+      )
+      expect(
+        await within(dialog).findByText(/ya se envió con otros datos/)
+      ).toBeInTheDocument()
     })
   })
 })

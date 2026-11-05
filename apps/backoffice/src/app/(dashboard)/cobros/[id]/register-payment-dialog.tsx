@@ -132,6 +132,11 @@ export function RegisterPaymentDialog({
   const [file, setFile] = React.useState<File | null>(null)
   const [fileError, setFileError] = React.useState<string | null>(null)
   const [error, setError] = React.useState<string | null>(null)
+  // Una clave por apertura del diálogo (el padre lo monta de nuevo con otra
+  // `key` cada vez): los reintentos del mismo envío la reusan y el backend no
+  // duplica el pago. Si el envío falla, el backend no guarda la clave, así que
+  // se puede corregir el formulario y volver a enviar con la misma.
+  const [idempotencyKey] = React.useState(() => crypto.randomUUID())
   const hasCredit = !isZero(installment.creditsAvailable)
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -202,6 +207,7 @@ export function RegisterPaymentDialog({
           : undefined,
         notes: data.notes.trim() || undefined,
         file,
+        idempotencyKey,
       })
       const credit = result.payment.creditGenerated
       toast.success(
@@ -242,6 +248,12 @@ export function RegisterPaymentDialog({
               "La imputación tiene que sumar lo pagado y no superar los saldos."
             ),
           })
+          handled = true
+          break
+        case "IDEMPOTENCY_KEY_REUSED":
+          setError(
+            "Este pago ya se envió con otros datos desde esta ventana. Cerrala, revisá la cuota para ver si quedó registrado y, si falta, volvé a cargarlo."
+          )
           handled = true
           break
         case "PAYMENT_INVALID_RECEIPT":
