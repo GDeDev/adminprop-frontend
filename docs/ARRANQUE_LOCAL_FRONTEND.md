@@ -255,5 +255,12 @@ deshabilitado sin cambios y manda solo lo que cambió` falló alguna vez bajo la
 - Ninguno de estos comandos se corrió con Doppler real ni contra el backend en
   una máquina limpia: la guía se contrastó contra `package.json`, `turbo.json`,
   los `next.config.ts`, los `.env.example` y el código.
-- Que exista la config `dev_sites` en Doppler (es una sugerencia) y la URL del
-  repositorio `adminprop-repo-files` figuran como **a confirmar**.
+- Que exista la config `dev_sites` en Doppler (es una sugerencia), la URL del
+  repositorio `adminprop-repo-files` y el problema de symlinks con Turbopack en
+  tu máquina siguen **a confirmar**.
+
+Ya confirmado (y fuera de «a confirmar»): el mapeo de configs
+`dev_backoffice` / `dev_portal` / `dev_backend`; que `SITES_CLIENT_IP_HEADER` y
+`SITES_TRUSTED_PROXY_HOPS` las lee `apps/sites` (`client-ip.ts`); que
+`CORS_ORIGINS` es obligatoria en `dev_backend`; y que el secreto de sitios es
+`SITES_SERVER_SECRET` o, de respaldo, `SITES_REVALIDATE_SECRET` (DT-166).
