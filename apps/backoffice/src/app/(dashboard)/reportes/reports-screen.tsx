@@ -35,6 +35,7 @@ import {
   periodLabel,
   shiftPeriod,
 } from "@/lib/billing"
+import { IncomeByReceiverTable, IncomeTotals } from "./income-by-receiver"
 import { PeriodInput } from "@/components/period-input"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -303,6 +304,7 @@ function IncomeTable({ range }: { range: RangeFilters }) {
   const rows = query.data?.rows ?? []
   return (
     <State query={query} empty={rows.length === 0}>
+      <IncomeTotals totals={query.data?.totals ?? []} />
       <Table>
         <Head
           columns={[
@@ -348,6 +350,7 @@ function IncomeTable({ range }: { range: RangeFilters }) {
           ))}
         </TableBody>
       </Table>
+      <IncomeByReceiverTable rows={rows} />
       <p className="p-3 text-xs text-muted-foreground">
         Los ingresos se cuentan por fecha de pago, no por el período de la cuota
         (A-38).
