@@ -57,25 +57,26 @@ doppler login        # una vez por máquina (abre el navegador)
 
 Proyecto `admin-prop`. Mapeo **real** de configs:
 
-| Carpeta                              | Config Doppler   | Estado                                                                         |
-| ------------------------------------ | ---------------- | ------------------------------------------------------------------------------ |
-| `adminprop-frontend/apps/backoffice` | `dev_backoffice` | Confirmado.                                                                    |
-| `adminprop-frontend/apps/portal`     | `dev_portal`     | Confirmado.                                                                    |
-| `adminprop-backend` (raíz)           | `dev_backend`    | Confirmado.                                                                    |
-| `adminprop-frontend/apps/sites`      | **a confirmar**  | No hay una config confirmada para sitios. Sugerencia: crear `dev_sites` vacía. |
+| Carpeta                              | Config Doppler         | Estado                                                                   |
+| ------------------------------------ | ---------------------- | ------------------------------------------------------------------------ |
+| `adminprop-frontend/apps/backoffice` | `dev_backoffice`       | Confirmado.                                                              |
+| `adminprop-frontend/apps/portal`     | `dev_portal`           | Confirmado.                                                              |
+| `adminprop-backend` (raíz)           | `dev_backend`          | Confirmado.                                                              |
+| `adminprop-frontend/apps/sites`      | `dev_sites` (sugerida) | Sin config confirmada: crearla (ver abajo). Hasta entonces, a confirmar. |
 
 Vincular **cada carpeta** (el vínculo de Doppler es por directorio):
 
 ```bash
 cd adminprop-frontend/apps/backoffice && doppler setup   # admin-prop / dev_backoffice
 cd ../portal                          && doppler setup   # admin-prop / dev_portal
-cd ../sites                           && doppler setup   # admin-prop / dev_sites (a confirmar, ver abajo)
+cd ../sites                           && doppler setup   # admin-prop / dev_sites (sugerida, ver abajo)
 cd ../../../adminprop-backend         && doppler setup   # admin-prop / dev_backend
 ```
 
-Para `apps/sites`: si `dev_sites` no existe todavía, crearla desde el panel de
-Doppler (vacía) antes de correr `doppler setup` ahí. Sin config, `sites` igual
-corre pasando las variables por la terminal (sección 6).
+Para `apps/sites` no hay una config confirmada en Doppler; se sugiere crear
+`dev_sites` (desde el panel: proyecto `admin-prop`, ambiente de desarrollo) antes
+de correr `doppler setup` ahí. Sin config, `sites` igual corre pasando las
+variables por la terminal (sección 6).
 
 ### Reglas del dueño para las variables
 
@@ -87,7 +88,10 @@ corre pasando las variables por la terminal (sección 6).
   doppler secrets set NOMBRE="" --project admin-prop --config dev_backoffice
   ```
 
-  y el valor lo carga el dueño después.
+  y el valor lo carga el dueño después. Config según la app: `dev_backoffice`,
+  `dev_portal`, `dev_sites` (sugerida) o `dev_backend` (las variables nuevas del
+  backend también se crean vacías; el backend, tras su arreglo de arranque, trata
+  una variable vacía como no definida).
 
 - `NEXT_PUBLIC_*` **solo para valores no sensibles**: terminan en el bundle del
   navegador. Los secretos, solo en variables sin ese prefijo (Server Actions,
@@ -137,7 +141,7 @@ Sin valores. "Dónde se lee" es el archivo que lo usa; si un nombre figura solo 
 | `PORTAL_TENANT_SLUG`  | Sí (en la práctica) | Slug de la inmobiliaria dueña de este portal (`src/lib/tenant-branding.ts`). Sin valor, el login del portal avisa que no hay inmobiliaria configurada. Debe existir en la API (el seed de desarrollo crea `demo`). |
 | `APP_ORIGINS`         |         No          | Igual que en el backoffice.                                                                                                                                                                                        |
 
-### Sitios (`apps/sites`, config **a confirmar**)
+### Sitios (`apps/sites`, config `dev_sites` sugerida)
 
 | Variable                     |     Obligatoria     | Qué es / dónde se lee                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------------------------- | :-----------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -250,5 +254,5 @@ deshabilitado sin cambios y manda solo lo que cambió` falló alguna vez bajo la
 - Ninguno de estos comandos se corrió con Doppler real ni contra el backend en
   una máquina limpia: la guía se contrastó contra `package.json`, `turbo.json`,
   los `next.config.ts`, los `.env.example` y el código.
-- La config de Doppler de `apps/sites` y el repositorio `adminprop-repo-files`
-  (URL) figuran como **a confirmar**.
+- Que exista la config `dev_sites` en Doppler (es una sugerencia) y la URL del
+  repositorio `adminprop-repo-files` figuran como **a confirmar**.
