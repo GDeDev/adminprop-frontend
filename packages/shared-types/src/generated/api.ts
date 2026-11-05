@@ -1344,7 +1344,7 @@ export interface paths {
     put?: never
     /**
      * Aplicar el próximo aumento programado
-     * @description Con ICL/IPC el nuevo alquiler sale de la variación del índice entre el mes del aumento anterior y el del nuevo. Con FIXED/OTHER, `newRent` es obligatorio. Aplica un aumento por llamada.
+     * @description Con ICL/IPC el nuevo alquiler sale de la variación del índice entre el mes del aumento anterior y el del nuevo. Con FIXED/OTHER, `newRent` es obligatorio. Aplica un aumento por llamada. Cargar `newRent` a mano (ajuste manual) es sólo de administradores: un empleado recibe 403 y sólo puede aplicar los aumentos por índice o por % fijo.
      */
     post: operations["ContractsController_applyRentUpdate_api/v1"]
     delete?: never
@@ -4928,6 +4928,8 @@ export interface components {
       dailyLateFeePercentage: string | null
       /** @example 10 */
       paymentGraceDays: number
+      /** @description El saldo a favor del inquilino se aplica solo al generar la cuota (si no, a mano) */
+      autoApplyCreditOnGeneration: boolean
       /**
        * @description Día del mes desde el que corre el punitorio (gracia + 1)
        * @example 11
@@ -4983,6 +4985,8 @@ export interface components {
        * @example 10
        */
       paymentGraceDays?: number
+      /** @description Saldo a favor del inquilino: true = se aplica solo al generar la cuota; false (por defecto) = se aplica a mano o al registrar un pago. */
+      autoApplyCreditOnGeneration?: boolean
     }
     AsyncJobStatusDto: {
       /** @example 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d */
@@ -6550,6 +6554,8 @@ export interface components {
       created: number
       /** @description Ya tenían su cuota */
       skipped: number
+      /** @description Saldos a favor aplicados solos a las cuotas nuevas (sólo si la inmobiliaria eligió el modo automático) */
+      creditsApplied: number
     }
     InstallmentContractRefDto: {
       id: string
@@ -6819,6 +6825,8 @@ export interface components {
       collected: string
       collectedByAgency: string
       collectedByOwner: string
+      /** @description Por liquidar al propietario: lo cobrado por la inmobiliaria y confirmado que todavía no está en una liquidación confirmada (alquiler + punitorios + cargos del propietario, antes de honorarios y gastos) */
+      pendingSettlement: string
       pendingConfirmation: string
       balance: string
       creditsAvailable: string
@@ -7187,6 +7195,12 @@ export interface components {
       expensesTotal: string
       /** @description Con signo */
       adjustmentsTotal: string
+      /** @description Retenciones vigentes, con signo (negativo) */
+      withholdingsTotal: string
+      /** @description Adelantos al propietario vigentes, con signo (negativo) */
+      advancesTotal: string
+      /** @description Otras deducciones y créditos vigentes, con signo. Las tres columnas suman `adjustmentsTotal` */
+      otherAdjustmentsTotal: string
       /** @description Puede ser negativo */
       netAmount: string
       transferredTotal: string
@@ -7260,6 +7274,12 @@ export interface components {
       expensesTotal: string
       /** @description Con signo */
       adjustmentsTotal: string
+      /** @description Retenciones vigentes, con signo (negativo) */
+      withholdingsTotal: string
+      /** @description Adelantos al propietario vigentes, con signo (negativo) */
+      advancesTotal: string
+      /** @description Otras deducciones y créditos vigentes, con signo. Las tres columnas suman `adjustmentsTotal` */
+      otherAdjustmentsTotal: string
       /** @description Puede ser negativo */
       netAmount: string
       transferredTotal: string
@@ -7300,6 +7320,12 @@ export interface components {
       expensesTotal: string
       /** @description Con signo */
       adjustmentsTotal: string
+      /** @description Retenciones, con signo (negativo) */
+      withholdingsTotal: string
+      /** @description Adelantos al propietario, con signo (negativo) */
+      advancesTotal: string
+      /** @description Otras deducciones y créditos, con signo. Las tres columnas suman `adjustmentsTotal` */
+      otherAdjustmentsTotal: string
       netTotal: string
       transferredTotal: string
     }
@@ -8855,18 +8881,43 @@ export interface components {
       /** @description Últimos 6 meses, el más viejo primero */
       history: components["schemas"]["DashboardHistoryDto"][]
     }
+    CollectedBreakdownDto: {
+      /** @description Alquiler cobrado */
+      rent: string
+      /** @description Punitorios cobrados */
+      lateFees: string
+      /** @description Cargos cobrados */
+      charges: string
+      /** @description Alquiler + punitorios + cargos */
+      total: string
+    }
+    CollectedByReceiverDto: {
+      /** @description Lo que cobró la inmobiliaria (fondos que administra) */
+      agency: components["schemas"]["CollectedBreakdownDto"]
+      /** @description Lo que percibió directamente el propietario (nunca pasó por la inmobiliaria) */
+      owner: components["schemas"]["CollectedBreakdownDto"]
+    }
     IncomeReportRowDto: {
       /** @example 2026-10 */
       period: string
       /** @enum {string} */
       currency: "ARS" | "USD"
+      /** @description Suma de lo cobrado por la inmobiliaria y lo percibido por el propietario; para separarlos, `collectedByReceiver` */
       rentCollected: string
       lateFeesCollected: string
       chargesCollected: string
+      collectedByReceiver: components["schemas"]["CollectedByReceiverDto"]
       feesAccrued: string
       feesCollected: string
       netSettled: string
       netTransferred: string
+    }
+    IncomeReportTotalDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @description Todo lo cobrado, sin distinguir quién lo recibió */
+      collected: components["schemas"]["CollectedBreakdownDto"]
+      collectedByReceiver: components["schemas"]["CollectedByReceiverDto"]
     }
     IncomeReportDto: {
       /** Format: date-time */
@@ -8876,6 +8927,8 @@ export interface components {
         [key: string]: string | null
       }
       rows: components["schemas"]["IncomeReportRowDto"][]
+      /** @description Un total por moneda del rango (ARS, USD), con lo cobrado por tipo y por quién lo recibió */
+      totals: components["schemas"]["IncomeReportTotalDto"][]
     }
     PaymentReportRowDto: {
       /** Format: uuid */
@@ -13501,7 +13554,7 @@ export interface operations {
           "application/json": components["schemas"]["ApiErrorDto"]
         }
       }
-      /** @description Rol insuficiente */
+      /** @description Un empleado intentó un ajuste manual (`CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY`) */
       403: {
         headers: {
           [name: string]: unknown
@@ -14537,7 +14590,10 @@ export interface operations {
   "PaymentsController_registerPayment_api/v1": {
     parameters: {
       query?: never
-      header?: never
+      header?: {
+        /** @description Opcional, hasta 128 caracteres sin espacios. Repetir el pedido con la misma clave y el mismo cuerpo (reintento de red, doble click) devuelve el pago ya registrado en vez de crear otro; con otro cuerpo es 409 `IDEMPOTENCY_KEY_REUSED`. Vale 24 horas. */
+        "Idempotency-Key"?: string
+      }
       path: {
         id: string
       }
