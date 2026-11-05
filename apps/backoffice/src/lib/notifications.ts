@@ -32,6 +32,10 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   INSTALLMENT_BASE_OUTDATED: "Cuota con base desactualizada",
   JOB_FAILED: "Automatización fallida",
   DOCUMENT_FAILED: "Documento no generado",
+  COMPARABLES_SOURCE_STALE: "Fuente de comparables desactualizada",
+  INQUIRY_FOLLOW_UP: "Seguimiento de consulta",
+  INQUIRY_ASSIGNED: "Consulta asignada",
+  LISTING_CHANNEL_ERROR: "Error al publicar en un canal",
 }
 
 export const CHANNEL_LABELS: Record<NotificationChannel, string> = {

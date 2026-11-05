@@ -112,7 +112,7 @@ export function BatchHistory() {
                 <li key={batch.id}>
                   <Link
                     href={batchPath(batch.id)}
-                    className="flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    className="flex lift items-center gap-3 rounded-xl border bg-card p-3 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">

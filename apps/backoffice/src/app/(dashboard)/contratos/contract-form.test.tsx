@@ -18,6 +18,9 @@ let propertyOwner: { id: string; fullName: string } | null = {
 vi.mock("@adminprop/session/client", () => ({
   useSession: () => ({ user: { id: "u1", tenantId: "t1" } }),
 }))
+vi.mock("@/lib/tenant-settings-api", () => ({
+  useTenantLateFeeReference: () => ({ percentage: undefined }),
+}))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },

@@ -55,16 +55,18 @@ dos apps y `npm audit`.
 
 ## UI
 
-Reglas completas: `../adminprop-repo-files/packages-ui-source/ADMINPROP-UI.md`
-(leerlo antes de tocar cualquier pantalla).
+Reglas completas: `docs/design/source-v2/ADMINPROP-UI-v2.md` (diseño v2, el
+único vigente; leerlo antes de tocar cualquier pantalla).
 
-- Tokens: `packages/ui/src/styles/adminprop.css` es copia textual del sistema
-  de diseño. **No se edita**: si cambia el diseño, se vuelve a copiar entero.
+- Tokens: `packages/ui/src/styles/adminprop-v2.css` y `adminprop-v2-effects.css`
+  (copia en `docs/design/source-v2/`). Se editan junto con esa copia y con
+  `test/contrast.test.ts`.
 - Colores: solo clases semánticas (`bg-primary`, `bg-muted`, `text-success`,
   `bg-sidebar`…). Nunca un hex en un componente. `accent` es la arena de la
   marca, **no** el hover: el hover es `muted`.
-- Tipografía: `font-display` (Outfit: títulos y montos) y `font-sans`
-  (Figtree: el resto). Montos: `font-display tabular-nums`, a la derecha.
+- Tipografía: `font-display` (Bricolage Grotesque: títulos y montos), `font-sans`
+  (Geist) y `font-mono`. Escala con nombre (`text-title-md`, `text-display-md`…).
+  Montos: `font-display num`, a la derecha. KPIs: `StatCard`.
 - Estados del dominio: `<Badge variant="disponible|alquilada|mantenimiento|mora|borrador">`.
 - Navegación: `AppSidebar` (desde `md:`) y `BottomNav` (mobile, máx. 5).
 - Mobile = Drawer: para diálogos usar `ResponsiveDialog`.
@@ -95,3 +97,11 @@ Detalle y decisiones: `docs/tecnica/fase-04.md` y `docs/DECISIONES_TECNICAS.md` 
 Mientras la API (`adminprop-backend`) no tenga el endpoint, las pantallas leen de `@adminprop/mocks` (`withLatency()` simula la red). Cuando un módulo tenga su endpoint, su `queryFn` pasa a usar `apiClient` (`src/lib/api-client.ts`) y el mock correspondiente se borra.
 
 Decisiones técnicas: `docs/DECISIONES_TECNICAS.md`. Fases cerradas: `docs/tecnica/` y `docs/funcional/`.
+
+## Sitios web de las inmobiliarias (`apps/sites`)
+
+App pública (puerto 3003) que sirve el sitio de cada inmobiliaria por subdominio, dominio propio o, en desarrollo, `http://localhost:3003/_s/<slug>`. Dos templates (`CLASSIC` y `MODERN`), tema por variables CSS, ISR, SEO y formulario de contacto. Se configura desde «Mi sitio web» en el backoffice. Detalle: `docs/tecnica/web-inmobiliaria.md`.
+
+```bash
+API_URL=http://localhost:3000/api/v1 npm run dev -w @adminprop/sites
+```

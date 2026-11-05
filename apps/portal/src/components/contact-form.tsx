@@ -102,10 +102,12 @@ export function ContactForm({
     <form
       onSubmit={(event) => void submit(event)}
       noValidate
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
       aria-label="Consultar por esta propiedad"
     >
-      <h2 className="font-display text-lg font-semibold">Enviá tu consulta</h2>
+      <h2 className="font-display text-title-md font-semibold">
+        Enviá tu consulta
+      </h2>
       {error && (
         <Alert variant="destructive" role="alert">
           <AlertDescription>{error}</AlertDescription>

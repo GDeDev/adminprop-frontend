@@ -1,0 +1,416 @@
+/* Adminprop v2 — utilidades de superficie, efectos y movimiento.
+   Se importa desde adminprop-v2.css; no se usa suelto.
+
+   Reglas de performance (ver ADMINPROP-UI-v2.md):
+   - Se anima solo transform y opacity.
+   - backdrop-filter solo en superficies flotantes chicas (.glass); nunca en
+     filas de listas ni de tablas.
+   - Todo movimiento se apaga con prefers-reduced-motion. */
+
+/* ---------- Keyframes + utilidades animate-* ---------- */
+@theme {
+  --animate-fade-up: fade-up var(--duration-slow, 320ms) var(--ease-out) both;
+  --animate-fade-in: fade-in var(--duration-base, 200ms) var(--ease-out) both;
+  --animate-scale-in: scale-in var(--duration-base, 200ms) var(--ease-out) both;
+  --animate-slide-in-right: slide-in-right var(--duration-slow, 320ms)
+    var(--ease-out) both;
+  --animate-shimmer: shimmer 1.6s var(--ease-in-out) infinite;
+  --animate-sparkle: sparkle 2.4s var(--ease-in-out) infinite;
+  --animate-glow-pulse: glow-pulse 2.8s var(--ease-in-out) infinite;
+  --animate-float: float 6s var(--ease-in-out) infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes sparkle {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+    50% {
+      opacity: 0.75;
+      transform: scale(1.12) rotate(8deg);
+    }
+  }
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+}
+
+/* ---------- Superficies ---------- */
+
+/* Sombras con reborde de luz: las usan los componentes base */
+@utility shadow-edge {
+  box-shadow: var(--edge-light), var(--elev-1);
+}
+@utility shadow-raised {
+  box-shadow: var(--edge-light), var(--elev-2);
+}
+@utility shadow-float {
+  box-shadow: var(--edge-light), var(--elev-3);
+}
+@utility shadow-overlay {
+  box-shadow: var(--edge-light), var(--elev-4);
+}
+@utility shadow-primary-edge {
+  box-shadow: var(--edge-primary), var(--elev-1);
+}
+
+/* Chrome oscuro (sidebar): tinta con un resplandor de cobre en la esquina */
+@utility chrome-glow {
+  background-image: radial-gradient(
+    26rem 16rem at 0% 0%,
+    color-mix(in oklab, var(--accent) 16%, transparent),
+    transparent 70%
+  );
+}
+
+/* Card elevada: borde translúcido + sombra de capas + reborde de luz */
+@utility surface-raised {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--edge-light), var(--elev-2);
+}
+
+@utility surface-sunken {
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border);
+}
+
+/* Vidrio: solo para superficies flotantes chicas (header sticky mobile,
+   bottom-nav, command palette). Sin soporte de backdrop-filter queda opaco. */
+@utility glass {
+  background-color: color-mix(in oklab, var(--background) 86%, transparent);
+  border: 1px solid var(--border);
+  @supports (backdrop-filter: blur(1px)) {
+    background-color: color-mix(in oklab, var(--background) 68%, transparent);
+    backdrop-filter: blur(14px) saturate(1.4);
+  }
+}
+
+@utility glass-dark {
+  background-color: color-mix(in oklab, var(--sidebar) 92%, transparent);
+  border-color: var(--sidebar-border);
+  @supports (backdrop-filter: blur(1px)) {
+    background-color: color-mix(in oklab, var(--sidebar) 78%, transparent);
+    backdrop-filter: blur(14px) saturate(1.3);
+  }
+}
+
+/* Mesh gradient sutil: 3 manchas de la marca de muy baja opacidad. Va en
+   héroes, login y estados vacíos; no en pantallas de datos densos. */
+@utility bg-mesh {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      60rem 32rem at 8% -10%,
+      color-mix(in oklab, var(--primary) 13%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      44rem 28rem at 100% 0%,
+      color-mix(in oklab, var(--accent) 16%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      40rem 28rem at 60% 110%,
+      color-mix(in oklab, var(--ai) 9%, transparent),
+      transparent 60%
+    );
+}
+
+@utility bg-mesh-soft {
+  background-image:
+    radial-gradient(
+      30rem 16rem at 0% 0%,
+      color-mix(in oklab, var(--primary) 9%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      26rem 14rem at 100% 100%,
+      color-mix(in oklab, var(--accent) 12%, transparent),
+      transparent 70%
+    );
+}
+
+/* Rejilla de puntos muy tenue para fondos de héroe */
+@utility bg-dots {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 18px 18px;
+}
+
+/* ---------- Efectos de énfasis ---------- */
+
+/* Degradé del botón principal: luz arriba, color pleno abajo. Sale del
+   --primary del tenant. */
+@utility bg-primary-gradient {
+  background-color: var(--primary);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--primary) 82%, white) 0%,
+    var(--primary) 100%
+  );
+}
+
+@utility glow-primary {
+  box-shadow: var(--glow-primary);
+}
+
+@utility glow-ai {
+  box-shadow: var(--glow-ai);
+}
+
+@utility text-gradient-ai {
+  background-image: linear-gradient(
+    110deg,
+    var(--ai-from),
+    var(--ai-via) 55%,
+    var(--ai-to)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Borde degradé de IA (1px) sobre una superficie opaca */
+@utility ai-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(120deg, var(--ai-from), var(--ai-via), var(--ai-to))
+      border-box;
+}
+
+@utility bg-ai-gradient {
+  background-image: linear-gradient(
+    120deg,
+    var(--ai-from),
+    var(--ai-via) 60%,
+    var(--ai-to)
+  );
+}
+
+/* ---------- Movimiento ---------- */
+
+/* Press: feedback táctil inmediato (solo transform) */
+@utility pressable {
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+  &:active:not(:disabled, [aria-disabled="true"]) {
+    transform: scale(0.97);
+  }
+}
+
+/* Hover que levanta 1px (cards clickeables) */
+@utility lift {
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--edge-light), var(--elev-3);
+    }
+  }
+}
+
+/* Entrada escalonada: los hijos directos entran de a uno (tope en 8).
+   Uso: <ul class="stagger"> … </ul>; el índice sale de nth-child. */
+@utility stagger {
+  & > * {
+    animation: fade-up var(--duration-slow) var(--ease-out) both;
+  }
+  & > :nth-child(1) {
+    animation-delay: 0ms;
+  }
+  & > :nth-child(2) {
+    animation-delay: 40ms;
+  }
+  & > :nth-child(3) {
+    animation-delay: 80ms;
+  }
+  & > :nth-child(4) {
+    animation-delay: 120ms;
+  }
+  & > :nth-child(5) {
+    animation-delay: 160ms;
+  }
+  & > :nth-child(6) {
+    animation-delay: 200ms;
+  }
+  & > :nth-child(7) {
+    animation-delay: 240ms;
+  }
+  & > :nth-child(n + 8) {
+    animation-delay: 280ms;
+  }
+}
+
+/* Entrada de pantalla */
+@utility page-enter {
+  animation: fade-up var(--duration-slower) var(--ease-out) both;
+}
+
+/* Shimmer: el barrido es un pseudo-elemento que se mueve con transform */
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-image: linear-gradient(
+      100deg,
+      transparent 20%,
+      color-mix(in oklab, var(--foreground) 7%, transparent) 50%,
+      transparent 80%
+    );
+    transform: translateX(-100%);
+    animation: shimmer 1.6s var(--ease-in-out) infinite;
+  }
+}
+
+/* Cifras: tabulares y sin ligaduras */
+@utility num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings:
+    "tnum" 1,
+    "calt" 0;
+}
+
+/* Bento: grilla de tarjetas de distinto tamaño (1 col en mobile) */
+@utility bento {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+/* Navegación entre documentos con fundido (progresivo: si el navegador no
+   soporta View Transitions, no pasa nada). */
+@view-transition {
+  navigation: auto;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-scale-in,
+  .animate-slide-in-right,
+  .animate-shimmer,
+  .animate-sparkle,
+  .animate-glow-pulse,
+  .animate-float,
+  .page-enter,
+  .stagger > * {
+    animation: none !important;
+  }
+  /* Esqueletos y entradas/salidas de diálogos, menús y popovers (tw-animate-css) */
+  .animate-pulse {
+    animation: none !important;
+  }
+  .animate-in,
+  .animate-out {
+    animation-duration: 1ms !important;
+  }
+  /* Toasts de sonner */
+  [data-sonner-toast],
+  [data-sonner-toaster] {
+    transition: none !important;
+    animation: none !important;
+  }
+  .shimmer::after {
+    animation: none !important;
+    display: none;
+  }
+  .pressable,
+  .lift {
+    transition: none !important;
+  }
+  .pressable:active,
+  .lift:hover {
+    transform: none !important;
+  }
+  html {
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+  }
+}

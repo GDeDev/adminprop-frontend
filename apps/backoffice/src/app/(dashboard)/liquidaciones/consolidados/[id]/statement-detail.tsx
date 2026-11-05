@@ -27,13 +27,6 @@ import {
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@adminprop/ui/components/select"
-import {
   Table,
   TableBody,
   TableCell,
@@ -41,8 +34,10 @@ import {
   TableHeader,
   TableRow,
 } from "@adminprop/ui/components/table"
+import { StatCard } from "@adminprop/ui/components/stat-card"
 
 import { DownloadPdfButton } from "@/components/download-pdf-button"
+import { SendModeSelect } from "@/components/send-mode-select"
 import { periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
@@ -133,7 +128,7 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               Consolidado de {periodLabel(statement.period)}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -226,12 +221,12 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
       )}
 
       <section
-        className="rounded-xl border bg-card p-4"
+        className="rounded-xl border bg-card p-4 shadow-raised"
         aria-labelledby="statement-settlements"
       >
         <h2
           id="statement-settlements"
-          className="mb-3 font-display text-lg font-semibold"
+          className="mb-3 font-display text-title-md font-semibold"
         >
           Liquidaciones incluidas
         </h2>
@@ -276,16 +271,16 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                         {settlementLabel(settlement)}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.rentTotal)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.feeTotal)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right font-display num">
                       {money(settlement.expensesTotal)}
                     </TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">
+                    <TableCell className="text-right font-display num font-medium">
                       {money(settlement.netAmount)}
                     </TableCell>
                     <TableCell>
@@ -358,15 +353,7 @@ function Stat({
   value: string
   hint?: string
 }) {
-  return (
-    <div className="rounded-xl border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
-      {hint && (
-        <p className="text-xs text-muted-foreground tabular-nums">{hint}</p>
-      )}
-    </div>
-  )
+  return <StatCard label={label} value={value} hint={hint} />
 }
 
 /** Las confirmadas del propietario que todavía no están en ningún consolidado. */
@@ -447,7 +434,7 @@ function AddSettlementsDialog({
                         {settlement.property?.address ?? "Propiedad eliminada"}{" "}
                         · {settlementLabel(settlement)}
                       </span>
-                      <span className="tabular-nums">
+                      <span className="font-display num">
                         {formatMoney(settlement.netAmount, settlement.currency)}
                       </span>
                     </Label>
@@ -507,29 +494,18 @@ function CloseDialog({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Cerrar el consolidado</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Los totales quedan congelados. Qué se le envía al propietario se usa
-            cuando estén el PDF y el email (Fases 14 y 15).
+            Los totales quedan congelados y se avisa al propietario según lo que
+            elijas acá.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <div className="px-4 sm:px-0">
-          <Label htmlFor="statement-send-mode">Qué se envía</Label>
-          <Select
+          <SendModeSelect
+            id="statement-send-mode"
+            label="Qué se envía"
+            context="close"
             value={sendMode}
-            onValueChange={(value) => setSendMode(value as StatementSendMode)}
-          >
-            <SelectTrigger id="statement-send-mode" className="mt-1 w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(SEND_MODE_LABELS) as StatementSendMode[]).map(
-                (mode) => (
-                  <SelectItem key={mode} value={mode}>
-                    {SEND_MODE_LABELS[mode]}
-                  </SelectItem>
-                )
-              )}
-            </SelectContent>
-          </Select>
+            onChange={setSendMode}
+          />
         </div>
         <ResponsiveDialogFooter>
           <Button

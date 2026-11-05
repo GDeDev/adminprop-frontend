@@ -16,7 +16,7 @@ export function PortalSecurityScreen({ role }: { role: PortalRole }) {
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">
+      <h1 className="font-display text-title-lg font-semibold tracking-tight">
         Seguridad
       </h1>
       <SecurityPanel

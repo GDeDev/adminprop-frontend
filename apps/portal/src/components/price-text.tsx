@@ -22,10 +22,7 @@ export function PriceText({
   }
   return (
     <p
-      className={cn(
-        "font-display text-xl font-semibold tabular-nums",
-        className
-      )}
+      className={cn("font-display num text-title-md font-semibold", className)}
     >
       {label}
     </p>

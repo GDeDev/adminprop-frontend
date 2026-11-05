@@ -87,7 +87,7 @@ function Account({
       <Header me={me} />
 
       <section
-        className="rounded-xl border bg-card p-5"
+        className="rounded-xl border bg-card p-5 shadow-raised"
         aria-labelledby="current-title"
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -97,7 +97,7 @@ function Account({
             </p>
             <h2
               id="current-title"
-              className="font-display text-3xl font-semibold tabular-nums"
+              className="font-display num text-display-md font-semibold"
             >
               {money(installment.totalDue)}
             </h2>
@@ -118,13 +118,13 @@ function Account({
 
         <dl className="mt-4 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted-foreground">Alquiler</dt>
-          <dd className="text-right tabular-nums">
+          <dd className="text-right font-display num">
             {money(installment.baseAmount)}
           </dd>
           {!isZero(installment.chargesTotal) && (
             <>
               <dt className="text-muted-foreground">Otros conceptos</dt>
-              <dd className="text-right tabular-nums">
+              <dd className="text-right font-display num">
                 {money(installment.chargesTotal)}
               </dd>
             </>
@@ -134,7 +134,7 @@ function Account({
               <dt className="text-muted-foreground">
                 Punitorio ({daysLabel(installment.feeDays)})
               </dt>
-              <dd className="text-right tabular-nums">
+              <dd className="text-right font-display num">
                 {money(installment.lateFeeAccrued)}
               </dd>
             </>
@@ -142,7 +142,7 @@ function Account({
           {!isZero(installment.paidTotal) && (
             <>
               <dt className="text-muted-foreground">Ya pagaste</dt>
-              <dd className="text-right tabular-nums">
+              <dd className="text-right font-display num">
                 −{money(installment.paidTotal)}
               </dd>
             </>
@@ -158,7 +158,7 @@ function Account({
               {installment.lateFeeDays.map((day) => (
                 <li
                   key={day.dayNumber}
-                  className="flex justify-between py-1 tabular-nums"
+                  className="flex justify-between py-1 num"
                 >
                   <span>
                     {formatDate(day.day)} · {day.dailyPercentage} % sobre{" "}
@@ -205,7 +205,7 @@ function Account({
 function Header({ me }: { me: PortalRenterMe }) {
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold tracking-tight">
+      <h1 className="font-display text-title-lg font-semibold md:text-display-md">
         Hola, {me.fullName}
       </h1>
       <p className="text-sm text-muted-foreground">
@@ -238,10 +238,10 @@ function PaymentInstructions({
 
   return (
     <section
-      className="rounded-xl border bg-card p-5"
+      className="rounded-xl border bg-card p-5 shadow-raised"
       aria-labelledby="pay-title"
     >
-      <h2 id="pay-title" className="font-display text-lg font-semibold">
+      <h2 id="pay-title" className="font-display text-title-md font-semibold">
         Cómo pagar
       </h2>
       {instructions.kind === "OWNER_DIRECT" ? (
@@ -295,7 +295,7 @@ function Row({
     <div className="flex items-center justify-between gap-2">
       <div>
         <dt className="text-xs text-muted-foreground">{label}</dt>
-        <dd className="font-medium tabular-nums">{value}</dd>
+        <dd className="num font-medium">{value}</dd>
       </div>
       {copy && (
         <Button

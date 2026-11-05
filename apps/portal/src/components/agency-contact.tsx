@@ -18,14 +18,14 @@ export function AgencyContact({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           {agency.name}
         </h1>
         <p className="text-sm text-muted-foreground">
           Cómo comunicarte con la inmobiliaria.
         </p>
       </div>
-      <section className="rounded-xl border bg-card p-5">
+      <section className="rounded-xl border bg-card p-5 shadow-raised">
         <ul className="flex flex-col gap-3 text-sm">
           {agency.phone && (
             <li className="flex items-center gap-3">

@@ -30,13 +30,13 @@ export function ContractSettlementsSection({
 
   return (
     <section
-      className="rounded-xl border bg-card p-4"
+      className="rounded-xl border bg-card p-4 shadow-raised"
       aria-labelledby="contract-settlements-title"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2
           id="contract-settlements-title"
-          className="font-display text-lg font-semibold"
+          className="font-display text-title-md font-semibold"
         >
           Liquidaciones
         </h2>
@@ -80,7 +80,7 @@ export function ContractSettlementsSection({
                   {settlementLabel(settlement)}
                 </Link>
                 <div className="flex items-center gap-2">
-                  <span className="tabular-nums">
+                  <span className="font-display num">
                     {money(settlement.netAmount)}
                     {!isZero(settlement.transferredTotal) && (
                       <span className="text-xs text-muted-foreground">

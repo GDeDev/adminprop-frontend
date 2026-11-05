@@ -12,7 +12,6 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -26,17 +25,10 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@adminprop/ui/components/responsive-dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@adminprop/ui/components/select"
 import { Switch } from "@adminprop/ui/components/switch"
 
 import { normalizeAmount } from "@/lib/contracts"
-import { SEND_MODE_LABELS } from "@/lib/settlements"
+import { SendModeSelect } from "@/components/send-mode-select"
 import { useUpdateOwnerFeeSettings } from "@/lib/settlements-api"
 
 /** Honorarios por propietario (Micaela #5) y modo de envío del resumen (#7). Solo admin. */
@@ -150,34 +142,13 @@ export function OwnerFeeSettingsDialog({
                 También sobre los cargos (multas, otros)
               </FieldLabel>
             </Field>
-            <Field>
-              <FieldLabel htmlFor="fee-send-mode">
-                Qué se le envía cada mes
-              </FieldLabel>
-              <Select
-                value={sendMode}
-                onValueChange={(value) =>
-                  setSendMode(value as StatementSendMode)
-                }
-              >
-                <SelectTrigger id="fee-send-mode" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(SEND_MODE_LABELS) as StatementSendMode[]).map(
-                    (mode) => (
-                      <SelectItem key={mode} value={mode}>
-                        {SEND_MODE_LABELS[mode]}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-              <FieldDescription>
-                Se usa al cerrar el consolidado; el envío real llega con las
-                Fases 14 y 15.
-              </FieldDescription>
-            </Field>
+            <SendModeSelect
+              id="fee-send-mode"
+              label="Qué se le envía cada mes"
+              context="owner"
+              value={sendMode}
+              onChange={setSendMode}
+            />
           </FieldGroup>
           {error && (
             <Alert variant="destructive" className="mt-4">

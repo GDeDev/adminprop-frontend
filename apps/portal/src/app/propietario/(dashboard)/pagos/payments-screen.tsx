@@ -40,7 +40,7 @@ export function OwnerPaymentsScreen() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Pagos
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -116,11 +116,11 @@ function Installments({ propertyId }: { propertyId: string }) {
           return (
             <li
               key={installment.id}
-              className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4"
+              className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-raised"
             >
               <div>
                 <p className="font-medium">{periodTitle(installment.period)}</p>
-                <p className="text-sm text-muted-foreground tabular-nums">
+                <p className="num text-sm text-muted-foreground">
                   {money(installment.baseAmount)}
                   {!isZero(installment.paidTotal) &&
                     ` · pagado ${money(installment.paidTotal)}`}

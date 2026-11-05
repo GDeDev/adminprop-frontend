@@ -25,3 +25,15 @@ if (typeof window !== "undefined" && !window.matchMedia) {
     })),
   })
 }
+
+// cmdk (CommandPalette) usa ResizeObserver, que jsdom no trae.
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver
+}
+if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {}
+}

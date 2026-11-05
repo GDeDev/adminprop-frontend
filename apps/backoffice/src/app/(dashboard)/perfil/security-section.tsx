@@ -15,7 +15,7 @@ export function SecuritySection() {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-display text-lg font-semibold tracking-tight">
+      <h2 className="font-display text-title-md font-semibold tracking-tight">
         Seguridad
       </h2>
       <SecurityPanel
