@@ -50,11 +50,21 @@ describe("apiErrorMessage", () => {
     )
     expect(apiErrorMessage(unique, "Algo falló")).not.toMatch(/contractId/)
 
-    const check = apiError(500, {
-      code: "DATABASE_ERROR",
-      message: "P2010: new row violates check constraint",
+    const check = apiError(422, {
+      code: "CHECK_CONSTRAINT_VIOLATION",
+      message: 'new row violates check constraint "rent_amount_positive"',
     })
-    expect(apiErrorMessage(check, "Algo falló")).toMatch(/datos sean válidos/)
+    expect(apiErrorMessage(check, "Algo falló")).toBe(
+      "Algún dato no cumple las reglas del sistema (un monto, porcentaje o fecha fuera de rango). Revisalo y volvé a intentar."
+    )
+    expect(apiErrorMessage(check, "Algo falló")).not.toMatch(/rent_amount/)
+
+    const db = apiError(500, {
+      code: "DATABASE_ERROR",
+      message: "P1001: can't reach database",
+    })
+    expect(apiErrorMessage(db, "Algo falló")).toMatch(/problema del sistema/)
+    expect(apiErrorMessage(db, "Algo falló")).not.toMatch(/P1001/)
 
     expect(
       apiErrorMessage(

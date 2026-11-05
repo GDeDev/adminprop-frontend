@@ -16,10 +16,14 @@ const FRIENDLY_MESSAGES: Record<string, string> = {
   // contrato y fecha, o un doble click que repite el alta.
   UNIQUE_CONSTRAINT_VIOLATION:
     "Ya existe un registro igual (por ejemplo, un aumento del mismo contrato con la misma fecha). Recargá la pantalla para ver el que ya está cargado.",
-  // CHECK de la base (D-241): montos negativos, porcentajes fuera de 0 a 100,
-  // fechas en desorden. La API lo informa como error de base de datos.
+  // CHECK de la base: montos negativos, porcentajes fuera de 0 a 100, fechas
+  // en desorden. La API responde 422 con este código estable y nunca expone
+  // el nombre del constraint (DT-174).
+  CHECK_CONSTRAINT_VIOLATION:
+    "Algún dato no cumple las reglas del sistema (un monto, porcentaje o fecha fuera de rango). Revisalo y volvé a intentar.",
+  // Error de base genérico (5xx): no es un dato inválido del usuario.
   DATABASE_ERROR:
-    "No se pudo guardar. Revisá que los datos sean válidos (montos sin signo negativo, porcentajes de 0 a 100, fechas en orden) y probá de nuevo. Si sigue pasando, avisá a soporte.",
+    "No se pudo guardar por un problema del sistema. Probá de nuevo en unos minutos y, si sigue pasando, avisá a soporte.",
   IDEMPOTENCY_KEY_REUSED:
     "Ese pedido ya se envió con otros datos. Recargá la pantalla para ver si quedó registrado.",
   CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY:
