@@ -37,6 +37,35 @@ export function parseArea(input: string): ParsedField<number> {
   return value <= LISTING_LIMITS.area.max ? { ok: true, value } : { ok: false }
 }
 
+/** Rango de cada coordenada, igual que el de la API. */
+export const COORDINATE_LIMITS = {
+  latitude: 90,
+  longitude: 180,
+} as const
+
+export const COORDINATE_LABELS = {
+  latitude: "Latitud",
+  longitude: "Longitud",
+} as const
+
+/**
+ * Coordenada decimal en grados, con coma o punto y hasta 6 decimales (como la
+ * API): `-34.6037`. Latitud entre -90 y 90, longitud entre -180 y 180.
+ * Vacío = no cargada.
+ */
+export function parseCoordinate(
+  input: string,
+  kind: keyof typeof COORDINATE_LIMITS
+): ParsedField<number> {
+  const text = input.trim()
+  if (text === "") return { ok: true, value: null }
+  if (!/^-?\d{1,3}([.,]\d{1,6})?$/.test(text)) return { ok: false }
+  const value = Number(text.replace(",", "."))
+  return Math.abs(value) <= COORDINATE_LIMITS[kind]
+    ? { ok: true, value }
+    : { ok: false }
+}
+
 /** Precio de publicación como string decimal (`150000.00`). Vacío = null. */
 export function parseListingPrice(input: string): ParsedField<string> {
   if (input.trim() === "") return { ok: true, value: null }

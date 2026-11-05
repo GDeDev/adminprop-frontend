@@ -45,6 +45,8 @@ import {
   OPERATION_LABELS,
   numberToInput,
   parseArea,
+  COORDINATE_LABELS,
+  parseCoordinate,
   parseListingPrice,
   parseWholeNumber,
 } from "@/lib/properties"
@@ -71,29 +73,61 @@ const areaField = z
     "Ingresá los m² con hasta 2 decimales."
   )
 
-const schema = z.object({
-  address: z.string().trim().min(1, "Ingresá la dirección.").max(200),
-  locationId: z.string().min(1, "Elegí al menos la localidad."),
-  propertyTypeId: z.string().min(1, "Elegí el tipo de propiedad."),
-  ownerId: z.string().nullable(),
-  amenityIds: z.array(z.string()),
-  notes: z.string().max(5000),
-  listingOperation: z.enum(["RENT", "SALE"]),
-  listingPrice: z
+const coordinateField = (kind: "latitude" | "longitude") =>
+  z
     .string()
     .refine(
-      (value) => parseListingPrice(value).ok,
-      "Ingresá un precio válido, por ejemplo 150000 o 150.000,50."
-    ),
-  listingCurrency: z.enum(["ARS", "USD"]),
-  publicDescription: z.string().max(MAX_PUBLIC_DESCRIPTION),
-  rooms: countField(LISTING_LIMITS.count.max),
-  bedrooms: countField(LISTING_LIMITS.count.max),
-  bathrooms: countField(LISTING_LIMITS.count.max),
-  totalAreaM2: areaField,
-  coveredAreaM2: areaField,
-  ageYears: countField(LISTING_LIMITS.ageYears.max),
-})
+      (value) => parseCoordinate(value, kind).ok,
+      kind === "latitude"
+        ? "La latitud va entre -90 y 90, con hasta 6 decimales (por ejemplo -34,6037)."
+        : "La longitud va entre -180 y 180, con hasta 6 decimales (por ejemplo -58,3816)."
+    )
+
+const schema = z
+  .object({
+    address: z.string().trim().min(1, "Ingresá la dirección.").max(200),
+    locationId: z.string().min(1, "Elegí al menos la localidad."),
+    propertyTypeId: z.string().min(1, "Elegí el tipo de propiedad."),
+    ownerId: z.string().nullable(),
+    amenityIds: z.array(z.string()),
+    notes: z.string().max(5000),
+    listingOperation: z.enum(["RENT", "SALE"]),
+    listingPrice: z
+      .string()
+      .refine(
+        (value) => parseListingPrice(value).ok,
+        "Ingresá un precio válido, por ejemplo 150000 o 150.000,50."
+      ),
+    listingCurrency: z.enum(["ARS", "USD"]),
+    publicDescription: z.string().max(MAX_PUBLIC_DESCRIPTION),
+    rooms: countField(LISTING_LIMITS.count.max),
+    bedrooms: countField(LISTING_LIMITS.count.max),
+    bathrooms: countField(LISTING_LIMITS.count.max),
+    totalAreaM2: areaField,
+    coveredAreaM2: areaField,
+    ageYears: countField(LISTING_LIMITS.ageYears.max),
+    latitude: coordinateField("latitude"),
+    longitude: coordinateField("longitude"),
+  })
+  .superRefine((values, ctx) => {
+    // El sitio público solo muestra el mapa con las dos coordenadas.
+    const hasLatitude = values.latitude.trim() !== ""
+    const hasLongitude = values.longitude.trim() !== ""
+    if (hasLatitude && !hasLongitude) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["longitude"],
+        message: "Cargá también la longitud: el mapa necesita las dos.",
+      })
+    }
+    if (hasLongitude && !hasLatitude) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["latitude"],
+        message: "Cargá también la latitud: el mapa necesita las dos.",
+      })
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -114,6 +148,8 @@ const STEPS = [
       "totalAreaM2",
       "coveredAreaM2",
       "ageYears",
+      "latitude",
+      "longitude",
     ],
   },
   { title: "Fotos", fields: [] },
@@ -144,6 +180,8 @@ const draftSchema = z
     totalAreaM2: z.string(),
     coveredAreaM2: z.string(),
     ageYears: z.string(),
+    latitude: z.string(),
+    longitude: z.string(),
   })
   .partial()
 
@@ -164,6 +202,8 @@ const EMPTY: FormValues = {
   totalAreaM2: "",
   coveredAreaM2: "",
   ageYears: "",
+  latitude: "",
+  longitude: "",
 }
 
 /**
@@ -180,6 +220,10 @@ export function listingBody(data: FormValues, editing: boolean) {
     const parsed = parseArea(input)
     return (parsed.ok ? parsed.value : null) ?? clear
   }
+  const coordinate = (input: string, kind: "latitude" | "longitude") => {
+    const parsed = parseCoordinate(input, kind)
+    return (parsed.ok ? parsed.value : null) ?? clear
+  }
   const price = parseListingPrice(data.listingPrice)
   const countMax = LISTING_LIMITS.count.max
   return {
@@ -193,6 +237,8 @@ export function listingBody(data: FormValues, editing: boolean) {
     totalAreaM2: area(data.totalAreaM2),
     coveredAreaM2: area(data.coveredAreaM2),
     ageYears: count(data.ageYears, LISTING_LIMITS.ageYears.max),
+    latitude: coordinate(data.latitude, "latitude"),
+    longitude: coordinate(data.longitude, "longitude"),
   }
 }
 
@@ -256,6 +302,8 @@ export function PropertyForm({ property }: { property?: PropertyDetail }) {
           totalAreaM2: numberToInput(property.totalAreaM2),
           coveredAreaM2: numberToInput(property.coveredAreaM2),
           ageYears: numberToInput(property.ageYears),
+          latitude: numberToInput(property.latitude),
+          longitude: numberToInput(property.longitude),
         }
       : (initialDraft ?? EMPTY),
   })
@@ -600,6 +648,8 @@ const AREA_FIELDS = [
   { name: "coveredAreaM2", label: "Superficie cubierta (m²)" },
 ] as const
 
+const COORDINATE_FIELDS = ["latitude", "longitude"] as const
+
 /** Paso 4: operación, precio y características que ve el público. */
 function ListingStep({
   form,
@@ -776,6 +826,47 @@ function ListingStep({
           )}
         />
       </div>
+      <fieldset className="flex flex-col gap-3">
+        <legend className="text-sm font-medium">
+          Ubicación en el mapa (opcional)
+        </legend>
+        <p
+          id="property-coordinates-help"
+          className="text-sm text-muted-foreground"
+        >
+          El sitio público muestra el mapa con las coordenadas redondeadas a
+          unos 100 m de precisión: se ve la zona, no la puerta. Se cargan las
+          dos o ninguna. Podés copiarlas del botón derecho en Google Maps o
+          OpenStreetMap.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {COORDINATE_FIELDS.map((name) => (
+            <Controller
+              key={name}
+              name={name}
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={`property-${name}`}>
+                    {COORDINATE_LABELS[name]}
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={`property-${name}`}
+                    inputMode="decimal"
+                    placeholder={name === "latitude" ? "-34,6037" : "-58,3816"}
+                    aria-invalid={fieldState.invalid}
+                    aria-describedby="property-coordinates-help"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          ))}
+        </div>
+      </fieldset>
     </>
   )
 }

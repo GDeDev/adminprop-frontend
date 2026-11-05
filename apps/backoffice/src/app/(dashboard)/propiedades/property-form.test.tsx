@@ -300,4 +300,79 @@ describe("PropertyForm (campos de publicación)", () => {
       })
     )
   })
+
+  it("manda las coordenadas opcionales como números, con coma o punto", async () => {
+    render(<PropertyForm />)
+    const user = userEvent.setup()
+    await fillStepOne(user)
+    await goToListingStep(user)
+
+    expect(screen.getByText(/unos 100 m de precisión/)).toBeInTheDocument()
+    await user.type(screen.getByLabelText("Latitud"), "-34,6037")
+    await user.type(screen.getByLabelText("Longitud"), "-58.3816")
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+    await user.click(screen.getByRole("button", { name: "Crear propiedad" }))
+
+    await waitFor(() => expect(create).toHaveBeenCalled())
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ latitude: -34.6037, longitude: -58.3816 })
+    )
+  })
+
+  it("valida el rango y pide las dos coordenadas o ninguna", async () => {
+    render(<PropertyForm />)
+    const user = userEvent.setup()
+    await fillStepOne(user)
+    await goToListingStep(user)
+
+    await user.type(screen.getByLabelText("Latitud"), "95")
+    await user.type(screen.getByLabelText("Longitud"), "-58,12345678")
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+    expect(
+      await screen.findByText(/La latitud va entre -90 y 90/)
+    ).toBeInTheDocument()
+    expect(screen.getByText(/La longitud va entre -180 y 180/)).toBeVisible()
+
+    await user.clear(screen.getByLabelText("Latitud"))
+    await user.clear(screen.getByLabelText("Longitud"))
+    await user.type(screen.getByLabelText("Latitud"), "-34,6")
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+    expect(
+      await screen.findByText(
+        "Cargá también la longitud: el mapa necesita las dos."
+      )
+    ).toBeInTheDocument()
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  it("al editar, borrar las coordenadas las manda como null", async () => {
+    const property = {
+      id: "p1",
+      address: "Calle 1",
+      locationId: "loc1",
+      propertyTypeId: "t1",
+      ownerId: null,
+      amenityIds: [],
+      notes: null,
+      listingOperation: "RENT",
+      listingPrice: null,
+      listingCurrency: "ARS",
+      publicDescription: null,
+      latitude: -34.6037,
+      longitude: -58.3816,
+    } as unknown as PropertyDetail
+    render(<PropertyForm property={property} />)
+    const user = userEvent.setup()
+    await goToListingStep(user)
+
+    expect(screen.getByLabelText("Latitud")).toHaveValue("-34.6037")
+    await user.clear(screen.getByLabelText("Latitud"))
+    await user.clear(screen.getByLabelText("Longitud"))
+    await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
+
+    await waitFor(() => expect(update).toHaveBeenCalled())
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ latitude: null, longitude: null })
+    )
+  })
 })
