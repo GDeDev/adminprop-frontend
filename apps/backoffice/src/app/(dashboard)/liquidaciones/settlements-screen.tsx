@@ -55,6 +55,8 @@ import {
   FEE_RECEIVABLE_STATUS_META,
   FEE_SOURCE_LABELS,
   SEND_MODE_LABELS,
+  adjustmentBreakdown,
+  signedMoney,
   SETTLEMENT_STATUS_META,
   settlementLabel,
   STATEMENT_STATUS_META,
@@ -224,6 +226,9 @@ function SettlementList() {
                   <TableHead>Mes</TableHead>
                   <TableHead className="text-right">Alquiler</TableHead>
                   <TableHead className="text-right">Honorarios</TableHead>
+                  <TableHead className="text-right">Retenciones</TableHead>
+                  <TableHead className="text-right">Adelantos</TableHead>
+                  <TableHead className="text-right">Otros ajustes</TableHead>
                   <TableHead className="text-right">Neto</TableHead>
                   <TableHead>Estado</TableHead>
                 </TableRow>
@@ -292,6 +297,14 @@ function SettlementRow({ settlement }: { settlement: SettlementSummary }) {
           ? `−${money(settlement.feeTotal)}`
           : money(settlement.feeTotal)}
       </TableCell>
+      {adjustmentBreakdown(settlement).map((item) => (
+        <TableCell
+          key={item.key}
+          className={`text-right num ${isZero(item.amount) ? "text-muted-foreground" : ""}`}
+        >
+          {signedMoney(item.amount, settlement.currency, formatMoney)}
+        </TableCell>
+      ))}
       <TableCell className="text-right font-display num font-medium">
         {money(settlement.netAmount)}
         {!isZero(settlement.transferredTotal) && (
@@ -324,6 +337,17 @@ function SettlementCard({ settlement }: { settlement: SettlementSummary }) {
         {settlement.property?.address ?? "Propiedad eliminada"} ·{" "}
         {settlementLabel(settlement)}
       </p>
+      {adjustmentBreakdown(settlement).some((item) => !isZero(item.amount)) && (
+        <p className="num text-xs text-muted-foreground">
+          {adjustmentBreakdown(settlement)
+            .filter((item) => !isZero(item.amount))
+            .map(
+              (item) =>
+                `${item.label} ${signedMoney(item.amount, settlement.currency, formatMoney)}`
+            )
+            .join(" · ")}
+        </p>
+      )}
       <div className="flex items-center justify-between gap-2 text-sm">
         <span className="num text-muted-foreground">
           Alquiler {money(settlement.rentTotal)}

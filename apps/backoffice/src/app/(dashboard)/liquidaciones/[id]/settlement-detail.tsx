@@ -31,7 +31,9 @@ import { formatDate } from "@/lib/dates"
 import { PAYMENT_METHOD_LABELS } from "@/lib/billing"
 import {
   ADJUSTMENT_CONCEPT_LABELS,
+  adjustmentBreakdown,
   adjustmentSubtracts,
+  signedMoney,
   settlementLabel,
 } from "@/lib/settlements"
 import {
@@ -282,13 +284,26 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
               value={`−${money(settlement.expensesTotal)}`}
             />
             <Row
-              label="Ajustes"
-              value={
-                settlement.adjustmentsTotal.startsWith("-")
-                  ? `−${money(settlement.adjustmentsTotal.slice(1))}`
-                  : money(settlement.adjustmentsTotal)
-              }
+              label="Ajustes (total)"
+              value={signedMoney(
+                settlement.adjustmentsTotal,
+                settlement.currency,
+                formatMoney
+              )}
             />
+            {adjustmentBreakdown(settlement).map((item) => (
+              <Row
+                key={item.key}
+                label={item.label}
+                indent
+                muted={isZero(item.amount)}
+                value={signedMoney(
+                  item.amount,
+                  settlement.currency,
+                  formatMoney
+                )}
+              />
+            ))}
             <dt className="border-t pt-2 font-medium">Neto a transferir</dt>
             <dd className="border-t pt-2 text-right font-display num text-title-md font-semibold">
               {money(settlement.netAmount)}
@@ -579,14 +594,19 @@ function Row({
   label,
   value,
   muted,
+  indent,
 }: {
   label: string
   value: string
   muted?: boolean
+  /** Sub-concepto del renglón de arriba (no suma aparte). */
+  indent?: boolean
 }) {
   return (
     <>
-      <dt className="text-muted-foreground">{label}</dt>
+      <dt className={`text-muted-foreground ${indent ? "pl-4 text-xs" : ""}`}>
+        {label}
+      </dt>
       <dd className={`text-right num ${muted ? "text-muted-foreground" : ""}`}>
         {value}
       </dd>

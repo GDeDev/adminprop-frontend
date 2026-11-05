@@ -122,6 +122,9 @@ describe("SettlementsScreen", () => {
       screen.getAllByRole("link", { name: "Juan Pérez" })[0]
     ).toHaveAttribute("href", "/liquidaciones/s1")
     expect(screen.getAllByText("−$ 10.000,00").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Retenciones").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Adelantos").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Otros ajustes").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Pendiente").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Transferida").length).toBeGreaterThan(0)
     expect(screen.getAllByText("En consolidado").length).toBeGreaterThan(0)

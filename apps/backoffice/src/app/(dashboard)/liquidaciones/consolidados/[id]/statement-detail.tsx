@@ -42,8 +42,10 @@ import { periodLabel } from "@/lib/billing"
 import { formatMoney } from "@/lib/contracts"
 import { formatDate } from "@/lib/dates"
 import {
+  adjustmentBreakdown,
   SEND_MODE_LABELS,
   SETTLEMENT_STATUS_META,
+  signedMoney,
   settlementLabel,
   STATEMENT_STATUS_META,
 } from "@/lib/settlements"
@@ -193,32 +195,34 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
         </div>
       </div>
 
-      {statement.totals.length > 0 && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {statement.totals.map((total) => (
-            <React.Fragment key={total.currency}>
-              <Stat
-                label={`Alquileres · ${total.currency}`}
-                value={formatMoney(total.rentTotal, total.currency)}
-              />
-              <Stat
-                label="Honorarios"
-                value={formatMoney(total.feeTotal, total.currency)}
-              />
-              <Stat
-                label="Gastos y ajustes"
-                value={formatMoney(total.expensesTotal, total.currency)}
-                hint={`ajustes ${formatMoney(total.adjustmentsTotal, total.currency)}`}
-              />
-              <Stat
-                label="Neto"
-                value={formatMoney(total.netTotal, total.currency)}
-                hint={`transferido ${formatMoney(total.transferredTotal, total.currency)}`}
-              />
-            </React.Fragment>
-          ))}
-        </div>
-      )}
+      {statement.totals.map((total) => (
+        <section
+          key={total.currency}
+          aria-label={`Totales en ${total.currency}`}
+          className="flex flex-col gap-3"
+        >
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat
+              label={`Alquileres · ${total.currency}`}
+              value={formatMoney(total.rentTotal, total.currency)}
+            />
+            <Stat
+              label="Honorarios"
+              value={formatMoney(total.feeTotal, total.currency)}
+            />
+            <Stat
+              label="Gastos adelantados"
+              value={formatMoney(total.expensesTotal, total.currency)}
+            />
+            <Stat
+              label="Neto"
+              value={formatMoney(total.netTotal, total.currency)}
+              hint={`transferido ${formatMoney(total.transferredTotal, total.currency)}`}
+            />
+          </div>
+          <AdjustmentTotals total={total} />
+        </section>
+      ))}
 
       <section
         className="rounded-xl border bg-card p-4 shadow-raised"
@@ -244,6 +248,9 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                 <TableHead className="text-right">Alquiler</TableHead>
                 <TableHead className="text-right">Honorarios</TableHead>
                 <TableHead className="text-right">Gastos</TableHead>
+                <TableHead className="text-right">Retenciones</TableHead>
+                <TableHead className="text-right">Adelantos</TableHead>
+                <TableHead className="text-right">Otros ajustes</TableHead>
                 <TableHead className="text-right">Neto</TableHead>
                 <TableHead>Estado</TableHead>
                 {open && (
@@ -280,6 +287,18 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
                     <TableCell className="text-right font-display num">
                       {money(settlement.expensesTotal)}
                     </TableCell>
+                    {adjustmentBreakdown(settlement).map((item) => (
+                      <TableCell
+                        key={item.key}
+                        className="text-right font-display num"
+                      >
+                        {signedMoney(
+                          item.amount,
+                          settlement.currency,
+                          formatMoney
+                        )}
+                      </TableCell>
+                    ))}
                     <TableCell className="text-right font-display num font-medium">
                       {money(settlement.netAmount)}
                     </TableCell>
@@ -340,6 +359,36 @@ function Detail({ statement }: { statement: OwnerStatementDetail }) {
         pending={reopen.isPending}
         onConfirm={reopenStatement}
       />
+    </div>
+  )
+}
+
+type StatementTotal = OwnerStatementDetail["totals"][number]
+
+/**
+ * Retenciones, adelantos y otros ajustes en renglones separados, con signo
+ * (negativo = se descuenta al propietario). `adjustmentsTotal` sigue siendo el
+ * total de los tres.
+ */
+function AdjustmentTotals({ total }: { total: StatementTotal }) {
+  return (
+    <div role="group" aria-label={`Ajustes en ${total.currency}`}>
+      <dl className="grid gap-x-6 gap-y-2 rounded-xl border bg-card p-4 text-sm shadow-raised sm:grid-cols-4">
+        {adjustmentBreakdown(total).map((item) => (
+          <div key={item.key}>
+            <dt className="text-muted-foreground">{item.label}</dt>
+            <dd className="font-display num font-medium">
+              {signedMoney(item.amount, total.currency, formatMoney)}
+            </dd>
+          </div>
+        ))}
+        <div>
+          <dt className="text-muted-foreground">Ajustes (total)</dt>
+          <dd className="font-display num font-semibold">
+            {signedMoney(total.adjustmentsTotal, total.currency, formatMoney)}
+          </dd>
+        </div>
+      </dl>
     </div>
   )
 }
@@ -498,7 +547,28 @@ function CloseDialog({
             elijas acá.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="px-4 sm:px-0">
+        <div className="flex flex-col gap-4 px-4 sm:px-0">
+          {statement.totals.map((total) => (
+            <div key={total.currency} className="flex flex-col gap-1">
+              <p className="text-sm font-medium">
+                Lo que se congela · {total.currency}
+              </p>
+              <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 rounded-lg bg-muted p-3 text-sm">
+                {adjustmentBreakdown(total).map((item) => (
+                  <React.Fragment key={item.key}>
+                    <dt className="text-muted-foreground">{item.label}</dt>
+                    <dd className="text-right num">
+                      {signedMoney(item.amount, total.currency, formatMoney)}
+                    </dd>
+                  </React.Fragment>
+                ))}
+                <dt className="border-t pt-1 font-medium">Neto</dt>
+                <dd className="border-t pt-1 text-right font-display num font-semibold">
+                  {formatMoney(total.netTotal, total.currency)}
+                </dd>
+              </dl>
+            </div>
+          ))}
           <SendModeSelect
             id="statement-send-mode"
             label="Qué se envía"
