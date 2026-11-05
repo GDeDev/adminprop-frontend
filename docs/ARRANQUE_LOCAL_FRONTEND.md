@@ -96,6 +96,24 @@ corre pasando las variables por la terminal (sección 6).
   Doppler dentro del script y turbo no las ve, así que un caché podría servir un
   bundle con una `NEXT_PUBLIC_API_URL` vieja.
 
+### CORS en el backend (obligatorio)
+
+El navegador llama a la API directo desde el backoffice (`http://localhost:3001`)
+y el portal (`http://localhost:3002`); los puertos salen de los scripts
+`dev`/`start` de `apps/backoffice/package.json` y `apps/portal/package.json`. El
+backend deja CORS cerrado si no tiene `CORS_ORIGINS`, así que **en `dev_backend`
+tiene que existir**:
+
+```bash
+doppler secrets set CORS_ORIGINS="http://localhost:3001,http://localhost:3002" --project admin-prop --config dev_backend
+```
+
+Sin esto ni el login del backoffice entra: la consola del navegador muestra un
+error de CORS (`blocked by CORS policy: No 'Access-Control-Allow-Origin' header`)
+y la petición a `/auth/login` falla. Hay que reiniciar el backend después de
+cargarla. (Es una variable del backend, no de las apps de este repo; `apps/sites`
+llama a la API desde el servidor y no la necesita.)
+
 ## 5. Variables por app
 
 Sin valores. "Dónde se lee" es el archivo que lo usa; si un nombre figura solo en
@@ -211,10 +229,12 @@ deshabilitado sin cambios y manda solo lo que cambió` falló alguna vez bajo la
 - **`next typegen`**: `npm run typecheck` lo corre antes de `tsc`. Un `tsc`
   suelto en una app protestará por `PageProps` hasta que existan los tipos de
   rutas generados.
-- **El login no entra o el navegador bloquea llamadas**: revisar que
-  `NEXT_PUBLIC_API_URL` apunte a la API local y que el backend permita el origen:
-  según su guía, sin `CORS_ORIGINS` el CORS queda cerrado. **A confirmar** qué
-  valor trae `dev_backend` para `http://localhost:3001` y `http://localhost:3002`.
+- **El login del backoffice no entra y la consola del navegador muestra un error
+  de CORS** (`Access to fetch at 'http://localhost:3000/api/v1/...' from origin
+'http://localhost:3001' has been blocked by CORS policy`): falta
+  `CORS_ORIGINS` en `dev_backend` (el backend deja CORS cerrado si no está). Ver
+  «CORS en el backend» en la sección 4. Si además falla `NEXT_PUBLIC_API_URL`,
+  debe apuntar a la API local con `/api/v1`.
 - **El portal dice «no hay inmobiliaria configurada»**: falta
   `PORTAL_TENANT_SLUG` en `dev_portal`, o el slug no existe en la API.
 - **«Mi sitio web»: la vista previa no se ve**: `apps/sites` no está levantada,
