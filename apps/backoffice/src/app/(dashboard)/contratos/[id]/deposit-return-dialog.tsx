@@ -478,9 +478,11 @@ export function DepositReturnSummary({ result }: { result: DepositReturn }) {
       <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
         <dt className="text-muted-foreground">Depósito recibido</dt>
         <dd className="text-right num">{money(result.depositAmount)}</dd>
-        <dt className="text-muted-foreground">
-          Monto de referencia ({DEPOSIT_RETURN_MODE_LABELS[result.mode]})
-        </dt>
+        <dt className="text-muted-foreground">Modo del contrato</dt>
+        <dd className="text-right">
+          {DEPOSIT_RETURN_MODE_LABELS[result.mode]}
+        </dd>
+        <dt className="text-muted-foreground">Monto de referencia</dt>
         <dd className="text-right num">{money(result.referenceAmount)}</dd>
       </dl>
       {result.deductions.length > 0 && (
