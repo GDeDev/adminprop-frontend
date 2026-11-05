@@ -11,6 +11,17 @@ verificar desde el sandbox figura como **a confirmar**.
 > corren dentro de `doppler run --`. **`apps/sites` no**: su script `dev` es
 > `next dev --port 3003` a secas (ver sección 6).
 
+## 0. Ramas definitivas a levantar
+
+| Repo     | Rama                        |
+| -------- | --------------------------- |
+| Backend  | `integration/consolidado-5` |
+| Frontend | `integration/frontend-7`    |
+
+Nota: el `allowedHeaders` de CORS con `Idempotency-Key` (necesario para registrar
+pagos desde el navegador) viene en `integration/consolidado-5`. Con una rama de
+backend anterior, registrar un pago falla con error de red por el preflight.
+
 ## 1. Requisitos
 
 | Qué               | Versión / nota                                                                                                                                                                                                          |

@@ -20,9 +20,9 @@ Regla común: el frontend no calcula dinero. Todo monto viaja como string y se m
 | Idempotency-Key en pagos         | D-243      | `cobros/[id]/register-payment-dialog.tsx`, `lib/billing-api.ts`                                                                                                                                                 | DT-172   |
 | Mensajes de errores nuevos       | D-240, 241 | `packages/session/src/client/api-error.ts`                                                                                                                                                                      | DT-173   |
 
-## Pendiente del backend (bloqueante para pagos)
+## CORS de `Idempotency-Key` (resuelto en el backend)
 
-`allowedHeaders` de CORS en `adminprop-backend/src/app.setup.ts` no incluye `Idempotency-Key`. El navegador manda un preflight por ese header y, sin él, **registrar un pago falla con error de red**. Agregarlo a la lista antes de desplegar este frontend (o apagar el envío de la clave en `useRegisterPayment`). Ver DT-172.
+El preflight por `Idempotency-Key` exige que esté en `allowedHeaders` de CORS. Eso ya está arreglado en la rama `integration/consolidado-5` del backend; con una rama anterior, registrar un pago falla con error de red. Ver DT-172.
 
 ## Tests nuevos o ajustados
 
