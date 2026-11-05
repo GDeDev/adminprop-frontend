@@ -808,3 +808,32 @@ Estaba dentro del `SessionGate`, así que sin API no se podía abrir ni capturar
 ### DT-159 — Diseño v2 como único sistema: adopción completa en backoffice y portal
 
 El dueño aprobó la v2 «entera». Se retiró `adminprop.css` (v1), las fuentes Outfit/Figtree de reserva y el test de paridad con v1 (ahora `design-rules.test.ts` congela la lista de nombres de token que usan las apps). Volver a v1 deja de ser un cambio de import: hay que recuperar el archivo del historial de git (ver `docs/tecnica/design-v2.md`, «Volver a v1»). La adopción pantalla por pantalla fue: paneles hechos a mano con `shadow-raised` (y `lift` los clickeables), KPIs con `StatCard`, títulos y cifras en la escala con nombre, montos en `font-display num`, `Button variant="ai"` y `AiBadge` solo en «Sugerir precio». `apps/sites` no se tocó. Una prueba (`apps-v2-language.test.ts`) impide que vuelvan `tabular-nums`, `text-xl` sobre `font-display`, paneles sin sombra, `transition-all` y `animate-pulse`. `StatCard` ya no duplica el valor para lectores de pantalla salvo mientras anima. Nota: si otra rama ya usó DT-112, renumerar al integrar.
+
+### DT-160 — Parámetros de cobro de la inmobiliaria: pantalla propia, solo administradores
+
+Backend D-228: el punitorio diario ya no tiene un 5 % por defecto. `Configuración → Parámetros de cobro` (`/configuracion/parametros`) edita `dailyLateFeePercentage` (0 a 100, 2 decimales) y `paymentGraceDays` (0 a 60). Una vez fijado el porcentaje no se puede quitar (la API devuelve 400 `TENANT_INVALID_BILLING_SETTING` con `null`): el campo no se puede vaciar y para «sin punitorio» se usa `0`. Solo se manda lo que cambió. El porcentaje viaja como string y la pantalla no calcula nada: `lateFeeStartDay` (gracia + 1) lo informa la API. `GET /tenants/current/settings` es solo de administradores, por eso la pantalla muestra «Solo para administradores» al resto.
+
+### DT-161 — Punitorio de un contrato: referencia de la inmobiliaria y «gracia» o «día de inicio», nunca los dos
+
+Alta, renovación y cambio de términos comparten el bloque `LateFeeFields` (`change-billing-terms-dialog.tsx`) y las reglas de `lib/late-fee.ts`. Decisiones:
+
+- La referencia («Referencia de la inmobiliaria: 0,50 % diario, 10 días de gracia») sale de `useTenantLateFeeReference`, que lee los ajustes **solo si el usuario es administrador**. Un empleado no ve referencia (el endpoint es de admin) y el formulario se comporta como antes. Si la inmobiliaria no fijó un porcentaje (`null`), el interruptor «Punitorio propio» queda activado y deshabilitado, con un aviso: el porcentaje del contrato es obligatorio.
+- «Desde cuándo corre» se elige con un selector (días de gracia / día de inicio) y solo se muestra el campo elegido, así que la UI no puede mandar los dos; `lateFeeRequestFields` además arma el cuerpo sin la clave que no corresponde (el backend devuelve 400 `CONTRACT_INVALID_BILLING_TERMS` si llegan juntas). El día de inicio no se convierte a gracia en el frontend: la API lo hace.
+- `CONTRACT_LATE_FEE_PERCENTAGE_REQUIRED` (el empleado no veía la referencia, o cambió) abre el interruptor y marca el campo con un mensaje claro, en vez del texto técnico de la API. Con ese error en el wizard se vuelve al paso «Condiciones».
+- Supuesto: «sin punitorio propio» sigue enviando `lateFeePercentage: null` y `lateFeeGraceDays: null` (hereda ambos de la inmobiliaria). Heredar solo uno de los dos no se ofrece.
+
+### DT-162 — Devolución del depósito: la API calcula, la pantalla solo muestra
+
+Backend D-227: el modo del contrato (fijo, sigue al alquiler, manual) fija el monto de referencia y lo devuelto es referencia menos deducciones. El diálogo ya no pide «monto devuelto»: no hay endpoint de previsualización y el frontend no calcula dinero, así que no manda `returnedAmount`, y tras registrar muestra lo que respondió la API (`referenceAmount`, deducciones y `returnedAmount`, todo string con `formatMoney`). Antes de enviar muestra la referencia que informa `suggestedReturn`. `referenceAmount` solo se pide y se manda en modo manual o cuando `suggestedReturn` es `null` (alquiler en otra moneda: no se convierte); en los automáticos no se manda para que no choque con `DEPOSIT_RETURN_INVALID_REFERENCE`. Cada deducción exige un motivo (la API ya lo pedía). Errores propios: `DEPOSIT_RETURN_DEDUCTIONS_EXCEED` e `DEPOSIT_RETURN_INVALID_REFERENCE` (con la indicación de reabrir el diálogo). En la cuenta corriente, los movimientos del depósito muestran `amount` y `amountCurrency` aparte, con la aclaración «no modifica el saldo» (D-227).
+
+### DT-163 — Ajuste manual del alquiler: motivo y «autorizado por» cuando hay monto a mano
+
+Backend D-230: todo monto escrito a mano exige `reason` (hasta 500) y `authorizedBy` (hasta 150, texto libre). El diálogo los muestra y exige exactamente cuando se escribe un monto (o cuando el contrato es de monto manual); sin monto (índice o porcentaje fijo) no aparecen y no se mandan. El historial `rentUpdates[]` muestra «Motivo» y «Autorizado por» de los ajustes manuales. `CONTRACT_MANUAL_ADJUSTMENT_JUSTIFICATION_REQUIRED` tiene un mensaje propio por si la API lo detecta primero.
+
+### DT-164 — Modo de envío del consolidado: un selector con la explicación de lo que sale
+
+Backend D-229: el modo ya gobierna los emails. `SendModeSelect` reemplaza los dos selectores sueltos (ficha del propietario y cierre del consolidado) y explica, para cada modo y según dónde se elige, qué se envía. Etiquetas: «Solo el resumen», «Comprobantes individuales», «Ambos: resumen y comprobantes». Se deja dicho lo que la API no puede deshacer (los comprobantes que ya salieron al confirmar no se retiran) y que los PDF se generan igual y están en el portal del propietario.
+
+### DT-165 — Coordenadas de la propiedad: las dos o ninguna, hasta 6 decimales
+
+Backend D-226. El formulario acepta latitud (−90 a 90) y longitud (−180 a 180) con coma o punto y hasta 6 decimales (como la API); vacío las borra al editar. La API admite cargar una sola, pero el sitio público solo muestra el mapa con las dos, así que el formulario pide las dos o ninguna (regla del frontend, no del backend). Se avisa que el sitio público las redondea a ~100 m. No hay geocodificación ni mapa en el formulario.
