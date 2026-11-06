@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     "@adminprop/mocks",
     "@adminprop/session",
   ],
+  // Sin `X-Powered-By: Next.js`: no le anunciamos el framework a nadie.
+  poweredByHeader: false,
   async headers() {
     return [
       {
