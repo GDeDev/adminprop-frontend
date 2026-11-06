@@ -25,7 +25,10 @@
         "SITES_PROTOCOL",
         "SITES_CLIENT_IP_HEADER",
         "SITES_TRUSTED_PROXY_HOPS",
-        "APP_ORIGINS"
+        "APP_ORIGINS",
+        "API_SERVER_SECRET",
+        "CLIENT_IP_HEADER",
+        "TRUSTED_PROXY_HOPS"
       ]
     },
     "lint": {

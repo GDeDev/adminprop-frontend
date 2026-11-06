@@ -282,6 +282,55 @@ describe("POST /api/session/refresh", () => {
     expect(response.cookies.get("bo_brand")?.maxAge).toBe(30 * 24 * 3600)
   })
 
+  it("pasa la IP del usuario en X-Client-IP con el secreto de servidor", async () => {
+    const withSecret = createSessionRoutes({
+      cookiePrefix: "bo",
+      apiUrl: API,
+      serverSecret: "s3cret",
+    })
+    fetchMock.mockResolvedValue(
+      apiResponds(200, {
+        accessToken: "a",
+        refreshToken: fakeJwt(inOneWeek()),
+        tokenType: "Bearer",
+        expiresIn: 900,
+      })
+    )
+    await withSecret.refresh(
+      request("/api/session/refresh", {
+        method: "POST",
+        cookie: "bo_rt=viejo",
+        headers: { "x-forwarded-for": "6.6.6.6, 203.0.113.9" },
+      })
+    )
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers
+    expect(headers).toMatchObject({
+      "X-Client-IP": "203.0.113.9",
+      "X-Sites-Secret": "s3cret",
+    })
+  })
+
+  it("sin secreto de servidor no manda la IP (la API no la creería)", async () => {
+    fetchMock.mockResolvedValue(
+      apiResponds(200, {
+        accessToken: "a",
+        refreshToken: fakeJwt(inOneWeek()),
+        tokenType: "Bearer",
+        expiresIn: 900,
+      })
+    )
+    await routes.refresh(
+      request("/api/session/refresh", {
+        method: "POST",
+        cookie: "bo_rt=viejo",
+        headers: { "x-forwarded-for": "203.0.113.9" },
+      })
+    )
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers
+    expect(headers).not.toHaveProperty("X-Client-IP")
+    expect(headers).not.toHaveProperty("X-Sites-Secret")
+  })
+
   it("sin cookie responde 401 sin llamar a la API", async () => {
     const response = await routes.refresh(
       request("/api/session/refresh", { method: "POST" })

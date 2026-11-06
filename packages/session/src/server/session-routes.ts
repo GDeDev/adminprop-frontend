@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import type { AuthTokens, TenantBranding } from "@adminprop/shared-types"
 
+import { clientIp } from "./client-ip"
 import {
   brandingCookieName,
   encodeBranding,
@@ -42,6 +43,15 @@ export interface SessionRouteOptions {
    * variable opcional `APP_ORIGINS` (separados por coma).
    */
   allowedOrigins?: string[]
+  /**
+   * Secreto compartido con la API (`X-Sites-Secret`) para que crea la IP del
+   * usuario que el BFF le pasa en `X-Client-IP` al refrescar. Sin él, el
+   * refresh sale con la IP de este servidor y todos los usuarios comparten el
+   * límite por IP de la API. Por defecto, `API_SERVER_SECRET` (solo servidor;
+   * tiene que ser uno de los valores que la API acepta como secreto de
+   * servidor). Si falta, no se manda ni el secreto ni la IP.
+   */
+  serverSecret?: string
 }
 
 /** Lo que recibe `POST /api/session` justo después de un login exitoso. */
@@ -66,6 +76,15 @@ export function createSessionRoutes(options: SessionRouteOptions) {
   )
   const refreshName = refreshCookieName(options.cookiePrefix)
   const brandingName = brandingCookieName(options.cookiePrefix)
+  const serverSecret = options.serverSecret ?? process.env.API_SERVER_SECRET
+
+  /** `X-Client-IP` + secreto, solo si hay las dos cosas. */
+  function clientIpHeaders(request: NextRequest): Record<string, string> {
+    const ip = clientIp(request.headers)
+    return ip && serverSecret
+      ? { "X-Client-IP": ip, "X-Sites-Secret": serverSecret }
+      : {}
+  }
 
   function cookieOptions(maxAgeSeconds: number) {
     return {
@@ -146,6 +165,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
     const result = await callApi<AuthTokens>(options.apiUrl, "/auth/refresh", {
       method: "POST",
       body: { refreshToken },
+      headers: clientIpHeaders(request),
     })
 
     if (!result.ok) {
@@ -311,7 +331,12 @@ type ApiResult<T> =
 async function callApi<T>(
   apiUrl: string | undefined,
   path: string,
-  init: { method: "GET" | "POST"; body?: unknown; accessToken?: string }
+  init: {
+    method: "GET" | "POST"
+    body?: unknown
+    accessToken?: string
+    headers?: Record<string, string>
+  }
 ): Promise<ApiResult<T>> {
   if (!apiUrl) {
     return {
@@ -326,6 +351,7 @@ async function callApi<T>(
       method: init.method,
       headers: {
         "Content-Type": "application/json",
+        ...init.headers,
         ...(init.accessToken
           ? { Authorization: `Bearer ${init.accessToken}` }
           : {}),
