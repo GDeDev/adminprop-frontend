@@ -262,6 +262,26 @@ describe("POST /api/session/refresh", () => {
     expect(JSON.parse(init?.body as string)).toEqual({ refreshToken: "viejo" })
   })
 
+  it("la cookie rotada tampoco dura más de 30 días aunque el exp sea lejano", async () => {
+    const farFuture = Math.floor(Date.now() / 1000) + 365 * 24 * 3600
+    fetchMock.mockResolvedValue(
+      apiResponds(200, {
+        accessToken: "a",
+        refreshToken: fakeJwt(farFuture),
+        tokenType: "Bearer",
+        expiresIn: 900,
+      })
+    )
+    const response = await routes.refresh(
+      request("/api/session/refresh", {
+        method: "POST",
+        cookie: "bo_rt=viejo; bo_brand=marca",
+      })
+    )
+    expect(response.cookies.get("bo_rt")?.maxAge).toBe(30 * 24 * 3600)
+    expect(response.cookies.get("bo_brand")?.maxAge).toBe(30 * 24 * 3600)
+  })
+
   it("sin cookie responde 401 sin llamar a la API", async () => {
     const response = await routes.refresh(
       request("/api/session/refresh", { method: "POST" })

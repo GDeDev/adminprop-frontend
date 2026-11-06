@@ -163,21 +163,23 @@ export function createSessionRoutes(options: SessionRouteOptions) {
       expiresIn: result.data.expiresIn,
     }
     const response = NextResponse.json(session)
+    // Mismo tope que al iniciar la sesión: un `exp` lejano (o un token sin
+    // `exp` legible) no estira la cookie más allá de 30 días.
+    const maxAge = Math.min(
+      secondsUntilExpiry(result.data.refreshToken),
+      MAX_SESSION_SECONDS
+    )
     // El refresh token rota en cada uso: guardar SIEMPRE el nuevo. Con el
     // viejo, el próximo refresh sería un reuso y la API cerraría la sesión.
     response.cookies.set(
       refreshName,
       result.data.refreshToken,
-      cookieOptions(secondsUntilExpiry(result.data.refreshToken))
+      cookieOptions(maxAge)
     )
     // La marca vive lo mismo que la sesión.
     const branding = request.cookies.get(brandingName)?.value
     if (branding) {
-      response.cookies.set(
-        brandingName,
-        branding,
-        cookieOptions(secondsUntilExpiry(result.data.refreshToken))
-      )
+      response.cookies.set(brandingName, branding, cookieOptions(maxAge))
     }
     return response
   }

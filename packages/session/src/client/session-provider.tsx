@@ -96,11 +96,17 @@ export function SessionProvider({
 
   const signIn = React.useCallback(
     async (result: AuthResult) => {
+      // Si quedaba una sesión abierta (otro usuario en la misma pestaña, o la
+      // cookie de antes), se revoca en la API antes de guardar la nueva: si no,
+      // su refresh token seguiría vivo hasta vencer. Sin cookie es un no-op.
+      // Las cachés del usuario anterior también se limpian.
+      await endSession(sessionPath)
+      onSignOut?.()
       await startSession(result.tokens, sessionPath)
       setUser(result.user)
       setStatus("authenticated")
     },
-    [sessionPath, setStatus]
+    [onSignOut, sessionPath, setStatus]
   )
 
   const signOut = React.useCallback(
