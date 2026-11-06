@@ -34,6 +34,11 @@ vi.mock("@/lib/crm-api", () => ({
       inquiries: 5,
       conversionRate: "20.0",
       byStage: { NEW: 2, CLOSED_WON: 1 },
+      bySource: { PORTAL: 5 },
+      daily: [
+        { date: "2026-11-01", views: 15, inquiries: 2 },
+        { date: "2026-11-02", views: 25, inquiries: 3 },
+      ],
     },
   }),
 }))
@@ -165,6 +170,6 @@ describe("PublicationSection", () => {
     render(<PublicationSection propertyId="p1" />)
     expect(screen.getByText("40")).toBeInTheDocument()
     expect(screen.getByText("20,0 %")).toBeInTheDocument()
-    expect(screen.getByText(/desde que se activó/)).toBeInTheDocument()
+    expect(screen.getByText(/fecha de activación/)).toBeInTheDocument()
   })
 })

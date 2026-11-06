@@ -129,6 +129,18 @@ function StageList({
           </li>
         ))}
       </ul>
+      {more.isError && (
+        <p role="alert" className="px-1 text-xs text-destructive">
+          No se pudieron cargar más consultas.{" "}
+          <button
+            type="button"
+            className="underline"
+            onClick={() => void more.refetch()}
+          >
+            Reintentar
+          </button>
+        </p>
+      )}
       {column.total > cards.length && (!expanded || more.hasNextPage) && (
         <Button
           variant="outline"

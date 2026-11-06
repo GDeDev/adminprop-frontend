@@ -67,26 +67,35 @@ export function ChannelsScreen() {
         </p>
       </div>
 
-      {connected === "mercadolibre" && (
-        <Alert role="status">
-          <AlertDescription>Mercado Libre quedó conectado.</AlertDescription>
-        </Alert>
-      )}
+      {connected === "mercadolibre" &&
+        channels.data?.some(
+          (item) =>
+            item.channel === "MERCADOLIBRE" && item.status === "CONNECTED"
+        ) && (
+          <Alert role="status">
+            <AlertDescription>Mercado Libre quedó conectado.</AlertDescription>
+          </Alert>
+        )}
       {channels.isPending && <Skeleton className="h-40" />}
       {channels.isError && (
         <Alert variant="destructive" role="alert">
           <AlertDescription>
-            {crmApiError(channels.error, "No se pudieron cargar los canales.")}
+            {crmApiError(channels.error, "No se pudieron cargar los canales.")}{" "}
+            <Button variant="link" onClick={() => void channels.refetch()}>
+              Reintentar
+            </Button>
           </AlertDescription>
         </Alert>
       )}
-      <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        {channels.data?.map((channel) => (
-          <li key={channel.channel}>
-            <ChannelCard channel={channel} />
-          </li>
-        ))}
-      </ul>
+      {channels.data && (
+        <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {channels.data?.map((channel) => (
+            <li key={channel.channel}>
+              <ChannelCard channel={channel} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -128,7 +137,8 @@ function ChannelCard({ channel }: { channel: ListingChannelDto }) {
       {channel.status === "ERROR" && channel.lastError && (
         <Alert variant="destructive" role="alert">
           <AlertDescription>
-            {channel.lastError} Reconectá la cuenta para seguir publicando.
+            La conexión con el portal falló: {channel.lastError} Reconectá la
+            cuenta para seguir publicando.
           </AlertDescription>
         </Alert>
       )}

@@ -15,12 +15,9 @@ import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
-import { StatCard } from "@adminprop/ui/components/stat-card"
 import { safeHttpUrl } from "@adminprop/ui/lib/safe-url"
 
-import { conversionLabel, crmApiError, STAGE_LABELS, STAGES } from "@/lib/crm"
-import { usePropertyAnalytics } from "@/lib/crm-api"
-import { addDays, todayIso } from "@/lib/dates"
+import { crmApiError } from "@/lib/crm"
 import { formatDateTime } from "@/lib/automations"
 import { isJobFinished, useJobStatus } from "@/lib/jobs-api"
 import {
@@ -38,6 +35,8 @@ import {
   useListingAction,
   usePropertyListings,
 } from "@/lib/listings-api"
+
+import { PropertyAnalytics } from "./property-analytics"
 
 /** Ficha de propiedad → Publicación y analíticas (rediseño Fase 23, sección 8). */
 export function PublicationSection({ propertyId }: { propertyId: string }) {
@@ -81,7 +80,7 @@ export function PublicationSection({ propertyId }: { propertyId: string }) {
           ))}
         </ul>
       </section>
-      <Analytics propertyId={propertyId} />
+      <PropertyAnalytics propertyId={propertyId} />
     </div>
   )
 }
@@ -183,7 +182,9 @@ function ListingCard({
       )}
       {listing.status === "ERROR" && listing.lastError && (
         <Alert variant="destructive" role="alert">
-          <AlertDescription>{listing.lastError}</AlertDescription>
+          <AlertDescription>
+            No se pudo publicar. Motivo informado: {listing.lastError}
+          </AlertDescription>
         </Alert>
       )}
       {!unavailable &&
@@ -225,66 +226,5 @@ function ListingCard({
         </div>
       )}
     </div>
-  )
-}
-
-function Figure({ label, value }: { label: string; value: string }) {
-  return <StatCard label={label} value={value} className="p-4" />
-}
-
-const RANGE_DAYS = 30
-
-/** Vistas, consultas y conversión de la propiedad en los últimos 30 días. */
-function Analytics({ propertyId }: { propertyId: string }) {
-  const range = React.useMemo(() => {
-    const to = todayIso()
-    return { from: addDays(to, -RANGE_DAYS), to }
-  }, [])
-  const analytics = usePropertyAnalytics(propertyId, range)
-
-  return (
-    <section
-      aria-labelledby="analytics-title"
-      className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-raised"
-    >
-      <h2
-        id="analytics-title"
-        className="font-display text-title-md font-semibold"
-      >
-        Interés en la propiedad
-      </h2>
-      {analytics.isPending && <Skeleton className="h-20" />}
-      {analytics.isError && (
-        <p className="text-sm text-muted-foreground">
-          No se pudieron cargar las analíticas.
-        </p>
-      )}
-      {analytics.data && (
-        <>
-          <div className="grid grid-cols-3 gap-3">
-            <Figure label="Vistas" value={String(analytics.data.views)} />
-            <Figure
-              label="Consultas"
-              value={String(analytics.data.inquiries)}
-            />
-            <Figure
-              label="Conversión"
-              value={conversionLabel(analytics.data.conversionRate)}
-            />
-          </div>
-          <ul className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            {STAGES.map((stage) => (
-              <li key={stage}>
-                {STAGE_LABELS[stage]}: {analytics.data.byStage[stage] ?? 0}
-              </li>
-            ))}
-          </ul>
-          <p className="text-xs text-muted-foreground">
-            Últimos {RANGE_DAYS} días. Las vistas se cuentan desde que se activó
-            esta función; antes no hay datos.
-          </p>
-        </>
-      )}
-    </section>
   )
 }

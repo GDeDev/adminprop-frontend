@@ -6,12 +6,13 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   closestCorners,
   useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
+import type { Announcements, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -75,6 +76,41 @@ export function resolveDrop(
   return { stage: target.stage, index: overIndex + (movingDown ? 1 : 0) }
 }
 
+/**
+ * Avisos para lectores de pantalla en español (los de dnd-kit vienen en
+ * inglés). Dicen qué consulta se mueve y sobre qué etapa o tarjeta está.
+ */
+export function dragAnnouncements(pipeline: PipelineDto): Announcements {
+  const cards = pipeline.columns.flatMap((column) => column.cards)
+  const nameOf = (id: string | number) =>
+    cards.find((card) => card.id === id)?.name ?? "la consulta"
+  const placeOf = (id: string | number) => {
+    const key = String(id)
+    if (key.startsWith("column:")) {
+      return `la etapa «${STAGE_LABELS[key.slice("column:".length) as InquiryStage]}»`
+    }
+    const column = pipeline.columns.find((item) =>
+      item.cards.some((card) => card.id === key)
+    )
+    return column
+      ? `la etapa «${STAGE_LABELS[column.stage]}», junto a ${nameOf(id)}`
+      : "otro lugar"
+  }
+  return {
+    onDragStart: ({ active }) => `Tomaste la consulta de ${nameOf(active.id)}.`,
+    onDragOver: ({ active, over }) =>
+      over
+        ? `La consulta de ${nameOf(active.id)} está sobre ${placeOf(over.id)}.`
+        : undefined,
+    onDragEnd: ({ active, over }) =>
+      over
+        ? `Soltaste la consulta de ${nameOf(active.id)} en ${placeOf(over.id)}.`
+        : `Soltaste la consulta de ${nameOf(active.id)} fuera de las etapas; no se movió.`,
+    onDragCancel: ({ active }) =>
+      `Se canceló el movimiento de la consulta de ${nameOf(active.id)}.`,
+  }
+}
+
 /** Tablero de escritorio: seis columnas con arrastre (mouse, tacto y teclado). */
 export function Board({
   pipeline,
@@ -89,6 +125,10 @@ export function Board({
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    // Tablets en horizontal: el tacto necesita una pausa para no competir con el scroll.
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -117,6 +157,13 @@ export function Board({
     onMove(card, drop.stage, column.cards, drop.index)
   }
 
+  /** «Mover a…»: la tarjeta va al final de la etapa elegida. */
+  function moveToEnd(card: InquiryCard, stage: InquiryStage) {
+    const list =
+      pipeline.columns.find((item) => item.stage === stage)?.cards ?? []
+    onMove(card, stage, list, list.length)
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -127,6 +174,7 @@ export function Board({
       onDragEnd={handleEnd}
       onDragCancel={() => setActiveId(null)}
       accessibility={{
+        announcements: dragAnnouncements(pipeline),
         screenReaderInstructions: {
           draggable:
             "Para mover la consulta, presioná espacio, usá las flechas para elegir el lugar y presioná espacio de nuevo para soltarla. Escape cancela.",
@@ -140,6 +188,7 @@ export function Board({
             column={column}
             filters={filters}
             onOpen={onOpen}
+            onMoveTo={moveToEnd}
           />
         ))}
       </div>
@@ -156,10 +205,12 @@ function BoardColumn({
   column,
   filters,
   onOpen,
+  onMoveTo,
 }: {
   column: PipelineColumn
   filters: InquiryFilters
   onOpen: (id: string) => void
+  onMoveTo: (card: InquiryCard, stage: InquiryStage) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: columnId(column.stage) })
   const [expanded, setExpanded] = React.useState(false)
@@ -193,11 +244,20 @@ function BoardColumn({
       >
         <ul className="flex flex-col gap-2">
           {column.cards.map((card) => (
-            <SortableItem key={card.id} card={card} onOpen={onOpen} />
+            <SortableItem
+              key={card.id}
+              card={card}
+              onOpen={onOpen}
+              onMoveTo={onMoveTo}
+            />
           ))}
           {extras.map((card) => (
             <li key={card.id}>
-              <InquiryCardView card={card} onOpen={onOpen} />
+              <InquiryCardView
+                card={card}
+                onOpen={onOpen}
+                onMoveMenu={(stage) => onMoveTo(card, stage)}
+              />
             </li>
           ))}
         </ul>
@@ -205,6 +265,18 @@ function BoardColumn({
       {column.total === 0 && (
         <p className="px-1 py-4 text-center text-xs text-muted-foreground">
           Sin consultas
+        </p>
+      )}
+      {more.isError && (
+        <p role="alert" className="px-1 text-xs text-destructive">
+          No se pudieron cargar más consultas.{" "}
+          <button
+            type="button"
+            className="underline"
+            onClick={() => void more.refetch()}
+          >
+            Reintentar
+          </button>
         </p>
       )}
       {hasMore && (!expanded || more.hasNextPage) && (
@@ -227,9 +299,11 @@ function BoardColumn({
 function SortableItem({
   card,
   onOpen,
+  onMoveTo,
 }: {
   card: InquiryCard
   onOpen: (id: string) => void
+  onMoveTo: (card: InquiryCard, stage: InquiryStage) => void
 }) {
   const {
     attributes,
@@ -238,7 +312,10 @@ function SortableItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: card.id })
+  } = useSortable({
+    id: card.id,
+    attributes: { roleDescription: "consulta movible" },
+  })
 
   return (
     <li
@@ -250,6 +327,7 @@ function SortableItem({
         card={card}
         onOpen={onOpen}
         dragHandle={{ ...attributes, ...listeners }}
+        onMoveMenu={(stage) => onMoveTo(card, stage)}
       />
     </li>
   )

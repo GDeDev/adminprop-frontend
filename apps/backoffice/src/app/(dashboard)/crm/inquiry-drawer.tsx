@@ -1,7 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Loader2, MessageCircle, Save, Send } from "lucide-react"
+import {
+  Loader2,
+  Mail,
+  MessageCircle,
+  PhoneCall,
+  Save,
+  Send,
+} from "lucide-react"
 import { toast } from "sonner"
 
 import type {
@@ -43,6 +50,7 @@ import {
 } from "@/lib/crm"
 import {
   useAddNote,
+  useContactAttempt,
   useAssignInquiry,
   useAssignees,
   useInquiry,
@@ -142,6 +150,7 @@ function Detail({
       <StageAssign inquiry={inquiry} onMove={onMove} stageCards={stageCards} />
       <EditForm inquiry={inquiry} />
       <WhatsAppSection inquiry={inquiry} />
+      <ContactAttempts inquiry={inquiry} />
       <Timeline inquiry={inquiry} />
     </>
   )
@@ -373,6 +382,59 @@ function WhatsAppSection({ inquiry }: { inquiry: InquiryDetail }) {
         <MessageCircle aria-hidden />
         Enviar por WhatsApp
       </Button>
+    </div>
+  )
+}
+
+/**
+ * Registro manual de un contacto hecho fuera del sistema (un llamado o un
+ * email). WhatsApp se registra solo al abrir el chat. Si la consulta estaba
+ * en «Nueva», la API la pasa a «Contactada».
+ */
+function ContactAttempts({ inquiry }: { inquiry: InquiryDetail }) {
+  const attempt = useContactAttempt()
+
+  async function register(channel: "PHONE" | "EMAIL") {
+    try {
+      await attempt.mutateAsync({ id: inquiry.id, channel })
+      toast.success("Contacto registrado.")
+    } catch (error) {
+      toast.error(crmApiError(error, "No se pudo registrar el contacto."))
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-medium">Registrar un contacto</p>
+      <div className="flex flex-wrap gap-2">
+        {inquiry.phone && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={attempt.isPending}
+            onClick={() => void register("PHONE")}
+          >
+            <PhoneCall aria-hidden />
+            Registrar llamado
+          </Button>
+        )}
+        {inquiry.email && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={attempt.isPending}
+            onClick={() => void register("EMAIL")}
+          >
+            <Mail aria-hidden />
+            Registrar email
+          </Button>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {inquiry.lastContactAt
+          ? `Último contacto: ${formatDateTime(inquiry.lastContactAt)}.`
+          : "Todavía no se registró ningún contacto."}
+      </p>
     </div>
   )
 }
