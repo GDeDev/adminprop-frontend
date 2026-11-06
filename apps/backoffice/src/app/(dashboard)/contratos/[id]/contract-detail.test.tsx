@@ -134,6 +134,9 @@ function makeContract(overrides: Partial<ContractDetail> = {}): ContractDetail {
 }
 
 vi.mock("./inventory-section", () => ({ InventorySection: () => null }))
+vi.mock("@/lib/inventory-api", () => ({
+  useContractInventories: () => ({ isPending: true, isError: false }),
+}))
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },

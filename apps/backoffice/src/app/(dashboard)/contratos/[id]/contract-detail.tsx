@@ -41,8 +41,10 @@ import {
   timelineLabel,
 } from "@/lib/contracts"
 import { DownloadPdfButton } from "@/components/download-pdf-button"
+import { useContractAccount, useContractInstallments } from "@/lib/billing-api"
 import { useContract } from "@/lib/contracts-api"
 import { formatDate, formatPeriod, todayIso } from "@/lib/dates"
+import { useContractInventories } from "@/lib/inventory-api"
 import { useContractServices } from "@/lib/services-api"
 
 import { ContractBadges } from "../contract-list"
@@ -61,6 +63,13 @@ import { TerminateDialog } from "./terminate-dialog"
 /** Ficha de contrato (spec Fase 9, 5.2). */
 export function ContractDetailScreen({ id }: { id: string }) {
   const query = useContract(id)
+  // Las secciones solo necesitan el id: se piden ya, en paralelo con el
+  // contrato, y no recién cuando este llega y se montan (cascada). React
+  // Query las comparte con los hooks de cada sección.
+  useContractServices(id)
+  useContractAccount(id)
+  useContractInstallments(id)
+  useContractInventories(id)
 
   if (query.isPending) return <PageSkeleton cards={3} />
   if (query.isError) {
