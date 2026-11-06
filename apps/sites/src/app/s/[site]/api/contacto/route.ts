@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-import { apiUrl } from "@/lib/api"
+import { apiUrl, trustedServerHeaders } from "@/lib/api"
 import { clientIp } from "@/lib/client-ip"
 import { isSameOrigin } from "@/lib/origin"
 import { requestHost } from "@/lib/request-host"
@@ -55,7 +55,12 @@ export async function POST(
   const propertyId =
     typeof body.propertyId === "string" ? body.propertyId : null
 
+  // La API limita las consultas por visitante. Le pasamos su IP en
+  // `X-Client-IP`, que solo cree si viene con `X-Sites-Secret` (un
+  // `X-Forwarded-For` lo puede escribir cualquiera). Sin IP confiable no va
+  // ninguno de los dos: la API cuenta por este servidor, como antes.
   const ip = clientIp(request.headers)
+  const forwarded = ip ? trustedServerHeaders() : {}
   try {
     const response = await fetch(
       `${base}/public/${encodeURIComponent(route.slug)}/contact`,
@@ -63,7 +68,9 @@ export async function POST(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(ip ? { "X-Forwarded-For": ip } : {}),
+          ...(ip && "X-Sites-Secret" in forwarded
+            ? { ...forwarded, "X-Client-IP": ip }
+            : {}),
         },
         body: JSON.stringify({
           name: text(body.name, 120),

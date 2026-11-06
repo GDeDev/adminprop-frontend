@@ -5,7 +5,11 @@ const resolveHost = vi.fn()
 vi.mock("@/lib/api", () => ({ resolveHost: (h: string) => resolveHost(h) }))
 
 import { clearHostCache } from "@/lib/host-cache"
-import { clearRateLimit, RATE_LIMIT_MAX } from "@/lib/rate-limit"
+import {
+  BROWSE_LIMIT_MAX,
+  clearRateLimit,
+  RATE_LIMIT_MAX,
+} from "@/lib/rate-limit"
 
 import { config, proxy } from "./proxy"
 
@@ -234,5 +238,22 @@ describe("proxy", () => {
     expect(config.matcher).toEqual(
       expect.arrayContaining(["/s/:path*", "/p/:path*"])
     )
+  })
+
+  it("fichas y favoritos (URL que arma el visitante) tienen su propio tope por IP", async () => {
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
+    for (let i = 0; i < BROWSE_LIMIT_MAX; i++) {
+      const r = await proxy(
+        request(`/propiedades/id-${i}`, "mi-inmo.sites.test", "203.0.113.9")
+      )
+      expect(r.status).not.toBe(429)
+    }
+    const limited = await proxy(
+      request("/api/favoritos?ids=x", "mi-inmo.sites.test", "203.0.113.9")
+    )
+    expect(limited.status).toBe(429)
+    // La home (fija y cacheada) no cuenta.
+    const home = await proxy(request("/", "mi-inmo.sites.test", "203.0.113.9"))
+    expect(home.status).not.toBe(429)
   })
 })

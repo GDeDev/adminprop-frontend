@@ -8,7 +8,11 @@ import {
   HostLookupLimitedError,
 } from "@/lib/host-cache"
 import { isPlausibleSiteHost, normalizeHost } from "@/lib/host-policy"
-import { takeToken } from "@/lib/rate-limit"
+import {
+  isVisitorBuiltRead,
+  takeBrowseToken,
+  takeToken,
+} from "@/lib/rate-limit"
 import { requestHost } from "@/lib/request-host"
 import {
   encodeSiteRoute,
@@ -129,6 +133,17 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!route) return NextResponse.rewrite(new URL(NOT_FOUND, request.url))
+
+  // Fichas, listado con filtros y favoritos: la URL la arma el visitante y la
+  // lectura va con el secreto, así que el tope lo pone este proxy.
+  const hasQuery = [...searchParams.keys()].some((k) => k !== "preview")
+  if (
+    !route.previewToken &&
+    isVisitorBuiltRead(rest, hasQuery) &&
+    !takeBrowseToken(ip)
+  ) {
+    return tooManyRequests()
+  }
 
   // El borrador tiene su propio árbol (`/p`), que no se cachea.
   const tree = route.previewToken ? "/p" : "/s"

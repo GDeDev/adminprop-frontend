@@ -56,7 +56,8 @@ describe("POST /api/contacto", () => {
     expect(response.status).toBe(403)
   })
 
-  it("el propio origen reenvía a la API con la IP confiable", async () => {
+  it("el propio origen reenvía a la API con la IP confiable y el secreto", async () => {
+    vi.stubEnv("SITES_SERVER_SECRET", "s3cret")
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response("{}", { status: 201 }))
@@ -73,8 +74,28 @@ describe("POST /api/contacto", () => {
     const [url, init] = fetchSpy.mock.calls[0] ?? []
     expect(url).toBe("http://api.test/api/v1/public/demo/contact")
     expect((init as RequestInit).headers).toMatchObject({
-      "X-Forwarded-For": "203.0.113.9",
+      "X-Client-IP": "203.0.113.9",
+      "X-Sites-Secret": "s3cret",
     })
+    expect((init as RequestInit).headers).not.toHaveProperty("X-Forwarded-For")
+  })
+
+  it("sin secreto no manda la IP (la API no la creería) ni el header", async () => {
+    vi.stubEnv("SITES_SERVER_SECRET", "")
+    vi.stubEnv("SITES_REVALIDATE_SECRET", "")
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response("{}", { status: 201 }))
+    await POST(
+      post({
+        origin: "http://localhost:3003",
+        "x-forwarded-for": "203.0.113.9",
+      }),
+      params()
+    )
+    const headers = (fetchSpy.mock.calls[0]?.[1] as RequestInit).headers
+    expect(headers).not.toHaveProperty("X-Client-IP")
+    expect(headers).not.toHaveProperty("X-Sites-Secret")
   })
 
   it("sin Origin (no es un navegador) se acepta", async () => {
