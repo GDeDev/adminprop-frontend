@@ -53,7 +53,13 @@ export function PropertySelect({
     address: string
   } | null>(null)
   const debouncedSearch = useDebouncedValue(search.trim())
-  const query = useInfiniteProperties({ search: debouncedSearch })
+  // Solo se busca con el selector abierto: la etiqueta de lo elegido no
+  // depende de la lista, y un formulario con varios selectores no dispara
+  // una búsqueda por cada uno al montarse.
+  const query = useInfiniteProperties(
+    { search: debouncedSearch },
+    { enabled: open }
+  )
   const properties = (
     query.data?.pages.flatMap((page) => page.data) ?? []
   ).filter(

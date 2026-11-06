@@ -48,9 +48,13 @@ async function unwrap<T>(
 // ---------------------------------------------------------------------------
 
 /** Listado con scroll infinito, como propietarios. */
-export function useInfiniteRenters(filters: RenterFilters) {
+export function useInfiniteRenters(
+  filters: RenterFilters,
+  { enabled = true }: { enabled?: boolean } = {}
+) {
   return useInfiniteQuery({
     queryKey: [...rentersKey, "list", filters],
+    enabled,
     queryFn: async ({ pageParam }) => {
       const { data } = await apiClient.get<
         ApiSuccess<Paginated<RenterSummary>>
@@ -151,9 +155,13 @@ export function useDeleteRenter() {
 // Garantes
 // ---------------------------------------------------------------------------
 
-export function useInfiniteGuarantors(filters: GuarantorFilters) {
+export function useInfiniteGuarantors(
+  filters: GuarantorFilters,
+  { enabled = true }: { enabled?: boolean } = {}
+) {
   return useInfiniteQuery({
     queryKey: [...guarantorsKey, "list", filters],
+    enabled,
     queryFn: async ({ pageParam }) => {
       const { data } = await apiClient.get<
         ApiSuccess<Paginated<GuarantorSummary>>

@@ -29,9 +29,13 @@ const PAGE_SIZE = 20
 const ownersKey = ["owners"] as const
 
 /** Listado con scroll infinito, como el de propiedades (DT-34). */
-export function useInfiniteOwners(filters: OwnerFilters) {
+export function useInfiniteOwners(
+  filters: OwnerFilters,
+  { enabled = true }: { enabled?: boolean } = {}
+) {
   return useInfiniteQuery({
     queryKey: [...ownersKey, "list", filters],
+    enabled,
     queryFn: async ({ pageParam }) => {
       const { data } = await apiClient.get<ApiSuccess<Paginated<OwnerSummary>>>(
         "/owners",
