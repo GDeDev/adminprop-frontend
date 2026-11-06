@@ -59,10 +59,10 @@ const securityHeaders = [
   },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "X-DNS-Prefetch-Control", value: "on" },
-  {
-    key: "Strict-Transport-Security",
-    value: "max-age=31536000; includeSubDomains",
-  },
+  // Sin `includeSubDomains`: el sitio también se sirve en el dominio propio de
+  // cada inmobiliaria, y con esa directiva le forzaríamos HTTPS a TODOS sus
+  // subdominios (mail, sistemas viejos en http…), que no son nuestros.
+  { key: "Strict-Transport-Security", value: "max-age=31536000" },
 ]
 
 const nextConfig: NextConfig = {

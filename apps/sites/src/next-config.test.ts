@@ -24,3 +24,13 @@ describe("CSP del sitio público", () => {
     expect(csp).toContain("object-src 'none'")
   })
 })
+
+describe("HSTS del sitio público", () => {
+  it("no incluye subdominios: los dominios propios no son nuestros", async () => {
+    const rules = (await nextConfig.headers?.()) ?? []
+    const hsts = rules[0]?.headers.find(
+      (h) => h.key === "Strict-Transport-Security"
+    )
+    expect(hsts?.value).toBe("max-age=31536000")
+  })
+})
