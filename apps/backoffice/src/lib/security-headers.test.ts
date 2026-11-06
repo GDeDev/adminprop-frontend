@@ -6,6 +6,8 @@ import {
   securityHeaders,
 } from "../../../../config/security-headers"
 
+import { DEFAULT_SITES_URL } from "./site"
+
 describe("security headers", () => {
   it("saca el origen de la API y descarta esquemas raros", () => {
     expect(originOf("https://api.ejemplo.com/api/v1")).toBe(
@@ -33,6 +35,12 @@ describe("security headers", () => {
     )
     expect(buildCsp()).toContain("frame-src 'self' about:;")
     expect(buildCsp({ sitesUrl: "javascript:1" })).not.toContain("javascript")
+  })
+
+  it("en desarrollo sin NEXT_PUBLIC_SITES_URL usa el mismo default que el iframe", () => {
+    expect(buildCsp({ isDev: true })).toContain(
+      `frame-src 'self' about: ${originOf(DEFAULT_SITES_URL)}`
+    )
   })
 
   it("en desarrollo permite eval y websocket de HMR", () => {

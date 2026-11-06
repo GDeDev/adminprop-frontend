@@ -31,6 +31,14 @@ export interface SecurityHeadersOptions {
   isDev?: boolean
 }
 
+/**
+ * Sitio web en desarrollo cuando no hay `NEXT_PUBLIC_SITES_URL`. Es el mismo
+ * default que usa el backoffice para armar la URL del iframe
+ * (`DEFAULT_SITES_URL` en `apps/backoffice/src/lib/site.ts`): si no
+ * coincidieran, la vista previa quedaría bloqueada por la CSP.
+ */
+export const DEV_SITES_URL = "http://localhost:3003"
+
 /** Origen (`https://host:puerto`) de una URL, o `null` si no es http(s). */
 export function originOf(url: string | undefined): string | null {
   if (!url) return null
@@ -49,7 +57,7 @@ export function buildCsp({
   isDev = false,
 }: SecurityHeadersOptions = {}): string {
   const apiOrigin = originOf(apiUrl)
-  const sitesOrigin = originOf(sitesUrl)
+  const sitesOrigin = originOf(sitesUrl ?? (isDev ? DEV_SITES_URL : undefined))
   const connect = ["'self'", ...(apiOrigin ? [apiOrigin] : [])]
   if (isDev) connect.push("ws:", "wss:")
 
