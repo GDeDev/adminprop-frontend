@@ -30,10 +30,20 @@ describe("X-Sites-Secret hacia la API", () => {
     expect(init.headers).toEqual({ "X-Sites-Secret": "s3cret" })
   })
 
-  it("lo manda al resolver el host (sin caché)", async () => {
+  it("NO lo manda al resolver el host (sin caché: la API lo sigue limitando)", async () => {
     await resolveHost("demo.example.com")
     const init = fetchMock.mock.calls[0]?.[1] as RequestInit
-    expect(init.headers).toEqual({ "X-Sites-Secret": "s3cret" })
+    expect(init.headers).toBeUndefined()
+  })
+
+  it("NO lo manda en la vista previa (sin caché)", async () => {
+    await getSite({
+      slug: "demo",
+      previewToken: "a.b.c",
+    } as unknown as SiteRoute)
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit
+    expect(init.cache).toBe("no-store")
+    expect(init.headers).toBeUndefined()
   })
 
   it("SITES_SERVER_SECRET tiene prioridad sobre SITES_REVALIDATE_SECRET", () => {

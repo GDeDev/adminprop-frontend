@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { HostResult } from "./api"
-import { cachedHostLookup, clearHostCache, HostLookupError } from "./host-cache"
+import {
+  cachedHostLookup,
+  clearHostCache,
+  HostLookupError,
+  HostLookupLimitedError,
+} from "./host-cache"
 
 const found = (slug: string): HostResult => ({ status: "found", slug })
 const missing: HostResult = { status: "missing" }
@@ -61,5 +66,34 @@ describe("cachedHostLookup", () => {
     await expect(
       cachedHostLookup("a.sites.com", lookup)
     ).rejects.toBeInstanceOf(HostLookupError)
+  })
+
+  it("una ráfaga de hosts inexistentes no desaloja a los sitios reales", async () => {
+    const lookup = vi.fn(async (host: string): Promise<HostResult> =>
+      host === "real.sites.com" ? found("real") : missing
+    )
+    await cachedHostLookup("real.sites.com", lookup)
+    for (let i = 0; i < 6_000; i++) {
+      await cachedHostLookup(`bot-${i}.com`, lookup)
+    }
+    lookup.mockClear()
+    expect(await cachedHostLookup("real.sites.com", lookup)).toBe("real")
+    expect(lookup).not.toHaveBeenCalled()
+    // Los inexistentes más viejos sí salieron (LRU), no se vació todo.
+    await cachedHostLookup("bot-0.com", lookup)
+    await cachedHostLookup("bot-5999.com", lookup)
+    expect(lookup.mock.calls.map(([h]) => h)).toEqual(["bot-0.com"])
+  })
+
+  it("sin cupo no llama a la API: sirve el valor viejo o lanza HostLookupLimitedError", async () => {
+    vi.useFakeTimers()
+    const lookup = vi.fn().mockResolvedValue(found("a"))
+    await cachedHostLookup("a.sites.com", lookup)
+    vi.advanceTimersByTime(60_000)
+    expect(await cachedHostLookup("a.sites.com", lookup, () => false)).toBe("a")
+    await expect(
+      cachedHostLookup("b.sites.com", lookup, () => false)
+    ).rejects.toBeInstanceOf(HostLookupLimitedError)
+    expect(lookup).toHaveBeenCalledTimes(1)
   })
 })

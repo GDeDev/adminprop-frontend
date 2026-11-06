@@ -5,8 +5,9 @@ const resolveHost = vi.fn()
 vi.mock("@/lib/api", () => ({ resolveHost: (h: string) => resolveHost(h) }))
 
 import { clearHostCache } from "@/lib/host-cache"
+import { clearRateLimit, RATE_LIMIT_MAX } from "@/lib/rate-limit"
 
-import { proxy } from "./proxy"
+import { config, proxy } from "./proxy"
 
 const TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ0eXAiOiJzaXRlIn0.firma-del-token_123"
 
@@ -17,15 +18,19 @@ const rewriteOf = (response: Response) =>
     // `/` queda como `/s/<sitio>/`: Next lo normaliza igual.
     .replace(/\/(\?|$)/, "$1")
 
-function request(url: string, host?: string) {
+function request(url: string, host?: string, ip?: string) {
   return new NextRequest(`http://localhost${url}`, {
-    headers: host ? { host } : {},
+    headers: {
+      ...(host ? { host } : {}),
+      ...(ip ? { "x-forwarded-for": ip } : {}),
+    },
   })
 }
 
 describe("proxy", () => {
   beforeEach(() => {
     clearHostCache()
+    clearRateLimit()
     resolveHost.mockReset()
     vi.unstubAllEnvs()
   })
@@ -187,5 +192,47 @@ describe("proxy", () => {
   it("un slug inválido en /_s no pasa", async () => {
     vi.stubEnv("NODE_ENV", "development")
     expect(rewriteOf(await proxy(request("/_s/Mi Inmo/x")))).toBe("/s/nf")
+  })
+
+  it("una IP que inventa hosts recibe 429 al pasar el cupo, sin llamar más a la API", async () => {
+    resolveHost.mockResolvedValue({ status: "missing" })
+    for (let i = 0; i < RATE_LIMIT_MAX; i++) {
+      await proxy(request("/", `bot-${i}.com`, "203.0.113.9"))
+    }
+    expect(resolveHost).toHaveBeenCalledTimes(RATE_LIMIT_MAX)
+    const limited = await proxy(request("/", "bot-x.com", "203.0.113.9"))
+    expect(limited.status).toBe(429)
+    expect(limited.headers.get("retry-after")).toBe("60")
+    expect(resolveHost).toHaveBeenCalledTimes(RATE_LIMIT_MAX)
+    // Otro visitante sigue entrando.
+    const other = await proxy(request("/", "bot-y.com", "198.51.100.7"))
+    expect(other.status).not.toBe(429)
+  })
+
+  it("lo cacheado no gasta cupo: un sitio real se sigue sirviendo", async () => {
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
+    for (let i = 0; i < RATE_LIMIT_MAX + 10; i++) {
+      const r = await proxy(request("/", "mi-inmo.sites.test", "203.0.113.9"))
+      expect(r.status).not.toBe(429)
+    }
+  })
+
+  it("la vista previa cuenta contra el cupo por IP", async () => {
+    resolveHost.mockResolvedValue({ status: "found", slug: "mi-inmo" })
+    for (let i = 0; i < RATE_LIMIT_MAX; i++) {
+      await proxy(
+        request(`/?preview=${TOKEN}`, "mi-inmo.sites.test", "203.0.113.9")
+      )
+    }
+    const limited = await proxy(
+      request(`/?preview=${TOKEN}`, "mi-inmo.sites.test", "203.0.113.9")
+    )
+    expect(limited.status).toBe(429)
+  })
+
+  it("el matcher cubre /s y /p aunque la ruta tenga extensión", () => {
+    expect(config.matcher).toEqual(
+      expect.arrayContaining(["/s/:path*", "/p/:path*"])
+    )
   })
 })

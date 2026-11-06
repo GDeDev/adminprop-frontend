@@ -48,6 +48,11 @@ export function apiUrl(): string | null {
  * acepta cualquiera de los dos). Solo servidor:
  * nunca `NEXT_PUBLIC_`, y no se manda en el formulario de contacto (ese sí
  * debe seguir limitado por visitante).
+ *
+ * Tampoco va en las lecturas sin caché (resolver el host, la vista previa):
+ * esas las dispara cualquiera con un `Host` o un `?preview=` inventado, y con
+ * el header la API no las frenaría nunca. Las cacheadas (ISR) llegan a la API
+ * a lo sumo una vez por minuto por URL, así que ahí el header no amplifica.
  */
 export function trustedServerHeaders(): Record<string, string> {
   const secret =
@@ -100,7 +105,7 @@ async function get<T>(
     response = await fetch(
       `${base}/public${path}${queryString(options.params)}`,
       options.fresh
-        ? { cache: "no-store", headers: trustedServerHeaders(), signal }
+        ? { cache: "no-store", signal }
         : {
             headers: trustedServerHeaders(),
             signal,

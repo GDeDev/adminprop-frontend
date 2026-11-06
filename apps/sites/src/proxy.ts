@@ -1,8 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { resolveHost } from "@/lib/api"
-import { cachedHostLookup, HostLookupError } from "@/lib/host-cache"
+import { clientIp } from "@/lib/client-ip"
+import {
+  cachedHostLookup,
+  HostLookupError,
+  HostLookupLimitedError,
+} from "@/lib/host-cache"
 import { isPlausibleSiteHost, normalizeHost } from "@/lib/host-policy"
+import { takeToken } from "@/lib/rate-limit"
 import { requestHost } from "@/lib/request-host"
 import {
   encodeSiteRoute,
@@ -42,6 +48,16 @@ function previewPathOf(pathname: string): string {
   return dev ? (dev[2] ?? "/") : pathname
 }
 
+function tooManyRequests(): NextResponse {
+  return new NextResponse("Demasiados pedidos. Probá de nuevo en un minuto.", {
+    status: 429,
+    headers: {
+      "Retry-After": "60",
+      "Content-Type": "text/plain; charset=utf-8",
+    },
+  })
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
@@ -58,6 +74,11 @@ export async function proxy(request: NextRequest) {
     isPreviewablePath(previewPathOf(pathname))
       ? previewParam
       : null
+
+  // Cada vista previa es una lectura sin caché contra la API: cuenta contra el
+  // cupo por IP. Lo publicado, no (ver `rate-limit.ts`).
+  const ip = clientIp(request.headers)
+  if (previewToken && !takeToken(ip)) return tooManyRequests()
 
   let route: SiteRoute | null = null
   let rest = pathname
@@ -76,8 +97,12 @@ export async function proxy(request: NextRequest) {
     // subdominios de dos niveles) se descarta sin llamar a la API.
     if (host && isPlausibleSiteHost(host)) {
       try {
-        slug = await cachedHostLookup(host, resolveHost)
+        // La vista previa ya descontó su cupo arriba.
+        slug = await cachedHostLookup(host, resolveHost, () =>
+          previewToken ? true : takeToken(ip)
+        )
       } catch (error) {
+        if (error instanceof HostLookupLimitedError) return tooManyRequests()
         if (!(error instanceof HostLookupError)) throw error
         // La API no pudo decir si el sitio existe: no es un 404, es un 503.
         return new NextResponse(
@@ -123,7 +148,12 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Se saltean los estáticos de Next y los archivos con extensión (favicon,
   // imágenes…), salvo `sitemap.xml` y `robots.txt`, que son del sitio.
+  // Los árboles internos `/s` y `/p` pasan SIEMPRE por el proxy (aunque la
+  // ruta termine en `.png`): si no, `/s/d~slug/x.png` llegaba directo a la app
+  // y salteaba el cierre del acceso por slug y el cupo por IP.
   matcher: [
     "/((?!_next/|api/revalidate$)(?!.*\\.(?!xml$|txt$)[a-zA-Z0-9]+$).*)",
+    "/s/:path*",
+    "/p/:path*",
   ],
 }
