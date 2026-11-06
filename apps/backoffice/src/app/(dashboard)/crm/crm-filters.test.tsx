@@ -152,7 +152,7 @@ describe("estados de la pantalla", () => {
     expect(refetch).toHaveBeenCalled()
   })
 
-  it("en mobile muestra pestañas por etapa y en escritorio el tablero", () => {
+  it("en mobile muestra pestañas por etapa y en escritorio el tablero", async () => {
     pipelineState = loaded()
     const { unmount } = render(<CrmScreen />)
     expect(screen.getAllByRole("tab")).toHaveLength(6)
@@ -164,8 +164,11 @@ describe("estados de la pantalla", () => {
     desktop = true
     render(<CrmScreen />)
     expect(screen.queryByRole("tab")).toBeNull()
+    // El tablero se carga aparte (next/dynamic).
     expect(
-      screen.getByRole("button", { name: "Mover la consulta de Cliente a" })
+      await screen.findByRole("button", {
+        name: "Mover la consulta de Cliente a",
+      })
     ).toBeInTheDocument()
   })
 

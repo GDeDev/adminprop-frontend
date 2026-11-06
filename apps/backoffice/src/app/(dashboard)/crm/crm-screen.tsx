@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import dynamic from "next/dynamic"
 import { Plus, Search } from "lucide-react"
 
 import type { InquiryCard, InquirySource } from "@adminprop/shared-types"
@@ -23,12 +24,18 @@ import { useAssignees, usePipeline } from "@/lib/crm-api"
 import type { InquiryFilters } from "@/lib/crm-api"
 import { useDebouncedValue } from "@/lib/use-debounced-value"
 
-import { Board } from "./board"
 import { CrmOverview } from "./crm-overview"
 import { InquiryDrawer } from "./inquiry-drawer"
 import { useMoveFlow } from "./move-flow"
 import { NewInquiryDialog } from "./new-inquiry-dialog"
 import { StageTabs } from "./stage-tabs"
+
+// El tablero arrastrable (@dnd-kit) solo se usa en escritorio: va en su propio
+// chunk y se carga recién cuando se monta, así el celular (pestañas) no lo baja.
+const Board = dynamic(() => import("./board").then((m) => m.Board), {
+  ssr: false,
+  loading: () => <PageSkeleton cards={3} />,
+})
 
 const ALL = "all"
 const UNASSIGNED = "unassigned"
