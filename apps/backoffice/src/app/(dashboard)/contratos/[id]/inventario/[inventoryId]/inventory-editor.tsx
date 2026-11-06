@@ -22,6 +22,7 @@ import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Textarea } from "@adminprop/ui/components/textarea"
 
+import { PrivateImage } from "@/components/private-image"
 import { formatDate } from "@/lib/dates"
 import {
   CONDITIONS,
@@ -84,15 +85,30 @@ export function InventoryEditor({
       />
     )
   }
-  return <Editor contractId={contractId} detail={query.data} />
+  // Las fotos traen URL firmada: si una vence, se vuelve a pedir el
+  // inventario. Las ediciones en curso no se pierden (el borrador vive en el
+  // estado del editor, no en la query).
+  const refreshPhoto = async (photoId: string) =>
+    (await query.refetch()).data?.items
+      .flatMap((item) => item.photos)
+      .find((photo) => photo.id === photoId)?.url
+  return (
+    <Editor
+      contractId={contractId}
+      detail={query.data}
+      refreshPhoto={refreshPhoto}
+    />
+  )
 }
 
 function Editor({
   contractId,
   detail,
+  refreshPhoto,
 }: {
   contractId: string
   detail: InventoryDetail
+  refreshPhoto: (photoId: string) => Promise<string | undefined>
 }) {
   const router = useRouter()
   const locked = detail.status === "CONFIRMED"
@@ -349,11 +365,11 @@ function Editor({
                   <div className="flex flex-wrap items-center gap-2">
                     {photos.map((photo) => (
                       <div key={photo.id} className="relative">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <PrivateImage
                           src={photo.url}
                           alt={`Foto de ${item.description}`}
                           className="size-20 rounded-md object-cover"
+                          refresh={() => refreshPhoto(photo.id)}
                         />
                         {!locked && (
                           <Button

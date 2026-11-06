@@ -3,7 +3,12 @@
 import Link from "next/link"
 import { ChevronLeft, Printer } from "lucide-react"
 
-import type { InventoryComparisonRow } from "@adminprop/shared-types"
+import { toast } from "sonner"
+
+import type {
+  InventoryComparison,
+  InventoryComparisonRow,
+} from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -17,33 +22,65 @@ import {
   TableHeader,
   TableRow,
 } from "@adminprop/ui/components/table"
+import { openInNewTab } from "@adminprop/ui/lib/open-in-new-tab"
 
+import { PrivateImage } from "@/components/private-image"
 import { formatDate } from "@/lib/dates"
 import { CHANGE_LABELS, CONDITION_LABELS } from "@/lib/inventory"
 import { useInventoryComparison } from "@/lib/inventory-api"
+import { isFileUrlFresh } from "@/lib/private-files"
 
+/** URL (firmada) de una foto dentro de la comparación. */
+function photoUrl(data: InventoryComparison | undefined, id: string) {
+  return data?.rows
+    .flatMap((row) => [...row.deliveryPhotos, ...row.returnPhotos])
+    .find((photo) => photo.id === id)?.url
+}
+
+/**
+ * Las fotos son archivos privados con URL firmada (vence a los 10 minutos):
+ * al abrir una, si la URL ya está por vencer se pide la comparación de nuevo,
+ * igual que `PrivateFileLink`; la miniatura se recupera sola si falla.
+ */
 function Photos({
   photos,
+  receivedAt,
+  refresh,
 }: {
   photos: InventoryComparisonRow["deliveryPhotos"]
+  receivedAt: number
+  refresh: (photoId: string) => Promise<string | undefined>
 }) {
   if (photos.length === 0) return null
+
+  async function open(photo: (typeof photos)[number]) {
+    try {
+      const opened = await openInNewTab(async () =>
+        isFileUrlFresh(receivedAt) ? photo.url : await refresh(photo.id)
+      )
+      if (!opened) toast.error("No se pudo abrir la foto.")
+    } catch {
+      toast.error("No se pudo abrir la foto.")
+    }
+  }
+
   return (
     <div className="mt-1 flex flex-wrap gap-1">
       {photos.map((photo) => (
-        <a
+        <button
           key={photo.id}
-          href={photo.url}
-          target="_blank"
-          rel="noopener noreferrer"
+          type="button"
+          aria-label="Abrir foto del inventario"
+          className="rounded"
+          onClick={() => void open(photo)}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <PrivateImage
             src={photo.url}
             alt="Foto del inventario"
             className="size-12 rounded object-cover"
+            refresh={() => refresh(photo.id)}
           />
-        </a>
+        </button>
       ))}
     </div>
   )
@@ -73,6 +110,8 @@ export function InventoryComparisonScreen({
     returnDate,
     worsenedCount,
   } = query.data
+  const refreshPhoto = async (photoId: string) =>
+    photoUrl((await query.refetch()).data, photoId)
 
   return (
     <div className="flex flex-col gap-4">
@@ -147,7 +186,11 @@ export function InventoryComparisonScreen({
                       {row.deliveryNotes}
                     </p>
                   )}
-                  <Photos photos={row.deliveryPhotos} />
+                  <Photos
+                    photos={row.deliveryPhotos}
+                    receivedAt={query.dataUpdatedAt}
+                    refresh={refreshPhoto}
+                  />
                 </TableCell>
                 <TableCell>
                   {row.returnCondition
@@ -158,7 +201,11 @@ export function InventoryComparisonScreen({
                       {row.returnNotes}
                     </p>
                   )}
-                  <Photos photos={row.returnPhotos} />
+                  <Photos
+                    photos={row.returnPhotos}
+                    receivedAt={query.dataUpdatedAt}
+                    refresh={refreshPhoto}
+                  />
                 </TableCell>
                 <TableCell>
                   <Badge
