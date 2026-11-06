@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   barPercent,
+  fillDaily,
   labelIndexes,
   layoutSeries,
   niceMax,
@@ -93,5 +94,28 @@ describe("geometría de la serie diaria", () => {
   it("arma la línea como pares x,y", () => {
     const layout = layoutSeries(daily, "views")
     expect(polylinePoints(layout.points).split(" ")).toHaveLength(3)
+  })
+})
+
+describe("fillDaily", () => {
+  it("rellena con 0 los días que la API omitió, en orden", () => {
+    const filled = fillDaily(
+      [
+        { date: "2026-11-03", views: 4, inquiries: 1 },
+        { date: "2026-11-01", views: 2, inquiries: 0 },
+      ],
+      "2026-11-01",
+      "2026-11-04"
+    )
+    expect(filled).toEqual([
+      { date: "2026-11-01", views: 2, inquiries: 0 },
+      { date: "2026-11-02", views: 0, inquiries: 0 },
+      { date: "2026-11-03", views: 4, inquiries: 1 },
+      { date: "2026-11-04", views: 0, inquiries: 0 },
+    ])
+  })
+
+  it("sin ningún punto queda vacía (estado vacío del gráfico)", () => {
+    expect(fillDaily([], "2026-11-01", "2026-11-04")).toEqual([])
   })
 })

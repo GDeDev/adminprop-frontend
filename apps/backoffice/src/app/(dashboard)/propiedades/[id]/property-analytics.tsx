@@ -14,6 +14,7 @@ import { usePropertyAnalytics } from "@/lib/crm-api"
 import {
   DEFAULT_RANGE,
   VIEWS_NOTICE,
+  fillDaily,
   rangeFor,
   rangeLabel,
   sourceRows,
@@ -74,7 +75,9 @@ export function PropertyAnalytics({ propertyId }: { propertyId: string }) {
               value={conversionLabel(analytics.data.conversionRate)}
             />
           </div>
-          <DailyChart daily={analytics.data.daily ?? []} />
+          <DailyChart
+            daily={fillDaily(analytics.data.daily ?? [], range.from, range.to)}
+          />
           <div className="grid gap-4 md:grid-cols-2">
             <BarList
               title="Consultas por etapa"

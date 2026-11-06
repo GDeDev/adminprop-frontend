@@ -5,7 +5,7 @@ import type {
 } from "@adminprop/shared-types"
 
 import { SOURCE_LABELS, STAGES, STAGE_LABELS } from "./crm"
-import { addDays } from "./dates"
+import { addDays, daysBetween } from "./dates"
 
 /** Rangos que se pueden elegir en las analíticas (días hacia atrás desde hoy). */
 export const ANALYTICS_RANGES = [7, 30, 90] as const
@@ -19,6 +19,28 @@ export function rangeLabel(days: number): string {
 /** Rango `from`/`to` (inclusive) para la API a partir de los días elegidos. */
 export function rangeFor(days: number, today: string) {
   return { from: addDays(today, -days), to: today }
+}
+
+/**
+ * Serie diaria completa de `from` a `to` (inclusive): la API puede omitir los
+ * días sin movimiento y el gráfico asume un punto por día, así que los que
+ * faltan se rellenan con 0. Sin ningún punto queda vacía (el gráfico muestra
+ * su estado vacío). Rescatado de la rama `feature/fase-23-crm-front-ui`.
+ */
+export function fillDaily(
+  points: PropertyInquiryDailyPoint[],
+  from: string,
+  to: string
+): PropertyInquiryDailyPoint[] {
+  if (points.length === 0) return []
+  const byDate = new Map(
+    points.map((point) => [point.date.slice(0, 10), point])
+  )
+  const days = Math.max(0, daysBetween(from, to))
+  return Array.from({ length: days + 1 }, (_, offset) => {
+    const date = addDays(from, offset)
+    return byDate.get(date) ?? { date, views: 0, inquiries: 0 }
+  })
 }
 
 /**
