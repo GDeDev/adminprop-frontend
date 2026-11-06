@@ -70,7 +70,7 @@ export function IncomeTotals({ totals }: { totals: IncomeReport["totals"] }) {
       className="flex flex-col gap-4 p-3"
     >
       <div>
-        <h3 id="income-totals-title" className="font-display text-lg">
+        <h3 id="income-totals-title" className="font-display text-title-md">
           Totales del período por moneda
         </h3>
         <p className="text-xs text-muted-foreground">
@@ -162,7 +162,7 @@ export function IncomeByReceiverTable({
       className="flex flex-col gap-2 p-3"
     >
       <div>
-        <h3 id="income-receiver-title" className="font-display text-lg">
+        <h3 id="income-receiver-title" className="font-display text-title-md">
           Quién cobró, mes a mes
         </h3>
         <p className="text-xs text-muted-foreground">
