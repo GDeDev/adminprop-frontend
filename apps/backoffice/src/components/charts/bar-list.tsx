@@ -38,9 +38,7 @@ export function BarList({
                   style={{ width: `${barPercent(row.value, max)}%` }}
                 />
               </span>
-              <span className="text-right font-medium tabular-nums">
-                {row.value}
-              </span>
+              <span className="text-right num font-medium">{row.value}</span>
             </li>
           ))}
         </ul>

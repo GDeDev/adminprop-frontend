@@ -61,7 +61,7 @@ function SeriesChart({
     <figure className="flex flex-col gap-1">
       <figcaption className="flex items-baseline justify-between gap-2 text-sm">
         <span className="font-medium">{meta.title}</span>
-        <span className="text-xs text-muted-foreground tabular-nums">
+        <span className="num text-xs text-muted-foreground">
           Total: {layout.total}
         </span>
       </figcaption>
@@ -194,10 +194,10 @@ export function DailyChart({ daily }: { daily: PropertyInquiryDailyPoint[] }) {
               {daily.map((point) => (
                 <TableRow key={point.date}>
                   <TableCell>{formatDate(point.date)}</TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {point.views}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {point.inquiries}
                   </TableCell>
                 </TableRow>

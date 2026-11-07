@@ -26,7 +26,7 @@ function Figure({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border p-3">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-semibold tabular-nums">{value}</p>
+      <p className="font-display num text-title-md font-semibold">{value}</p>
     </div>
   )
 }
@@ -40,10 +40,13 @@ export function PropertyAnalytics({ propertyId }: { propertyId: string }) {
   return (
     <section
       aria-labelledby="analytics-title"
-      className="flex flex-col gap-4 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-raised"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="analytics-title" className="font-display text-lg font-semibold">
+        <h2
+          id="analytics-title"
+          className="font-display text-title-md font-semibold"
+        >
           Interés en la propiedad
         </h2>
         <AnalyticsRangeSelect value={days} onChange={setDays} />
