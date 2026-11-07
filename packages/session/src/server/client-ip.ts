@@ -20,6 +20,12 @@ export function clientIp(
   const custom = env.CLIENT_IP_HEADER?.trim().toLowerCase()
   if (custom) return valid(headers.get(custom))
 
+  // En producción, sin un header que fije la plataforma, el último
+  // `X-Forwarded-For` lo puede elegir el cliente si nadie por delante lo
+  // agrega: no se declara IP (la API cuenta por este servidor). En desarrollo
+  // se mantiene el comportamiento.
+  if (env.NODE_ENV === "production") return null
+
   const parts = (headers.get("x-forwarded-for") ?? "")
     .split(",")
     .map((p) => p.trim())

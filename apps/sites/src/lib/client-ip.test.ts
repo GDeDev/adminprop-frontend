@@ -45,4 +45,17 @@ describe("clientIp", () => {
       "2001:db8::1"
     )
   })
+
+  it("en producción sin header configurado no declara IP (XFF lo elige el cliente)", () => {
+    const h = headers({ "x-forwarded-for": "6.6.6.6, 203.0.113.9" })
+    expect(clientIp(h, { NODE_ENV: "production" })).toBeNull()
+    expect(
+      clientIp(headers({ "x-real-ip": "203.0.113.9" }), {
+        NODE_ENV: "production",
+        CUSTOM: "x",
+        SITES_CLIENT_IP_HEADER: "x-real-ip",
+        CLIENT_IP_HEADER: "x-real-ip",
+      })
+    ).toBe("203.0.113.9")
+  })
 })

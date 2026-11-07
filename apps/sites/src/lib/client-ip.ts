@@ -9,6 +9,8 @@ import { isIP } from "node:net"
  *    garantiza: `x-real-ip`, `cf-connecting-ip`, `x-vercel-forwarded-for`…);
  * 2. el valor de `X-Forwarded-For` que agregó nuestro proxy más cercano, es
  *    decir, contando desde la derecha: `SITES_TRUSTED_PROXY_HOPS` (default 1).
+ * En producción (`NODE_ENV=production`) el paso 2 NO se usa: sin el header
+ * configurado no se manda IP.
  * Si no hay una IP válida, `null` (la API cuenta por el servidor).
  */
 export function clientIp(
@@ -22,6 +24,12 @@ export function clientIp(
 
   const custom = env.SITES_CLIENT_IP_HEADER?.trim().toLowerCase()
   if (custom) return valid(headers.get(custom))
+
+  // En producción, sin un header que fije la plataforma, el último
+  // `X-Forwarded-For` lo puede elegir el cliente si nadie por delante lo
+  // agrega: no se declara IP (la API cuenta por este servidor). En desarrollo
+  // se mantiene el comportamiento.
+  if (env.NODE_ENV === "production") return null
 
   const parts = (headers.get("x-forwarded-for") ?? "")
     .split(",")
