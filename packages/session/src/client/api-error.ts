@@ -26,6 +26,13 @@ const FRIENDLY_MESSAGES: Record<string, string> = {
     "No se pudo guardar por un problema del sistema. Probá de nuevo en unos minutos y, si sigue pasando, avisá a soporte.",
   IDEMPOTENCY_KEY_REUSED:
     "Ese pedido ya se envió con otros datos. Recargá la pantalla para ver si quedó registrado.",
+  // Confirmar una liquidación que cambió (pago anulado o gasto editado, D-259 del backend):
+  // la API la recalcula y responde 409; al recargar ya viene actualizada.
+  SETTLEMENT_STALE:
+    "La liquidación cambió (se anuló un pago o se editó un gasto) y se recalculó. Revisá los montos y confirmá de nuevo.",
+  // Pago fechado antes de otro que ya cobró punitorio (D-261 del backend).
+  PAYMENT_DATE_BEFORE_LATE_FEE_PAYMENT:
+    "Hay un pago posterior que ya cobró punitorio. Anulalo, cargá este pago y después volvé a cargar el otro, en orden de fecha.",
   // Job global pedido hace poco (D-254): 409 con cooldown entre corridas.
   AUTOMATION_JOB_COOLDOWN: "Ya se pidió hace poco, probá en unos minutos.",
   // Job global desde una inmobiliaria (D-254): 403, corre solo en su horario.
