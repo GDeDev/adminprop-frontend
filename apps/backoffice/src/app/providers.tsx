@@ -40,9 +40,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
           apiClient={apiClient}
           loginPath={LOGIN_PATH}
           // Que el próximo usuario en esta pestaña no vea datos cacheados ni borradores del anterior.
-          onSignOut={() => {
+          // Al re-loguear el mismo usuario tras vencer la sesión se conservan los borradores.
+          onSignOut={(context) => {
             queryClient.clear()
-            clearDrafts()
+            if (!context || context.userChanged) clearDrafts()
           }}
         >
           <TooltipProvider>

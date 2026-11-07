@@ -52,4 +52,36 @@ describe("SessionProvider.signIn", () => {
     expect(onSignOut).toHaveBeenCalledTimes(1)
     expect(tokenStore.get()).toBe("nuevo")
   })
+
+  it("avisa si el usuario es el mismo o cambió, para conservar borradores", async () => {
+    const onSignOut = vi.fn()
+    let session: ReturnType<typeof useSession> | undefined
+    function Probe() {
+      session = useSession()
+      return null
+    }
+    render(
+      <SessionProvider
+        apiClient={{} as AxiosInstance}
+        loginPath="/login"
+        onSignOut={onSignOut}
+      >
+        <Probe />
+      </SessionProvider>
+    )
+    const login = (user: AuthResult["user"]) =>
+      act(() =>
+        session!.signIn({
+          user,
+          tokens: { accessToken: "a", refreshToken: "r" },
+        } as AuthResult)
+      )
+
+    await login(USER)
+    expect(onSignOut).toHaveBeenLastCalledWith({ userChanged: false })
+    await login(USER)
+    expect(onSignOut).toHaveBeenLastCalledWith({ userChanged: false })
+    await login({ ...USER, id: "otro-usuario" })
+    expect(onSignOut).toHaveBeenLastCalledWith({ userChanged: true })
+  })
 })
