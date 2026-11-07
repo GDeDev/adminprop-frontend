@@ -10,6 +10,7 @@ import { TooltipProvider } from "@adminprop/ui/components/tooltip"
 
 import { apiClient } from "@/lib/api-client"
 import { clearDrafts } from "@/lib/drafts"
+import { shouldRetryQuery } from "@/lib/query-retry"
 import { LOGIN_PATH } from "@/lib/session"
 
 function makeQueryClient() {
@@ -18,7 +19,7 @@ function makeQueryClient() {
       queries: {
         staleTime: 60 * 1000,
         refetchOnWindowFocus: false,
-        retry: 1,
+        retry: shouldRetryQuery,
       },
     },
   })
