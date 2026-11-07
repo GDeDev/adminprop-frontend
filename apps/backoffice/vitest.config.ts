@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vitest/config"
 
+import { sharedTest } from "../../vitest.shared"
+
 const root = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
@@ -18,13 +20,9 @@ export default defineConfig({
     ],
   },
   test: {
+    ...sharedTest,
     environment: "jsdom",
-    passWithNoTests: true,
     setupFiles: ["./test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
-    // El wizard de contratos recorre cinco pasos con userEvent: con la suite
-    // entera en paralelo supera los 5 s por defecto (y en máquinas lentas los 15 s) y arrastra a los tests
-    // siguientes del archivo (borrador compartido en localStorage).
-    testTimeout: 45_000,
   },
 })

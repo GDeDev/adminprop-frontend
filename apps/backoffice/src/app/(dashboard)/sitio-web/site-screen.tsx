@@ -66,10 +66,21 @@ import { useUnsavedGuard } from "./use-unsaved-guard"
 /** Cuánto se espera sin cambios antes de guardar el borrador solo. */
 const AUTOSAVE_DELAY_MS = 1500
 
+interface SiteScreenProps {
+  /**
+   * Sólo para tests: cuánto esperar antes de autoguardar. Los tests que
+   * escriben mucho con userEvent lo suben para que el autoguardado no se
+   * cuele entre lo que tipean y el botón «Guardar borrador».
+   */
+  autosaveDelayMs?: number
+}
+
 type TabKey = "diseno" | "contenido" | "secciones" | "dominio" | "vista"
 
 /** Mi sitio web: editor del sitio de la inmobiliaria (spec 6.2). Solo administradores. */
-export function SiteScreen() {
+export function SiteScreen({
+  autosaveDelayMs = AUTOSAVE_DELAY_MS,
+}: SiteScreenProps = {}) {
   const { user } = useSession()
 
   if (user?.role !== "ADMIN") {
@@ -81,10 +92,10 @@ export function SiteScreen() {
       />
     )
   }
-  return <SiteEditor />
+  return <SiteEditor autosaveDelayMs={autosaveDelayMs} />
 }
 
-function SiteEditor() {
+function SiteEditor({ autosaveDelayMs }: { autosaveDelayMs: number }) {
   const settingsQuery = useSiteSettings()
   const templatesQuery = useSiteTemplates()
 
@@ -114,16 +125,22 @@ function SiteEditor() {
   }
 
   return (
-    <Editor settings={settingsQuery.data} templates={templatesQuery.data} />
+    <Editor
+      settings={settingsQuery.data}
+      templates={templatesQuery.data}
+      autosaveDelayMs={autosaveDelayMs}
+    />
   )
 }
 
 function Editor({
   settings,
   templates,
+  autosaveDelayMs,
 }: {
   settings: SiteSettings
   templates: SiteTemplateInfo[]
+  autosaveDelayMs: number
 }) {
   const tenant = useTenantSettings()
   const wide = useMediaQuery("(min-width: 96rem)")
@@ -293,10 +310,10 @@ function Editor({
     if (lastFailed.current === local) return
     const timer = window.setTimeout(
       () => void saveRef.current({ silent: true }),
-      AUTOSAVE_DELAY_MS
+      autosaveDelayMs
     )
     return () => window.clearTimeout(timer)
-  }, [dirty, busy, errorCount, local])
+  }, [dirty, busy, errorCount, local, autosaveDelayMs])
 
   async function confirmAndPublish() {
     setPublishProblems(null)

@@ -115,7 +115,9 @@ describe("useMoveInquiry", () => {
         .catch(() => undefined)
     })
 
-    expect(result.current.isError).toBe(true)
+    // El estado de la mutación llega en un render posterior al rechazo: bajo
+    // carga, leerlo recién salido del act() lo encontraba todavía en false.
+    await waitFor(() => expect(result.current.isError).toBe(true))
     expect(client.getQueryData(pipelineKey)).toEqual(initial)
     expect(columnIds(client, "NEW")).toEqual(["a", "b"])
   })

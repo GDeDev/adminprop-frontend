@@ -46,7 +46,9 @@
     },
     "test": {
       "dependsOn": ["transit"],
-      "outputs": []
+      "outputs": [],
+      "env": ["VITEST_MAX_WORKERS"],
+      "cache": false
     }
   },
   "globalEnv": ["NODE_ENV"]

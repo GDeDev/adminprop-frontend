@@ -106,6 +106,16 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
+/**
+ * Sin autoguardado: estos tests escriben mucho con userEvent y, con la suite
+ * entera en paralelo, el tipeo puede tardar más que el autoguardado real
+ * (1,5 s) y colar un guardado extra. El autoguardado se prueba aparte, en
+ * «autoguardado», con el delay real.
+ */
+function renderScreen() {
+  return render(<SiteScreen autosaveDelayMs={60_000} />)
+}
+
 function statusRegion() {
   return screen.getByRole("region", { name: "Estado del sitio" })
 }
@@ -120,7 +130,7 @@ async function openBlock(
 describe("Mi sitio web", () => {
   it("sólo es para administradores", () => {
     role = "EMPLOYEE"
-    render(<SiteScreen />)
+    renderScreen()
     expect(screen.getByText("Sólo para administradores")).toBeInTheDocument()
     expect(screen.queryByText("Estado del sitio")).toBeNull()
   })
@@ -133,7 +143,7 @@ describe("Mi sitio web", () => {
         hasUnpublishedChanges: false,
         publicUrl: "https://oppido.sitios.test",
       })
-      render(<SiteScreen />)
+      renderScreen()
       expect(within(statusRegion()).getByText("Publicado")).toBeInTheDocument()
       expect(
         screen.getByRole("link", { name: "https://oppido.sitios.test" })
@@ -153,14 +163,14 @@ describe("Mi sitio web", () => {
         hasUnpublishedChanges: true,
         publicUrl: "https://oppido.sitios.test",
       })
-      render(<SiteScreen />)
+      renderScreen()
       expect(
         within(statusRegion()).getByText("Borrador con cambios")
       ).toBeInTheDocument()
     })
 
     it("Sin publicar, y avisa que falta el subdominio si no hay URL", () => {
-      render(<SiteScreen />)
+      renderScreen()
       expect(
         within(statusRegion()).getByText("Sin publicar")
       ).toBeInTheDocument()
@@ -170,7 +180,7 @@ describe("Mi sitio web", () => {
     })
 
     it("«Despublicar» sólo aparece con el sitio en línea", () => {
-      const { unmount } = render(<SiteScreen />)
+      const { unmount } = renderScreen()
       expect(screen.queryByRole("button", { name: "Despublicar" })).toBeNull()
       unmount()
 
@@ -179,7 +189,7 @@ describe("Mi sitio web", () => {
         publishedAt: "2026-10-01T12:00:00.000Z",
         hasUnpublishedChanges: false,
       })
-      render(<SiteScreen />)
+      renderScreen()
       expect(
         screen.getByRole("button", { name: "Despublicar" })
       ).toBeInTheDocument()
@@ -188,7 +198,7 @@ describe("Mi sitio web", () => {
 
   describe("guardar borrador", () => {
     it("está deshabilitado sin cambios y manda solo lo que cambió", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       const save = screen.getByRole("button", { name: "Guardar borrador" })
       expect(save).toBeDisabled()
@@ -223,7 +233,7 @@ describe("Mi sitio web", () => {
     })
 
     it("marca el contraste en vivo", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       const item = () =>
         screen.getByText("Texto sobre fondo:").closest("li") as HTMLElement
@@ -246,7 +256,7 @@ describe("Mi sitio web", () => {
           { field: "algo.raro", message: "Algo no cerró." },
         ])
       )
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await user.click(screen.getByRole("tab", { name: "Contenido" }))
       await openBlock(user, /^Preguntas frecuentes/)
@@ -387,7 +397,7 @@ describe("Mi sitio web", () => {
 
   describe("publicar", () => {
     it("pide confirmación antes de publicar", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await user.click(screen.getByRole("button", { name: "Publicar" }))
 
@@ -403,7 +413,7 @@ describe("Mi sitio web", () => {
     })
 
     it("con cambios sin guardar, los guarda primero", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       const primary = screen.getByLabelText("Color principal")
       await user.clear(primary)
@@ -436,7 +446,7 @@ describe("Mi sitio web", () => {
           },
         ])
       )
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await user.click(screen.getByRole("button", { name: "Publicar" }))
       const dialog = await screen.findByRole("dialog")
@@ -464,7 +474,7 @@ describe("Mi sitio web", () => {
       publishedAt: "2026-10-01T12:00:00.000Z",
       hasUnpublishedChanges: false,
     })
-    render(<SiteScreen />)
+    renderScreen()
     const user = userEvent.setup()
     await user.click(screen.getByRole("button", { name: "Despublicar" }))
     const dialog = await screen.findByRole("dialog")
@@ -477,7 +487,7 @@ describe("Mi sitio web", () => {
 
   describe("template", () => {
     it("pregunta por el tema y, si se acepta, lo restaura conservando el contenido", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await user.click(screen.getByRole("radio", { name: /Moderno/ }))
 
@@ -499,7 +509,7 @@ describe("Mi sitio web", () => {
     })
 
     it("si se conserva el tema, no restaura", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await user.click(screen.getByRole("radio", { name: /Moderno/ }))
       const dialog = await screen.findByRole("dialog")
@@ -513,7 +523,7 @@ describe("Mi sitio web", () => {
     })
 
     it("cancelar no cambia nada", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await user.click(screen.getByRole("radio", { name: /Moderno/ }))
       const dialog = await screen.findByRole("dialog")
@@ -523,7 +533,7 @@ describe("Mi sitio web", () => {
     })
 
     it("cada template muestra su miniatura real", () => {
-      render(<SiteScreen />)
+      renderScreen()
       expect(
         screen.getByAltText("Vista de ejemplo del template Clásico")
       ).toHaveAttribute("src", "/templates/classic.png")
@@ -545,7 +555,7 @@ describe("Mi sitio web", () => {
         .map((input) => (input as HTMLInputElement).value)
 
     it("agrega, mueve y quita", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await openFaqs(user)
       expect(questions()).toEqual(["¿Cómo alquilo?", "¿Cuánto cuesta?"])
@@ -585,7 +595,7 @@ describe("Mi sitio web", () => {
         question: `P${i}`,
         answer: "R",
       }))
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await openFaqs(user)
       expect(
@@ -601,7 +611,7 @@ describe("Mi sitio web", () => {
     })
 
     it("muestra el contador de caracteres", async () => {
-      render(<SiteScreen />)
+      renderScreen()
       const user = userEvent.setup()
       await openFaqs(user)
       // "¿Cómo alquilo?" tiene 14 caracteres, de 200.
@@ -610,7 +620,7 @@ describe("Mi sitio web", () => {
   })
 
   it("las secciones se reordenan y se ocultan", async () => {
-    render(<SiteScreen />)
+    renderScreen()
     const user = userEvent.setup()
     await user.click(screen.getByRole("tab", { name: "Secciones" }))
 
@@ -657,7 +667,7 @@ describe("Mi sitio web", () => {
   })
 
   it("avisa con beforeunload sólo cuando hay cambios", async () => {
-    render(<SiteScreen />)
+    renderScreen()
     const user = userEvent.setup()
     const fire = () => {
       const event = new Event("beforeunload", { cancelable: true })
@@ -672,7 +682,7 @@ describe("Mi sitio web", () => {
   })
 
   it("la vista previa arma el iframe con el slug y el token", async () => {
-    render(<SiteScreen />)
+    renderScreen()
     const user = userEvent.setup()
     await user.click(screen.getByRole("tab", { name: "Vista previa" }))
     const frame = await screen.findByTitle(/Vista previa del sitio/)
@@ -685,7 +695,7 @@ describe("Mi sitio web", () => {
   })
 
   it("el dominio se guarda con su propio botón, fuera del borrador", async () => {
-    render(<SiteScreen />)
+    renderScreen()
     const user = userEvent.setup()
     await user.click(screen.getByRole("tab", { name: "Dominio" }))
     await user.type(
@@ -703,7 +713,7 @@ describe("Mi sitio web", () => {
   it("los textos del editor son texto plano (no se interpreta HTML)", async () => {
     settings = makeSettings()
     settings.draft.content.hero.title = "<img src=x onerror=alert(1)>"
-    const { container } = render(<SiteScreen />)
+    const { container } = renderScreen()
     const user = userEvent.setup()
     await user.click(screen.getByRole("tab", { name: "Contenido" }))
     await openBlock(user, /^Portada/)
@@ -728,7 +738,7 @@ describe("Mi sitio web", () => {
 
     async function openDomainTab() {
       const user = userEvent.setup()
-      render(<SiteScreen />)
+      renderScreen()
       await user.click(screen.getByRole("tab", { name: "Dominio" }))
       return user
     }
