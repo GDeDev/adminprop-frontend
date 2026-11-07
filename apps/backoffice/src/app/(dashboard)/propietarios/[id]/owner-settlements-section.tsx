@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Pencil, Plus } from "lucide-react"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type {
   OwnerDetail,
   OwnerFeeAccountTotals,
@@ -60,12 +61,13 @@ export function OwnerSettlementsSection({ owner }: { owner: OwnerDetail }) {
           <Skeleton className="h-10" />
         </div>
       ) : query.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(
+        <SectionError
+          description={apiErrorMessage(
             query.error,
             "No se pudieron cargar las liquidaciones."
           )}
-        </p>
+          onRetry={() => void query.refetch()}
+        />
       ) : settlements.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Todavía no hay liquidaciones para este propietario.
@@ -188,12 +190,13 @@ export function OwnerFeeAccountSection({
           <Skeleton className="h-10" />
         </div>
       ) : query.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(
+        <SectionError
+          description={apiErrorMessage(
             query.error,
             "No se pudo cargar la cuenta de honorarios."
           )}
-        </p>
+          onRetry={() => void query.refetch()}
+        />
       ) : (
         <div className="flex flex-col gap-4 text-sm">
           {query.data.totals.length === 0 ? (

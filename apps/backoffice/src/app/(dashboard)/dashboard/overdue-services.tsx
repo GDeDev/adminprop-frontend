@@ -5,6 +5,7 @@ import Link from "next/link"
 import { AlertTriangle } from "lucide-react"
 
 import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type { OverdueService } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -63,12 +64,13 @@ export function OverdueServices() {
           <Skeleton className="h-10" />
         </div>
       ) : query.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(
+        <SectionError
+          description={apiErrorMessage(
             query.error,
             "No se pudieron cargar los servicios vencidos."
           )}
-        </p>
+          onRetry={() => void query.refetch()}
+        />
       ) : services.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Ningún servicio vencido. Todo al día.

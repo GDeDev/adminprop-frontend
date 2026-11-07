@@ -20,6 +20,8 @@ export interface ReasonDialogProps {
   title: string
   description: string
   confirmLabel: string
+  /** Texto del botón de cierre; por defecto "Cancelar". */
+  cancelLabel?: string
   successMessage: string
   errorMessage: string
   /** Lo que se ejecuta con el motivo; si rechaza, se muestra el error. */
@@ -36,6 +38,7 @@ export function ReasonDialog({
   title,
   description,
   confirmLabel,
+  cancelLabel = "Cancelar",
   successMessage,
   errorMessage,
   onConfirm,
@@ -93,7 +96,7 @@ export function ReasonDialog({
             onClick={() => onOpenChange(false)}
             disabled={pending}
           >
-            Cancelar
+            {cancelLabel}
           </Button>
           <Button
             variant="destructive"

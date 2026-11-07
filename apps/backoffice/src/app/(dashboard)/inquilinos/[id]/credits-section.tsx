@@ -5,6 +5,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type { PaymentMethod, RenterCredit } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -81,12 +82,16 @@ export function RenterBillingSection({ renterId }: { renterId: string }) {
           <Skeleton className="h-10" />
         </div>
       ) : arrears.isError || credits.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(
+        <SectionError
+          description={apiErrorMessage(
             arrears.error ?? credits.error,
             "No se pudo cargar el estado de pago."
           )}
-        </p>
+          onRetry={() => {
+            void arrears.refetch()
+            void credits.refetch()
+          }}
+        />
       ) : (
         <div className="flex flex-col gap-3 text-sm">
           <div className="flex flex-wrap items-center gap-3">

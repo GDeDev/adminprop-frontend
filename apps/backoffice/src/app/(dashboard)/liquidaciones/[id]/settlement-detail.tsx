@@ -544,7 +544,8 @@ function Detail({ settlement }: { settlement: SettlementDetail }) {
           key={dialogKey}
           title="¿Cancelar la liquidación?"
           description="Los pagos y gastos vuelven a quedar disponibles para otra liquidación. Queda registrado el motivo."
-          confirmLabel="Cancelar liquidación"
+          confirmLabel="Sí, anular liquidación"
+          cancelLabel="Volver"
           successMessage="Liquidación cancelada."
           errorMessage="No se pudo cancelar."
           onConfirm={(reason) =>

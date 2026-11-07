@@ -78,8 +78,10 @@ export function ReportsScreen() {
     from: shiftPeriod(currentPeriod(), -5),
     to: currentPeriod(),
   }))
-  const [minDays, setMinDays] = React.useState(1)
-  const [withinDays, setWithinDays] = React.useState(60)
+  const [minDaysText, setMinDaysText] = React.useState("1")
+  const [withinDaysText, setWithinDaysText] = React.useState("60")
+  const minDays = Math.max(0, Math.trunc(Number(minDaysText)) || 0)
+  const withinDays = Math.max(1, Math.trunc(Number(withinDaysText)) || 1)
 
   const exportParams = exportConfig(report, { range, minDays, withinDays })
 
@@ -158,10 +160,11 @@ export function ReportsScreen() {
           <label className="flex flex-col gap-1 text-sm font-medium">
             Días de atraso mínimos
             <Input
-              type="number"
-              min={0}
-              value={minDays}
-              onChange={(event) => setMinDays(Number(event.target.value) || 0)}
+              inputMode="numeric"
+              value={minDaysText}
+              onChange={(event) =>
+                setMinDaysText(event.target.value.replace(/\D/g, ""))
+              }
             />
           </label>
         )}
@@ -169,11 +172,10 @@ export function ReportsScreen() {
           <label className="flex flex-col gap-1 text-sm font-medium">
             Vencen dentro de (días)
             <Input
-              type="number"
-              min={1}
-              value={withinDays}
+              inputMode="numeric"
+              value={withinDaysText}
               onChange={(event) =>
-                setWithinDays(Number(event.target.value) || 1)
+                setWithinDaysText(event.target.value.replace(/\D/g, ""))
               }
             />
           </label>

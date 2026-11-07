@@ -6,6 +6,7 @@ import { Building2, Pencil, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type {
   Currency,
   PropertyService,
@@ -94,9 +95,13 @@ export function ServicesSection({
           <Skeleton className="h-10" />
         </div>
       ) : query.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(query.error, "No se pudieron cargar los servicios.")}
-        </p>
+        <SectionError
+          description={apiErrorMessage(
+            query.error,
+            "No se pudieron cargar los servicios."
+          )}
+          onRetry={() => void query.refetch()}
+        />
       ) : query.data.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Sin servicios cargados. Expensas, luz, gas: lo que tenga la propiedad

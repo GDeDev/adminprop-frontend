@@ -3,6 +3,7 @@
 import Link from "next/link"
 
 import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type { ContractDetail } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
 import { Skeleton } from "@adminprop/ui/components/skeleton"
@@ -56,9 +57,13 @@ export function InstallmentsSection({
           <Skeleton className="h-10" />
         </div>
       ) : query.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(query.error, "No se pudieron cargar las cuotas.")}
-        </p>
+        <SectionError
+          description={apiErrorMessage(
+            query.error,
+            "No se pudieron cargar las cuotas."
+          )}
+          onRetry={() => void query.refetch()}
+        />
       ) : query.data.data.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Todavía no hay cuotas generadas para este contrato.

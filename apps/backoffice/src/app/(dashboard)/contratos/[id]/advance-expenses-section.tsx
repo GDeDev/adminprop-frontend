@@ -5,6 +5,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type { AdvanceExpense, ContractDetail } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -107,9 +108,13 @@ export function AdvanceExpensesSection({
             <Skeleton className="h-10" />
           </div>
         ) : query.isError ? (
-          <p className="text-sm text-destructive">
-            {apiErrorMessage(query.error, "No se pudieron cargar los gastos.")}
-          </p>
+          <SectionError
+            description={apiErrorMessage(
+              query.error,
+              "No se pudieron cargar los gastos."
+            )}
+            onRetry={() => void query.refetch()}
+          />
         ) : (
           <>
             {query.data.items.length === 0 ? (

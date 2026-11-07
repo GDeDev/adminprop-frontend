@@ -4,6 +4,7 @@ import { RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type { IndexStatus } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -35,12 +36,13 @@ export function IndexStatusPanel({ canRun }: { canRun: boolean }) {
   if (query.isPending) return <Skeleton className="h-16" />
   if (query.isError) {
     return (
-      <p className="text-sm text-destructive">
-        {apiErrorMessage(
+      <SectionError
+        description={apiErrorMessage(
           query.error,
           "No se pudo cargar el estado de los índices."
         )}
-      </p>
+        onRetry={() => void query.refetch()}
+      />
     )
   }
 

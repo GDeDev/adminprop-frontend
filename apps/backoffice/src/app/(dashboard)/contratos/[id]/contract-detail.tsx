@@ -110,7 +110,7 @@ function Detail({ contract }: { contract: ContractDetail }) {
       <div className="flex flex-col gap-3">
         <Link
           href="/contratos"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex min-h-11 items-center gap-1 self-start text-sm text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft aria-hidden className="size-4" />
           Contratos

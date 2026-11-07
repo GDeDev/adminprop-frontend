@@ -6,6 +6,7 @@ import { ChevronLeft, Play } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type {
   Job,
   JobExecution,
@@ -331,9 +332,13 @@ function ExecutionHistory({ jobs }: { jobs: Job[] }) {
       {query.isPending ? (
         <PageSkeleton cards={2} />
       ) : query.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(query.error, "No se pudo cargar el historial.")}
-        </p>
+        <SectionError
+          description={apiErrorMessage(
+            query.error,
+            "No se pudo cargar el historial."
+          )}
+          onRetry={() => void query.refetch()}
+        />
       ) : executions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Sin ejecuciones todavía.

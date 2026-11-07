@@ -5,6 +5,7 @@ import { AlertTriangle, Bell, Check, MailWarning } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type { InternalAlert } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -110,9 +111,13 @@ export function InternalAlerts() {
           <Skeleton className="h-10" />
         </div>
       ) : query.isError ? (
-        <p className="text-sm text-destructive">
-          {apiErrorMessage(query.error, "No se pudieron cargar los avisos.")}
-        </p>
+        <SectionError
+          description={apiErrorMessage(
+            query.error,
+            "No se pudieron cargar los avisos."
+          )}
+          onRetry={() => void query.refetch()}
+        />
       ) : alerts.length === 0 ? (
         <p className="text-sm text-muted-foreground">Sin avisos pendientes.</p>
       ) : (

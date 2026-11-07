@@ -7,6 +7,7 @@ import { CalendarPlus, ChevronLeft, ChevronRight, Wallet } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type {
   BillingSummaryByCurrency,
   CollectionMode,
@@ -191,9 +192,13 @@ function Summary({ period }: { period: string }) {
   }
   if (query.isError) {
     return (
-      <p className="text-sm text-destructive">
-        {apiErrorMessage(query.error, "No se pudo cargar el resumen del mes.")}
-      </p>
+      <SectionError
+        description={apiErrorMessage(
+          query.error,
+          "No se pudo cargar el resumen del mes."
+        )}
+        onRetry={() => void query.refetch()}
+      />
     )
   }
   if (query.data.byCurrency.length === 0) {
@@ -297,7 +302,10 @@ function InstallmentList({
           value={status}
           onValueChange={(value) => setStatus(value as StatusFilter)}
         >
-          <SelectTrigger className="w-44" aria-label="Filtrar por estado">
+          <SelectTrigger
+            className="w-full sm:w-44"
+            aria-label="Filtrar por estado"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -315,7 +323,10 @@ function InstallmentList({
           value={mode}
           onValueChange={(value) => setMode(value as ModeFilter)}
         >
-          <SelectTrigger className="w-56" aria-label="Filtrar por quién cobra">
+          <SelectTrigger
+            className="w-full sm:w-56"
+            aria-label="Filtrar por quién cobra"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -329,7 +340,7 @@ function InstallmentList({
             )}
           </SelectContent>
         </Select>
-        <span className="text-sm text-muted-foreground">
+        <span aria-live="polite" className="text-sm text-muted-foreground">
           {query.data ? `${total} cuotas` : " "}
         </span>
       </div>
@@ -499,6 +510,7 @@ function GenerateDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
+  const labelId = React.useId()
   const [period, setPeriod] = React.useState(defaultPeriod)
   const generate = useGenerateInstallments()
 
@@ -523,8 +535,12 @@ function GenerateDialog({
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <div className="px-4 sm:px-0">
-          <p className="mb-1 text-sm font-medium">Mes</p>
-          <PeriodInput value={period} onChange={setPeriod} />
+          <p id={labelId} className="mb-1 text-sm font-medium">
+            Mes
+          </p>
+          <div role="group" aria-labelledby={labelId}>
+            <PeriodInput value={period} onChange={setPeriod} />
+          </div>
         </div>
         <ResponsiveDialogFooter>
           <Button
