@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { Camera, ChevronLeft, Plus, Trash2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
-import { apiErrorMessage } from "@adminprop/session/client"
+import { apiErrorCode, apiErrorMessage } from "@adminprop/session/client"
 import type {
   InventoryDetail,
   InventoryItem,
@@ -18,10 +18,17 @@ import { Button } from "@adminprop/ui/components/button"
 import { Checkbox } from "@adminprop/ui/components/checkbox"
 import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@adminprop/ui/components/radio-group"
 import { Textarea } from "@adminprop/ui/components/textarea"
+import { cn } from "@adminprop/ui/lib/utils"
 
+import { useUnsavedGuard } from "@/app/(dashboard)/sitio-web/use-unsaved-guard"
 import { PrivateImage } from "@/components/private-image"
 import { formatDate } from "@/lib/dates"
 import {
@@ -52,6 +59,31 @@ interface DraftItem {
   notes: string
 }
 
+function descriptionId(key: string) {
+  return `inventory-item-description-${key}`
+}
+
+/** Foto instantánea de lo editable, para saber si hay cambios sin guardar. */
+function snapshot(
+  items: DraftItem[],
+  generalNotes: string,
+  date: string,
+  acknowledged: boolean
+) {
+  return JSON.stringify([
+    items.map(({ id, category, description, condition, notes }) => [
+      id ?? null,
+      category,
+      description,
+      condition,
+      notes,
+    ]),
+    generalNotes,
+    date,
+    acknowledged,
+  ])
+}
+
 function toDraft(item: InventoryItem): DraftItem {
   return {
     key: item.id,
@@ -78,10 +110,22 @@ export function InventoryEditor({
   const query = useInventory(inventoryId)
   if (query.isPending) return <PageSkeleton />
   if (query.isError) {
+    if (apiErrorCode(query.error) === "INVENTORY_NOT_FOUND") {
+      return (
+        <EmptyState
+          title="No se encontró el inventario"
+          description="Puede que lo hayan reemplazado por una corrección."
+        />
+      )
+    }
     return (
-      <EmptyState
-        title="No se encontró el inventario"
-        description="Puede que lo hayan reemplazado por una corrección."
+      <ErrorState
+        title="No se pudo cargar el inventario"
+        description={apiErrorMessage(
+          query.error,
+          "Revisá tu conexión y probá de nuevo."
+        )}
+        onRetry={() => void query.refetch()}
       />
     )
   }
@@ -135,6 +179,22 @@ function Editor({
   const [correctionReason, setCorrectionReason] = React.useState("")
   const [showCorrection, setShowCorrection] = React.useState(false)
 
+  const [baseline, setBaseline] = React.useState(() =>
+    snapshot(
+      detail.items.map(toDraft),
+      detail.generalNotes ?? "",
+      detail.date,
+      detail.tenantAcknowledged
+    )
+  )
+  const [invalidKeys, setInvalidKeys] = React.useState<Set<string>>(
+    () => new Set()
+  )
+  const [action, setAction] = React.useState<"draft" | "confirm" | null>(null)
+  const dirty =
+    !locked && snapshot(items, generalNotes, date, acknowledged) !== baseline
+  const guard = useUnsavedGuard(dirty)
+
   const photosById = new Map(detail.items.map((item) => [item.id, item.photos]))
   const status = INVENTORY_STATUS_META[detail.status]
 
@@ -142,6 +202,14 @@ function Editor({
     setItems((current) =>
       current.map((item) => (item.key === key ? { ...item, ...patch } : item))
     )
+    if (patch.description?.trim()) {
+      setInvalidKeys((current) => {
+        if (!current.has(key)) return current
+        const next = new Set(current)
+        next.delete(key)
+        return next
+      })
+    }
   }
 
   function addItem(category: string) {
@@ -158,10 +226,14 @@ function Editor({
   }
 
   async function save(): Promise<InventoryDetail | null> {
-    if (items.some((item) => item.description.trim() === "")) {
+    const empty = items.filter((item) => item.description.trim() === "")
+    if (empty.length > 0) {
+      setInvalidKeys(new Set(empty.map((item) => item.key)))
       toast.error("Todos los ítems necesitan una descripción.")
+      document.getElementById(descriptionId(empty[0]!.key))?.focus()
       return null
     }
+    setInvalidKeys(new Set())
     try {
       const saved = await update.mutateAsync({
         id: detail.id,
@@ -176,7 +248,9 @@ function Editor({
           notes: item.notes.trim() || null,
         })),
       })
-      setItems(saved.items.map(toDraft))
+      const savedDrafts = saved.items.map(toDraft)
+      setItems(savedDrafts)
+      setBaseline(snapshot(savedDrafts, generalNotes, date, acknowledged))
       return saved
     } catch (cause) {
       toast.error(apiErrorMessage(cause, "No se pudo guardar el inventario."))
@@ -185,10 +259,12 @@ function Editor({
   }
 
   async function saveDraft() {
+    setAction("draft")
     if (await save()) toast.success("Borrador guardado.")
   }
 
   async function askToConfirm() {
+    setAction("confirm")
     const saved = await save()
     if (!saved) return
     setConfirming(poorWithoutPhotos(saved))
@@ -315,37 +391,57 @@ function Editor({
                   {locked || item.id ? (
                     <p className="font-medium">{item.description}</p>
                   ) : (
-                    <Input
-                      aria-label="Descripción del ítem"
-                      placeholder="Ítem (ej. Heladera)"
-                      value={item.description}
-                      onChange={(event) =>
-                        patchItem(item.key, { description: event.target.value })
-                      }
-                    />
+                    <>
+                      <Input
+                        id={descriptionId(item.key)}
+                        aria-label="Descripción del ítem"
+                        placeholder="Ítem (ej. Heladera)"
+                        value={item.description}
+                        aria-invalid={invalidKeys.has(item.key) || undefined}
+                        aria-describedby={
+                          invalidKeys.has(item.key)
+                            ? `${descriptionId(item.key)}-error`
+                            : undefined
+                        }
+                        onChange={(event) =>
+                          patchItem(item.key, {
+                            description: event.target.value,
+                          })
+                        }
+                      />
+                      {invalidKeys.has(item.key) && (
+                        <p
+                          id={`${descriptionId(item.key)}-error`}
+                          className="text-sm font-medium text-destructive"
+                        >
+                          Poné una descripción para este ítem.
+                        </p>
+                      )}
+                    </>
                   )}
-                  <div
-                    role="radiogroup"
+                  <RadioGroup
                     aria-label={`Estado de ${item.description || "ítem nuevo"}`}
+                    value={item.condition}
+                    disabled={locked}
+                    orientation="horizontal"
                     className="flex flex-wrap gap-2"
+                    onValueChange={(value) =>
+                      patchItem(item.key, { condition: value as ItemCondition })
+                    }
                   >
                     {CONDITIONS.map((condition) => (
-                      <Button
+                      <label
                         key={condition}
-                        type="button"
-                        size="sm"
-                        role="radio"
-                        aria-checked={item.condition === condition}
-                        variant={
-                          item.condition === condition ? "default" : "outline"
-                        }
-                        disabled={locked}
-                        onClick={() => patchItem(item.key, { condition })}
+                        className={cn(
+                          "flex h-11 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm hover:bg-muted has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10 has-[[data-state=checked]]:font-medium",
+                          locked && "cursor-not-allowed opacity-60"
+                        )}
                       >
+                        <RadioGroupItem value={condition} />
                         {CONDITION_LABELS[condition]}
-                      </Button>
+                      </label>
                     ))}
-                  </div>
+                  </RadioGroup>
                   <Textarea
                     aria-label={`Observaciones de ${item.description || "ítem nuevo"}`}
                     placeholder="Observaciones"
@@ -362,7 +458,7 @@ function Editor({
                       Se recomienda adjuntar foto para respaldo.
                     </p>
                   )}
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-4 pt-2">
                     {photos.map((photo) => (
                       <div key={photo.id} className="relative">
                         <PrivateImage
@@ -388,7 +484,7 @@ function Editor({
                     ))}
                     {!locked &&
                       (item.id ? (
-                        <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm hover:bg-muted">
+                        <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-md border bg-card px-4 text-sm font-medium hover:bg-muted has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring">
                           <Camera aria-hidden className="size-4" />
                           Agregar fotos
                           <input
@@ -448,19 +544,32 @@ function Editor({
       </label>
 
       {!locked ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 -mx-4 flex flex-wrap items-center gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur md:bottom-0 md:mx-0 md:rounded-lg md:border">
+          <p
+            role="status"
+            className={cn(
+              "w-full text-sm sm:w-auto sm:flex-1",
+              dirty ? "font-medium text-foreground" : "text-muted-foreground"
+            )}
+          >
+            {dirty ? "Cambios sin guardar" : "Guardado"}
+          </p>
           <Button
             variant="outline"
             onClick={() => void saveDraft()}
-            disabled={update.isPending}
+            disabled={update.isPending || confirm.isPending}
           >
-            Guardar borrador
+            {update.isPending && action !== "confirm"
+              ? "Guardando…"
+              : "Guardar borrador"}
           </Button>
           <Button
             onClick={() => void askToConfirm()}
             disabled={update.isPending || confirm.isPending}
           >
-            Confirmar inventario
+            {confirm.isPending || (update.isPending && action === "confirm")
+              ? "Confirmando…"
+              : "Confirmar inventario"}
           </Button>
         </div>
       ) : showCorrection ? (
@@ -515,6 +624,15 @@ function Editor({
           </Alert>
         )}
       </ConfirmDialog>
+      <ConfirmDialog
+        open={guard.pendingHref !== null}
+        onOpenChange={(open) => !open && guard.stay()}
+        title="¿Salir sin guardar?"
+        description="Tenés cambios en el inventario que todavía no guardaste. Si salís, se pierden."
+        confirmLabel="Salir sin guardar"
+        cancelLabel="Seguir editando"
+        onConfirm={guard.leave}
+      />
       <ConfirmDialog
         open={detaching !== null}
         onOpenChange={(open) => !open && setDetaching(null)}

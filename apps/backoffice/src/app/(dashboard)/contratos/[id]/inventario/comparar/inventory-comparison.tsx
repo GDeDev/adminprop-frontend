@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 import { openInNewTab } from "@adminprop/ui/lib/open-in-new-tab"
+import { cn } from "@adminprop/ui/lib/utils"
 
 import { PrivateImage } from "@/components/private-image"
 import { formatDate } from "@/lib/dates"
@@ -84,6 +85,44 @@ function Photos({
         </button>
       ))}
     </div>
+  )
+}
+
+function ChangeBadge({ change }: { change: InventoryComparisonRow["change"] }) {
+  return (
+    <Badge
+      variant={
+        change === "WORSE"
+          ? "destructive"
+          : change === "BETTER"
+            ? "default"
+            : "outline"
+      }
+    >
+      {CHANGE_LABELS[change]}
+    </Badge>
+  )
+}
+
+function ConditionCell({
+  condition,
+  notes,
+  photos,
+  receivedAt,
+  refresh,
+}: {
+  condition: InventoryComparisonRow["deliveryCondition"]
+  notes: string | null
+  photos: InventoryComparisonRow["deliveryPhotos"]
+  receivedAt: number
+  refresh: (photoId: string) => Promise<string | undefined>
+}) {
+  return (
+    <>
+      {condition ? CONDITION_LABELS[condition] : "—"}
+      {notes && <p className="text-xs text-muted-foreground">{notes}</p>}
+      <Photos photos={photos} receivedAt={receivedAt} refresh={refresh} />
+    </>
   )
 }
 
@@ -154,7 +193,53 @@ export function InventoryComparisonScreen({
         </Alert>
       )}
 
-      <div className="overflow-x-auto rounded-xl border bg-card shadow-raised">
+      <ul className="flex flex-col gap-3 lg:hidden" aria-label="Ítems">
+        {rows.map((row) => (
+          <li
+            key={`${row.category}-${row.description}`}
+            className={cn(
+              "rounded-xl border bg-card p-4 shadow-raised",
+              row.change === "WORSE" && "bg-destructive/10"
+            )}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="font-medium">{row.description}</p>
+                <p className="text-xs text-muted-foreground">{row.category}</p>
+              </div>
+              <ChangeBadge change={row.change} />
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-xs text-muted-foreground">Entrega</dt>
+                <dd>
+                  <ConditionCell
+                    condition={row.deliveryCondition}
+                    notes={row.deliveryNotes}
+                    photos={row.deliveryPhotos}
+                    receivedAt={query.dataUpdatedAt}
+                    refresh={refreshPhoto}
+                  />
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Devolución</dt>
+                <dd>
+                  <ConditionCell
+                    condition={row.returnCondition}
+                    notes={row.returnNotes}
+                    photos={row.returnPhotos}
+                    receivedAt={query.dataUpdatedAt}
+                    refresh={refreshPhoto}
+                  />
+                </dd>
+              </div>
+            </dl>
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden overflow-x-auto rounded-xl border bg-card shadow-raised lg:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -179,47 +264,25 @@ export function InventoryComparisonScreen({
                   </p>
                 </TableCell>
                 <TableCell>
-                  {row.deliveryCondition
-                    ? CONDITION_LABELS[row.deliveryCondition]
-                    : "—"}
-                  {row.deliveryNotes && (
-                    <p className="text-xs text-muted-foreground">
-                      {row.deliveryNotes}
-                    </p>
-                  )}
-                  <Photos
+                  <ConditionCell
+                    condition={row.deliveryCondition}
+                    notes={row.deliveryNotes}
                     photos={row.deliveryPhotos}
                     receivedAt={query.dataUpdatedAt}
                     refresh={refreshPhoto}
                   />
                 </TableCell>
                 <TableCell>
-                  {row.returnCondition
-                    ? CONDITION_LABELS[row.returnCondition]
-                    : "—"}
-                  {row.returnNotes && (
-                    <p className="text-xs text-muted-foreground">
-                      {row.returnNotes}
-                    </p>
-                  )}
-                  <Photos
+                  <ConditionCell
+                    condition={row.returnCondition}
+                    notes={row.returnNotes}
                     photos={row.returnPhotos}
                     receivedAt={query.dataUpdatedAt}
                     refresh={refreshPhoto}
                   />
                 </TableCell>
                 <TableCell>
-                  <Badge
-                    variant={
-                      row.change === "WORSE"
-                        ? "destructive"
-                        : row.change === "BETTER"
-                          ? "default"
-                          : "outline"
-                    }
-                  >
-                    {CHANGE_LABELS[row.change]}
-                  </Badge>
+                  <ChangeBadge change={row.change} />
                 </TableCell>
               </TableRow>
             ))}
