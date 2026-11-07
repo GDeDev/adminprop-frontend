@@ -497,6 +497,11 @@ function Timeline({ inquiry }: { inquiry: InquiryDetail }) {
           </Button>
         </div>
       </form>
+      {activities.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Todavía no hay actividad registrada.
+        </p>
+      )}
       <ol className="flex flex-col gap-2 border-l pl-4">
         {activities.map((activity) => (
           <li key={activity.id} className="text-sm">

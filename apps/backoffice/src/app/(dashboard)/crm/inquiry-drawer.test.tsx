@@ -125,6 +125,18 @@ describe("InquiryDrawer", () => {
     expect(screen.getByText("Hola, ¿sigue disponible?")).toBeInTheDocument()
   })
 
+  it("sin actividad lo dice en vez de dejar el historial en blanco", () => {
+    inquiryState = {
+      isPending: false,
+      isError: false,
+      data: detail({ activities: [] }),
+    }
+    open()
+    expect(
+      screen.getByText("Todavía no hay actividad registrada.")
+    ).toBeInTheDocument()
+  })
+
   it("muestra el motivo de una consulta perdida", () => {
     inquiryState = {
       isPending: false,

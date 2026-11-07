@@ -2,11 +2,12 @@
 
 import * as React from "react"
 import dynamic from "next/dynamic"
-import { Plus, Search } from "lucide-react"
+import { Inbox, Plus, Search } from "lucide-react"
 
 import type { InquiryCard, InquirySource } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
+import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -66,6 +67,12 @@ export function CrmScreen() {
     [assignee, source, propertyId, q]
   )
   const pipeline = usePipeline(filters)
+  // Sin filtros y sin ninguna consulta en ninguna etapa: en vez de un tablero
+  // vacío, el estado vacío con el alta manual.
+  const isEmpty =
+    pipeline.data !== undefined &&
+    Object.keys(filters).length === 0 &&
+    pipeline.data.columns.every((column) => column.total === 0)
 
   const stageCards = React.useCallback(
     (stage: InquiryCard["stage"]) =>
@@ -155,7 +162,21 @@ export function CrmScreen() {
           </AlertDescription>
         </Alert>
       )}
+      {isEmpty && (
+        <EmptyState
+          icon={Inbox}
+          title="Todavía no hay consultas"
+          description="Las consultas del portal y de los canales conectados aparecen acá. También podés cargar las que llegan por teléfono o WhatsApp."
+          action={
+            <Button onClick={() => setCreating(true)}>
+              <Plus aria-hidden />
+              Nueva consulta
+            </Button>
+          }
+        />
+      )}
       {pipeline.data &&
+        !isEmpty &&
         (isDesktop ? (
           <Board
             pipeline={pipeline.data}

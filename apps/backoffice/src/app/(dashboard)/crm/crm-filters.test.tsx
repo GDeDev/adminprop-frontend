@@ -175,10 +175,21 @@ describe("estados de la pantalla", () => {
   it("una etapa sin consultas muestra el estado vacío en mobile", () => {
     pipelineState = {
       ...loaded(),
-      data: makePipeline(),
+      data: makePipeline({ CONTACTED: [makeCard("c", "CONTACTED")] }),
     }
     render(<CrmScreen />)
     expect(screen.getByText("Sin consultas en esta etapa")).toBeInTheDocument()
+  })
+
+  it("sin ninguna consulta (y sin filtros) muestra el estado vacío con el alta manual", async () => {
+    pipelineState = { ...loaded(), data: makePipeline() }
+    const user = userEvent.setup()
+    render(<CrmScreen />)
+    expect(screen.getByText("Todavía no hay consultas")).toBeInTheDocument()
+    expect(screen.queryByRole("tab")).toBeNull()
+    const buttons = screen.getAllByRole("button", { name: "Nueva consulta" })
+    await user.click(buttons[buttons.length - 1]!)
+    expect(await screen.findByRole("dialog")).toBeInTheDocument()
   })
 
   it("«Nueva consulta» abre el alta manual", async () => {
