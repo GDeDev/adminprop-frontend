@@ -7,6 +7,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 
+import { apiErrorCode } from "@adminprop/session/client"
+
 import type {
   ApiSuccess,
   CloseOwnerStatementRequest,
@@ -51,17 +53,23 @@ function useSettlementMutation<TVariables, TResult>(
   request: (variables: TVariables) => Promise<TResult>
 ) {
   const queryClient = useQueryClient()
+  const invalidate = () => {
+    for (const key of [
+      settlementsKey,
+      ["billing"],
+      ["advance-expenses"],
+      ["owners"],
+    ]) {
+      void queryClient.invalidateQueries({ queryKey: key })
+    }
+  }
   return useMutation({
     mutationFn: request,
-    onSuccess: () => {
-      for (const key of [
-        settlementsKey,
-        ["billing"],
-        ["advance-expenses"],
-        ["owners"],
-      ]) {
-        void queryClient.invalidateQueries({ queryKey: key })
-      }
+    onSuccess: invalidate,
+    // Con 409 SETTLEMENT_STALE la API ya recalculó la liquidación: recargarla
+    // para que el usuario vea los montos nuevos antes de volver a confirmar.
+    onError: (error) => {
+      if (apiErrorCode(error) === "SETTLEMENT_STALE") invalidate()
     },
   })
 }
