@@ -97,9 +97,22 @@ describe("AutomationsScreen", () => {
         nextRunAt: null,
       },
     ]
+    jobs.push({
+      ...jobs[1]!,
+      name: "valuation.refresh-comparables",
+      title: "Actualizar comparables",
+      lastExecution: null,
+    })
     executions = [execution]
     render(<AutomationsScreen />)
 
+    // Global sin corrida manual (403 desde un tenant): sin botón.
+    expect(
+      screen.queryByRole("button", { name: /Ejecutar Actualizar comparables/ })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /Ejecutar Traer índices/ })
+    ).toBeInTheDocument()
     expect(
       screen.getByRole("heading", { name: "Generar cuotas del mes" })
     ).toBeInTheDocument()
@@ -110,8 +123,8 @@ describe("AutomationsScreen", () => {
     expect(screen.getByText("Falló")).toBeInTheDocument()
     expect(screen.getByText("BCRA no responde")).toBeInTheDocument()
     expect(
-      screen.getByText(/global, para todas las inmobiliarias/)
-    ).toBeInTheDocument()
+      screen.getAllByText(/global, para todas las inmobiliarias/).length
+    ).toBeGreaterThan(0)
     const history = screen.getByRole("region", {
       name: "Historial de ejecuciones",
     })

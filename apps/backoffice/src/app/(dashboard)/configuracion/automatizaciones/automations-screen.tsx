@@ -64,6 +64,12 @@ const PERIOD_JOBS = new Set([
   "settlements.statement-reminder",
 ])
 
+/**
+ * Jobs globales que un admin de inmobiliaria sí puede pedir a mano (con un
+ * mínimo entre corridas). Los demás globales dan 403 (D-254): sin botón.
+ */
+const GLOBAL_MANUAL_JOBS = new Set(["indices.fetch"])
+
 type StatusFilter = JobExecutionStatus | "ALL"
 
 /** Configuración → Automatizaciones (rediseño Fase 13, sección 6). Solo admin. */
@@ -157,15 +163,17 @@ function JobCard({ job, onRun }: { job: Job; onRun: () => void }) {
           </h2>
           <p className="text-sm text-muted-foreground">{job.description}</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRun}
-          aria-label={`Ejecutar ${job.title} ahora`}
-        >
-          <Play aria-hidden />
-          Ejecutar
-        </Button>
+        {(job.scope !== "GLOBAL" || GLOBAL_MANUAL_JOBS.has(job.name)) && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRun}
+            aria-label={`Ejecutar ${job.title} ahora`}
+          >
+            <Play aria-hidden />
+            Ejecutar
+          </Button>
+        )}
       </div>
       <p className="text-xs text-muted-foreground">
         {job.cronLabel}
