@@ -201,6 +201,8 @@ export function migrationErrorMessage(code: string | undefined): string | null {
       return "El archivo es de una versión vieja de la plantilla. Descargá la plantilla actual y pasá tus datos."
     case "BATCH_NOT_READY":
       return "El lote todavía no está listo para importar."
+    case "TOKKO_NOT_ENABLED":
+      return "La importación desde Tokko no está habilitada para esta inmobiliaria."
     case "BATCH_ALREADY_CONFIRMED":
       return "Este lote ya se confirmó."
     default:

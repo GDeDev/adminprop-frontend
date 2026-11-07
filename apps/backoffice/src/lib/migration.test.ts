@@ -108,6 +108,9 @@ describe("textos", () => {
     expect(migrationErrorMessage("TEMPLATE_VERSION_MISMATCH")).toMatch(
       /plantilla actual/
     )
+    expect(migrationErrorMessage("TOKKO_NOT_ENABLED")).toMatch(
+      /Tokko no está habilitada/
+    )
     expect(migrationErrorMessage("OTRO")).toBeNull()
   })
 
