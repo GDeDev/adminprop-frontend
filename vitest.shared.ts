@@ -11,15 +11,21 @@ import { availableParallelism } from "node:os"
  * paquete y se dan timeouts holgados; los tests no cambian.
  *
  * `VITEST_MAX_WORKERS` lo pisa (CI, o una máquina con pocos núcleos).
+ *
+ * El pool es `threads` y no `forks`: con la máquina cargada (la suite e2e del
+ * backend y su Postgres suelen correr a la vez) arrancar un proceso por
+ * archivo llegaba a fallar con "Failed to start forks worker"; un hilo por
+ * archivo arranca en milisegundos y comparte el proceso.
  */
 export function sharedMaxWorkers(): number {
   const fromEnv = Number(process.env.VITEST_MAX_WORKERS)
   if (Number.isInteger(fromEnv) && fromEnv > 0) return fromEnv
-  return Math.max(1, Math.floor(availableParallelism() / 3))
+  return Math.max(1, Math.floor(availableParallelism() / 4))
 }
 
 export const sharedTest = {
   passWithNoTests: true,
+  pool: "threads",
   maxWorkers: sharedMaxWorkers(),
   testTimeout: 30_000,
   hookTimeout: 30_000,
