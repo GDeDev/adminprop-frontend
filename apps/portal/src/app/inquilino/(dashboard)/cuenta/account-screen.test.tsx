@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import type {
@@ -41,6 +41,49 @@ vi.mock("@/lib/portal-api", () => ({
 afterEach(() => {
   vi.clearAllMocks()
 })
+
+/** La cuota del mes, pagada entera el 5. */
+const paidInstallment: NonNullable<PortalRenterAccount["currentInstallment"]> =
+  {
+    id: "i2",
+    period: "2026-11",
+    contract: { id: "c1" },
+    property: { id: "p1", address: "Calle 1 100" },
+    renter: { id: "r1", fullName: "Iván López" },
+    owner: null,
+    currency: "ARS",
+    baseAmount: "200000.00",
+    chargesTotal: "0.00",
+    lateFeeAccrued: "0.00",
+    lateFeeAdjusted: "0.00",
+    lateFeeWaived: false,
+    lateFeeBalance: "0.00",
+    paidTotal: "200000.00",
+    rentBalance: "0.00",
+    chargesBalance: "0.00",
+    totalDue: "0.00",
+    pendingConfirmationTotal: "0.00",
+    status: "PAID",
+    graceEndDate: "2026-11-10",
+    feeDays: 0,
+    paidAt: "2026-11-05",
+    collectionMode: "AGENCY",
+    feeMode: "DEDUCTED",
+    createdAt: "2026-10-28T00:00:00.000Z",
+    lateFeePercentage: "5.00",
+    lateFeeGraceDays: 10,
+    feePercentage: "5.00",
+    feeAmount: null,
+    feeOnBase: "10000.00",
+    feeOnCollected: "10000.00",
+    charges: [],
+    payments: [],
+    lateFeeAdjustments: [],
+    lateFeeDays: [],
+    creditsAvailable: "0.00",
+    notes: null,
+    updatedAt: "2026-11-05T00:00:00.000Z",
+  }
 
 describe("RenterAccountScreen", () => {
   it("muestra la cuota vencida con punitorio, el día por día y cómo pagar", () => {
@@ -120,6 +163,91 @@ describe("RenterAccountScreen", () => {
     expect(
       screen.getByRole("link", { name: /Avisar por WhatsApp/ })
     ).toHaveAttribute("href", expect.stringContaining("wa.me/5492211234567"))
+  })
+
+  it("con el mes al día pero una cuota anterior vencida, avisa la deuda y cómo pagar (spec 18, deuda de varios períodos)", () => {
+    account = {
+      contract: { id: "c1", status: "ACTIVE" },
+      currentInstallment: {
+        ...paidInstallment,
+      },
+      creditsAvailable: [],
+      arrears: {
+        renterId: "r1",
+        status: "OVERDUE",
+        overdueInstallments: 1,
+        maxDaysOverdue: 20,
+        lateFeeAccrued: [{ currency: "ARS", amount: "100000.00" }],
+        balance: [{ currency: "ARS", amount: "300000.00" }],
+      },
+      paymentInstructions: {
+        kind: "AGENCY",
+        bankAccount: me.agency.bankAccount,
+      },
+    }
+    render(<RenterAccountScreen />)
+
+    // La cuota del mes sigue mostrándose como pagada…
+    expect(
+      screen.getByText("Pagada el 05/11/2026. ¡Gracias!")
+    ).toBeInTheDocument()
+    // …pero la deuda anterior no se esconde.
+    const alert = screen.getByRole("alert")
+    expect(alert).toHaveTextContent("Tenés una cuota anterior vencida")
+    expect(alert).toHaveTextContent("Saldo total vencido: $ 300.000,00")
+    expect(alert).toHaveTextContent("Llevás 20 días de atraso")
+    expect(
+      within(alert).getByRole("link", { name: "Ver las cuotas pendientes" })
+    ).toHaveAttribute("href", "/inquilino/pagos")
+    // Y las instrucciones de pago aparecen aunque la del mes esté pagada.
+    expect(screen.getByText("0110000000000000000001")).toBeInTheDocument()
+  })
+
+  it("con dos cuotas anteriores vencidas y sin cuota este mes, igual muestra la deuda", () => {
+    account = {
+      contract: { id: "c1", status: "ACTIVE" },
+      currentInstallment: null,
+      creditsAvailable: [],
+      arrears: {
+        renterId: "r1",
+        status: "OVERDUE",
+        overdueInstallments: 2,
+        maxDaysOverdue: 45,
+        lateFeeAccrued: [{ currency: "ARS", amount: "0.00" }],
+        balance: [{ currency: "ARS", amount: "400000.00" }],
+      },
+      paymentInstructions: { kind: "AGENCY", bankAccount: null },
+    }
+    render(<RenterAccountScreen />)
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Tenés 2 cuotas anteriores vencidas"
+    )
+    expect(
+      screen.getByText("Todavía no hay cuota para este mes")
+    ).toBeInTheDocument()
+  })
+
+  it("la cuota del mes vencida no se cuenta dos veces", () => {
+    account = {
+      contract: { id: "c1", status: "ACTIVE" },
+      currentInstallment: {
+        ...paidInstallment,
+        status: "OVERDUE",
+        paidAt: null,
+      },
+      creditsAvailable: [],
+      arrears: {
+        renterId: "r1",
+        status: "OVERDUE",
+        overdueInstallments: 1,
+        maxDaysOverdue: 3,
+        lateFeeAccrued: [],
+        balance: [{ currency: "ARS", amount: "200000.00" }],
+      },
+      paymentInstructions: { kind: "AGENCY", bankAccount: null },
+    }
+    render(<RenterAccountScreen />)
+    expect(screen.queryByRole("alert")).toBeNull()
   })
 
   it("sin contrato vigente lo dice", () => {

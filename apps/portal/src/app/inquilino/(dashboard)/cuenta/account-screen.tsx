@@ -9,6 +9,7 @@ import { apiErrorMessage } from "@adminprop/session/client"
 import type {
   PortalRenterAccount,
   PortalRenterMe,
+  RenterArrears,
 } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
@@ -57,11 +58,20 @@ function Account({
 }) {
   const installment = account.currentInstallment
   const arrears = account.arrears
+  // Cuotas vencidas además de la que se muestra: la tarjeta es de la cuota
+  // del mes, pero la deuda puede venir de meses anteriores (spec 18, caso
+  // borde "deuda de varios períodos"). Con el mes al día y el anterior
+  // vencido, antes acá decía "Pagada ¡Gracias!" y nada más.
+  const previousOverdue =
+    arrears.overdueInstallments - (installment?.status === "OVERDUE" ? 1 : 0)
 
   if (!account.contract || !installment) {
     return (
       <div className="flex flex-col gap-6">
         <Header me={me} />
+        {previousOverdue > 0 && (
+          <ArrearsNotice arrears={arrears} count={previousOverdue} />
+        )}
         <EmptyState
           title={
             account.contract
@@ -85,6 +95,10 @@ function Account({
   return (
     <div className="flex flex-col gap-6">
       <Header me={me} />
+
+      {previousOverdue > 0 && (
+        <ArrearsNotice arrears={arrears} count={previousOverdue} />
+      )}
 
       <section
         className="rounded-xl border bg-card p-5 shadow-raised"
@@ -183,7 +197,7 @@ function Account({
         )}
       </section>
 
-      {installment.status !== "PAID" && (
+      {(installment.status !== "PAID" || previousOverdue > 0) && (
         <PaymentInstructions
           instructions={account.paymentInstructions}
           agency={me.agency}
@@ -199,6 +213,46 @@ function Account({
         </Link>
       </p>
     </div>
+  )
+}
+
+/**
+ * Deuda de meses anteriores a la cuota que se muestra. El saldo es el total
+ * vencido del inquilino (incluye la cuota de la tarjeta si también venció),
+ * por moneda, tal como lo manda la API.
+ */
+function ArrearsNotice({
+  arrears,
+  count,
+}: {
+  arrears: RenterArrears
+  count: number
+}) {
+  const balance = arrears.balance
+    .filter((b) => !isZero(b.amount))
+    .map((b) => formatMoney(b.amount, b.currency))
+    .join(" · ")
+  return (
+    <section
+      role="alert"
+      className="rounded-xl border border-destructive/40 bg-destructive/5 p-4"
+      aria-labelledby="arrears-title"
+    >
+      <h2 id="arrears-title" className="font-display font-semibold">
+        {count === 1
+          ? "Tenés una cuota anterior vencida"
+          : `Tenés ${count} cuotas anteriores vencidas`}
+      </h2>
+      <p className="mt-1 text-sm">
+        {balance ? `Saldo total vencido: ${balance}. ` : ""}
+        {arrears.maxDaysOverdue > 0
+          ? `Llevás ${daysLabel(arrears.maxDaysOverdue)} de atraso y el punitorio sigue corriendo. `
+          : ""}
+        <Link href="/inquilino/pagos" className="underline">
+          Ver las cuotas pendientes
+        </Link>
+      </p>
+    </section>
   )
 }
 
