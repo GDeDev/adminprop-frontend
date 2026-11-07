@@ -224,7 +224,7 @@ export function ChangeBillingTermsDialog({
         <form
           id="billing-terms-form"
           onSubmit={form.handleSubmit(submit)}
-          className="max-h-[70vh] overflow-y-auto px-4 sm:px-0"
+          className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-0"
         >
           <FieldGroup>
             <Controller

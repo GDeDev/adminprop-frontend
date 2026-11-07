@@ -219,7 +219,7 @@ export function ServiceFormDialog({
           id="service-form"
           onSubmit={form.handleSubmit(submit)}
           noValidate
-          className="max-h-[60vh] overflow-y-auto px-4 md:px-0"
+          className="min-h-0 flex-1 overflow-y-auto px-4 md:px-0"
         >
           <FieldGroup>
             {error && (

@@ -284,10 +284,16 @@ export function RegisterPaymentDialog({
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
+        {error && (
+          <Alert variant="destructive" className="mx-4 w-auto sm:mx-0">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <form
           id="register-payment-form"
           onSubmit={form.handleSubmit(submit)}
-          className="max-h-[70vh] overflow-y-auto px-4 sm:px-0"
+          className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-0"
         >
           <FieldGroup>
             <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
@@ -419,7 +425,12 @@ export function RegisterPaymentDialog({
                       <FieldLabel htmlFor="payment-rate-date">
                         Fecha de la cotización
                       </FieldLabel>
-                      <Input {...field} id="payment-rate-date" type="date" />
+                      <Input
+                        {...field}
+                        id="payment-rate-date"
+                        type="date"
+                        aria-invalid={fieldState.invalid}
+                      />
                       <FieldDescription>
                         Si queda vacía, la del pago.
                       </FieldDescription>
@@ -637,11 +648,6 @@ export function RegisterPaymentDialog({
               )}
             />
           </FieldGroup>
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
         </form>
 
         <ResponsiveDialogFooter>
@@ -653,7 +659,7 @@ export function RegisterPaymentDialog({
             Cancelar
           </Button>
           <Button type="submit" form="register-payment-form" disabled={pending}>
-            Registrar pago
+            {pending ? "Registrando…" : "Registrar pago"}
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

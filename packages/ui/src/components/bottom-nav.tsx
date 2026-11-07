@@ -22,7 +22,7 @@ import {
 const MAX_DESTINATIONS = 5
 
 const itemClassName =
-  "pressable relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[0.7rem] leading-none font-medium text-sidebar-muted outline-none before:absolute before:top-0 before:h-0.5 before:w-8 before:rounded-full before:bg-accent before:opacity-0 before:transition-opacity focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset data-[active=true]:text-sidebar-foreground data-[active=true]:before:opacity-100"
+  "pressable relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-caption leading-none font-medium text-sidebar-muted outline-none before:absolute before:top-0 before:h-0.5 before:w-8 before:rounded-full before:bg-accent before:opacity-0 before:transition-opacity focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset data-[active=true]:text-sidebar-foreground data-[active=true]:before:opacity-100"
 
 /**
  * Navegación mobile (ADMINPROP-UI.md, "Componentes propios"): hasta cinco

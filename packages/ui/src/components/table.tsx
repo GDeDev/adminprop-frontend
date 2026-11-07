@@ -3,11 +3,22 @@
 import * as React from "react"
 import { cn } from "cn"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+/**
+ * `label` nombra la región scrolleable (lector de pantalla); el contenedor es
+ * enfocable para poder desplazar una tabla ancha con el teclado.
+ */
+function Table({
+  className,
+  label,
+  ...props
+}: React.ComponentProps<"table"> & { label?: string }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      role="region"
+      tabIndex={0}
+      aria-label={label ?? props["aria-label"]}
+      className="relative w-full overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <table
         data-slot="table"
@@ -67,6 +78,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
+      scope="col"
       data-slot="table-head"
       className={cn(
         "h-11 px-3 text-left align-middle text-xs font-medium tracking-wide whitespace-nowrap text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",

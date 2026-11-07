@@ -64,7 +64,7 @@ function isRawServerMessage(message: string): boolean {
   return (
     /^Cannot (GET|POST|PUT|PATCH|DELETE|HEAD)\b/.test(message) ||
     /\/api\/v\d/.test(message) ||
-    /^(Internal server error|Bad Gateway|Service Unavailable|Not Found)$/i.test(
+    /^(Internal server error|Bad Gateway|Service Unavailable|Not Found|Unauthorized|Forbidden|Bad Request|Too Many Requests|Payload Too Large|Unprocessable Entity|Conflict)$/i.test(
       message
     )
   )

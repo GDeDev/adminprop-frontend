@@ -5,6 +5,7 @@ import { Eye, Loader2, RefreshCw, RotateCcw } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type {
   NotificationChannel,
   NotificationLogItem,
@@ -25,6 +26,7 @@ import {
   ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
+  ResponsiveDialogBody,
 } from "@adminprop/ui/components/responsive-dialog"
 import {
   Select,
@@ -284,13 +286,17 @@ function NotificationDetailDialog({
               : "Cargando…"}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="max-h-[60vh] overflow-y-auto px-4 sm:px-0">
+        <ResponsiveDialogBody>
           {detail.isPending ? (
             <Skeleton className="h-32" />
           ) : detail.isError ? (
-            <p className="text-sm text-destructive" role="alert">
-              {apiErrorMessage(detail.error, "No se pudo cargar el detalle.")}
-            </p>
+            <SectionError
+              description={apiErrorMessage(
+                detail.error,
+                "No se pudo cargar el detalle."
+              )}
+              onRetry={() => void detail.refetch()}
+            />
           ) : (
             <div className="flex flex-col gap-4 text-sm">
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
@@ -359,7 +365,7 @@ function NotificationDetailDialog({
               )}
             </div>
           )}
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cerrar
@@ -449,12 +455,13 @@ export function ResendFailedPanel({
           className="flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-raised"
         >
           {status.isError ? (
-            <p className="text-sm text-destructive">
-              {apiErrorMessage(
+            <SectionError
+              description={apiErrorMessage(
                 status.error,
                 "No se pudo consultar el avance del reintento."
               )}
-            </p>
+              onRetry={() => void status.refetch()}
+            />
           ) : !job ? (
             <p className="text-sm text-muted-foreground">Iniciando…</p>
           ) : (

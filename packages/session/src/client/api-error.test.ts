@@ -15,6 +15,20 @@ function apiError(status: number, data: unknown): AxiosError {
 }
 
 describe("apiErrorMessage", () => {
+  it.each([
+    "Unauthorized",
+    "Forbidden",
+    "Bad Request",
+    "Too Many Requests",
+    "Payload Too Large",
+    "Unprocessable Entity",
+    "conflict",
+  ])("no muestra el mensaje crudo en inglés %s", (message) => {
+    expect(apiErrorMessage(apiError(400, { message }), "Algo falló")).toBe(
+      "Algo falló"
+    )
+  })
+
   it("usa el mensaje de la API, que ya está pensado para el usuario", () => {
     const error = apiError(401, {
       code: "INVALID_CREDENTIALS",

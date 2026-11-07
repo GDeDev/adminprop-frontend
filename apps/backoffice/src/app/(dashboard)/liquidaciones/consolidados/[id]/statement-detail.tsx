@@ -6,6 +6,7 @@ import { ChevronLeft, Lock, LockOpen, Plus, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { apiErrorMessage, useSession } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
 import type {
   OwnerStatementDetail,
   SettlementSummary,
@@ -25,6 +26,7 @@ import {
   ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
+  ResponsiveDialogBody,
 } from "@adminprop/ui/components/responsive-dialog"
 import {
   Table,
@@ -431,16 +433,17 @@ function AddSettlementsDialog({
             consolidado.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="max-h-[60vh] overflow-y-auto px-4 sm:px-0">
+        <ResponsiveDialogBody>
           {candidates.isPending ? (
             <p className="text-sm text-muted-foreground">Cargando…</p>
           ) : candidates.isError ? (
-            <p className="text-sm text-destructive">
-              {apiErrorMessage(
+            <SectionError
+              description={apiErrorMessage(
                 candidates.error,
                 "No se pudieron cargar las candidatas."
               )}
-            </p>
+              onRetry={() => void candidates.refetch()}
+            />
           ) : candidates.data.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No hay liquidaciones para agregar.
@@ -482,7 +485,7 @@ function AddSettlementsDialog({
               })}
             </ul>
           )}
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <Button
             variant="outline"

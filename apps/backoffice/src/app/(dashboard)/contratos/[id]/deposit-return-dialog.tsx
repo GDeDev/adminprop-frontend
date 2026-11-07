@@ -27,6 +27,7 @@ import {
   ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
+  ResponsiveDialogBody,
 } from "@adminprop/ui/components/responsive-dialog"
 import {
   Select,
@@ -226,7 +227,7 @@ export function DepositReturnDialog({
             referencia, se descuentan las deducciones y se devuelve el resto.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="max-h-[65vh] overflow-y-auto px-4 sm:px-0">
+        <ResponsiveDialogBody>
           <FieldGroup>
             <Alert role="note">
               <Info aria-hidden />
@@ -452,7 +453,7 @@ export function DepositReturnDialog({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <Button
             variant="outline"

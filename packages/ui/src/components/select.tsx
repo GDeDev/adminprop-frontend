@@ -5,6 +5,8 @@ import { cn } from "cn"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Select as SelectPrimitive } from "radix-ui"
 
+import { useFieldControlProps } from "@adminprop/ui/components/field"
+
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
@@ -27,10 +29,11 @@ function SelectTrigger({
   className,
   size = "default",
   children,
-  ...props
+  ...rawProps
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default"
 }) {
+  const props = useFieldControlProps(rawProps)
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"

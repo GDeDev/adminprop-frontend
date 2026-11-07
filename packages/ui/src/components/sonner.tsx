@@ -40,7 +40,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--border-radius": "var(--radius-lg)",
         } as React.CSSProperties
       }
+      // Un error que desaparece en 4 s es fácil de perder (WCAG 2.2.1).
+      // Sonner no tiene duración por tipo: se sube para todos y se suma cierre.
+      closeButton
       toastOptions={{
+        duration: 8000,
         classNames: {
           toast: "shadow-float!",
           // Sonner pinta la descripción con un gris propio que no llega a AA.

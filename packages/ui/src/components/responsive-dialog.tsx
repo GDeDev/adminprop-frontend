@@ -4,6 +4,7 @@ import * as React from "react"
 
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogDescription,
@@ -14,6 +15,7 @@ import {
 } from "@adminprop/ui/components/dialog"
 import {
   Drawer,
+  DrawerBody,
   DrawerClose,
   DrawerContent,
   DrawerDescription,
@@ -81,6 +83,16 @@ function ResponsiveDialogHeader(props: React.ComponentProps<"div">) {
   return <Header {...props} />
 }
 
+/**
+ * Cuerpo scrolleable: va entre `ResponsiveDialogHeader` y
+ * `ResponsiveDialogFooter`, que quedan fijos. Reemplaza los
+ * `max-h-[70vh] overflow-y-auto` ad hoc.
+ */
+function ResponsiveDialogBody(props: React.ComponentProps<"div">) {
+  const Body = useDesktop() ? DialogBody : DrawerBody
+  return <Body {...props} />
+}
+
 function ResponsiveDialogFooter(props: React.ComponentProps<"div">) {
   const Footer = useDesktop() ? DialogFooter : DrawerFooter
   return <Footer {...props} />
@@ -102,6 +114,7 @@ function ResponsiveDialogDescription(
 
 export {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
