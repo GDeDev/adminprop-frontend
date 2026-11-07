@@ -1,4 +1,5 @@
 import "server-only"
+import { headers } from "next/headers"
 
 import type {
   ApiSuccess,
@@ -10,6 +11,7 @@ import type {
   PublicSite,
 } from "@adminprop/shared-types"
 
+import { clientIp } from "./client-ip"
 import type { SiteRoute } from "./site-route"
 
 /** Cada cuánto se vuelve a pedir lo publicado a la API (segundos). */
@@ -49,15 +51,29 @@ export function apiUrl(): string | null {
  * nunca `NEXT_PUBLIC_`, y no se manda en el formulario de contacto (ese sí
  * debe seguir limitado por visitante).
  *
- * Tampoco va en las lecturas sin caché (resolver el host, la vista previa):
- * esas las dispara cualquiera con un `Host` o un `?preview=` inventado, y con
- * el header la API no las frenaría nunca. Las cacheadas (ISR) llegan a la API
- * a lo sumo una vez por minuto por URL, así que ahí el header no amplifica.
+ * Las lecturas sin caché (resolver el host, la vista previa) las dispara
+ * cualquiera con un `Host` o un `?preview=` inventado: van con el secreto
+ * Y con `X-Client-IP` (ver `visitorHeaders`), para que la API cuente cada
+ * pedido contra la IP del visitante y no contra la de este servidor, que si no
+ * agota el cupo de todos los sitios con muchos misses (429 → 503).
  */
 export function trustedServerHeaders(): Record<string, string> {
   const secret =
     process.env.SITES_SERVER_SECRET || process.env.SITES_REVALIDATE_SECRET
   return secret ? { "X-Sites-Secret": secret } : {}
+}
+
+/**
+ * Secreto + IP del visitante, para las lecturas sin caché. Sin IP confiable o
+ * sin secreto no va ninguno de los dos: la API cuenta por este servidor.
+ */
+export function visitorHeaders(
+  ip: string | null | undefined
+): Record<string, string> {
+  const trusted = trustedServerHeaders()
+  return ip && "X-Sites-Secret" in trusted
+    ? { ...trusted, "X-Client-IP": ip }
+    : {}
 }
 
 type Params = Record<string, string | number | undefined>
@@ -95,7 +111,12 @@ export const siteTag = (slug: string) => `site:${slug}`
  */
 async function get<T>(
   path: string,
-  options: { params?: Params; fresh?: boolean; tag?: string } = {}
+  options: {
+    params?: Params
+    fresh?: boolean
+    tag?: string
+    ip?: string | null
+  } = {}
 ): Promise<T | null> {
   const base = apiUrl()
   if (!base) throw new UpstreamError("API_URL sin configurar", null)
@@ -105,7 +126,7 @@ async function get<T>(
     response = await fetch(
       `${base}/public${path}${queryString(options.params)}`,
       options.fresh
-        ? { cache: "no-store", signal }
+        ? { cache: "no-store", signal, headers: visitorHeaders(options.ip) }
         : {
             headers: trustedServerHeaders(),
             signal,
@@ -150,13 +171,24 @@ async function get<T>(
   return (body as ApiSuccess<T>).data
 }
 
+/** IP del visitante del pedido en curso (solo dentro de un request de Next). */
+async function currentVisitorIp(): Promise<string | null> {
+  try {
+    return clientIp(await headers())
+  } catch {
+    return null
+  }
+}
+
 const slugPath = (route: SiteRoute) => `/${encodeURIComponent(route.slug)}`
 
 /** El sitio (publicado, o el borrador con token de vista previa). */
-export function getSite(route: SiteRoute): Promise<PublicSite | null> {
+export async function getSite(route: SiteRoute): Promise<PublicSite | null> {
+  const fresh = route.previewToken !== null
   return get<PublicSite>(`${slugPath(route)}/site`, {
     params: route.previewToken ? { preview: route.previewToken } : undefined,
-    fresh: route.previewToken !== null,
+    fresh,
+    ip: fresh ? await currentVisitorIp() : null,
     tag: siteTag(route.slug),
   })
 }
@@ -211,11 +243,15 @@ export type HostResult =
   | { status: "error" }
 
 /** Resuelve el slug de un host (subdominio o dominio propio). */
-export async function resolveHost(host: string): Promise<HostResult> {
+export async function resolveHost(
+  host: string,
+  ip?: string | null
+): Promise<HostResult> {
   try {
     const data = await get<{ slug: string }>("/site-by-host", {
       params: { host },
       fresh: true,
+      ip,
     })
     return data ? { status: "found", slug: data.slug } : { status: "missing" }
   } catch {

@@ -102,8 +102,10 @@ export async function proxy(request: NextRequest) {
     if (host && isPlausibleSiteHost(host)) {
       try {
         // La vista previa ya descontó su cupo arriba.
-        slug = await cachedHostLookup(host, resolveHost, () =>
-          previewToken ? true : takeToken(ip)
+        slug = await cachedHostLookup(
+          host,
+          (key) => resolveHost(key, ip),
+          () => (previewToken ? true : takeToken(ip))
         )
       } catch (error) {
         if (error instanceof HostLookupLimitedError) return tooManyRequests()
