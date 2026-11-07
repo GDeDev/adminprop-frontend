@@ -59,6 +59,14 @@ describe("apiErrorMessage", () => {
     )
     expect(apiErrorMessage(check, "Algo falló")).not.toMatch(/rent_amount/)
 
+    const cooldown = apiError(409, {
+      code: "AUTOMATION_JOB_COOLDOWN",
+      message: "Esa tarea ya corrió hace poco",
+    })
+    expect(apiErrorMessage(cooldown, "Algo falló")).toBe(
+      "Ya se pidió hace poco, probá en unos minutos."
+    )
+
     const db = apiError(500, {
       code: "DATABASE_ERROR",
       message: "P1001: can't reach database",

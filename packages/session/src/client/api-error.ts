@@ -26,6 +26,11 @@ const FRIENDLY_MESSAGES: Record<string, string> = {
     "No se pudo guardar por un problema del sistema. Probá de nuevo en unos minutos y, si sigue pasando, avisá a soporte.",
   IDEMPOTENCY_KEY_REUSED:
     "Ese pedido ya se envió con otros datos. Recargá la pantalla para ver si quedó registrado.",
+  // Job global pedido hace poco (D-254): 409 con cooldown entre corridas.
+  AUTOMATION_JOB_COOLDOWN: "Ya se pidió hace poco, probá en unos minutos.",
+  // Job global desde una inmobiliaria (D-254): 403, corre solo en su horario.
+  AUTOMATION_JOB_GLOBAL:
+    "Esa tarea es de toda la plataforma y corre sola en su horario.",
   CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY:
     "Cargar el alquiler a mano lo hace un administrador.",
 }
