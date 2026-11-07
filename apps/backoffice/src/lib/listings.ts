@@ -92,3 +92,25 @@ export function missingFromError(error: unknown): string[] {
     ? missing.filter((item): item is string => typeof item === "string")
     : []
 }
+
+// Señales de texto técnico (excepciones, stack, JSON/HTML, códigos HTTP).
+const TECHNICAL_ERROR =
+  /exception|error:|stack|prisma|econn|etimedout|status code|axios|\bat \S+\(|[{}<>]|\b[45]\d{2}\b/i
+
+export const GENERIC_REMOTE_ERROR =
+  "El portal rechazó o no pudo procesar la operación. Probá de nuevo en unos minutos; si sigue igual, reconectá la cuenta."
+
+/**
+ * `lastError` lo guarda el servidor a partir de lo que respondió el portal y
+ * puede traer texto técnico. Se muestra solo si parece un mensaje pensado para
+ * personas (corto y sin señales técnicas); si no, un texto genérico. Es una
+ * heurística: puede ocultar algún mensaje legítimo con un número de 3 cifras.
+ * Rescatado de la rama `feature/fase-23-crm-front-ui`.
+ */
+export function friendlyRemoteError(raw: string): string {
+  const text = raw.trim()
+  if (text === "" || text.length > 200 || TECHNICAL_ERROR.test(text)) {
+    return GENERIC_REMOTE_ERROR
+  }
+  return text
+}

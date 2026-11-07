@@ -25,7 +25,11 @@ import { safeHttpsUrl } from "@adminprop/ui/lib/safe-url"
 
 import { formatDateTime } from "@/lib/automations"
 import { crmApiError } from "@/lib/crm"
-import { CHANNEL_LABELS, channelStatusMeta } from "@/lib/listings"
+import {
+  CHANNEL_LABELS,
+  channelStatusMeta,
+  friendlyRemoteError,
+} from "@/lib/listings"
 import {
   useChannels,
   useConnectMercadoLibre,
@@ -137,8 +141,9 @@ function ChannelCard({ channel }: { channel: ListingChannelDto }) {
       {channel.status === "ERROR" && channel.lastError && (
         <Alert variant="destructive" role="alert">
           <AlertDescription>
-            La conexión con el portal falló: {channel.lastError} Reconectá la
-            cuenta para seguir publicando.
+            La conexión con el portal falló:{" "}
+            {friendlyRemoteError(channel.lastError)} Reconectá la cuenta para
+            seguir publicando.
           </AlertDescription>
         </Alert>
       )}

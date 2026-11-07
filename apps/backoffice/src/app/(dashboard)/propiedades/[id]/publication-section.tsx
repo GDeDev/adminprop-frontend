@@ -22,6 +22,7 @@ import { formatDateTime } from "@/lib/automations"
 import { isJobFinished, useJobStatus } from "@/lib/jobs-api"
 import {
   CHANNEL_LABELS,
+  friendlyRemoteError,
   LISTING_ACTION_LABELS,
   listingActions,
   listingStatusMeta,
@@ -183,7 +184,8 @@ function ListingCard({
       {listing.status === "ERROR" && listing.lastError && (
         <Alert variant="destructive" role="alert">
           <AlertDescription>
-            No se pudo publicar. Motivo informado: {listing.lastError}
+            No se pudo publicar. Motivo informado:{" "}
+            {friendlyRemoteError(listing.lastError)}
           </AlertDescription>
         </Alert>
       )}
