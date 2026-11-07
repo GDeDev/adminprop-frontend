@@ -889,3 +889,38 @@ Además del arrastre, cada tarjeta del tablero de escritorio tiene un menú «Mo
 ### DT-178 — Contactos manuales desde el detalle y estados de error
 
 El detalle permite registrar un llamado o un email (`contact-attempts` con `PHONE` o `EMAIL`), visibles sólo si la consulta tiene teléfono o email, porque WhatsApp ya se registra solo al abrir el chat (DT-101). Los errores de red o de servidor nunca se muestran crudos: `crmApiError` usa el mensaje del catálogo por código o el texto de respaldo en español. Los textos que la API guarda como dato (`lastError` de un canal o de una publicación) sí se muestran, precedidos por una frase en español («No se pudo publicar. Motivo informado: …»). El aviso «Mercado Libre quedó conectado» exige `?connected=mercadolibre` **y** que el canal figure `CONNECTED`, para que abrir la URL a mano no anuncie algo falso. El resumen del CRM, la lista de canales y las analíticas de la propiedad ofrecen «Reintentar» al fallar.
+
+### DT-179 — `apps/sites`: el secreto solo va en lecturas que no arma el visitante, y el proxy limita por IP
+
+Revisión 2026-11-06 (F-S2, H6). `X-Sites-Secret` hace que la API no cuente nuestras lecturas contra su tope por IP; mandarlo en lo que dispara cualquiera convertía al sitio en un amplificador. Ahora: (1) **no** va en `resolveHost` ni en la vista previa (`fresh`); esas las sigue limitando la API por la IP del servidor. (2) El proxy aplica un tope por IP en memoria (ventana fija de 60 s, por instancia): 120 para lo que llega sin caché (resolver un host que no está en memoria y cada pedido con `?preview=`) y otro balde de 300 para lo que va con el secreto pero cuya URL arma el visitante (fichas `/propiedades/<id>`, listado con filtros, `/api/favoritos`). Pasado el tope, 429 con `Retry-After: 60`; lo cacheado y fijo (la home) no gasta cupo. Sin IP confiable (`clientIp` → `null`, típico en desarrollo) no se limita, para no frenar a todos con un balde compartido. (3) La caché de hosts pasa a LRU con dos mapas (2000 existentes, 5000 inexistentes): una ráfaga de `Host` inventados ya no vacía la caché de los sitios reales. Es un freno contra un abusador desde una IP, no una cuota exacta: con varias instancias o IPs distribuidas el tope se multiplica; para eso hace falta un rate limit compartido (Redis/edge), que queda pendiente.
+
+### DT-180 — El matcher del proxy de `apps/sites` cubre siempre `/s` y `/p`
+
+F-S3. El matcher saltea las rutas con extensión (favicon, imágenes), y con eso `/s/d~slug/x.png` llegaba directo a la app sin pasar por el proxy: salteaba el cierre del acceso por slug en producción y el tope por IP. Se agregan `/s/:path*` y `/p/:path*` al matcher, así que esas rutas siempre caen en la regla que las reescribe a 404. El `[id]` de la ficha ya se validaba como UUID antes de pedir a la API. Se descartó el header interno chequeado en los layouts: leer headers vuelve dinámica la página y rompe el ISR.
+
+### DT-181 — HSTS sin `includeSubDomains` en el sitio público
+
+F-S4. El sitio se sirve también en el dominio propio de cada inmobiliaria; con `includeSubDomains` le forzaríamos HTTPS a todos sus subdominios (mail, sistemas viejos), que no administramos. Queda `max-age=31536000`. El backoffice y el portal (dominios nuestros) siguen con `includeSubDomains`.
+
+### DT-182 — IP del usuario hacia la API en `X-Client-IP`, siempre con el secreto
+
+H5. La API va a creer la IP real solo en `X-Client-IP` y solo si viene con un `X-Sites-Secret` válido (un `X-Forwarded-For` lo escribe cualquiera). El formulario de contacto de `apps/sites` deja de mandar `X-Forwarded-For` y manda `X-Client-IP` + secreto; si no hay IP confiable o no hay secreto, no manda ninguno (la API cuenta por el servidor). El BFF de sesión (`packages/session`, `POST /api/session/refresh`) hace lo mismo con `API_SERVER_SECRET` (o la opción `serverSecret`); la IP sale de `CLIENT_IP_HEADER` o de `X-Forwarded-For` contado desde la derecha (`TRUSTED_PROXY_HOPS`, default 1), igual que en `apps/sites`. Sin `API_SERVER_SECRET` no cambia nada. **Supuesto a revisar:** el valor de `API_SERVER_SECRET` tiene que ser uno de los que la API acepta como secreto de servidor (hoy `SITES_SERVER_SECRET`/`SITES_REVALIDATE_SECRET`); si el backend define un secreto propio para el BFF, solo cambia el valor en Doppler. El login no pasa por el BFF (va del navegador a la API), así que no aplica.
+
+### DT-183 — Sesión: tope de 30 días también al rotar y `signIn` cierra la sesión anterior
+
+F-S7 y F-S8. `refresh()` topa la cookie del refresh token rotado (y la de la marca) en 30 días, como ya hacía `start()`. `signIn` llama a `endSession()` (revoca en la API y borra la cookie; sin cookie es un no-op) y a `onSignOut` (limpia cachés) antes de guardar la sesión nueva: entrar con otro usuario en la misma pestaña ya no deja vivo el refresh token anterior ni datos en caché del usuario previo. Cuesta un pedido más por login.
+
+### DT-184 — Fotos del inventario como archivos privados con URL firmada
+
+F-S6 (parte front). El backend pasa las fotos del inventario a `access: 'private'` y el `SignedUrlsInterceptor` las firma (vencen a los 10 minutos, como los comprobantes). Las miniaturas usan `PrivateImage` (`components/private-image.tsx`): si la carga falla, vuelve a pedir el recurso una vez y reintenta con la URL nueva. Abrir una foto desde la comparación sigue el patrón de `PrivateFileLink`: si la URL que tenemos está por vencer (`isFileUrlFresh`), se pide la comparación de nuevo antes de abrir. En el editor el refresco no pisa lo que se está editando: el borrador vive en el estado del editor, no en la query. Mientras el backend siga devolviendo URLs públicas, nada cambia.
+
+### DT-185 — Performance del backoffice y del sitio (F-P9 a F-P12)
+
+- **Ficha de contrato:** servicios, cuenta corriente, cuotas e inventarios se piden en `ContractDetailScreen` junto con el contrato (solo necesitan el id); React Query los comparte con los hooks de cada sección. Antes esperaban a que llegara el contrato.
+- **CRM:** el tablero con `@dnd-kit` se carga con `next/dynamic` (`ssr: false`) y solo en escritorio; el celular usa pestañas y no lo baja.
+- **Selectores** de propiedad, propietario, inquilino y garante: la búsqueda se habilita solo con el selector abierto (`enabled: open`). Se descartó `open || value !== null`: la etiqueta de lo elegido nunca sale de la lista, así que pedirla con un valor elegido no sirve para nada.
+- **`SiteImage`:** con `sizes` y una URL de Cloudinary sin transformaciones (`/image/upload/v123/…`) arma `srcSet` con `w_N,c_limit,f_auto,q_auto` (320 a 1920). Otros storages o URLs que ya traen transformaciones quedan como estaban.
+
+### DT-186 — Rescate de la rama `feature/fase-23-crm-front-ui`
+
+Según `COMPARACION_FASE_23_FRONT.md` §11 se trajeron cuatro cosas a la versión conservada: estado vacío global del tablero (`EmptyState` con «Nueva consulta», solo sin filtros y con todas las etapas en 0), estado vacío de actividad en el detalle, `fillDaily` (rellena con 0 los días que la API omite en la serie diaria; sin ningún punto queda vacía y el gráfico muestra su estado vacío) y `friendlyRemoteError` (`lib/listings.ts`). Este último reemplaza lo dicho en DT-178 sobre `lastError`: ahora solo se muestra si es corto y no tiene señales técnicas (excepciones, JSON/HTML, códigos 4xx/5xx); si no, un texto genérico. Es una heurística: puede ocultar algún mensaje legítimo con un número de tres cifras. No se rescató `daily-bars-chart.tsx` ni el `Select` «Mover a…» fijo.
