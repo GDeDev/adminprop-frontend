@@ -328,7 +328,7 @@ export interface paths {
     }
     /**
      * Basic health check
-     * @description Simple health check endpoint that returns basic application status
+     * @description Simple health check endpoint that only returns the status (no version, environment or uptime)
      */
     get: operations["HealthController_checkHealth"]
     put?: never
@@ -2510,7 +2510,7 @@ export interface paths {
     put?: never
     /**
      * Analizar el stock de Tokko (dry-run)
-     * @description Siempre es un análisis: no hay "importar directo". Con `TOKKO_SOURCE=fixture` usa una muestra incluida; con `http`, la API real.
+     * @description Siempre es un análisis: no hay "importar directo". Con `TOKKO_SOURCE=fixture` usa una muestra incluida; con `http`, la API real, sólo para la inmobiliaria de `TOKKO_TENANT_ID`.
      */
     post: operations["MigrationController_analyzeTokko_api/v1"]
     delete?: never
@@ -10308,14 +10308,6 @@ export interface operations {
           "application/json": {
             /** @example ok */
             status?: string
-            /** @example 2023-12-01T10:00:00Z */
-            timestamp?: string
-            /** @example 12345 */
-            uptime?: number
-            /** @example 1.0.0 */
-            version?: string
-            /** @example development */
-            environment?: string
           }
         }
       }
@@ -16594,7 +16586,7 @@ export interface operations {
           "application/json": components["schemas"]["StartMigrationResultDto"]
         }
       }
-      /** @description Sólo el administrador migra datos */
+      /** @description TOKKO_NOT_ENABLED: con la API real, la inmobiliaria no es la dueña de la key */
       403: {
         headers: {
           [name: string]: unknown
