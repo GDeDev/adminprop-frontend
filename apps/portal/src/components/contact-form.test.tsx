@@ -44,16 +44,58 @@ describe("ContactForm", () => {
     )
   })
 
-  it("valida los obligatorios y no envía", async () => {
+  it("cada campo vacío muestra su error y el primero recibe el foco", async () => {
     const user = userEvent.setup()
     render(<ContactForm slug="demo" propertyId="p-1" defaultMessage="" />)
 
     await user.click(screen.getByRole("button", { name: "Enviar consulta" }))
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Completá tu nombre, tu email y el mensaje."
+    const name = screen.getByLabelText("Nombre")
+    expect(name).toHaveAttribute("aria-invalid", "true")
+    expect(name).toHaveFocus()
+    expect(screen.getByLabelText("Email")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    )
+    expect(screen.getByLabelText("Mensaje")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    )
+    const alerts = screen.getAllByRole("alert")
+    expect(alerts).toHaveLength(3)
+    expect(alerts[0]).toHaveTextContent("Contanos tu nombre.")
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it("rechaza un email inválido y enfoca ese campo", async () => {
+    const user = userEvent.setup()
+    render(<ContactForm slug="demo" propertyId="p-1" defaultMessage="Hola" />)
+
+    await user.type(screen.getByLabelText("Nombre"), "Ana")
+    await user.type(screen.getByLabelText("Email"), "ana")
+    await user.click(screen.getByRole("button", { name: "Enviar consulta" }))
+
+    expect(screen.getByLabelText("Email")).toHaveFocus()
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Escribí un email válido."
     )
     expect(post).not.toHaveBeenCalled()
+  })
+
+  it("un error 500 que dice 'disponible' no se toma por propiedad no disponible", async () => {
+    post.mockRejectedValue(
+      apiError(500, { message: "Servicio no disponible por mantenimiento." })
+    )
+    const user = userEvent.setup()
+    render(<ContactForm slug="demo" propertyId="p-1" defaultMessage="" />)
+
+    await fill(user)
+    await user.click(screen.getByRole("button", { name: "Enviar consulta" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No pudimos enviar tu consulta. Probá de nuevo en un rato."
+    )
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
   })
 
   it("envía la consulta con la propiedad y el honeypot vacío, y muestra el éxito", async () => {
@@ -77,7 +119,7 @@ describe("ContactForm", () => {
     })
   })
 
-  it("avisa con amabilidad si la propiedad ya no está disponible", async () => {
+  it("avisa con amabilidad si la propiedad ya no está disponible (409 por código)", async () => {
     post.mockRejectedValue(
       apiError(409, {
         code: "PROPERTY_NOT_AVAILABLE",

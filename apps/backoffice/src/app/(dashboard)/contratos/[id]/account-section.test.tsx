@@ -67,10 +67,10 @@ describe("AccountSection", () => {
         contract={{ id: "c1", currency: "ARS", status: "FINISHED" }}
       />
     )
-    expect(screen.getByText(/Importe:/)).toHaveTextContent(
-      /200\.000,00.*no modifica el saldo/
-    )
-    expect(screen.getByText(/Importe:/)).toHaveTextContent(/US\$|USD/)
+    // La lista (mobile) y la tabla (desktop) se renderizan las dos.
+    const [importe] = screen.getAllByText(/Importe:/)
+    expect(importe).toHaveTextContent(/200\.000,00.*no modifica el saldo/)
+    expect(importe).toHaveTextContent(/US\$|USD/)
     expect(screen.getByText(/monto de referencia: .*260\.000/)).toBeVisible()
   })
 

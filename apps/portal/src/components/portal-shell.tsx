@@ -142,7 +142,7 @@ export function PortalShell({
       />
 
       <div className="flex min-h-svh min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+        <header className="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
           <Link
             href="/"
             className="min-w-0 truncate font-display text-title-lg font-semibold"

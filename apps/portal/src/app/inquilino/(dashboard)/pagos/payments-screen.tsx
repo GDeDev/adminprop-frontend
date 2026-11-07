@@ -68,7 +68,7 @@ export function RenterPaymentsScreen() {
         />
       ) : (
         <>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-2" aria-live="polite">
             {installments.map((installment) => (
               <li key={installment.id}>
                 <InstallmentRow
@@ -84,7 +84,7 @@ export function RenterPaymentsScreen() {
               onClick={() => void query.fetchNextPage()}
               disabled={query.isFetchingNextPage}
             >
-              Ver más
+              {query.isFetchingNextPage ? "Cargando…" : "Ver más"}
             </Button>
           )}
         </>
@@ -155,14 +155,25 @@ function InstallmentDialog({
               ? installment.status === "PAID"
                 ? "Pagada. Estos son los pagos registrados."
                 : `Saldo: ${money(installment.totalDue)}.`
-              : "Cargando…"}
+              : query.isError
+                ? "No pudimos cargar el detalle."
+                : "Cargando…"}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <div className="px-4 pb-4 sm:px-0">
           {query.isError && (
-            <p className="text-sm text-destructive">
-              {apiErrorMessage(query.error, "No pudimos cargar la cuota.")}
-            </p>
+            <div role="alert" className="flex flex-col items-start gap-2">
+              <p className="text-sm text-destructive">
+                {apiErrorMessage(query.error, "No pudimos cargar la cuota.")}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void query.refetch()}
+              >
+                Reintentar
+              </Button>
+            </div>
           )}
           {installment &&
             installment.payments.filter((p) => p.status !== "VOIDED").length ===

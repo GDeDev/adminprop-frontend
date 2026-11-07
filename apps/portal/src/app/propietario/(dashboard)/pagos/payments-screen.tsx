@@ -108,7 +108,7 @@ function Installments({ propertyId }: { propertyId: string }) {
   }
   return (
     <>
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-2" aria-live="polite">
         {installments.map((installment) => {
           const meta = INSTALLMENT_STATUS_META[installment.status]
           const money = (amount: string) =>
@@ -142,7 +142,7 @@ function Installments({ propertyId }: { propertyId: string }) {
           onClick={() => void query.fetchNextPage()}
           disabled={query.isFetchingNextPage}
         >
-          Ver más
+          {query.isFetchingNextPage ? "Cargando…" : "Ver más"}
         </Button>
       )}
     </>

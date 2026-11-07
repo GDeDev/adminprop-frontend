@@ -19,6 +19,8 @@ let list: {
   data?: { pages: { data: InstallmentSummary[] }[] }
 }
 let detail: InstallmentDetail | undefined
+let detailError = false
+const detailRefetch = vi.fn()
 
 vi.mock("@/lib/portal-api", () => ({
   useRenterInstallments: () => ({
@@ -28,7 +30,12 @@ vi.mock("@/lib/portal-api", () => ({
     isFetchingNextPage: false,
     fetchNextPage: vi.fn(),
   }),
-  useRenterInstallment: () => ({ isError: false, data: detail }),
+  useRenterInstallment: () => ({
+    isError: detailError,
+    error: detailError ? new Error("boom") : undefined,
+    data: detail,
+    refetch: detailRefetch,
+  }),
   renterReceiptPath: (id: string) => `/portal/renter/payments/${id}/receipt`,
   openPortalPdf: (...args: unknown[]) => openPortalPdf(...args),
 }))
@@ -153,6 +160,7 @@ beforeAll(() => {
 afterEach(() => {
   vi.clearAllMocks()
   detail = undefined
+  detailError = false
 })
 
 describe("RenterPaymentsScreen", () => {
@@ -222,6 +230,25 @@ describe("RenterPaymentsScreen", () => {
     expect(openPortalPdf).toHaveBeenCalledWith(
       "/portal/renter/payments/pay1/receipt"
     )
+  })
+
+  it("si falla el detalle de la cuota muestra el error con reintento y no dice Cargando", async () => {
+    list = {
+      isPending: false,
+      isError: false,
+      data: { pages: [{ data: [paid] }] },
+    }
+    detailError = true
+    const user = userEvent.setup()
+    render(<RenterPaymentsScreen />)
+
+    await user.click(screen.getByRole("button", { name: /Septiembre de 2026/ }))
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("No pudimos cargar la cuota.")
+    expect(screen.queryByText("Cargando…")).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Reintentar" }))
+    expect(detailRefetch).toHaveBeenCalled()
   })
 
   it("en una cuota con un pago informado sin confirmar no ofrece recibo", async () => {

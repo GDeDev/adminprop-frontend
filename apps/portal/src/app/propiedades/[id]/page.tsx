@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react"
 import { Badge } from "@adminprop/ui/components/badge"
 
 import { ContactForm } from "@/components/contact-form"
+import { PropertyGallery } from "@/components/property-gallery"
 import { PriceText } from "@/components/price-text"
 import { PublicFooter } from "@/components/public-footer"
 import { PublicHeader } from "@/components/public-header"
@@ -47,21 +48,10 @@ export default async function PropertyPage(
         </Link>
 
         {property.photos.length > 0 && (
-          <div
-            className="flex snap-x gap-2 overflow-x-auto rounded-xl"
-            role="group"
-            aria-label="Fotos de la propiedad"
-          >
-            {property.photos.map((photo, index) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={photo.id}
-                src={photo.url}
-                alt={`Foto ${index + 1} de ${property.address}`}
-                className="h-72 min-w-[85%] snap-center rounded-xl object-cover sm:min-w-[60%]"
-              />
-            ))}
-          </div>
+          <PropertyGallery
+            photos={property.photos}
+            address={property.address}
+          />
         )}
 
         <div className="flex flex-col gap-2">
