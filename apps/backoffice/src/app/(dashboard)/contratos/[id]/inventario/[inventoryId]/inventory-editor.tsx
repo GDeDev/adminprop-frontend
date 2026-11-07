@@ -367,6 +367,7 @@ function Editor({
                       <div key={photo.id} className="relative">
                         <PrivateImage
                           src={photo.url}
+                          retryKey={photo.id}
                           alt={`Foto de ${item.description}`}
                           className="size-20 rounded-md object-cover"
                           refresh={() => refreshPhoto(photo.id)}

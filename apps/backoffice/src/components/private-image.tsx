@@ -7,6 +7,13 @@ interface Props {
   src: string
   alt: string
   className?: string
+  /**
+   * Identidad estable de la imagen (por ejemplo el id de la foto). La URL
+   * firmada cambia en cada refetch, así que el único reintento se guarda por
+   * esta clave y no por `src`: sin ella, una foto rota de verdad reintentaría
+   * sin fin. Sin clave se usa `src`.
+   */
+  retryKey?: string
   /** Vuelve a pedir el recurso y devuelve la URL nueva de esta imagen. */
   refresh: () => Promise<string | null | undefined>
 }
@@ -17,7 +24,13 @@ interface Props {
  * abierta, o la query vino de la caché): pide el recurso una vez y reintenta
  * con la URL fresca. Si vuelve a fallar no insiste.
  */
-export function PrivateImage({ src, alt, className, refresh }: Props) {
+export function PrivateImage({
+  src,
+  alt,
+  className,
+  retryKey,
+  refresh,
+}: Props) {
   // URL fresca para el `src` actual. Si llega otro `src` (se refrescó la
   // query), se usa ese y esto queda descartado.
   const [fresh, setFresh] = React.useState<{ for: string; url: string } | null>(
@@ -27,8 +40,9 @@ export function PrivateImage({ src, alt, className, refresh }: Props) {
   const current = fresh?.for === src ? fresh.url : src
 
   async function handleError() {
-    if (retriedFor.current === src) return
-    retriedFor.current = src
+    const key = retryKey ?? src
+    if (retriedFor.current === key) return
+    retriedFor.current = key
     try {
       const url = await refresh()
       if (url && url !== src) setFresh({ for: src, url })

@@ -76,6 +76,7 @@ function Photos({
         >
           <PrivateImage
             src={photo.url}
+            retryKey={photo.id}
             alt="Foto del inventario"
             className="size-12 rounded object-cover"
             refresh={() => refresh(photo.id)}

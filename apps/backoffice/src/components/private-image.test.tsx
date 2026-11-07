@@ -33,4 +33,29 @@ describe("PrivateImage", () => {
     await waitFor(() => expect(refresh).toHaveBeenCalled())
     expect(img).toHaveAttribute("src", "https://cdn.test/a")
   })
+
+  it("con retryKey no reintenta aunque el refetch traiga otra firma", async () => {
+    const refresh = vi.fn().mockResolvedValue("https://cdn.test/f?firma=2")
+    const { rerender } = render(
+      <PrivateImage
+        src="https://cdn.test/f?firma=1"
+        retryKey="foto-1"
+        alt="Foto"
+        refresh={refresh}
+      />
+    )
+    fireEvent.error(screen.getByAltText("Foto"))
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1))
+    // El refetch re-firma todas las URLs: llega un src nuevo y vuelve a fallar.
+    rerender(
+      <PrivateImage
+        src="https://cdn.test/f?firma=3"
+        retryKey="foto-1"
+        alt="Foto"
+        refresh={refresh}
+      />
+    )
+    fireEvent.error(screen.getByAltText("Foto"))
+    expect(refresh).toHaveBeenCalledTimes(1)
+  })
 })
