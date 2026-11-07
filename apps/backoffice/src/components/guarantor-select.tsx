@@ -52,7 +52,13 @@ export function GuarantorSelect({
     fullName: string
   } | null>(null)
   const debouncedSearch = useDebouncedValue(search.trim())
-  const query = useInfiniteGuarantors({ search: debouncedSearch })
+  // Solo se busca con el selector abierto: la etiqueta de lo elegido no
+  // depende de la lista, y un formulario con varios selectores no dispara
+  // una búsqueda por cada uno al montarse.
+  const query = useInfiniteGuarantors(
+    { search: debouncedSearch },
+    { enabled: open }
+  )
   const guarantors = query.data?.pages.flatMap((page) => page.data) ?? []
   const label =
     picked && picked.id === value ? picked.fullName : (selectedLabel ?? null)
@@ -123,7 +129,7 @@ export function GuarantorSelect({
                     <span className="flex-1 truncate">
                       {guarantor.fullName}
                     </span>
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="num text-xs text-muted-foreground">
                       {formatNationalId(guarantor.nationalId)}
                     </span>
                   </CommandItem>

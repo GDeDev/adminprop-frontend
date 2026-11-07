@@ -9,6 +9,7 @@ import type { CatalogItem, CatalogKey } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import { Switch } from "@adminprop/ui/components/switch"
 
@@ -24,7 +25,7 @@ import { NameDialog } from "./name-dialog"
 
 /**
  * Un maestro plano: listado con toggle de activo y alta rápida (spec Fase 5,
- * 6). Los empleados lo ven, pero sólo un admin lo cambia.
+ * 6). Los empleados lo ven, pero solo un admin lo cambia.
  */
 export function CatalogPanel({
   catalog,
@@ -74,15 +75,13 @@ export function CatalogPanel({
       {items.isPending ? (
         <PageSkeleton cards={2} />
       ) : items.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudo cargar"
           description={apiErrorMessage(
             items.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void items.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void items.refetch()}
         />
       ) : items.data.length === 0 ? (
         <EmptyState
@@ -90,7 +89,7 @@ export function CatalogPanel({
           description={canEdit ? "Agregá el primero." : undefined}
         />
       ) : (
-        <ul className="divide-y rounded-xl border bg-card">
+        <ul className="divide-y rounded-xl border bg-card shadow-raised">
           {items.data.map((item) => (
             <li
               key={item.id}

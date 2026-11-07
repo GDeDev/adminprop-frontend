@@ -6,14 +6,13 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 /**
- * Reglas de ADMINPROP-UI.md que se pueden chequear leyendo el código. Sirven
- * sobre todo al instalar un componente nuevo de shadcn: si trae un
- * `hover:bg-accent`, este test lo marca.
+ * Reglas de ADMINPROP-UI-v2.md que se pueden chequear leyendo el código.
+ * Sirven sobre todo al instalar un componente nuevo de shadcn: si trae un
+ * `hover:bg-accent` o un `transition-all`, este test lo marca.
  */
-const componentsDir = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../src/components"
-)
+const here = path.dirname(fileURLToPath(import.meta.url))
+const componentsDir = path.resolve(here, "../src/components")
+const stylesDir = path.resolve(here, "../src/styles")
 
 const components = readdirSync(componentsDir)
   .filter((file) => file.endsWith(".tsx") && !file.endsWith(".test.tsx"))
@@ -22,13 +21,19 @@ const components = readdirSync(componentsDir)
     source: readFileSync(path.join(componentsDir, file), "utf8"),
   }))
 
+const v2 = readFileSync(path.join(stylesDir, "adminprop-v2.css"), "utf8")
+const effects = readFileSync(
+  path.join(stylesDir, "adminprop-v2-effects.css"),
+  "utf8"
+)
+
 function offenders(pattern: RegExp) {
   return components
     .filter(({ source }) => pattern.test(source))
     .map(({ file }) => file)
 }
 
-describe("reglas del sistema de diseño", () => {
+describe("reglas del sistema de diseño (componentes)", () => {
   it("encuentra los componentes", () => {
     expect(components.length).toBeGreaterThan(20)
   })
@@ -42,11 +47,168 @@ describe("reglas del sistema de diseño", () => {
     expect(offenders(/text-accent-foreground/)).toEqual([])
   })
 
-  it("ningún componente escribe un color hex", () => {
+  it("ningún componente escribe un color (hex, oklch, rgb, hsl)", () => {
     expect(offenders(/#[0-9a-fA-F]{3,8}\b/)).toEqual([])
+    expect(offenders(/\b(oklch|oklab|rgba?|hsla?)\(/)).toEqual([])
   })
 
-  it("no usa blanco fijo para texto: sale de un token *-foreground", () => {
+  it("no usa blanco ni negro fijos: sale de un token", () => {
     expect(offenders(/\btext-white\b/)).toEqual([])
+    expect(offenders(/\bbg-(black|white)\b/)).toEqual([])
+  })
+
+  it("no usa transition-all: se anima solo lo que cambia", () => {
+    expect(offenders(/\btransition-all\b/)).toEqual([])
+  })
+
+  it("no anima propiedades de layout", () => {
+    expect(
+      offenders(
+        /transition-\[[^\]]*\b(width|height|top|left|right|bottom|margin|padding)\b/
+      )
+    ).toEqual([])
+  })
+
+  it("no usa animate-pulse: la carga es shimmer", () => {
+    expect(offenders(/\banimate-pulse\b/)).toEqual([])
+  })
+
+  it("el blur de fondo no está en componentes que se repiten en listas", () => {
+    const listLike = ["table.tsx", "card.tsx", "skeleton.tsx", "badge.tsx"]
+    const withBlur = components
+      .filter(({ file }) => listLike.includes(file))
+      .filter(({ source }) => /backdrop-blur|\bglass\b/.test(source))
+      .map(({ file }) => file)
+    expect(withBlur).toEqual([])
+  })
+
+  it("los targets de los botones de ícono miden 44px en mobile", () => {
+    const button = components.find(({ file }) => file === "button.tsx")!
+    expect(button.source).toContain('icon: "size-11 md:size-9"')
+    expect(button.source).toContain("h-11")
+  })
+})
+
+describe("reglas del sistema de diseño (tokens v2)", () => {
+  const names = (css: string) =>
+    new Set([...css.matchAll(/^\s*--([\w-]+):/gm)].map((m) => m[1]!))
+
+  it("v2 define todos los tokens de color que usan las apps y los componentes", () => {
+    // Nombres heredados de v1 (el archivo ya no existe; la lista congela el
+    // contrato para que borrar un token no rompa pantallas en silencio).
+    const base = [
+      "background",
+      "foreground",
+      "card",
+      "card-foreground",
+      "popover",
+      "popover-foreground",
+      "primary",
+      "primary-foreground",
+      "primary-soft",
+      "secondary",
+      "secondary-foreground",
+      "muted",
+      "muted-foreground",
+      "accent",
+      "accent-foreground",
+      "accent-soft",
+      "destructive",
+      "destructive-foreground",
+      "destructive-soft",
+      "success",
+      "success-foreground",
+      "success-soft",
+      "warning",
+      "warning-foreground",
+      "warning-soft",
+      "info",
+      "info-soft",
+      "border",
+      "input",
+      "ring",
+      "sidebar",
+      "sidebar-foreground",
+      "sidebar-muted",
+      "sidebar-border",
+      "chart-1",
+      "chart-2",
+      "chart-3",
+      "chart-4",
+      "chart-5",
+    ]
+    const missing = base.filter((name) => !names(v2).has(name))
+    expect(missing).toEqual([])
+  })
+
+  it("v2 define los mismos tokens para claro y oscuro", () => {
+    const dark = v2.slice(v2.indexOf("\n.dark {"))
+    const darkBlock = dark.slice(0, dark.indexOf("\n}"))
+    const colorNames = [...v2.matchAll(/^ {2}--([\w-]+):\s*oklch\(/gm)].map(
+      (m) => m[1]!
+    )
+    // Los tokens de marca, estados e IA tienen que tener versión oscura.
+    const mustOverride = colorNames.filter((name) =>
+      /^(background|foreground|card|popover|primary|secondary|muted|accent|destructive|success|warning|info|ai|border|input|sidebar)/.test(
+        name
+      )
+    )
+    const missing = mustOverride.filter(
+      (name) => !darkBlock.includes(`--${name}:`)
+    )
+    expect(missing).toEqual([])
+  })
+
+  it("los colores de v2 están en OKLCH (ningún hex)", () => {
+    expect(v2).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+  })
+
+  it("el tema por inmobiliaria solo pisa primary: lo derivado usa color-mix", () => {
+    expect(v2).toMatch(
+      /--glow-primary:[^;]*color-mix\(in oklab, var\(--primary\)/
+    )
+    expect(effects).toMatch(/bg-primary-gradient[\s\S]*var\(--primary\)/)
+  })
+})
+
+describe("reglas del sistema de diseño (movimiento)", () => {
+  it("los keyframes solo animan transform y opacity", () => {
+    const bodies = [
+      ...effects.matchAll(/@keyframes [\w-]+ \{([\s\S]*?)\n {2}\}/g),
+    ].map((m) => m[1]!)
+    expect(bodies.length).toBeGreaterThanOrEqual(6)
+
+    const allowed = new Set(["opacity", "transform"])
+    const used = new Set<string>()
+    for (const body of bodies) {
+      for (const m of body.matchAll(/^\s*([a-z-]+):\s*[^;{]+;/gm)) {
+        used.add(m[1]!)
+      }
+    }
+    expect([...used].filter((p) => !allowed.has(p))).toEqual([])
+  })
+
+  it("todo movimiento tiene su versión con prefers-reduced-motion", () => {
+    expect(effects).toContain("@media (prefers-reduced-motion: reduce)")
+    for (const klass of [
+      ".animate-fade-up",
+      ".animate-shimmer",
+      ".animate-sparkle",
+      ".stagger > *",
+      ".page-enter",
+      ".shimmer::after",
+      ".pressable",
+    ]) {
+      const reduced = effects.slice(
+        effects.indexOf("@media (prefers-reduced-motion: reduce)")
+      )
+      expect(reduced, klass).toContain(klass)
+    }
+  })
+
+  it("las duraciones del sistema son 120/200/320/500 ms", () => {
+    for (const ms of ["120ms", "200ms", "320ms", "500ms"]) {
+      expect(v2).toContain(ms)
+    }
   })
 })

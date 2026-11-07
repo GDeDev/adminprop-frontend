@@ -1,0 +1,373 @@
+"use client"
+
+import * as React from "react"
+import Link from "next/link"
+
+import { apiErrorMessage } from "@adminprop/session/client"
+import { SectionError } from "@adminprop/ui/components/section-error"
+import type {
+  AccountMovementType,
+  ContractAccount,
+  ContractDetail,
+} from "@adminprop/shared-types"
+import { Button } from "@adminprop/ui/components/button"
+import { Skeleton } from "@adminprop/ui/components/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@adminprop/ui/components/table"
+
+import {
+  COLLECTION_MODE_LABELS,
+  DEPOSIT_RETURN_MODE_LABELS,
+  FEE_MODE_LABELS,
+  isZero,
+} from "@/lib/billing"
+import { useContractAccount } from "@/lib/billing-api"
+import { formatMoney } from "@/lib/contracts"
+import { formatDate } from "@/lib/dates"
+
+import { DepositReturnDialog } from "./deposit-return-dialog"
+
+const MOVEMENT_LABELS: Record<AccountMovementType, string> = {
+  INSTALLMENT: "Cuota",
+  CHARGE: "Cargo",
+  LATE_FEE_ACCRUED: "Punitorio devengado",
+  PAYMENT: "Pago",
+  CREDIT_APPLIED: "Saldo a favor aplicado",
+  CREDIT_GENERATED: "Saldo a favor generado",
+  CREDIT_REFUNDED: "Devolución de saldo",
+  LATE_FEE_ADJUSTMENT: "Ajuste de punitorio",
+  PAYMENT_VOIDED: "Pago anulado",
+  DEPOSIT_RECEIVED: "Depósito recibido",
+  DEPOSIT_RETURNED: "Depósito devuelto",
+  DEPOSIT_DEDUCTION: "Deducción del depósito",
+}
+
+const PREVIEW_ROWS = 8
+
+/**
+ * Cuenta corriente del contrato (Micaela #8): devengado, cobrado, pendiente,
+ * punitorios, saldos a favor y el depósito, con los movimientos cronológicos.
+ */
+export function AccountSection({
+  contract,
+}: {
+  contract: Pick<ContractDetail, "id" | "currency" | "status">
+}) {
+  const query = useContractAccount(contract.id)
+  const [expanded, setExpanded] = React.useState(false)
+  const [returning, setReturning] = React.useState(false)
+  // El depósito se devuelve al terminar el contrato (A-13, PRD 11.5).
+  const canReturnDeposit = contract.status !== "ACTIVE"
+
+  return (
+    <section
+      className="rounded-xl border bg-card p-4 shadow-raised lg:col-span-2"
+      aria-labelledby="contract-account-title"
+    >
+      <h2
+        id="contract-account-title"
+        className="mb-3 font-display text-title-md font-semibold"
+      >
+        Cuenta corriente
+      </h2>
+      {query.isPending ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-16" />
+          <Skeleton className="h-10" />
+        </div>
+      ) : query.isError ? (
+        <SectionError
+          description={apiErrorMessage(
+            query.error,
+            "No se pudo cargar la cuenta corriente."
+          )}
+          onRetry={() => void query.refetch()}
+        />
+      ) : (
+        <>
+          <Account
+            account={query.data}
+            expanded={expanded}
+            onExpand={() => setExpanded(true)}
+          />
+          {canReturnDeposit && !query.data.deposit.returned && (
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setReturning(true)}
+              >
+                Devolver depósito
+              </Button>
+            </div>
+          )}
+          {returning && (
+            <DepositReturnDialog
+              contractId={contract.id}
+              deposit={query.data.deposit}
+              installments={query.data.installments
+                .filter((i) => i.status !== "PAID")
+                .map((i) => ({
+                  id: i.id,
+                  period: i.period,
+                  totalDue: i.totalDue,
+                }))}
+              open
+              onOpenChange={(open) => !open && setReturning(false)}
+            />
+          )}
+        </>
+      )}
+    </section>
+  )
+}
+
+function Account({
+  account,
+  expanded,
+  onExpand,
+}: {
+  account: ContractAccount
+  expanded: boolean
+  onExpand: () => void
+}) {
+  const money = (amount: string) =>
+    formatMoney(amount, account.contract.currency)
+  const { totals, deposit } = account
+  const movements = [...account.movements].reverse()
+  const visible = expanded ? movements : movements.slice(0, PREVIEW_ROWS)
+
+  return (
+    <div className="flex flex-col gap-4">
+      <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-4">
+        <Total label="Devengado" value={money(totals.accrued)} />
+        <Total label="Cobrado" value={money(totals.collected)} />
+        <Total
+          label="Pendiente"
+          value={money(totals.balance)}
+          tone={isZero(totals.balance) ? undefined : "warning"}
+        />
+        <Total
+          label="Punitorios"
+          value={money(totals.lateFeeAccrued)}
+          hint={
+            isZero(totals.lateFeeAdjusted)
+              ? undefined
+              : `−${money(totals.lateFeeAdjusted)} ajustados`
+          }
+        />
+        <Total label="Saldo a favor" value={money(totals.creditsAvailable)} />
+        <Total
+          label="Honorarios devengados"
+          value={money(totals.feeAccruedOnCollected)}
+          hint={`${money(totals.feeAccruedOnBase)} sobre el total`}
+        />
+        <Total
+          label="Por liquidar"
+          value={money(totals.pendingSettlement)}
+          hint="Bruto, antes de honorarios y gastos"
+          describedBy="pending-settlement-help"
+        />
+      </dl>
+      <p id="pending-settlement-help" className="text-xs text-muted-foreground">
+        <strong className="font-medium">Por liquidar</strong> es lo que cobró la
+        inmobiliaria y todavía no está en una liquidación confirmada (alquiler,
+        punitorios y cargos del propietario). Es un monto bruto: no descuenta
+        honorarios ni gastos, así que no es lo que se le va a transferir al
+        propietario.
+      </p>
+      <p className="num text-xs text-muted-foreground">
+        {COLLECTION_MODE_LABELS[account.contract.collectionMode]} ·{" "}
+        {FEE_MODE_LABELS[account.contract.feeMode]}
+        {!isZero(totals.collectedByOwner) &&
+          ` · ${money(totals.collectedByOwner)} cobrados por el propietario`}
+        {!isZero(totals.pendingConfirmation) &&
+          ` · ${money(totals.pendingConfirmation)} informados sin confirmar`}
+      </p>
+
+      <div className="rounded-lg bg-muted p-3 text-sm">
+        <p className="font-medium">
+          Depósito: {formatMoney(deposit.amount, deposit.currency)}
+        </p>
+        <p className="text-muted-foreground">
+          {DEPOSIT_RETURN_MODE_LABELS[deposit.returnMode]}
+          {deposit.suggestedReturn &&
+            !deposit.returned &&
+            ` · monto de referencia: ${formatMoney(deposit.suggestedReturn, deposit.currency)}`}
+        </p>
+        {deposit.returned && (
+          <p className="mt-1">
+            Devuelto el {formatDate(deposit.returned.returnedAt)}:{" "}
+            <span className="font-display num">
+              {formatMoney(deposit.returned.returnedAmount, deposit.currency)}
+            </span>
+            {deposit.returned.deductions.length > 0 &&
+              ` · ${deposit.returned.deductions.length} ${
+                deposit.returned.deductions.length === 1
+                  ? "deducción"
+                  : "deducciones"
+              }`}
+          </p>
+        )}
+      </div>
+
+      {movements.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Sin movimientos.</p>
+      ) : (
+        <>
+          <ul className="flex flex-col divide-y text-sm lg:hidden">
+            {visible.map((movement, index) => (
+              <li
+                key={`${movement.date}-${movement.type}-${index}`}
+                className="flex flex-col gap-1 py-2"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <MovementConcept
+                    movement={movement}
+                    currency={account.contract.currency}
+                  />
+                  <span className="shrink-0 num text-xs text-muted-foreground">
+                    {formatDate(movement.date)}
+                  </span>
+                </div>
+                <dl className="grid grid-cols-3 gap-2">
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Debe</dt>
+                    <dd className="font-display num">
+                      {movement.debit ? money(movement.debit) : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Haber</dt>
+                    <dd className="font-display num">
+                      {movement.credit ? money(movement.credit) : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Saldo</dt>
+                    <dd className="font-display num font-medium">
+                      {money(movement.balance)}
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden lg:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Movimiento</TableHead>
+                  <TableHead className="text-right">Debe</TableHead>
+                  <TableHead className="text-right">Haber</TableHead>
+                  <TableHead className="text-right">Saldo</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visible.map((movement, index) => (
+                  <TableRow key={`${movement.date}-${movement.type}-${index}`}>
+                    <TableCell className="num">
+                      {formatDate(movement.date)}
+                    </TableCell>
+                    <TableCell>
+                      <MovementConcept
+                        movement={movement}
+                        currency={account.contract.currency}
+                      />
+                    </TableCell>
+                    <TableCell className="text-right num">
+                      {movement.debit ? money(movement.debit) : ""}
+                    </TableCell>
+                    <TableCell className="text-right num">
+                      {movement.credit ? money(movement.credit) : ""}
+                    </TableCell>
+                    <TableCell className="text-right font-display num font-medium">
+                      {money(movement.balance)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          {!expanded && movements.length > PREVIEW_ROWS && (
+            <Button variant="outline" size="sm" onClick={onExpand}>
+              Ver los {movements.length} movimientos
+            </Button>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+function Total({
+  label,
+  value,
+  hint,
+  tone,
+  describedBy,
+}: {
+  label: string
+  value: string
+  hint?: string
+  tone?: "warning"
+  /** Id del texto de ayuda que explica este total. */
+  describedBy?: string
+}) {
+  return (
+    <div>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd
+        aria-describedby={describedBy}
+        className={`font-display num font-semibold ${
+          tone === "warning" ? "text-warning" : ""
+        }`}
+      >
+        {value}
+      </dd>
+      {hint && <dd className="text-xs text-muted-foreground">{hint}</dd>}
+    </div>
+  )
+}
+
+function MovementConcept({
+  movement,
+  currency,
+}: {
+  movement: ContractAccount["movements"][number]
+  currency: string
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="font-medium">{MOVEMENT_LABELS[movement.type]}</p>
+      <p className="text-xs text-muted-foreground">
+        {movement.installmentId ? (
+          <Link
+            href={`/cobros/${movement.installmentId}`}
+            className="hover:underline"
+          >
+            {movement.description}
+          </Link>
+        ) : (
+          movement.description
+        )}
+      </p>
+      {movement.amount && (
+        // Los movimientos del depósito traen su importe aparte:
+        // es informativo y no entra en el saldo.
+        <p className="num text-xs text-muted-foreground">
+          Importe:{" "}
+          {formatMoney(movement.amount, movement.amountCurrency ?? currency)}{" "}
+          (no modifica el saldo)
+        </p>
+      )}
+    </div>
+  )
+}

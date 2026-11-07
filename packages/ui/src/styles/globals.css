@@ -1,12 +1,12 @@
 /*
  * Punto de entrada de estilos de las dos apps.
  *
- * Los tokens viven en ./adminprop.css, copia textual de
- * adminprop-repo-files/packages-ui-source/globals.css: no se edita acá. Si el
- * sistema de diseño cambia, se vuelve a copiar el archivo entero.
- * Este archivo solo agrega lo que necesita el monorepo.
+ * Los tokens viven en adminprop-v2.css ("Cobre sobre tinta"), el único
+ * sistema de diseño. La v1 (adminprop.css, Outfit + Figtree) se retiró: está
+ * en el historial de git y en adminprop-repo-files/packages-ui-source/. Cómo
+ * volver, en docs/tecnica/design-v2.md ("Volver a v1").
  */
-@import "./adminprop.css";
+@import "./adminprop-v2.css";
 @import "tw-animate-css";
 
 /* Tailwind escanea las apps y el paquete de UI. */
@@ -14,7 +14,7 @@
 @source "../**/*.{ts,tsx}";
 
 @layer base {
-  /* Outfit para títulos; Figtree (font-sans) para el resto. */
+  /* Fuente de títulos. */
   h1,
   h2,
   h3 {

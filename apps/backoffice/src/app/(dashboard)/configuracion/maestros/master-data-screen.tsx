@@ -26,7 +26,7 @@ const CATALOG_TABS: CatalogKey[] = [
 
 /**
  * Configuración → Maestros (spec Fase 5, 6): una pestaña por maestro. Los
- * empleados la ven (son los valores que eligen en las altas) pero sólo un
+ * empleados la ven (son los valores que eligen en las altas) pero solo un
  * admin la edita, igual que en la API.
  */
 export function MasterDataScreen() {
@@ -43,13 +43,13 @@ export function MasterDataScreen() {
           <ChevronLeft aria-hidden className="size-4" />
           Configuración
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-title-lg font-semibold md:text-display-md">
           Maestros
         </h1>
         <p className="text-sm text-muted-foreground">
           Las listas que aparecen en las altas de propiedades, contratos y
           servicios.
-          {!canEdit && " Sólo un administrador puede cambiarlas."}
+          {!canEdit && " Solo un administrador puede cambiarlas."}
         </p>
       </div>
 

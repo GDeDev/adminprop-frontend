@@ -2,7 +2,7 @@ import axios, { type AxiosError, type AxiosInstance } from "axios"
 
 import type { ApiError } from "@adminprop/shared-types"
 
-import { DEFAULT_SESSION_PATH, refreshAccessToken } from "./session-client"
+import { refreshAccessToken } from "./session-client"
 import { tokenStore } from "./token-store"
 
 declare module "axios" {
@@ -33,12 +33,18 @@ export interface ApiClientOptions {
  * en silencio y reintenta una vez. Si el refresh tampoco anda, llama a
  * `onUnauthenticated`.
  */
+const UPLOAD_TIMEOUT_MS = 120_000
+
 export function createApiClient(options: ApiClientOptions): AxiosInstance {
   const client = axios.create({ baseURL: options.baseURL, timeout: 15_000 })
 
   client.interceptors.request.use((config) => {
     const token = tokenStore.get()
     if (token) config.headers.Authorization = `Bearer ${token}`
+    // Subidas (fotos, PDFs): 15 s es poco con datos móviles.
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      config.timeout = Math.max(config.timeout ?? 0, UPLOAD_TIMEOUT_MS)
+    }
     return config
   })
 
@@ -93,8 +99,22 @@ export function safeNextPath(
   fallback: string
 ): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) return fallback
+  // El estándar WHATWG trata `\` como `/` y descarta tab/saltos de línea
+  // dentro de la URL: `/\evil.com` y `/<TAB>/evil.com` terminan en `//evil.com`.
+  // eslint-disable-next-line no-control-regex
+  if (/[\\\u0000-\u001f\u007f\s]/.test(next)) return fallback
   if (next.startsWith("/api/")) return fallback
+  // Defensa en profundidad: resolver como lo hace el navegador y exigir el
+  // mismo origen.
+  const base = "http://adminprop.invalid"
+  try {
+    const url = new URL(next, base)
+    if (url.origin !== base) return fallback
+    if (url.pathname.startsWith("//") || url.pathname.startsWith("/api/")) {
+      return fallback
+    }
+  } catch {
+    return fallback
+  }
   return next
 }
-
-export { DEFAULT_SESSION_PATH }

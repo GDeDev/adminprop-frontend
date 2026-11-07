@@ -22,7 +22,7 @@ import {
 const MAX_DESTINATIONS = 5
 
 const itemClassName =
-  "flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[0.7rem] leading-none font-medium text-sidebar-muted outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset data-[active=true]:text-sidebar-foreground"
+  "pressable relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-caption leading-none font-medium text-sidebar-muted outline-none before:absolute before:top-0 before:h-0.5 before:w-8 before:rounded-full before:bg-accent before:opacity-0 before:transition-opacity focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset data-[active=true]:text-sidebar-foreground data-[active=true]:before:opacity-100"
 
 /**
  * Navegación mobile (ADMINPROP-UI.md, "Componentes propios"): hasta cinco
@@ -60,7 +60,7 @@ function BottomNav({
       data-slot="bottom-nav"
       aria-label={ariaLabel}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 grid border-t border-sidebar-border bg-sidebar pb-[env(safe-area-inset-bottom)] text-sidebar-foreground md:hidden",
+        "fixed inset-x-0 bottom-0 z-40 grid border-t border-sidebar-border bg-sidebar pb-[env(safe-area-inset-bottom)] text-sidebar-foreground supports-[backdrop-filter]:bg-sidebar/85 supports-[backdrop-filter]:backdrop-blur-md md:hidden",
         className
       )}
       style={{ gridTemplateColumns: `repeat(${slots}, minmax(0, 1fr))` }}

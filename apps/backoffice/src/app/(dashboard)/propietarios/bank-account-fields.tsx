@@ -18,13 +18,13 @@ import {
 } from "@adminprop/ui/components/field"
 import { Input } from "@adminprop/ui/components/input"
 
-/** "0170099 22000006789-1234" → sólo dígitos. */
+/** "0170099 22000006789-1234" → solo dígitos. */
 export function cbuDigits(value: string): string {
   return value.replace(/[\s-]/g, "")
 }
 
 /**
- * Sólo el largo se valida acá; los dígitos verificadores los chequea la API
+ * Solo el largo se valida acá; los dígitos verificadores los chequea la API
  * (D-40) y el error vuelve al campo con `OWNER_INVALID_CBU`.
  */
 export const bankAccountSchema = z.object({

@@ -17,6 +17,7 @@ import { apiErrorMessage, useSession } from "@adminprop/session/client"
 import type { InternalRole, User } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@adminprop/ui/components/dropdown-menu"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
   Select,
@@ -55,7 +57,7 @@ const dateFormat = new Intl.DateTimeFormat("es-AR", {
   timeStyle: "short",
 })
 
-/** Gestión de usuarios internos (spec Fase 4, 3.6). Sólo admins. */
+/** Gestión de usuarios internos (spec Fase 4, 3.6). Solo admins. */
 export function UsersScreen() {
   const { user: me } = useSession()
 
@@ -63,7 +65,7 @@ export function UsersScreen() {
     return (
       <EmptyState
         icon={ShieldOff}
-        title="Sólo para administradores"
+        title="Solo para administradores"
         description="Pedile a un administrador de la inmobiliaria que gestione los usuarios."
         action={
           <Button variant="outline" asChild>
@@ -107,6 +109,13 @@ function UsersManager({ meId }: { meId: string }) {
     setFormOpen(true)
   }
 
+  const [deactivating, setDeactivating] = React.useState<User | null>(null)
+
+  function askToggleActive(user: User) {
+    if (user.isActive) setDeactivating(user)
+    else void toggleActive(user)
+  }
+
   async function toggleActive(user: User) {
     try {
       await setActive.mutateAsync({ id: user.id, active: !user.isActive })
@@ -116,15 +125,23 @@ function UsersManager({ meId }: { meId: string }) {
           : `${displayName(user)} volvió a estar activo.`
       )
     } catch (cause) {
-      toast.error(apiErrorMessage(cause, "No se pudo cambiar el estado."))
+      toast.error(
+        apiErrorMessage(
+          cause,
+          user.isActive
+            ? "No se pudo desactivar al usuario."
+            : "No se pudo reactivar al usuario."
+        )
+      )
     }
+    setDeactivating(null)
   }
 
   const actions = {
     meId,
     onEdit: openEdit,
     onReset: setResetting,
-    onToggleActive: toggleActive,
+    onToggleActive: askToggleActive,
   }
   const pagination = users.data?.pagination
 
@@ -132,7 +149,7 @@ function UsersManager({ meId }: { meId: string }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Usuarios
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -183,15 +200,13 @@ function UsersManager({ meId }: { meId: string }) {
       {users.isPending ? (
         <PageSkeleton cards={2} />
       ) : users.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los usuarios"
           description={apiErrorMessage(
             users.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void users.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void users.refetch()}
         />
       ) : users.data.data.length === 0 ? (
         <EmptyState
@@ -201,9 +216,12 @@ function UsersManager({ meId }: { meId: string }) {
       ) : (
         <>
           {/* Mobile: tarjetas. Desktop: tabla. */}
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {users.data.data.map((user) => (
-              <li key={user.id} className="rounded-xl border bg-card p-4">
+              <li
+                key={user.id}
+                className="rounded-xl border bg-card p-4 shadow-raised"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{displayName(user)}</p>
@@ -304,6 +322,21 @@ function UsersManager({ meId }: { meId: string }) {
         user={resetting}
         onOpenChange={(open) => !open && setResetting(null)}
       />
+      <ConfirmDialog
+        open={deactivating !== null}
+        onOpenChange={(open) => !open && setDeactivating(null)}
+        title="¿Desactivar al usuario?"
+        description={
+          deactivating
+            ? `${displayName(deactivating)} no va a poder ingresar y se le cierran todas las sesiones abiertas. Después se lo puede reactivar.`
+            : undefined
+        }
+        confirmLabel="Desactivar"
+        pending={setActive.isPending}
+        onConfirm={() =>
+          deactivating ? toggleActive(deactivating) : undefined
+        }
+      />
     </div>
   )
 }
@@ -355,7 +388,7 @@ function UserActions({
           <>
             <DropdownMenuItem onSelect={() => onReset(user)}>
               <KeyRound aria-hidden />
-              Resetear contraseña
+              Restablecer contraseña
             </DropdownMenuItem>
             <DropdownMenuItem
               variant={user.isActive ? "destructive" : "default"}

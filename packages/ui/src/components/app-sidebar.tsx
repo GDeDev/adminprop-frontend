@@ -37,7 +37,7 @@ function AppSidebar({
       data-slot="app-sidebar"
       className={cn(
         // w-62 = 248px
-        "sticky top-0 hidden h-svh w-62 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex",
+        "sticky top-0 hidden h-svh w-62 shrink-0 flex-col border-r border-sidebar-border bg-sidebar chrome-glow text-sidebar-foreground md:flex",
         className
       )}
     >
@@ -56,8 +56,9 @@ function AppSidebar({
               aria-current={active ? "page" : undefined}
               data-active={active}
               className={cn(
-                "flex min-h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-sidebar-muted transition-colors outline-none hover:bg-sidebar-border/60 hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-accent",
-                active && "bg-sidebar-border text-sidebar-foreground"
+                "relative flex min-h-10 pressable items-center gap-3 rounded-md px-3 text-sm font-medium text-sidebar-muted outline-none before:absolute before:top-2 before:bottom-2 before:-left-3 before:w-0.5 before:rounded-full before:bg-accent before:opacity-0 before:transition-opacity hover:bg-sidebar-border/60 hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-accent",
+                active &&
+                  "bg-sidebar-border text-sidebar-foreground before:opacity-100"
               )}
             >
               <Icon

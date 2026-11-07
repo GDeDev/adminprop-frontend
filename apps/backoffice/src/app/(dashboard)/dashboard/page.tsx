@@ -1,19 +1,22 @@
 import type { Metadata } from "next"
 
-import { ComingSoon } from "@adminprop/ui/components/coming-soon"
+import { DashboardOverview } from "./dashboard-overview"
+import { InternalAlerts } from "./internal-alerts"
+import { OverdueServices } from "./overdue-services"
+import { UnattendedInquiries } from "./unattended-inquiries"
 
-import { MockDataCheck } from "./mock-data-check"
-
-export const metadata: Metadata = { title: "Dashboard" }
+export const metadata: Metadata = { title: "Inicio" }
 
 export default function Page() {
   return (
     <div className="flex flex-col gap-6">
-      <ComingSoon
-        title="Dashboard"
-        description="Resumen del mes, alertas y accesos rápidos — Fase 19."
-      />
-      <MockDataCheck />
+      <h1 className="font-display text-title-lg font-semibold md:text-display-md">
+        Inicio
+      </h1>
+      <DashboardOverview />
+      <UnattendedInquiries />
+      <InternalAlerts />
+      <OverdueServices />
     </div>
   )
 }

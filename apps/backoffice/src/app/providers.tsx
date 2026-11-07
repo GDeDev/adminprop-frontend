@@ -9,6 +9,8 @@ import { Toaster } from "@adminprop/ui/components/sonner"
 import { TooltipProvider } from "@adminprop/ui/components/tooltip"
 
 import { apiClient } from "@/lib/api-client"
+import { clearDrafts } from "@/lib/drafts"
+import { shouldRetryQuery } from "@/lib/query-retry"
 import { LOGIN_PATH } from "@/lib/session"
 
 function makeQueryClient() {
@@ -17,7 +19,7 @@ function makeQueryClient() {
       queries: {
         staleTime: 60 * 1000,
         refetchOnWindowFocus: false,
-        retry: 1,
+        retry: shouldRetryQuery,
       },
     },
   })
@@ -38,8 +40,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <SessionProvider
           apiClient={apiClient}
           loginPath={LOGIN_PATH}
-          // Que el próximo usuario en esta pestaña no vea datos cacheados del anterior.
-          onSignOut={() => queryClient.clear()}
+          // Que el próximo usuario en esta pestaña no vea datos cacheados ni borradores del anterior.
+          // Al re-loguear el mismo usuario tras vencer la sesión se conservan los borradores.
+          onSignOut={(context) => {
+            queryClient.clear()
+            if (!context || context.userChanged) clearDrafts()
+          }}
         >
           <TooltipProvider>
             {children}

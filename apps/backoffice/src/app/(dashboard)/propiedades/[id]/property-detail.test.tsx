@@ -28,13 +28,28 @@ vi.mock("@/lib/properties-api", () => ({
   useDeletePropertyPhoto: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useUploadPropertyPhotos: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
+// La sección de servicios tiene sus propios tests: acá, sin servicios.
+vi.mock("@/lib/services-api", () => ({
+  usePropertyServices: () => ({ isPending: false, isError: false, data: [] }),
+  useCreateService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteService: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
+
+// La tasación y la publicación tienen sus propios tests.
+vi.mock("./appraisal-section", () => ({ AppraisalSection: () => null }))
+vi.mock("./publication-section", () => ({ PublicationSection: () => null }))
 
 function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
   return {
     id: "p1",
+    listingPrice: null,
+    listingCurrency: "ARS",
+    publicDescription: null,
     address: "Calle 7 1234",
     status: "AVAILABLE",
     ownerId: null,
+    activeContractId: null,
     owner: null,
     location: {
       id: "l1",
@@ -53,6 +68,16 @@ function makeProperty(overrides: Partial<PropertyDetail> = {}): PropertyDetail {
     amenities: [{ id: "a1", name: "Pileta", isActive: true, icon: "waves" }],
     notes: "Llave en portería",
     photos: [],
+    listingOperation: "RENT",
+    bedrooms: null,
+    bathrooms: null,
+    rooms: null,
+    totalAreaM2: null,
+    coveredAreaM2: null,
+    ageYears: null,
+    latitude: null,
+    longitude: null,
+    needsReview: false,
     ...overrides,
   }
 }
@@ -83,6 +108,36 @@ describe("Ficha de propiedad", () => {
     expect(screen.getByText("(desactivado)")).toBeInTheDocument()
   })
 
+  it("muestra operación, precio y características; sin cargar, «Consultar»", () => {
+    property = makeProperty()
+    const { unmount } = render(<PropertyDetailScreen id="p1" />)
+    expect(screen.getByText("Alquiler")).toBeInTheDocument()
+    expect(screen.getByText("Consultar")).toBeInTheDocument()
+    expect(screen.queryByText("Dormitorios")).toBeNull()
+    unmount()
+
+    property = makeProperty({
+      listingOperation: "SALE",
+      listingPrice: "150000.00",
+      listingCurrency: "USD",
+      bedrooms: 3,
+      rooms: 4,
+      totalAreaM2: 85.5,
+      ageYears: 1,
+    })
+    render(<PropertyDetailScreen id="p1" />)
+    expect(screen.getByText("Venta")).toBeInTheDocument()
+    expect(screen.getByText(/150\.000/)).toBeInTheDocument()
+    expect(screen.getByText("Dormitorios").nextSibling).toHaveTextContent("3")
+    expect(screen.getByText("Superficie total").nextSibling).toHaveTextContent(
+      "85,5 m²"
+    )
+    expect(screen.getByText("Antigüedad").nextSibling).toHaveTextContent(
+      "1 año"
+    )
+    expect(screen.queryByText("Baños")).toBeNull()
+  })
+
   it("ofrece sólo las transiciones de estado permitidas", async () => {
     property = makeProperty({ status: "MAINTENANCE" })
     render(<PropertyDetailScreen id="p1" />)
@@ -96,7 +151,7 @@ describe("Ficha de propiedad", () => {
     expect(changeStatus).toHaveBeenCalledWith({ id: "p1", status: "AVAILABLE" })
   })
 
-  it("sólo un admin ve el botón de eliminar", () => {
+  it("solo un admin ve el botón de eliminar", () => {
     property = makeProperty()
     const { unmount } = render(<PropertyDetailScreen id="p1" />)
     expect(

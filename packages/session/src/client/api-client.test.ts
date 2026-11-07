@@ -168,8 +168,59 @@ describe("safeNextPath", () => {
     }
   })
 
+  it("descarta los payloads que el navegador normaliza a //host", () => {
+    const payloads = [
+      "/\\evil.example",
+      "/\\/evil.example",
+      "/\t/evil.example",
+      "/\n/evil.example",
+      "/\r/evil.example",
+      "/ /evil.example",
+      "/\u0000/evil.example",
+      "/\u001f/evil.example",
+      "/%5Cevil.example/..//x\\y",
+      "javascript:alert(1)",
+      "/\\\\evil.example",
+      "///evil.example",
+      "\\/evil.example",
+      "\\\\evil.example",
+      "http:evil.example",
+      "/ok\u007f",
+    ]
+    for (const next of payloads) {
+      expect(safeNextPath(next, "/dashboard")).toBe("/dashboard")
+    }
+  })
+
+  it("conserva query, hash y paths con puntos de la app", () => {
+    expect(safeNextPath("/contratos/1?tab=a#x", "/d")).toBe(
+      "/contratos/1?tab=a#x"
+    )
+    expect(safeNextPath("/a/../b", "/d")).toBe("/a/../b")
+  })
+
   it("descarta las rutas de la API de la app y la ausencia de next", () => {
     expect(safeNextPath("/api/session", "/dashboard")).toBe("/dashboard")
     expect(safeNextPath(null, "/dashboard")).toBe("/dashboard")
+  })
+})
+
+describe("timeout de subidas", () => {
+  it("sube el timeout para multipart y deja el de siempre para el resto", async () => {
+    const seen: Array<number | undefined> = []
+    const client = createApiClient({
+      baseURL: "http://api.test",
+      onUnauthenticated: vi.fn(),
+    })
+    client.defaults.adapter = async (config) => {
+      seen.push(config.timeout)
+      return { data: {}, status: 200, statusText: "", headers: {}, config }
+    }
+
+    await client.get("/x")
+    await client.post("/y", new FormData())
+
+    expect(seen[0]).toBe(15_000)
+    expect(seen[1]).toBeGreaterThanOrEqual(120_000)
   })
 })

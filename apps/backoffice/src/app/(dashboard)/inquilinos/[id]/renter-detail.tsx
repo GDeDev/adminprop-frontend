@@ -7,11 +7,9 @@ import {
   ChevronLeft,
   FileText,
   KeyRound,
-  MessageCircle,
   Pencil,
   ShieldCheck,
   Trash2,
-  Wallet,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -21,25 +19,22 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
+import { ArrearsBadge } from "@/components/arrears-badge"
 import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
+import { useRenterArrears } from "@/lib/billing-api"
 import { formatNationalId } from "@/lib/owners"
-import { formatDate, GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
+import { formatDate } from "@/lib/dates"
+import { WhatsAppButton } from "@/components/whatsapp-button"
+import { GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
 import {
   useDeleteRenter,
   useIssueRenterPortalCredentials,
   useRenter,
 } from "@/lib/renters-api"
 
-import { PaymentBadge } from "../renter-list"
+import { RenterBillingSection } from "./credits-section"
 
 /** Ficha de inquilino (spec Fase 8, 5.2). */
 export function RenterDetailScreen({ id }: { id: string }) {
@@ -64,8 +59,7 @@ export function RenterDetailScreen({ id }: { id: string }) {
 
 function Detail({ renter }: { renter: RenterDetail }) {
   const { user } = useSession()
-  const whatsapp = whatsappLink(renter.phone)
-
+  const arrears = useRenterArrears(renter.id)
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
@@ -78,16 +72,16 @@ function Detail({ renter }: { renter: RenterDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {renter.fullName}
             </h1>
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="num text-sm text-muted-foreground">
               DNI/CUIT {formatNationalId(renter.nationalId)}
               {renter.moveInDate &&
                 ` · Ingresó el ${formatDate(renter.moveInDate)}`}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              <PaymentBadge renter={renter} />
+              <ArrearsBadge arrears={arrears.data} />
               {renter.hasPortalAccess && (
                 <Badge variant="outline" className="gap-1">
                   <KeyRound aria-hidden className="size-3" />
@@ -97,14 +91,11 @@ function Detail({ renter }: { renter: RenterDetail }) {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {whatsapp && (
-              <Button variant="outline" asChild>
-                <a href={whatsapp} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle aria-hidden />
-                  WhatsApp
-                </a>
-              </Button>
-            )}
+            <WhatsAppButton
+              phone={renter.phone}
+              templateKeys={["PAYMENT_REMINDER", "ARREARS"]}
+              values={{ recipientName: renter.fullName }}
+            />
             <Button variant="outline" asChild>
               <Link href={`/inquilinos/${renter.id}/editar`}>
                 <Pencil aria-hidden />
@@ -116,7 +107,7 @@ function Detail({ renter }: { renter: RenterDetail }) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Section title="Datos">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Teléfono</dt>
@@ -166,16 +157,26 @@ function Detail({ renter }: { renter: RenterDetail }) {
 
         <PortalAccessSection renter={renter} />
 
-        <Placeholder
-          icon={FileText}
-          title="Contrato activo"
-          text="Los contratos se cargan en una etapa posterior."
-        />
-        <Placeholder
-          icon={Wallet}
-          title="Historial de pagos"
-          text="Aparece cuando existan contratos y cobros."
-        />
+        <Section title="Contrato activo">
+          {renter.activeContract ? (
+            <Link
+              href={`/contratos/${renter.activeContract.id}`}
+              className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+            >
+              <FileText aria-hidden className="size-4 text-muted-foreground" />
+              Ver contrato
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Sin contrato activo.{" "}
+              <Link href="/contratos/nuevo" className="underline">
+                Nuevo contrato
+              </Link>
+              .
+            </p>
+          )}
+        </Section>
+        <RenterBillingSection renterId={renter.id} />
       </div>
     </div>
   )
@@ -197,7 +198,7 @@ function GuarantorSummaryCard({
         >
           {guarantor.fullName}
         </Link>
-        <span className="text-muted-foreground tabular-nums">
+        <span className="num text-muted-foreground">
           {formatNationalId(guarantor.nationalId)}
         </span>
       </div>
@@ -238,32 +239,12 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4">
+    <section className="rounded-xl border bg-card p-4 shadow-raised">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
+        <h2 className="font-display text-title-md font-semibold">{title}</h2>
         {action}
       </div>
       {children}
-    </section>
-  )
-}
-
-function Placeholder({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: typeof FileText
-  title: string
-  text: string
-}) {
-  return (
-    <section className="flex items-start gap-3 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-      <Icon aria-hidden className="mt-0.5 size-5 shrink-0" />
-      <div>
-        <h2 className="font-medium text-foreground">{title}</h2>
-        <p>{text}</p>
-      </div>
     </section>
   )
 }
@@ -297,7 +278,7 @@ function PortalAccessSection({ renter }: { renter: RenterDetail }) {
         {!renter.email
           ? "Cargale un email para poder darle acceso: es su usuario del portal."
           : renter.hasPortalAccess
-            ? `Entra al portal con ${renter.email}. Si perdió la contraseña, generale una nueva: la anterior deja de servir.`
+            ? `Entra al portal con ${renter.email}. Si no la recuerda, generale una contraseña nueva: la anterior deja de servir.`
             : `Todavía no tiene acceso. Se le genera un usuario (${renter.email}) y una contraseña que se muestra una sola vez.`}
       </p>
       <PortalCredentialsDialog
@@ -341,31 +322,20 @@ function DeleteButton({ renter }: { renter: RenterDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>
-              ¿Eliminar al inquilino?
-            </ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {renter.fullName} deja de aparecer en el sistema y pierde el
-              acceso al portal. Con un contrato activo no se puede eliminar.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar al inquilino?"
+        description={
+          <>
+            {renter.fullName} deja de aparecer en el sistema y pierde el acceso
+            al portal. Con un contrato activo no se puede eliminar.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }

@@ -12,7 +12,8 @@
     "prepare": "husky",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
-    "api:types": "npm run api:types -w @adminprop/shared-types"
+    "api:types": "npm run api:types -w @adminprop/shared-types",
+    "test:regression": "turbo run typecheck lint test --continue --concurrency=3"
   },
   "devDependencies": {
     "@adminprop/eslint-config": "*",

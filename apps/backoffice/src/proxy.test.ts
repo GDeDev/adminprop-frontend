@@ -2,7 +2,7 @@
 import { NextRequest } from "next/server"
 import { describe, expect, it } from "vitest"
 
-import { proxy } from "./proxy"
+import { config, proxy } from "./proxy"
 
 const request = (path: string, cookie?: string) =>
   new NextRequest(`http://localhost:3001${path}`, {
@@ -35,5 +35,32 @@ describe("proxy del backoffice", () => {
     const response = proxy(request("/propiedades", "adminprop_portal_rt=token"))
 
     expect(response.status).toBe(307)
+  })
+})
+
+describe("matcher del proxy del backoffice", () => {
+  const matcher = new RegExp(`^${config.matcher[0]}$`)
+
+  it("no protege el login, la API ni los assets", () => {
+    for (const path of [
+      "/login",
+      "/login/x",
+      "/api/session",
+      "/api",
+      "/logo.png",
+    ]) {
+      expect(matcher.test(path), path).toBe(false)
+    }
+  })
+
+  it("sí protege rutas que solo empiezan igual que login o api", () => {
+    for (const path of [
+      "/apiarios",
+      "/login-historial",
+      "/apis/x",
+      "/propiedades",
+    ]) {
+      expect(matcher.test(path), path).toBe(true)
+    }
   })
 })

@@ -11,7 +11,6 @@ import {
   Pencil,
   Trash2,
   UserRound,
-  Wallet,
   X,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -28,17 +27,18 @@ import {
 } from "@adminprop/ui/components/dropdown-menu"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { AmenityIcon } from "@/components/amenity-icon"
-import { MANUAL_TRANSITIONS, MAX_PHOTOS, STATUS_META } from "@/lib/properties"
+import { formatMoney } from "@/lib/contracts"
+import { OVERSIZED_PHOTO_MESSAGE, splitOversizedPhotos } from "@/lib/photos"
+import {
+  MANUAL_TRANSITIONS,
+  MAX_PHOTOS,
+  OPERATION_LABELS,
+  STATUS_META,
+  listingFacts,
+} from "@/lib/properties"
 import {
   useChangePropertyStatus,
   useDeleteProperty,
@@ -46,8 +46,12 @@ import {
   useProperty,
   useUploadPropertyPhotos,
 } from "@/lib/properties-api"
+import { usePropertyServices } from "@/lib/services-api"
 
 import { StatusBadge } from "../property-list"
+import { AppraisalSection } from "./appraisal-section"
+import { PublicationSection } from "./publication-section"
+import { ServicesSection } from "./services-section"
 
 /** Ficha de propiedad (spec Fase 6, 5.2). */
 export function PropertyDetailScreen({ id }: { id: string }) {
@@ -73,6 +77,8 @@ export function PropertyDetailScreen({ id }: { id: string }) {
 
 function Detail({ property }: { property: PropertyDetail }) {
   const { user } = useSession()
+  const services = usePropertyServices(property.id)
+  const router = useRouter()
 
   return (
     <div className="flex flex-col gap-6">
@@ -86,7 +92,7 @@ function Detail({ property }: { property: PropertyDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {property.address}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -110,7 +116,7 @@ function Detail({ property }: { property: PropertyDetail }) {
 
       <PhotoCarousel photos={property.photos} address={property.address} />
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Section title="Datos">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Tipo</dt>
@@ -127,6 +133,30 @@ function Detail({ property }: { property: PropertyDetail }) {
               <StatusBadge status={property.status} />
             </dd>
           </dl>
+          <h3 className="mt-4 mb-2 text-xs font-medium text-muted-foreground">
+            Publicación
+          </h3>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-muted-foreground">Operación</dt>
+            <dd>{OPERATION_LABELS[property.listingOperation]}</dd>
+            <dt className="text-muted-foreground">Precio</dt>
+            <dd>
+              {property.listingPrice
+                ? formatMoney(property.listingPrice, property.listingCurrency)
+                : "Consultar"}
+            </dd>
+            {listingFacts(property).map(([label, value]) => (
+              <React.Fragment key={label}>
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd>{value}</dd>
+              </React.Fragment>
+            ))}
+          </dl>
+          {property.publicDescription && (
+            <p className="mt-3 text-sm whitespace-pre-line">
+              {property.publicDescription}
+            </p>
+          )}
           {property.notes && (
             <div className="mt-4 rounded-lg bg-muted p-3 text-sm whitespace-pre-line">
               <p className="mb-1 text-xs font-medium text-muted-foreground">
@@ -176,17 +206,43 @@ function Detail({ property }: { property: PropertyDetail }) {
             </p>
           )}
         </Section>
-        <Placeholder
-          icon={FileText}
-          title="Contrato activo"
-          text="Los contratos se cargan en una etapa posterior."
-        />
-        <Placeholder
-          icon={Wallet}
-          title="Historial de pagos"
-          text="Aparece cuando existan contratos y cobros."
-        />
+        <Section title="Contrato activo">
+          {property.activeContractId ? (
+            <Link
+              href={`/contratos/${property.activeContractId}`}
+              className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+            >
+              <FileText aria-hidden className="size-4 text-muted-foreground" />
+              Ver contrato
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Sin contrato activo.{" "}
+              {property.owner ? (
+                <Link href="/contratos/nuevo" className="underline">
+                  Nuevo contrato
+                </Link>
+              ) : (
+                "Para alquilarla primero hay que asignarle un propietario"
+              )}
+              .
+            </p>
+          )}
+        </Section>
+        <ServicesSection propertyId={property.id} query={services} />
       </div>
+
+      <AppraisalSection
+        propertyId={property.id}
+        locationId={property.locationId}
+        onUse={(price, currency) =>
+          router.push(
+            `/propiedades/${property.id}/editar?precio=${price}&moneda=${currency}`
+          )
+        }
+      />
+
+      <PublicationSection propertyId={property.id} />
 
       <PhotoManager property={property} />
     </div>
@@ -201,30 +257,9 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4">
-      <h2 className="mb-3 font-display text-lg font-semibold">{title}</h2>
+    <section className="rounded-xl border bg-card p-4 shadow-raised">
+      <h2 className="mb-3 font-display text-title-md font-semibold">{title}</h2>
       {children}
-    </section>
-  )
-}
-
-/** Espacio reservado para lo que llega en otras fases (spec 5.2). */
-function Placeholder({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: typeof UserRound
-  title: string
-  text: string
-}) {
-  return (
-    <section className="flex items-start gap-3 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-      <Icon aria-hidden className="mt-0.5 size-5 shrink-0" />
-      <div>
-        <h2 className="font-medium text-foreground">{title}</h2>
-        <p>{text}</p>
-      </div>
     </section>
   )
 }
@@ -327,31 +362,20 @@ function DeleteButton({ property }: { property: PropertyDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>
-              ¿Eliminar la propiedad?
-            </ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {property.address} deja de aparecer en el sistema. Si tiene
-              contratos, no se puede eliminar: pasala a mantenimiento.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar la propiedad?"
+        description={
+          <>
+            {property.address} deja de aparecer en el sistema. Si tiene
+            contratos, no se puede eliminar: pasala a mantenimiento.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }
@@ -364,10 +388,15 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
 
   async function add(list: FileList | null) {
     if (!list || list.length === 0) return
-    const files = [...list].slice(0, remaining)
-    if (list.length > remaining) {
+    const { accepted, oversized } = splitOversizedPhotos([...list])
+    if (oversized.length > 0) {
+      toast.error(OVERSIZED_PHOTO_MESSAGE(oversized.length))
+    }
+    const files = accepted.slice(0, remaining)
+    if (files.length === 0) return
+    if (accepted.length > remaining) {
       toast.warning(
-        `Sólo entran ${remaining} fotos más (máximo ${MAX_PHOTOS}).`
+        `Solo entran ${remaining} fotos más (máximo ${MAX_PHOTOS}).`
       )
     }
     try {
@@ -378,12 +407,17 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
     }
   }
 
+  const [deleting, setDeleting] = React.useState<string | null>(null)
+
   async function removePhoto(photoId: string) {
     try {
       await remove.mutateAsync({ id: property.id, photoId })
     } catch (cause) {
-      toast.error(apiErrorMessage(cause, "No se pudo borrar la foto."))
+      toast.error(
+        apiErrorMessage(cause, "No se pudo borrar la foto de la propiedad.")
+      )
     }
+    setDeleting(null)
   }
 
   return (
@@ -408,7 +442,7 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
               className="absolute top-1 right-1"
               aria-label={`Borrar foto ${index + 1}`}
               disabled={remove.isPending}
-              onClick={() => void removePhoto(photo.id)}
+              onClick={() => setDeleting(photo.id)}
             >
               <X aria-hidden />
             </Button>
@@ -438,6 +472,15 @@ function PhotoManager({ property }: { property: PropertyDetail }) {
           </li>
         )}
       </ul>
+      <ConfirmDialog
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title="¿Borrar la foto?"
+        description="La foto se borra de la propiedad y no se puede recuperar."
+        confirmLabel="Borrar foto"
+        pending={remove.isPending}
+        onConfirm={() => (deleting ? removePhoto(deleting) : undefined)}
+      />
     </Section>
   )
 }

@@ -11,7 +11,7 @@ import {
   safeNextPath,
   useSession,
 } from "@adminprop/session/client"
-import type { ApiSuccess, AuthResult } from "@adminprop/shared-types"
+import type { LoginResponse } from "@adminprop/shared-types"
 import { Alert, AlertDescription } from "@adminprop/ui/components/alert"
 import { Button } from "@adminprop/ui/components/button"
 import {
@@ -26,7 +26,7 @@ import { apiClient } from "@/lib/api-client"
 import { HOME_PATH } from "@/lib/session"
 
 /**
- * En el login sólo se valida que haya algo: las reglas de contraseña son para
+ * En el login solo se valida que haya algo: las reglas de contraseña son para
  * cuando se define una. Aplicarlas acá le contaría a cualquiera cómo son las
  * contraseñas válidas.
  */
@@ -51,7 +51,7 @@ export function LoginForm() {
     try {
       // Directo a la API (no por el servidor de Next): el límite de intentos
       // de la API es por IP y tiene que ver la de cada usuario.
-      const { data } = await apiClient.post<ApiSuccess<AuthResult>>(
+      const { data } = await apiClient.post<LoginResponse>(
         "/auth/login",
         values,
         { skipAuthRefresh: true }

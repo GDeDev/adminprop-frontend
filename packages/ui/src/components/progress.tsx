@@ -12,15 +12,17 @@ function Progress({
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
+      // Sin esto el root no recibe el valor y queda sin aria-valuenow.
+      value={value}
       className={cn(
-        "relative h-2 w-full overflow-hidden rounded-full bg-primary/20",
+        "relative h-2 w-full overflow-hidden rounded-full bg-primary/15",
         className
       )}
       {...props}
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="h-full w-full flex-1 bg-primary transition-all"
+        className="h-full w-full flex-1 rounded-full bg-primary-gradient transition-transform duration-500 ease-out"
         style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
       />
     </ProgressPrimitive.Root>

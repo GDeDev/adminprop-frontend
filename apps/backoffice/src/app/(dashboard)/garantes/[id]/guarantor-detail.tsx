@@ -12,14 +12,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { formatNationalId } from "@/lib/owners"
 import { GUARANTEE_TYPE_LABELS, whatsappLink } from "@/lib/renters"
@@ -71,10 +64,10 @@ function Detail({ guarantor }: { guarantor: GuarantorDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {guarantor.fullName}
             </h1>
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="num text-sm text-muted-foreground">
               DNI/CUIT {formatNationalId(guarantor.nationalId)}
             </p>
             <div className="mt-2">
@@ -101,7 +94,7 @@ function Detail({ guarantor }: { guarantor: GuarantorDetail }) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Section title="Datos">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Teléfono</dt>
@@ -174,8 +167,8 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4">
-      <h2 className="mb-3 font-display text-lg font-semibold">{title}</h2>
+    <section className="rounded-xl border bg-card p-4 shadow-raised">
+      <h2 className="mb-3 font-display text-title-md font-semibold">{title}</h2>
       {children}
     </section>
   )
@@ -207,30 +200,21 @@ function DeleteButton({ guarantor }: { guarantor: GuarantorDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>¿Eliminar al garante?</ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {guarantor.fullName} deja de aparecer en el sistema. Si algún
-              inquilino lo tiene asignado, no se puede eliminar: primero cambiá
-              el garante de ese inquilino.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar al garante?"
+        description={
+          <>
+            {guarantor.fullName} deja de aparecer en el sistema. Si algún
+            inquilino lo tiene asignado, no se puede eliminar: primero cambiá el
+            garante de ese inquilino.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }

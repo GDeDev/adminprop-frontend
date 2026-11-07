@@ -32,6 +32,8 @@ export function OwnerSelect({
   value,
   selectedLabel,
   onChange,
+  placeholder = "Sin propietario",
+  "aria-label": ariaLabel,
   "aria-invalid": ariaInvalid,
 }: {
   id?: string
@@ -39,6 +41,9 @@ export function OwnerSelect({
   /** Nombre del propietario ya elegido (ficha en edición). */
   selectedLabel?: string | null
   onChange: (ownerId: string | null, fullName: string | null) => void
+  /** Texto cuando no hay nadie elegido ("Todos los propietarios" en filtros). */
+  placeholder?: string
+  "aria-label"?: string
   "aria-invalid"?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
@@ -49,7 +54,13 @@ export function OwnerSelect({
     fullName: string
   } | null>(null)
   const debouncedSearch = useDebouncedValue(search.trim())
-  const query = useInfiniteOwners({ search: debouncedSearch })
+  // Solo se busca con el selector abierto: la etiqueta de lo elegido no
+  // depende de la lista, y un formulario con varios selectores no dispara
+  // una búsqueda por cada uno al montarse.
+  const query = useInfiniteOwners(
+    { search: debouncedSearch },
+    { enabled: open }
+  )
   const owners = query.data?.pages.flatMap((page) => page.data) ?? []
   const label =
     picked && picked.id === value ? picked.fullName : (selectedLabel ?? null)
@@ -75,11 +86,12 @@ export function OwnerSelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
+            aria-label={ariaLabel}
             aria-invalid={ariaInvalid}
             className="w-full justify-between font-normal"
           >
             <span className={value ? "" : "text-muted-foreground"}>
-              {value ? (label ?? "Propietario elegido") : "Sin propietario"}
+              {value ? (label ?? "Propietario elegido") : placeholder}
             </span>
             <ChevronsUpDown aria-hidden className="opacity-50" />
           </Button>
@@ -114,7 +126,7 @@ export function OwnerSelect({
                       }
                     />
                     <span className="flex-1 truncate">{owner.fullName}</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="num text-xs text-muted-foreground">
                       {formatNationalId(owner.nationalId)}
                     </span>
                   </CommandItem>

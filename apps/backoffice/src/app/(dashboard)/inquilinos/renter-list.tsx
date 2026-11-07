@@ -5,19 +5,12 @@ import Link from "next/link"
 import { KeyRound, Plus, Search, Users } from "lucide-react"
 
 import { apiErrorMessage } from "@adminprop/session/client"
-import type { RenterSummary } from "@adminprop/shared-types"
-import { Badge } from "@adminprop/ui/components/badge"
+import type { RenterArrears, RenterSummary } from "@adminprop/shared-types"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@adminprop/ui/components/select"
 import {
   Table,
   TableBody,
@@ -27,9 +20,10 @@ import {
   TableRow,
 } from "@adminprop/ui/components/table"
 
+import { ArrearsBadge } from "@/components/arrears-badge"
 import { LoadMore } from "@/components/load-more"
+import { useArrears } from "@/lib/billing-api"
 import { formatNationalId } from "@/lib/owners"
-import { PAYMENT_STATUS_META } from "@/lib/renters"
 import { useInfiniteRenters } from "@/lib/renters-api"
 import { useDebouncedValue } from "@/lib/use-debounced-value"
 
@@ -40,6 +34,7 @@ export function RenterList() {
 
   const query = useInfiniteRenters({ search: debouncedSearch })
   const renters = query.data?.pages.flatMap((page) => page.data) ?? []
+  const arrears = useArrears(renters.map((renter) => renter.id))
   const total = query.data?.pages[0]?.pagination.total ?? 0
   const filtered = debouncedSearch !== ""
 
@@ -47,7 +42,7 @@ export function RenterList() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Inquilinos
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -67,7 +62,7 @@ export function RenterList() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+      <div className="grid gap-3">
         <div className="relative">
           <Search
             aria-hidden
@@ -82,33 +77,21 @@ export function RenterList() {
             className="pl-9"
           />
         </div>
-        {/* Estado de pago: existe en la API pero no tiene datos hasta la
-            Fase 11 (cobros). Se muestra deshabilitado, como pide la spec. */}
-        <Select value="ALL" disabled>
-          <SelectTrigger
-            className="w-full sm:w-52"
-            aria-label="Filtrar por estado de pago (disponible con los cobros)"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Estado de pago: pronto</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Filtros por estado de pago y por propiedad: la API los valida pero
+            todavía no filtra (RentersController, D-46 / D-51). Se agregan
+            cuando el backend los resuelva; no se deja un control muerto. */}
       </div>
 
       {query.isPending ? (
         <PageSkeleton cards={3} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los inquilinos"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : renters.length === 0 ? (
         <EmptyState
@@ -131,10 +114,13 @@ export function RenterList() {
         />
       ) : (
         <>
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {renters.map((renter) => (
               <li key={renter.id}>
-                <RenterCard renter={renter} />
+                <RenterCard
+                  renter={renter}
+                  arrears={arrears.data?.get(renter.id)}
+                />
               </li>
             ))}
           </ul>
@@ -164,7 +150,7 @@ export function RenterList() {
                         {renter.fullName}
                       </Link>
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="num">
                       {formatNationalId(renter.nationalId)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -173,7 +159,7 @@ export function RenterList() {
                     <TableCell>{renter.guarantor?.fullName ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">—</TableCell>
                     <TableCell>
-                      <PaymentBadge renter={renter} />
+                      <ArrearsBadge arrears={arrears.data?.get(renter.id)} />
                     </TableCell>
                     <TableCell>
                       {renter.hasPortalAccess && (
@@ -199,30 +185,23 @@ export function RenterList() {
   )
 }
 
-/** Estado de pago; gris "Sin datos" hasta que exista el motor de cobros. */
-export function PaymentBadge({
+function RenterCard({
   renter,
+  arrears,
 }: {
-  renter: Pick<RenterSummary, "paymentStatus">
+  renter: RenterSummary
+  arrears: RenterArrears | undefined
 }) {
-  if (!renter.paymentStatus) {
-    return <Badge variant="borrador">Sin datos</Badge>
-  }
-  const meta = PAYMENT_STATUS_META[renter.paymentStatus]
-  return <Badge variant={meta.badge}>{meta.label}</Badge>
-}
-
-function RenterCard({ renter }: { renter: RenterSummary }) {
   return (
     <Link
       href={`/inquilinos/${renter.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">{renter.fullName}</p>
-        <PaymentBadge renter={renter} />
+        <ArrearsBadge arrears={arrears} />
       </div>
-      <p className="text-sm text-muted-foreground tabular-nums">
+      <p className="num text-sm text-muted-foreground">
         {formatNationalId(renter.nationalId)}
         {renter.phone && ` · ${renter.phone}`}
       </p>

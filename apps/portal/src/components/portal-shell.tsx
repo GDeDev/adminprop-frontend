@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { KeyRound, LogOut } from "lucide-react"
 
 import { useSession } from "@adminprop/session/client"
 import type { PortalRole } from "@adminprop/shared-types"
@@ -25,11 +25,36 @@ function BrandMark({
 }) {
   return (
     <Link href="/" className="flex min-w-0 flex-col">
-      <span className="truncate font-display text-xl font-semibold tracking-tight">
+      <span className="truncate font-display text-title-lg font-semibold">
         {tenantName ?? "Adminprop"}
       </span>
       <span className="text-xs text-sidebar-muted">{areaLabel}</span>
     </Link>
+  )
+}
+
+function SecurityLink({
+  role,
+  className,
+}: {
+  role: PortalRole
+  className?: string
+}) {
+  return (
+    <Button
+      asChild
+      variant="ghost"
+      size="icon"
+      className={className}
+      title="Seguridad de la cuenta"
+    >
+      <Link
+        href={`${PORTAL_AREAS[role].basePath}/seguridad`}
+        aria-label="Seguridad de la cuenta"
+      >
+        <KeyRound aria-hidden />
+      </Link>
+    </Button>
   )
 }
 
@@ -96,10 +121,16 @@ export function PortalShell({
                 <p className="min-w-0 truncate text-sm font-medium">
                   {userName}
                 </p>
-                <SignOutButton
-                  role={role}
-                  className="shrink-0 text-sidebar-foreground hover:bg-sidebar-border/60 focus-visible:ring-accent"
-                />
+                <div className="flex shrink-0 items-center">
+                  <SecurityLink
+                    role={role}
+                    className="text-sidebar-foreground hover:bg-sidebar-border/60 focus-visible:ring-accent"
+                  />
+                  <SignOutButton
+                    role={role}
+                    className="text-sidebar-foreground hover:bg-sidebar-border/60 focus-visible:ring-accent"
+                  />
+                </div>
               </div>
             )}
             <div className="flex items-center justify-between px-3 text-sm text-sidebar-muted">
@@ -111,15 +142,16 @@ export function PortalShell({
       />
 
       <div className="flex min-h-svh min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+        <header className="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-2 border-b bg-background/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
           <Link
             href="/"
-            className="min-w-0 truncate font-display text-xl font-semibold tracking-tight"
+            className="min-w-0 truncate font-display text-title-lg font-semibold"
           >
             {tenantName ?? "Adminprop"}
           </Link>
           <div className="flex shrink-0 items-center">
             <ThemeToggle className="hover:bg-muted" />
+            <SecurityLink role={role} className="hover:bg-muted" />
             <SignOutButton role={role} className="hover:bg-muted" />
           </div>
         </header>

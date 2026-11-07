@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import type { AuthTokens, TenantBranding } from "@adminprop/shared-types"
 
+import { clientIp } from "./client-ip"
 import {
   brandingCookieName,
   encodeBranding,
@@ -34,6 +35,23 @@ export interface SessionRouteOptions {
    * portal la toma de su slug.
    */
   storeBranding?: boolean
+  /**
+   * Orígenes públicos de la app (`https://app.ejemplo.com`) que se aceptan en
+   * el `Origin` de las mutaciones de sesión, además del que ve Next. Detrás de
+   * un proxy que termina TLS o reescribe el `Host`, Next ve `http://interno:3000`
+   * y el navegador manda `https://app.ejemplo.com`. Por defecto sale de la
+   * variable opcional `APP_ORIGINS` (separados por coma).
+   */
+  allowedOrigins?: string[]
+  /**
+   * Secreto compartido con la API (`X-Sites-Secret`) para que crea la IP del
+   * usuario que el BFF le pasa en `X-Client-IP` al refrescar. Sin él, el
+   * refresh sale con la IP de este servidor y todos los usuarios comparten el
+   * límite por IP de la API. Por defecto, `API_SERVER_SECRET` (solo servidor;
+   * tiene que ser uno de los valores que la API acepta como secreto de
+   * servidor). Si falta, no se manda ni el secreto ni la IP.
+   */
+  serverSecret?: string
 }
 
 /** Lo que recibe `POST /api/session` justo después de un login exitoso. */
@@ -49,10 +67,24 @@ export interface RefreshedSession {
 }
 
 const API_TIMEOUT_MS = 10_000
+/** Tope de la cookie: un `exp` lejano en un token ajeno no la vuelve casi permanente. */
+const MAX_SESSION_SECONDS = 30 * 24 * 60 * 60
 
 export function createSessionRoutes(options: SessionRouteOptions) {
+  const allowedOrigins = normalizeOrigins(
+    options.allowedOrigins ?? parseOriginList(process.env.APP_ORIGINS)
+  )
   const refreshName = refreshCookieName(options.cookiePrefix)
   const brandingName = brandingCookieName(options.cookiePrefix)
+  const serverSecret = options.serverSecret ?? process.env.API_SERVER_SECRET
+
+  /** `X-Client-IP` + secreto, solo si hay las dos cosas. */
+  function clientIpHeaders(request: NextRequest): Record<string, string> {
+    const ip = clientIp(request.headers)
+    return ip && serverSecret
+      ? { "X-Client-IP": ip, "X-Sites-Secret": serverSecret }
+      : {}
+  }
 
   function cookieOptions(maxAgeSeconds: number) {
     return {
@@ -74,7 +106,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
 
   /** `POST /api/session`: guarda el refresh token del login recién hecho. */
   async function start(request: NextRequest): Promise<NextResponse> {
-    const rejected = rejectCrossSite(request)
+    const rejected = rejectCrossSite(request, allowedOrigins)
     if (rejected) return rejected
 
     const body = (await request.json().catch(() => null)) as unknown
@@ -82,12 +114,25 @@ export function createSessionRoutes(options: SessionRouteOptions) {
       return error(400, "VALIDATION_ERROR", "Faltan los tokens de la sesión")
     }
 
-    const response = NextResponse.json({ ok: true })
-    response.cookies.set(
-      refreshName,
-      body.refreshToken,
-      cookieOptions(secondsUntilExpiry(body.refreshToken))
+    // El refresh token lo manda el navegador y acá no se puede verificar su
+    // firma. El access token recién emitido sí lo valida la API: sin una sesión
+    // real detrás, no se escribe ninguna cookie.
+    const me = await callApi<unknown>(options.apiUrl, "/auth/me", {
+      method: "GET",
+      accessToken: body.accessToken,
+    })
+    if (!me.ok) {
+      return me.status === 401 || me.status === 403
+        ? error(401, "INVALID_SESSION", "La sesión no es válida")
+        : error(503, "API_UNAVAILABLE", "No se pudo validar la sesión")
+    }
+
+    const maxAge = Math.min(
+      secondsUntilExpiry(body.refreshToken),
+      MAX_SESSION_SECONDS
     )
+    const response = NextResponse.json({ ok: true })
+    response.cookies.set(refreshName, body.refreshToken, cookieOptions(maxAge))
 
     if (options.storeBranding) {
       // Con el access token recién emitido: si fuera inválido, la API lo
@@ -101,7 +146,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
         response.cookies.set(
           brandingName,
           encodeBranding(branding.data),
-          cookieOptions(secondsUntilExpiry(body.refreshToken))
+          cookieOptions(maxAge)
         )
       }
     }
@@ -111,7 +156,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
 
   /** `POST /api/session/refresh`: rota el refresh token y devuelve un access token. */
   async function refresh(request: NextRequest): Promise<NextResponse> {
-    const rejected = rejectCrossSite(request)
+    const rejected = rejectCrossSite(request, allowedOrigins)
     if (rejected) return rejected
 
     const refreshToken = request.cookies.get(refreshName)?.value
@@ -120,6 +165,7 @@ export function createSessionRoutes(options: SessionRouteOptions) {
     const result = await callApi<AuthTokens>(options.apiUrl, "/auth/refresh", {
       method: "POST",
       body: { refreshToken },
+      headers: clientIpHeaders(request),
     })
 
     if (!result.ok) {
@@ -137,28 +183,30 @@ export function createSessionRoutes(options: SessionRouteOptions) {
       expiresIn: result.data.expiresIn,
     }
     const response = NextResponse.json(session)
+    // Mismo tope que al iniciar la sesión: un `exp` lejano (o un token sin
+    // `exp` legible) no estira la cookie más allá de 30 días.
+    const maxAge = Math.min(
+      secondsUntilExpiry(result.data.refreshToken),
+      MAX_SESSION_SECONDS
+    )
     // El refresh token rota en cada uso: guardar SIEMPRE el nuevo. Con el
     // viejo, el próximo refresh sería un reuso y la API cerraría la sesión.
     response.cookies.set(
       refreshName,
       result.data.refreshToken,
-      cookieOptions(secondsUntilExpiry(result.data.refreshToken))
+      cookieOptions(maxAge)
     )
     // La marca vive lo mismo que la sesión.
     const branding = request.cookies.get(brandingName)?.value
     if (branding) {
-      response.cookies.set(
-        brandingName,
-        branding,
-        cookieOptions(secondsUntilExpiry(result.data.refreshToken))
-      )
+      response.cookies.set(brandingName, branding, cookieOptions(maxAge))
     }
     return response
   }
 
   /** `DELETE /api/session`: revoca el refresh token en la API y borra las cookies. */
   async function end(request: NextRequest): Promise<NextResponse> {
-    const rejected = rejectCrossSite(request)
+    const rejected = rejectCrossSite(request, allowedOrigins)
     if (rejected) return rejected
 
     const refreshToken = request.cookies.get(refreshName)?.value
@@ -182,10 +230,63 @@ export function createSessionRoutes(options: SessionRouteOptions) {
  * podría, con un formulario, guardar su propia sesión en el navegador de la
  * víctima (login CSRF). Los navegadores mandan `Origin` en todo POST y DELETE.
  */
-function rejectCrossSite(request: NextRequest): NextResponse | null {
+function rejectCrossSite(
+  request: NextRequest,
+  allowedOrigins: string[]
+): NextResponse | null {
   const origin = request.headers.get("origin")
-  if (origin && origin === request.nextUrl.origin) return null
+  if (origin && requestOrigins(request, allowedOrigins).includes(origin)) {
+    return null
+  }
   return error(403, "FORBIDDEN_ORIGIN", "Origen no permitido")
+}
+
+/**
+ * Orígenes que se consideran "la propia app": el que ve Next, el que declara el
+ * proxy (`X-Forwarded-Host`/`-Proto`; un sitio ajeno no puede fijar headers en
+ * el navegador de la víctima) y los configurados a mano.
+ */
+function requestOrigins(
+  request: NextRequest,
+  allowedOrigins: string[]
+): string[] {
+  const origins = [request.nextUrl.origin, ...allowedOrigins]
+  const host = firstValue(request.headers.get("x-forwarded-host"))
+  if (host) {
+    const proto =
+      firstValue(request.headers.get("x-forwarded-proto")) ??
+      request.nextUrl.protocol.replace(":", "")
+    origins.push(...normalizeOrigins([`${proto}://${host}`]))
+  }
+  return origins
+}
+
+function firstValue(header: string | null): string | null {
+  const value = header?.split(",")[0]?.trim()
+  return value ? value : null
+}
+
+function parseOriginList(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+/** Deja sólo `esquema://host[:puerto]` de http(s); descarta lo que no parsea. */
+function normalizeOrigins(values: string[]): string[] {
+  const origins: string[] = []
+  for (const value of values) {
+    try {
+      const url = new URL(value)
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        origins.push(url.origin)
+      }
+    } catch {
+      // Valor mal escrito: se ignora (nunca ensancha lo permitido).
+    }
+  }
+  return origins
 }
 
 function isStartSessionBody(body: unknown): body is StartSessionBody {
@@ -230,7 +331,12 @@ type ApiResult<T> =
 async function callApi<T>(
   apiUrl: string | undefined,
   path: string,
-  init: { method: "GET" | "POST"; body?: unknown; accessToken?: string }
+  init: {
+    method: "GET" | "POST"
+    body?: unknown
+    accessToken?: string
+    headers?: Record<string, string>
+  }
 ): Promise<ApiResult<T>> {
   if (!apiUrl) {
     return {
@@ -245,6 +351,7 @@ async function callApi<T>(
       method: init.method,
       headers: {
         "Content-Type": "application/json",
+        ...init.headers,
         ...(init.accessToken
           ? { Authorization: `Bearer ${init.accessToken}` }
           : {}),

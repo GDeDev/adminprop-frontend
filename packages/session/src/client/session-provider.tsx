@@ -3,7 +3,7 @@
 import * as React from "react"
 import type { AxiosInstance } from "axios"
 
-import type { ApiSuccess, AuthResult, User } from "@adminprop/shared-types"
+import type { AuthResult, MeResponse, User } from "@adminprop/shared-types"
 
 import {
   DEFAULT_SESSION_PATH,
@@ -42,8 +42,14 @@ export interface SessionProviderProps {
   /** A dónde ir después de cerrar sesión. */
   loginPath: string
   sessionPath?: string
-  /** Para limpiar cachés (React Query) al cerrar sesión. */
-  onSignOut?: () => void
+  /**
+   * Para limpiar cachés (React Query) y borradores al cerrar sesión o al
+   * iniciar otra. En un inicio de sesión llega `userChanged`: `false` si
+   * vuelve el mismo usuario de la misma inmobiliaria (sesión vencida), para no
+   * borrarle lo que estaba escribiendo; `true` si cambió. Sin argumento
+   * (cerrar sesión) se limpia todo.
+   */
+  onSignOut?: (context?: { userChanged: boolean }) => void
 }
 
 export function SessionProvider({
@@ -55,6 +61,10 @@ export function SessionProvider({
 }: SessionProviderProps) {
   const [status, setStatusState] = React.useState<SessionStatus>("idle")
   const [user, setUser] = React.useState<User | null>(null)
+  const userRef = React.useRef<User | null>(null)
+  React.useEffect(() => {
+    userRef.current = user
+  }, [user])
   const pending = React.useRef<Promise<void> | null>(null)
   // Copia del estado para `ensure`, que no puede depender de `status`: si lo
   // hiciera, cambiaría en cada transición y las rutas protegidas volverían a
@@ -80,7 +90,7 @@ export function SessionProvider({
             return
           }
         }
-        const { data } = await apiClient.get<ApiSuccess<User>>("/auth/me")
+        const { data } = await apiClient.get<MeResponse>("/auth/me")
         setUser(data.data)
         setStatus("authenticated")
       } catch {
@@ -96,11 +106,23 @@ export function SessionProvider({
 
   const signIn = React.useCallback(
     async (result: AuthResult) => {
+      // Si quedaba una sesión abierta (otro usuario en la misma pestaña, o la
+      // cookie de antes), se revoca en la API antes de guardar la nueva: si no,
+      // su refresh token seguiría vivo hasta vencer. Sin cookie es un no-op.
+      // Las cachés del usuario anterior también se limpian.
+      const previous = userRef.current
+      await endSession(sessionPath)
+      onSignOut?.({
+        userChanged:
+          !!previous &&
+          (previous.id !== result.user.id ||
+            previous.tenantId !== result.user.tenantId),
+      })
       await startSession(result.tokens, sessionPath)
       setUser(result.user)
       setStatus("authenticated")
     },
-    [sessionPath, setStatus]
+    [onSignOut, sessionPath, setStatus]
   )
 
   const signOut = React.useCallback(

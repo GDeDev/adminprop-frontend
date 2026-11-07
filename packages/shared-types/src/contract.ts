@@ -1,53 +1,39 @@
-import type {
-  Currency,
-  IsoDate,
-  Money,
-  Percentage,
-  Timestamps,
-  Uuid,
-} from "./common"
+import type { ApiSchemas } from "./api"
 
-export type ContractStatus = "active" | "finished" | "terminated"
+/**
+ * Contratos e índices (PRD 5.5, Fase 9), tal como los devuelve la API.
+ * La moneda (`Currency`) ya está en `common.ts` con los mismos valores.
+ */
 
-export type RentAdjustmentIndex = "ICL" | "IPC" | "fixed" | "other"
+/** Una fila del listado: partes resueltas, alquiler vigente y alertas. */
+export type ContractSummary = ApiSchemas["ContractSummaryDto"]
+/** La ficha: además condiciones, caución, rescisión, historial y línea de tiempo. */
+export type ContractDetail = ApiSchemas["ContractDetailDto"]
+export type ContractPropertyRef = ApiSchemas["ContractPropertyRefDto"]
+export type ContractPartyRef = ApiSchemas["ContractPartyRefDto"]
+export type ContractSurety = ApiSchemas["ContractSuretyDto"]
+export type ContractTermination = ApiSchemas["ContractTerminationDto"]
+export type ContractRentUpdate = ApiSchemas["ContractRentUpdateDto"]
+export type ContractTimeline = ApiSchemas["ContractTimelineDto"]
 
-export type RentAdjustmentFrequency =
-  "monthly" | "quarterly" | "every_four_months"
+export type ContractStatus = ContractSummary["status"]
+export type RentUpdateType = ContractDetail["rentUpdateType"]
+export type RentUpdateFrequency = ContractDetail["rentUpdateFrequency"]
+export type RentUpdateSource = ContractRentUpdate["source"]
 
-export type ServicePayer = "renter" | "owner"
+export type CreateContractRequest = ApiSchemas["CreateContractDto"]
+export type UpdateContractRequest = ApiSchemas["UpdateContractDto"]
+export type ContractSuretyRequest = ApiSchemas["PartialSuretyDto"]
+export type RenewContractRequest = ApiSchemas["RenewContractDto"]
+export type ApplyRentUpdateRequest = ApiSchemas["ApplyRentUpdateDto"]
+export type TerminateContractRequest = ApiSchemas["TerminateContractDto"]
 
-export interface ContractService {
-  serviceTypeId: Uuid
-  paidBy: ServicePayer
-}
+/** `GET /contracts/:id/termination-preview`: la multa sin rescindir. */
+export type TerminationPreview = ApiSchemas["TerminationPreviewDto"]
+/** `POST /contracts/:id/terminate`: el desglose más el contrato rescindido. */
+export type TerminationResult = ApiSchemas["TerminationResultDto"]
 
-/** Contrato de alquiler (PRD 5.5, Fase 9). */
-export interface Contract extends Timestamps {
-  id: Uuid
-  tenantId: Uuid
-  propertyId: Uuid
-  ownerId: Uuid
-  renterId: Uuid
-  guarantorId: Uuid | null
-  startDate: IsoDate
-  endDate: IsoDate
-  initialRent: Money
-  currency: Currency
-  adjustmentIndex: RentAdjustmentIndex
-  adjustmentFrequency: RentAdjustmentFrequency
-  /** Fijo al monto inicial mientras no se resuelva la consulta a Micaela. */
-  securityDeposit: Money
-  /** Fijado al crear el contrato (5% o 3% según RN-07 en ese momento). */
-  feePercentage: Percentage
-  status: ContractStatus
-  contractPdfUrl: string | null
-  services: ContractService[]
-  notes: string | null
-  // Seguro de caución
-  hasSuretyBond: boolean
-  insurerName: string | null
-  insurerAlertEmail: string | null
-  policyNumber: string | null
-  policyExpiryDate: IsoDate | null
-  policyPdfUrl: string | null
-}
+/** Valores mensuales de ICL/IPC, globales a todas las inmobiliarias. */
+export type IndexValue = ApiSchemas["IndexValueDto"]
+export type IndexType = IndexValue["indexType"]
+export type RegisterIndexValueRequest = ApiSchemas["RegisterIndexValueDto"]

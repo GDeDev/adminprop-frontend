@@ -9,7 +9,6 @@ import {
   KeyRound,
   Landmark,
   Pencil,
-  Receipt,
   Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -20,14 +19,7 @@ import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@adminprop/ui/components/responsive-dialog"
+import { ConfirmDialog } from "@adminprop/ui/components/confirm-dialog"
 
 import { PortalCredentialsDialog } from "@/components/portal-credentials-dialog"
 import { formatCbu, formatNationalId, portfolioLabel } from "@/lib/owners"
@@ -40,6 +32,10 @@ import {
 import { StatusBadge } from "../../propiedades/property-list"
 import { ReducedFeeBadge } from "../owner-list"
 import { BankAccountDialog } from "./bank-account-dialog"
+import {
+  OwnerFeeAccountSection,
+  OwnerSettlementsSection,
+} from "./owner-settlements-section"
 
 /** Ficha de propietario (spec Fase 7, 5.2). */
 export function OwnerDetailScreen({ id }: { id: string }) {
@@ -77,10 +73,10 @@ function Detail({ owner }: { owner: OwnerDetail }) {
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight">
+            <h1 className="font-display text-title-lg font-semibold md:text-display-md">
               {owner.fullName}
             </h1>
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="num text-sm text-muted-foreground">
               DNI/CUIT {formatNationalId(owner.nationalId)} ·{" "}
               {portfolioLabel(owner)}
             </p>
@@ -106,7 +102,7 @@ function Detail({ owner }: { owner: OwnerDetail }) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Section title="Datos">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Teléfono</dt>
@@ -156,15 +152,8 @@ function Detail({ owner }: { owner: OwnerDetail }) {
 
         <PortalAccessSection owner={owner} />
 
-        <section className="flex items-start gap-3 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-          <Receipt aria-hidden className="mt-0.5 size-5 shrink-0" />
-          <div>
-            <h2 className="font-medium text-foreground">
-              Historial de liquidaciones
-            </h2>
-            <p>Aparece cuando existan contratos y cobros.</p>
-          </div>
-        </section>
+        <OwnerSettlementsSection owner={owner} />
+        <OwnerFeeAccountSection owner={owner} feeSettings={owner.feeSettings} />
       </div>
     </div>
   )
@@ -180,9 +169,9 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4">
+    <section className="rounded-xl border bg-card p-4 shadow-raised">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
+        <h2 className="font-display text-title-md font-semibold">{title}</h2>
         {action}
       </div>
       {children}
@@ -220,9 +209,7 @@ function BankAccountSection({ owner }: { owner: OwnerDetail }) {
       ) : (
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
           <dt className="text-muted-foreground">CBU</dt>
-          <dd className="tabular-nums">
-            {account.cbu ? formatCbu(account.cbu) : "—"}
-          </dd>
+          <dd className="num">{account.cbu ? formatCbu(account.cbu) : "—"}</dd>
           <dt className="text-muted-foreground">Alias</dt>
           <dd>{account.alias ?? "—"}</dd>
           <dt className="text-muted-foreground">Banco</dt>
@@ -270,7 +257,7 @@ function PortalAccessSection({ owner }: { owner: OwnerDetail }) {
         {!owner.email
           ? "Cargale un email para poder darle acceso: es su usuario del portal."
           : owner.hasPortalAccess
-            ? `Entra al portal con ${owner.email}. Si perdió la contraseña, generale una nueva: la anterior deja de servir.`
+            ? `Entra al portal con ${owner.email}. Si no la recuerda, generale una contraseña nueva: la anterior deja de servir.`
             : `Todavía no tiene acceso. Se le genera un usuario (${owner.email}) y una contraseña que se muestra una sola vez.`}
       </p>
       <PortalCredentialsDialog
@@ -314,32 +301,21 @@ function DeleteButton({ owner }: { owner: OwnerDetail }) {
       >
         <Trash2 aria-hidden />
       </Button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen}>
-        <ResponsiveDialogContent className="sm:max-w-md">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>
-              ¿Eliminar al propietario?
-            </ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              {owner.fullName} deja de aparecer en el sistema y pierde el acceso
-              al portal. Si tiene propiedades asignadas, no se puede eliminar:
-              primero reasignalas.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => void confirm()}
-              disabled={remove.isPending}
-            >
-              Eliminar
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="¿Eliminar al propietario?"
+        description={
+          <>
+            {owner.fullName} deja de aparecer en el sistema y pierde el acceso
+            al portal. Si tiene propiedades asignadas, no se puede eliminar:
+            primero reasignalas.
+          </>
+        }
+        confirmLabel="Eliminar"
+        pending={remove.isPending}
+        onConfirm={confirm}
+      />
     </>
   )
 }

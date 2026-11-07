@@ -243,12 +243,57 @@ export interface paths {
     }
     /**
      * Inmobiliaria del usuario logueado
-     * @description Nombre y marca, para el layout del backoffice y del portal.
+     * @description Nombre, marca y datos de contacto, para el layout del backoffice y de los portales.
      */
     get: operations["TenantsController_current_api/v1"]
     put?: never
     post?: never
     delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/tenants/current/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Configuración de la inmobiliaria (admin)
+     * @description Datos legales, bancarios y de marca, y el último número de recibo emitido.
+     */
+    get: operations["TenantsController_settings_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Editar la configuración de la inmobiliaria (admin)
+     * @description Todos los campos son opcionales: lo que no viene no se toca; null o vacío borra el dato.
+     */
+    patch: operations["TenantsController_updateSettings_api/v1"]
+    trace?: never
+  }
+  "/api/v1/tenants/current/logo": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Subir el logo (admin)
+     * @description Reemplaza al anterior. Los PDFs nuevos lo usan en el encabezado.
+     */
+    post: operations["TenantsController_uploadLogo_api/v1"]
+    /** Quitar el logo (admin) */
+    delete: operations["TenantsController_deleteLogo_api/v1"]
     options?: never
     head?: never
     patch?: never
@@ -263,7 +308,7 @@ export interface paths {
     }
     /**
      * Marca de una inmobiliaria por su slug (sin sesión)
-     * @description La usa el portal para mostrar el login con el logo y el color de la inmobiliaria.
+     * @description La usa el portal para mostrar el login con el logo, el color y el contacto de la inmobiliaria.
      */
     get: operations["TenantsController_bySlug_api/v1"]
     put?: never
@@ -283,7 +328,7 @@ export interface paths {
     }
     /**
      * Basic health check
-     * @description Simple health check endpoint that returns basic application status
+     * @description Simple health check endpoint that only returns the status (no version, environment or uptime)
      */
     get: operations["HealthController_checkHealth"]
     put?: never
@@ -953,6 +998,26 @@ export interface paths {
     patch: operations["OwnersController_updateBankAccount_api/v1"]
     trace?: never
   }
+  "/api/v1/owners/{id}/fee-settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Honorarios y modo de envío (sólo admin)
+     * @description Override del % de honorarios (null = regla por umbral de la inmobiliaria), qué conceptos cobrados entran en la base además del alquiler, y qué se le manda al cerrar el consolidado. Lo que no viene no cambia.
+     */
+    patch: operations["OwnersController_updateFeeSettings_api/v1"]
+    trace?: never
+  }
   "/api/v1/owners/{id}/portal-credentials": {
     parameters: {
       query?: never
@@ -982,7 +1047,7 @@ export interface paths {
     }
     /**
      * Listar, con búsqueda por nombre o DNI
-     * @description Cada inquilino trae a su garante. Los filtros `paymentStatus` (Fase 11) y `propertyId` (Fase 9) se aceptan y validan desde ya, pero todavía no filtran: no hay cuotas ni contratos contra qué cruzar.
+     * @description Cada inquilino trae a su garante. Los filtros `paymentStatus` (Fase 11) y `propertyId` (D-51) se aceptan y validan desde ya, pero todavía no filtran: no hay cuotas ni contratos contra qué cruzar.
      */
     get: operations["RentersController_list_api/v1"]
     put?: never
@@ -1023,7 +1088,7 @@ export interface paths {
     }
     /**
      * Ficha completa, con el garante expandido
-     * @description `activeContract` (Fase 9) y `payments` (Fase 11) vienen vacíos hasta esas fases.
+     * @description `activeContract` trae el id del contrato activo; `payments` (Fase 11) viene vacío hasta esa fase.
      */
     get: operations["RentersController_findOne_api/v1"]
     put?: never
@@ -1123,6 +1188,3337 @@ export interface paths {
     head?: never
     /** Editar */
     patch: operations["GuarantorsController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/indices": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Valores cargados de un índice, del más reciente al más viejo */
+    get: operations["IndicesController_list_api/v1"]
+    put?: never
+    /**
+     * Cargar a mano el valor de un mes (sólo admin)
+     * @description Hasta que la Fase 13 los traiga de la fuente oficial. Un mes ya cargado no se pisa: 409.
+     */
+    post: operations["IndicesController_register_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar, con filtros por estado, propiedad, inquilino, propietario y vencimiento
+     * @description Cada fila trae las partes, el alquiler vigente y las marcas calculadas: por vencer, vencido, póliza vencida.
+     */
+    get: operations["ContractsController_list_api/v1"]
+    put?: never
+    /**
+     * Alta
+     * @description El propietario sale de la propiedad y los honorarios se fijan con su estado en este momento. La propiedad pasa a alquilada.
+     */
+    post: operations["ContractsController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha completa
+     * @description Con el historial del alquiler, la línea de tiempo y la caución. `monthlyStatus` llega con la Fase 11.
+     */
+    get: operations["ContractsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Editar notas, caución, garante o modo de devolución del depósito
+     * @description Fechas, montos, partes y estado no se editan: cambian por un aumento, una rescisión o una renovación. Los términos de cobro cambian por POST /contracts/:id/billing-terms.
+     */
+    patch: operations["ContractsController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/termination-preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Desglose de la multa por rescisión, sin rescindir
+     * @description Mismas reglas y misma cuenta que POST /contracts/:id/terminate.
+     */
+    get: operations["ContractsController_terminationPreview_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/billing-terms": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cambiar los términos de cobro (sólo admin)
+     * @description Agrega una vigencia nueva: modalidad de cobro, honorarios (% o importe fijo) y punitorio. Lo que no viene se copia de la vigente; las anteriores quedan en el historial y las cuotas ya generadas no cambian.
+     */
+    post: operations["ContractsController_changeBillingTerms_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/documents/contract": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Subir el PDF del contrato firmado (reemplaza al anterior) */
+    post: operations["ContractsController_uploadContractPdf_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/documents/policy": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Subir el PDF de la póliza de caución (reemplaza al anterior) */
+    post: operations["ContractsController_uploadPolicyPdf_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/rent-updates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Aplicar el próximo aumento programado
+     * @description Con ICL/IPC el nuevo alquiler sale de la variación del índice entre el mes del aumento anterior y el del nuevo. Con FIXED/OTHER, `newRent` es obligatorio. Aplica un aumento por llamada. Cargar `newRent` a mano (ajuste manual) es sólo de administradores: un empleado recibe 403 y sólo puede aplicar los aumentos por índice o por % fijo.
+     */
+    post: operations["ContractsController_applyRentUpdate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/terminate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Rescindir anticipadamente
+     * @description Calcula y guarda la multa (10 % del canon futuro, RN-09); la propiedad vuelve a disponible.
+     */
+    post: operations["ContractsController_terminate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{id}/renew": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Renovar
+     * @description Crea un contrato nuevo, activo, precargado con el original salvo lo que se indique (el inquilino puede cambiar); el original queda finalizado.
+     */
+    post: operations["ContractsController_renew_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/properties/{propertyId}/services": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios de una propiedad
+     * @description Todos los de la propiedad (de la propiedad y de sus contratos), cada uno con su estado calculado. `contractId` deja sólo los de ese contrato.
+     */
+    get: operations["ServicesController_listByProperty_api/v1"]
+    put?: never
+    /**
+     * Alta de un servicio en una propiedad
+     * @description Sin `contractId` es un servicio de la propiedad, que sus contratos heredan. Con vencimiento exige `dueDate`; con aumentos, `increaseFrequency`.
+     */
+    post: operations["ServicesController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/services": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios que aplican a un contrato
+     * @description Los cargados para el contrato (`scope: CONTRACT`) más los de la propiedad sin contrato, que hereda (`scope: PROPERTY`).
+     */
+    get: operations["ServicesController_listByContract_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/services/overdue": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios vencidos de la inmobiliaria (dashboard)
+     * @description Los que tienen vencimiento y la fecha ya pasó, los más atrasados primero, con la propiedad. Filtrable por propiedad.
+     */
+    get: operations["ServicesController_listOverdue_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/services/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Eliminar un servicio (borrado lógico) */
+    delete: operations["ServicesController_remove_api/v1"]
+    options?: never
+    head?: never
+    /**
+     * Editar un servicio
+     * @description Todo menos la propiedad. Vencimiento y aumentos se validan sobre el servicio resultante.
+     */
+    patch: operations["ServicesController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/advance-expenses": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Gastos adelantados de un contrato
+     * @description `settled=true|false` filtra descontados o pendientes. Los totales son del contrato entero, sin importar el filtro.
+     */
+    get: operations["AdvanceExpensesController_list_api/v1"]
+    put?: never
+    /**
+     * Registrar un gasto adelantado, con su comprobante
+     * @description Multipart: `amount`, `description`, `expenseDate`, `currency?` (la del contrato si no viene) y `file` (JPG, PNG, WebP o PDF, hasta 10 MB, obligatorio). El contrato puede estar en cualquier estado.
+     */
+    post: operations["AdvanceExpensesController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/advance-expenses/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Eliminar un gasto pendiente (borrado lógico, sólo admin)
+     * @description Un gasto ya descontado en una liquidación no se elimina (409). El comprobante se borra del storage.
+     */
+    delete: operations["AdvanceExpensesController_remove_api/v1"]
+    options?: never
+    head?: never
+    /**
+     * Editar un gasto pendiente
+     * @description Monto, descripción y fecha. Un gasto ya descontado en una liquidación no se edita (409).
+     */
+    patch: operations["AdvanceExpensesController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/billing/installments/generate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Generar las cuotas de un mes (idempotente)
+     * @description Una cuota por contrato activo que cubre el mes, con el alquiler vigente y los términos de cobro copiados. Sin `period`, el mes siguiente. Correrlo dos veces no duplica.
+     */
+    post: operations["InstallmentsController_generate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar cuotas con saldos a hoy
+     * @description Filtros por mes, estado (OVERDUE calculado), contrato, inquilino, propiedad, propietario y modalidad de cobro.
+     */
+    get: operations["InstallmentsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/summary": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Resumen del mes por moneda
+     * @description Cantidades por estado, base, cargos, cobrado (por quién lo recibió), punitorio devengado y cobrado, honorarios devengados y saldo.
+     */
+    get: operations["InstallmentsController_summary_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha de la cuota
+     * @description Saldos a hoy, cargos, pagos (con cotización e imputación), ajustes del punitorio, detalle diario y saldo a favor disponible.
+     */
+    get: operations["InstallmentsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/breakdown": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Desglose a una fecha
+     * @description Base, cargos, días y punitorio, pagado por concepto, saldos, crédito disponible y total a pagar, recalculados a `asOf` (default hoy).
+     */
+    get: operations["InstallmentsController_breakdown_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Cuenta corriente del contrato
+     * @description Totales, cuotas y movimientos cronológicos (devengado, cargos, punitorio, pagos, saldos a favor, anulaciones) más el depósito con su devolución sugerida. El contrato puede estar en cualquier estado.
+     */
+    get: operations["InstallmentsController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/deposit-return": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Devolver el depósito en garantía
+     * @description Sólo contratos finalizados, rescindidos o activos con el fin ya pasado, y una sola vez. `returnedAmount + Σ deducciones` tiene que ser el depósito. Una deducción DEBT con cuota crea un pago DEPOSIT sobre ella.
+     */
+    post: operations["InstallmentsController_returnDeposit_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/charges": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar un cargo a la cuota
+     * @description Expensas, multa de rescisión u otro concepto, en la moneda de la cuota. Sólo sobre una cuota no saldada. No devenga punitorio.
+     */
+    post: operations["PaymentsController_createCharge_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/charges/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un cargo sin imputaciones
+     * @description El cargo queda registrado como anulado y deja de contar.
+     */
+    post: operations["PaymentsController_voidCharge_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar un pago
+     * @description Multipart. Parcial o total, en la moneda del contrato o en la otra con cotización (fuente, fecha, valor). Se aplican antes los saldos a favor (`applyCredit`, default true); después el pago se imputa punitorio → alquiler → cargos, o según `allocation` (JSON). El exceso queda como saldo a favor. Recibido por el propietario nace pendiente de confirmación.
+     */
+    post: operations["PaymentsController_registerPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/apply-credit": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Aplicar saldo a favor a la cuota, a mano
+     * @description Sin plata: aplica los créditos disponibles del inquilino en la moneda del contrato (o uno puntual, hasta un monto). `payment` es la primera aplicación; `creditApplications`, las demás.
+     */
+    post: operations["PaymentsController_applyCredit_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/installments/{id}/late-fee-adjustments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reducir o condonar el punitorio (sólo admin)
+     * @description REDUCE descuenta `amount` del punitorio pendiente; WAIVE lo condona entero y deja de devengar. Siempre con motivo.
+     */
+    post: operations["PaymentsController_adjustLateFee_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar pagos
+     * @description Filtros por contrato, inquilino, estado (pendientes de confirmación), quién lo recibió y rango de fechas de pago.
+     */
+    get: operations["PaymentsController_listPayments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/payments/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar un pago informado por el propietario
+     * @description No cambia saldos (A-11): es control interno.
+     */
+    post: operations["PaymentsController_confirmPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/payments/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un pago (sólo admin)
+     * @description Deja de contar en todo y la cuota se recalcula. El saldo a favor que generó tiene que estar sin usar; anular una aplicación de crédito devuelve el monto al crédito.
+     */
+    post: operations["PaymentsController_voidPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/renters/{renterId}/credits": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Saldos a favor de un inquilino
+     * @description Disponibles, aplicados, devueltos y anulados, con el total disponible por moneda.
+     */
+    get: operations["PaymentsController_listCredits_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/credits/{id}/refund": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Devolver un saldo a favor (sólo admin)
+     * @description Registra la devolución: fecha, medio y notas. Sólo un crédito disponible.
+     */
+    post: operations["PaymentsController_refundCredit_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/billing/arrears": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mora por inquilino
+     * @description `?renterId=a&renterId=b` o `?renterIds=a,b`. Una fila por id pedido aunque no tenga cuotas (UP_TO_DATE). Para badges en listados y fichas.
+     */
+    get: operations["PaymentsController_arrears_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar liquidaciones
+     * @description Filtros por propietario, propiedad, contrato, mes y estado.
+     */
+    get: operations["SettlementsController_list_api/v1"]
+    put?: never
+    /**
+     * Crear la liquidación pendiente de un contrato
+     * @description Toma los pagos cobrados por la inmobiliaria sin liquidar, los gastos adelantados pendientes en la moneda del contrato y calcula los honorarios cuota por cuota. Una sola pendiente por contrato.
+     */
+    post: operations["SettlementsController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/owners/{ownerId}/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de liquidaciones de un propietario
+     * @description Ficha del propietario y portal (Fase 17).
+     */
+    get: operations["SettlementsController_listByOwner_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha de la liquidación
+     * @description Pagos incluidos con su cuota, gastos, honorarios con base y modalidad, ajustes, transferencias y consolidado.
+     */
+    get: operations["SettlementsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/recalculate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Recalcular una liquidación pendiente
+     * @description Vuelve a tomar pagos y gastos; los ajustes manuales se conservan.
+     */
+    post: operations["SettlementsController_recalculate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/adjustments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar una retención, un adelanto u otro ajuste
+     * @description Sólo sobre una pendiente. El monto es positivo; el concepto da el signo.
+     */
+    post: operations["SettlementsController_addAdjustment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/adjustments/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un ajuste
+     * @description Sólo mientras la liquidación está pendiente.
+     */
+    post: operations["SettlementsController_voidAdjustment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar la liquidación
+     * @description Congela los números, marca los pagos y los gastos como liquidados y, si los honorarios no se descuentan, los devenga en la cuenta del propietario. Inmutable desde ahí.
+     */
+    post: operations["SettlementsController_confirm_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/cancel": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cancelar una liquidación pendiente (sólo admin)
+     * @description Libera sus pagos y gastos para la próxima liquidación del contrato.
+     */
+    post: operations["SettlementsController_cancel_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/{id}/transfers": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar una transferencia al propietario
+     * @description Multipart. Sólo sobre una confirmada o transferida; la suma no puede superar el neto. Al cubrirlo, la liquidación pasa a TRANSFERRED.
+     */
+    post: operations["SettlementsController_registerTransfer_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/settlements/transfers/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular una transferencia (sólo admin)
+     * @description Resta del total transferido; la liquidación puede volver a CONFIRMED (A-18).
+     */
+    post: operations["SettlementsController_voidTransfer_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Listar consolidados */
+    get: operations["StatementsController_list_api/v1"]
+    put?: never
+    /**
+     * Abrir el consolidado del mes de un propietario
+     * @description Nace abierto y vacío, con el modo de envío del propietario. Uno por propietario y mes.
+     */
+    post: operations["StatementsController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ficha del consolidado
+     * @description Sus liquidaciones con alquiler, punitorios, cargos, honorarios, gastos, ajustes, neto y transferido, y los totales por moneda.
+     */
+    get: operations["StatementsController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/candidates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Liquidaciones del propietario que se pueden agregar
+     * @description Confirmadas o transferidas, sin consolidado.
+     */
+    get: operations["StatementsController_candidates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar liquidaciones al consolidado
+     * @description Sólo confirmadas o transferidas, del mismo propietario y sin consolidado.
+     */
+    post: operations["StatementsController_addSettlements_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/settlements/{settlementId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Quitar una liquidación del consolidado (sólo abierto) */
+    delete: operations["StatementsController_removeSettlement_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/close": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cerrar el consolidado
+     * @description Congela los totales por moneda y el modo de envío; emite el evento para el email y el PDF.
+     */
+    post: operations["StatementsController_close_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/statements/{id}/reopen": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Reabrir un consolidado cerrado (sólo admin) */
+    post: operations["StatementsController_reopen_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-receivables": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Honorarios a cobrar
+     * @description Filtros por propietario, contrato y estado. Más nuevos primero.
+     */
+    get: operations["FeesController_listReceivables_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/owners/{ownerId}/fee-account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Cuenta de honorarios de un propietario
+     * @description Devengado, cobrado, pendiente y sin imputar por moneda; receivables, pagos y movimientos cronológicos.
+     */
+    get: operations["FeesController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar un pago de honorarios
+     * @description Multipart. Lo paga el propietario o el inquilino por su cuenta. Se imputa a los honorarios pendientes más viejos (del contrato, si viene) en esa moneda; el exceso queda sin imputar.
+     */
+    post: operations["FeesController_registerPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-payments/{id}/void": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Anular un pago de honorarios (sólo admin)
+     * @description Deshace sus imputaciones: los honorarios vuelven a estar pendientes.
+     */
+    post: operations["FeesController_voidPayment_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/fee-payments/{id}/allocate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Imputar el saldo sin asignar de un pago
+     * @description A los honorarios pendientes de hoy del propietario (y del contrato, si el pago vino con uno).
+     */
+    post: operations["FeesController_allocate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/jobs": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Catálogo de jobs
+     * @description Nombre, cron legible, última ejecución de la inmobiliaria (o la global, en índices) y próxima corrida prevista.
+     */
+    get: operations["AutomationsController_jobs_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/executions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de ejecuciones
+     * @description Las de la inmobiliaria más las globales (índices). Más nuevas primero.
+     */
+    get: operations["AutomationsController_executions_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/jobs/{job}/run": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Ejecutar un job ahora
+     * @description Encola una corrida manual y responde 202 con el id de la ejecución. Se saltea la condición "hoy es el día N" pero no la idempotencia: no duplica nada. Con `period`, procesa ese mes (generar cuotas, consolidados). `indices.fetch` es global.
+     */
+    post: operations["AutomationsController_run_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/alerts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Avisos internos
+     * @description Avisos para el personal de los últimos 30 días (aumento pendiente, índice no disponible, cuota con base desactualizada, consolidado pendiente), más nuevos primero.
+     */
+    get: operations["AutomationsController_alerts_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/alerts/read-all": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Marcar todos los avisos como leídos */
+    post: operations["AutomationsController_readAll_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/automations/alerts/{id}/read": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Marcar un aviso como leído */
+    patch: operations["AutomationsController_read_api/v1"]
+    trace?: never
+  }
+  "/api/v1/indices/status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de los índices
+     * @description Por tipo: último mes cargado, fuente, último intento de traerlo y su resultado.
+     */
+    get: operations["IndexStatusController_status_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/excel/template": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Descargar la plantilla de Excel
+     * @description Hojas Instrucciones, Propietarios, Garantes, Inquilinos, Propiedades y Contratos, con desplegables armados con los maestros de la inmobiliaria.
+     */
+    get: operations["MigrationController_template_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/excel/analyze": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Analizar un Excel (dry-run)
+     * @description Multipart: `file` (.xlsx, hasta 10 MB y 5.000 filas). No crea ninguna entidad: arma un lote con las filas validadas para revisar.
+     */
+    post: operations["MigrationController_analyzeExcel_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/tokko/analyze": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Analizar el stock de Tokko (dry-run)
+     * @description Siempre es un análisis: no hay "importar directo". Con `TOKKO_SOURCE=fixture` usa una muestra incluida; con `http`, la API real, sólo para la inmobiliaria de `TOKKO_TENANT_ID`.
+     */
+    post: operations["MigrationController_analyzeTokko_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Historial de lotes */
+    get: operations["MigrationController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Resumen y reporte de un lote */
+    get: operations["MigrationController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/rows": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Filas del lote, con filtros */
+    get: operations["MigrationController_rows_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/rows/{rowId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Excluir una fila o elegir cómo resolver su conflicto
+     * @description Sólo mientras el lote está pendiente de revisión (READY).
+     */
+    patch: operations["MigrationController_updateRow_api/v1"]
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar el lote revisado
+     * @description Importa exactamente las filas analizadas. Las filas con error se omiten solas. Un conflicto se saltea por defecto; `MERGE_EMPTY_FIELDS` sólo completa campos vacíos, nunca pisa un valor cargado.
+     */
+    post: operations["MigrationController_confirm_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/discard": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Descartar el lote sin importar nada */
+    post: operations["MigrationController_discard_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/assets/retry": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Reintentar sólo las fotos que fallaron */
+    post: operations["MigrationController_retryAssets_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/migration/batches/{id}/report.xlsx": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Descargar el reporte del lote
+     * @description Una hoja con los errores y conflictos (fila, campo, mensaje) para corregir y volver a subir, y otra con las fotos por propiedad.
+     */
+    get: operations["MigrationController_report_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/properties/{propertyId}/appraise": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Sugerir un rango de alquiler
+     * @description Síncrono: consulta sólo el caché de avisos, sin red. Devuelve 201 también cuando `reused` es true (una tasación idéntica de las últimas 6 horas). 422 `INSUFFICIENT_MARKET_DATA` si no hay avisos suficientes; 429 `VALUATION_DAILY_LIMIT`. No modifica la propiedad. Auditado.
+     */
+    post: operations["ValuationController_appraise_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/properties/{propertyId}/history": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Historial de tasaciones de una propiedad, las nuevas primero */
+    get: operations["ValuationController_history_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/market-status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de las fuentes de datos de mercado
+     * @description Por fuente: último ingreso, estado y avisos vigentes. Son datos de mercado agregados, iguales para todas las inmobiliarias.
+     */
+    get: operations["ValuationController_marketStatus_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/market-coverage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Avisos vigentes de la zona de una ubicación
+     * @description Para anticipar el 422 antes de tasar. No distingue categoría ni moneda: es una cobertura orientativa.
+     */
+    get: operations["ValuationController_marketCoverage_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/valuation/zones/refresh": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Refrescar los avisos de la zona de una ubicación (admin)
+     * @description Se encola y responde 202 con el id del trabajo (`GET /jobs/:id/status`). Respeta el máximo de una corrida por zona cada 24 h.
+     */
+    post: operations["ValuationController_refreshZone_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/pipeline": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Tablero: 6 columnas con hasta 50 tarjetas cada una */
+    get: operations["CrmController_pipeline_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Consultas paginadas (ver más de una columna, lista mobile)
+     * @description Con `stage` ordena por posición del tablero; sin él, las más nuevas primero.
+     */
+    get: operations["CrmController_list_api/v1"]
+    put?: never
+    /** Cargar una consulta a mano (llamado, WhatsApp, visita) */
+    post: operations["CrmController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Detalle de una consulta con su línea de tiempo */
+    get: operations["CrmController_detail_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Editar datos de contacto, propiedad o seguimiento */
+    patch: operations["CrmController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/stage": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Mover una tarjeta de columna o de lugar
+     * @description La posición sale de los vecinos (`beforeId` arriba, `afterId` abajo); sin vecinos va arriba. `CLOSED_LOST` exige `lostReason` (422 `LOST_REASON_REQUIRED`). Reabrir una cerrada está permitido.
+     */
+    patch: operations["CrmController_move_api/v1"]
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/assign": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Asignar la consulta a un usuario (null la libera) */
+    patch: operations["CrmController_assign_api/v1"]
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/notes": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Agregar una nota
+     * @description Las notas no se editan ni se borran: queda el rastro.
+     */
+    post: operations["CrmController_addNote_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/contact-attempts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Registrar un intento de contacto
+     * @description Fija el último contacto y, si la consulta estaba en `NEW`, la pasa a `CONTACTED`.
+     */
+    post: operations["CrmController_contactAttempt_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/inquiries/{id}/whatsapp-link": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Link de WhatsApp con el mensaje de la plantilla ya armado
+     * @description `url` es null si la consulta no tiene un teléfono utilizable. Plantilla por defecto: `INQUIRY_FIRST_CONTACT`.
+     */
+    get: operations["CrmController_whatsapp_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/assignees": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Personal activo al que se puede asignar */
+    get: operations["CrmController_assignees_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/analytics/overview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Resumen del CRM en un rango de fechas */
+    get: operations["CrmController_overview_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/analytics/properties/{propertyId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Vistas, consultas y conversión de una propiedad
+     * @description Las vistas se cuentan desde la activación de la fase; antes figuran en 0.
+     */
+    get: operations["CrmController_propertyAnalytics_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Los tres canales; Zonaprop y Argenprop salen UNAVAILABLE */
+    get: operations["ChannelsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels/mercadolibre/connect": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Empezar la conexión con Mercado Libre
+     * @description Devuelve la URL del portal a la que hay que mandar al navegador. El `state` va firmado con el tenant y el usuario y vence a los 10 minutos.
+     */
+    post: operations["ChannelsController_connect_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels/{channel}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Desconectar un canal
+     * @description Borra los tokens. Las publicaciones activas quedan en el portal.
+     */
+    delete: operations["ChannelsController_disconnect_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/channels/mercadolibre/callback": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Callback del OAuth de Mercado Libre (redirige al backoffice)
+     * @description Valida el `state`, canjea el código y guarda los tokens cifrados. Redirige a `/configuracion/canales?connected=mercadolibre` (o `?error=`). Un `state` vencido o manipulado es 400 `OAUTH_STATE_INVALID`.
+     */
+    get: operations["ChannelOAuthController_callback_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Estado de la propiedad en cada canal */
+    get: operations["PropertyListingsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/publish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Publicar o actualizar la publicación (trabajo en segundo plano)
+     * @description Responde 202 con el `jobId` (consultá `GET /jobs/:id/status`). Valida antes de encolar: 422 `LISTING_NOT_READY` (la lista de lo que falta va en `errors`), 409 `CHANNEL_NOT_CONNECTED`.
+     */
+    post: operations["PropertyListingsController_publish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/retry": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reintentar una publicación en error
+     * @description 409 `LISTING_STATE_INVALID` si no está en `ERROR`.
+     */
+    post: operations["PropertyListingsController_retry_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/pause": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Pausar la publicación en el portal */
+    post: operations["PropertyListingsController_pause_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/resume": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Reanudar una publicación pausada */
+    post: operations["PropertyListingsController_resume_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/crm/properties/{propertyId}/listings/{channel}/close": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Cerrar la publicación en el portal
+     * @description Un aviso cerrado no se reabre: publicar de nuevo crea uno nuevo.
+     */
+    post: operations["PropertyListingsController_close_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de notificaciones
+     * @description Los envíos de la inmobiliaria, más nuevos primero (los avisos internos de la campana no figuran: están en `/automations/alerts`).
+     */
+    get: operations["NotificationsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/resend-failed": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reintentar todas las notificaciones fallidas
+     * @description Encola un trabajo (`notifications-resend-failed`) y responde 202 con su id. El avance se consulta en `GET /jobs/:id/status`.
+     */
+    post: operations["NotificationsController_resendFailed_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Tipos de aviso y sus canales
+     * @description El catálogo con el estado de la inmobiliaria.
+     */
+    get: operations["NotificationsController_settings_api/v1"]
+    /**
+     * Habilitar tipos de aviso y elegir canales
+     * @description Un tipo obligatorio no se puede deshabilitar ni sacarle sus canales originales (422 `NOTIFICATION_MANDATORY`).
+     */
+    put: operations["NotificationsController_updateSettings_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Plantillas de email */
+    get: operations["NotificationsController_templates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Editar una plantilla
+     * @description Usar una variable que el tipo no declara da 422 `TEMPLATE_UNKNOWN_VARIABLE`.
+     */
+    put: operations["NotificationsController_updateTemplate_api/v1"]
+    post?: never
+    /** Restaurar el texto original de una plantilla */
+    delete: operations["NotificationsController_resetTemplate_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}/preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Vista previa de una plantilla
+     * @description Con datos de ejemplo del tipo. No envía nada.
+     */
+    post: operations["NotificationsController_preview_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/templates/{key}/test": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Enviarme una prueba
+     * @description Manda la plantilla vigente con datos de ejemplo al email del usuario logueado, por el mismo camino de entrega que un aviso real.
+     */
+    post: operations["NotificationsController_test_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/me/preferences": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Mis preferencias de notificación */
+    get: operations["NotificationsController_myPreferences_api/v1"]
+    /**
+     * Actualizar mis preferencias de notificación
+     * @description Sólo aplican a los avisos al personal que no son obligatorios. Apagar uno obligatorio da 422 `NOTIFICATION_MANDATORY`.
+     */
+    put: operations["NotificationsController_updateMyPreferences_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/whatsapp-templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Plantillas de WhatsApp
+     * @description Los textos con los que el backoffice arma los links `wa.me` (recordatorio, mora, primer contacto de una consulta).
+     */
+    get: operations["NotificationsController_whatsapp_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/whatsapp-templates/{key}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Editar una plantilla de WhatsApp */
+    put: operations["NotificationsController_updateWhatsapp_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/dev/events": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Simular un evento del proveedor de email (sólo desarrollo)
+     * @description Registra un evento (entregado, abierto, rebotó...) sobre una notificación ya enviada. Sólo con `EMAIL_PROVIDER=console` y fuera de producción; si no, 404.
+     */
+    post: operations["NotificationsController_devEvent_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de una notificación
+     * @description Con el asunto, el texto enviado y la cronología de entregas, aperturas y rebotes.
+     */
+    get: operations["NotificationsController_detail_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/{id}/resend": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Reenviar una notificación fallida
+     * @description Vuelve a encolarla con los intentos en cero. Queda en la auditoría.
+     */
+    post: operations["NotificationsController_resend_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/webhooks/resend": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Webhook de Resend
+     * @description Público, con firma Svix (`svix-id`, `svix-timestamp`, `svix-signature`) y tolerancia de 5 minutos. Firma inválida: 401. Un evento repetido o de un mensaje desconocido responde 200 sin duplicar nada.
+     */
+    post: operations["WebhooksController_resendEvent_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/documents": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar documentos generados
+     * @description Todas las versiones, más nuevas primero.
+     */
+    get: operations["DocumentsController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/documents/{kind}/{entityId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Documento vigente de una entidad
+     * @description El PDF vigente (`READY`) de la liquidación, el consolidado, el pago o el contrato. 200 si está listo; 202 con `status: PENDING` si todavía se está generando (volver a consultar); 200 con `FAILED` si el último intento falló. 404 `DOCUMENT_NOT_FOUND` si nunca se pidió o no es del usuario (portales).
+     */
+    get: operations["DocumentsController_get_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/documents/{kind}/{entityId}/regenerate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Regenerar el PDF
+     * @description Encola una versión nueva (por ejemplo después de cambiar el logo) y responde 202 con la versión en `PENDING`. La anterior no se pisa.
+     */
+    post: operations["DocumentsController_regenerate_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mis datos y los de la inmobiliaria
+     * @description Nombre, email y teléfono del inquilino; la inmobiliaria con logo, color, contacto, WhatsApp y datos bancarios para pagar.
+     */
+    get: operations["PortalRenterController_me_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/contract": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mi contrato
+     * @description El contrato activo o, si no tiene, el último (A-35). `data: null` si nunca tuvo uno. Los honorarios sólo se muestran si los paga él por cuenta del propietario (A-38).
+     */
+    get: operations["PortalRenterController_contract_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de cuenta
+     * @description La cuota del mes con el punitorio a hoy día por día, el saldo a favor disponible, la mora y cómo pagar (datos de la inmobiliaria o pago directo al propietario).
+     */
+    get: operations["PortalRenterController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/installments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de cuotas
+     * @description Todas sus cuotas, de todos sus contratos, las más nuevas primero.
+     */
+    get: operations["PortalRenterController_installments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/installments/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de una cuota
+     * @description Con sus pagos y el punitorio día por día. Sin quién registró, notas internas ni la liquidación al propietario. Una cuota de otro inquilino es un 404.
+     */
+    get: operations["PortalRenterController_installment_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/renter/payments/{id}/receipt": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Recibo PDF de un pago
+     * @description Redirige (302) al PDF del recibo. 404 `DOCUMENT_NOT_READY` si todavía no se generó; 404 `PAYMENT_NOT_FOUND` si el pago no es suyo. Con `?format=json` responde `{ url }` en lugar de redirigir.
+     */
+    get: operations["PortalRenterController_receipt_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mis datos y los de la inmobiliaria
+     * @description Nombre, email, su cuenta bancaria registrada (para que confirme que es correcta), el modo de envío de resúmenes y los datos de la inmobiliaria.
+     */
+    get: operations["PortalOwnerController_me_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/properties": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Mis propiedades
+     * @description Con el contrato activo (inquilino, fechas, alquiler vigente) y el estado de pago de la cuota del mes.
+     */
+    get: operations["PortalOwnerController_properties_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/properties/{propertyId}/installments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Pagos del inquilino de una propiedad
+     * @description Las cuotas de la propiedad con estado, pagado y fecha. Sin el detalle de medios de pago ni quién registró. Una propiedad ajena es un 404.
+     */
+    get: operations["PortalOwnerController_propertyInstallments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/account": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado de cuenta del mes
+     * @description Por propiedad: alquiler devengado, cobrado, pendiente, punitorio y las liquidaciones del mes. Más los totales por moneda y su cuenta de honorarios con la inmobiliaria. Sin honorarios de otros propietarios ni totales de la inmobiliaria.
+     */
+    get: operations["PortalOwnerController_account_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de liquidaciones
+     * @description Sólo las confirmadas o transferidas (A-36), las más nuevas primero. Filtros por propiedad y mes.
+     */
+    get: operations["PortalOwnerController_settlements_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de una liquidación
+     * @description Con pagos, honorarios, gastos, ajustes y transferencias; `acknowledgedAt` si ya acusó recibo. Sin quién registró cada cosa ni notas internas.
+     */
+    get: operations["PortalOwnerController_settlement_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements/{id}/pdf": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * PDF de una liquidación
+     * @description Redirige (302) al PDF vigente. 404 `DOCUMENT_NOT_READY` si todavía no se generó. Con `?format=json` responde `{ url }` en lugar de redirigir.
+     */
+    get: operations["PortalOwnerController_settlementPdf_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/settlements/{id}/acknowledge": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Recibí la transferencia
+     * @description La única escritura del portal (A-37): deja constancia de cuándo el propietario confirmó que recibió la transferencia. Idempotente. 422 `SETTLEMENT_NOTHING_TO_ACKNOWLEDGE` si todavía no se le transfirió nada.
+     */
+    post: operations["PortalOwnerController_acknowledge_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/statements": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Resúmenes mensuales
+     * @description Los consolidados cerrados, los más nuevos primero.
+     */
+    get: operations["PortalOwnerController_statements_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/statements/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Detalle de un resumen mensual */
+    get: operations["PortalOwnerController_statement_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/portal/owner/statements/{id}/pdf": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * PDF de un resumen mensual
+     * @description Redirige (302) al PDF vigente. 404 `DOCUMENT_NOT_READY` si todavía no se generó. Con `?format=json` responde `{ url }` en lugar de redirigir.
+     */
+    get: operations["PortalOwnerController_statementPdf_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Listar los movimientos de auditoría
+     * @description Más nuevos primero. Filtra por entidad, acción, usuario, tipo de actor, fechas y texto.
+     */
+    get: operations["AuditController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/entities": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Catálogo de entidades y acciones
+     * @description Para armar los filtros de la pantalla.
+     */
+    get: operations["AuditController_catalog_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/export": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Exportar la auditoría filtrada
+     * @description Devuelve el archivo (Content-Disposition). Hasta 5.000 movimientos; con más, acotar por fecha. La exportación queda auditada.
+     */
+    get: operations["AuditController_export_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/entity/{entity}/{entityId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Historial de una ficha
+     * @description Los últimos cambios de una entidad (pestaña "Historial"), más nuevos primero.
+     */
+    get: operations["AuditController_history_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/audit/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Detalle de un movimiento
+     * @description Con el diff campo por campo; si el valor es un id (propiedad, inquilino…), también su nombre.
+     */
+    get: operations["AuditController_detail_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/dashboard": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Dashboard del mes
+     * @description Cuotas por estado, punitorios y honorarios del mes (por moneda), pendientes del día, contratos por vencer y los últimos 6 meses.
+     */
+    get: operations["ReportsController_dashboard_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/financial/income": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Ingresos, honorarios y punitorios por mes
+     * @description Una fila por mes y moneda. Lo cobrado se cuenta por fecha de pago; honorarios y neto, por el mes de la liquidación.
+     */
+    get: operations["ReportsController_income_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/financial/payments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Pagos recibidos
+     * @description Pagos confirmados del período, más nuevos primero, con cuota, inquilino, propiedad, propietario, medio y quién recibió. Paginado; con `format`, todos.
+     */
+    get: operations["ReportsController_payments_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/financial/arrears": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Alquileres vencidos
+     * @description Inquilinos con deuda a la fecha: cuotas vencidas, días de atraso, saldo y punitorio por moneda, y teléfono.
+     */
+    get: operations["ReportsController_arrears_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/operations/properties": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Propiedades alquiladas o disponibles
+     * @description Las alquiladas con inquilino, alquiler y fin del contrato; las disponibles con los días sin alquilar.
+     */
+    get: operations["ReportsController_properties_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/operations/expiring-contracts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Contratos por vencer
+     * @description Los activos que terminan dentro de `withinDays` (default: los días de aviso de la inmobiliaria), con si hay renovación en curso.
+     */
+    get: operations["ReportsController_expiring_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/reports/operations/services": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Servicios vencidos
+     * @description Servicios de propiedades con vencimiento pasado y sus días de atraso.
+     */
+    get: operations["ReportsController_services_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/inventories": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Inventarios vigentes de un contrato
+     * @description Los no reemplazados, con si se puede crear el de entrega y el de devolución.
+     */
+    get: operations["InventoryController_list_api/v1"]
+    put?: never
+    /**
+     * Crear un inventario en borrador
+     * @description Sin `items` se precarga la plantilla estándar con todo en "No aplica". Un solo vigente por tipo (409 `INVENTORY_ALREADY_EXISTS`); la devolución sólo con el contrato no activo o a 30 días o menos de su fin (422 `INVENTORY_RETURN_NOT_ALLOWED`).
+     */
+    post: operations["InventoryController_create_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/contracts/{contractId}/inventories/compare": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Comparar la entrega con la devolución
+     * @description Usa los inventarios vigentes y confirmados. Si falta uno, `hasDelivery`/`hasReturn` lo avisa.
+     */
+    get: operations["InventoryController_compare_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Detalle de un inventario, con ítems y fotos */
+    get: operations["InventoryController_get_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * Editar un borrador
+     * @description Fecha, notas, conformidad del inquilino y la lista de ítems (la reemplaza). Confirmado no se edita (409 `INVENTORY_CONFIRMED`).
+     */
+    patch: operations["InventoryController_update_api/v1"]
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/items/{itemId}/photos": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Subir fotos a un ítem (hasta 5 por pedido y 15 por ítem)
+     * @description Multipart: `files`. JPG, PNG, WebP o HEIC reconocidos por su contenido, hasta 10 MB cada una. Sólo en borrador.
+     */
+    post: operations["InventoryController_addPhotos_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/photos/{photoId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Borrar una foto de un borrador */
+    delete: operations["InventoryController_deletePhoto_api/v1"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/confirm": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirmar el inventario
+     * @description Lo cierra para siempre. Exige al menos un ítem evaluado (422 `INVENTORY_EMPTY`). `warnings` lista los ítems en mal estado sin fotos.
+     */
+    post: operations["InventoryController_confirm_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/inventories/{id}/correct": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Crear una corrección de un inventario confirmado
+     * @description Copia el inventario en un borrador nuevo con el motivo. Al confirmarla reemplaza al original.
+     */
+    post: operations["InventoryController_correct_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/properties": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Propiedades disponibles, con filtros */
+    get: operations["PublicController_list_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/properties/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Ficha pública de una propiedad disponible */
+    get: operations["PublicController_findOne_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/filters": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Tipos y ubicaciones en uso por propiedades disponibles */
+    get: operations["PublicController_filters_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/contact": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Enviar una consulta
+     * @description Anti-spam: honeypot (`website` vacío) y 5 consultas por hora por IP y por email. Con el honeypot lleno responde 201 igual y no guarda nada.
+     */
+    post: operations["PublicController_contact_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Templates disponibles, con su tema por defecto */
+    get: operations["SiteController_templates_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/settings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Configuración del sitio
+     * @description La primera vez la crea con el template CLASSIC y los datos de la inmobiliaria, deshabilitada.
+     */
+    get: operations["SiteController_settings_api/v1"]
+    /**
+     * Guardar el borrador (parcial)
+     * @description Cambia el borrador, no el sitio publicado. `subdomain` y `customDomain` se aplican al instante.
+     */
+    put: operations["SiteController_update_api/v1"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/settings/reset-template": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Restaurar el tema (y opcionalmente el contenido) del template */
+    post: operations["SiteController_reset_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/publish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Publicar
+     * @description Valida el borrador completo, lo copia a lo publicado y prende el sitio.
+     */
+    post: operations["SiteController_publish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/unpublish": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Despublicar
+     * @description El sitio pasa a 404. No se pierde nada de lo configurado.
+     */
+    post: operations["SiteController_unpublish_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/assets": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Subir una imagen
+     * @description JPG, PNG o WebP de hasta 5 MB, validada por contenido. No se admite SVG.
+     */
+    post: operations["SiteController_upload_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/preview-token": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Token de vista previa
+     * @description JWT de 15 minutos que abre el borrador en el sitio con `?preview=<token>`.
+     */
+    get: operations["SiteController_previewToken_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/domain": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Estado del dominio propio
+     * @description Si está verificado y, si no, el registro TXT que hay que cargar en el DNS para demostrar que es tuyo.
+     */
+    get: operations["SiteController_domain_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/domain/verify": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Verificar el dominio propio
+     * @description Busca el registro TXT en el DNS. Hasta que se verifica, el dominio está reservado pero no resuelve el sitio.
+     */
+    post: operations["SiteController_verifyDomain_api/v1"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/site/subdomain-availability": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Verifica si un subdominio es válido y está libre */
+    get: operations["SiteController_subdomainAvailability_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/site-by-host": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Resuelve el slug a partir del host
+     * @description `<subdominio>.<SITES_BASE_DOMAIN>` o un dominio propio. Lo usa el middleware de apps/sites.
+     */
+    get: operations["PublicSiteController_byHost_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/public/{slug}/site": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * El sitio publicado de una inmobiliaria
+     * @description Con `?preview=<token>` (de GET /site/preview-token) devuelve el borrador, sin caché.
+     */
+    get: operations["PublicSiteController_site_api/v1"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
     trace?: never
   }
   "/api/v1/examples": {
@@ -1249,6 +4645,8 @@ export interface components {
         | "UNSUPPORTED_MEDIA_TYPE"
         | "METHOD_NOT_ALLOWED"
         | "RATE_LIMIT_EXCEEDED"
+        | "VALUATION_DAILY_LIMIT"
+        | "LISTING_NOT_READY"
         | "SERVICE_UNAVAILABLE"
         | "REQUEST_TIMEOUT"
         | "UNAUTHENTICATED"
@@ -1271,6 +4669,7 @@ export interface components {
         | "FEATURE_DISABLED"
         | "DATABASE_ERROR"
         | "UNIQUE_CONSTRAINT_VIOLATION"
+        | "CHECK_CONSTRAINT_VIOLATION"
         | "FOREIGN_KEY_CONSTRAINT_VIOLATION"
         | "RECORD_NOT_FOUND"
         | "RELATED_RECORDS_EXIST"
@@ -1309,11 +4708,19 @@ export interface components {
        */
       path: string
     }
-    LoginDto: {
-      /** @example ana@ejemplo.com */
-      email: string
-      /** @example UnaClaveSegura123 */
-      password: string
+    ApiSuccessDto: {
+      /**
+       * @description Indica si la operación fue exitosa
+       * @example true
+       */
+      success: boolean
+      /**
+       * @description Mensaje que describe el resultado de la operación
+       * @example Operación completada correctamente
+       */
+      message: string | null
+      /** @description Payload devuelto por la operación */
+      data: Record<string, never>
     }
     PublicUserDto: {
       /** @example 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d */
@@ -1364,6 +4771,12 @@ export interface components {
       user: components["schemas"]["PublicUserDto"]
       tokens: components["schemas"]["AuthTokensDto"]
     }
+    LoginDto: {
+      /** @example ana@ejemplo.com */
+      email: string
+      /** @example UnaClaveSegura123 */
+      password: string
+    }
     PortalLoginDto: {
       /** @example ana@ejemplo.com */
       email: string
@@ -1400,20 +4813,6 @@ export interface components {
       currentPassword: string
       /** @description Contraseña nueva. Mínimo 10 caracteres, con minúscula, mayúscula y número. */
       newPassword: string
-    }
-    ApiSuccessDto: {
-      /**
-       * @description Indica si la operación fue exitosa
-       * @example true
-       */
-      success: boolean
-      /**
-       * @description Mensaje que describe el resultado de la operación
-       * @example Operación completada correctamente
-       */
-      message: string | null
-      /** @description Payload devuelto por la operación */
-      data: Record<string, never>
     }
     PaginationMetaDto: {
       /**
@@ -1493,6 +4892,102 @@ export interface components {
        * @example #1f4e79
        */
       primaryColor: string | null
+      /**
+       * @description Sólo dígitos con código de país
+       * @example 5491122334455
+       */
+      whatsapp: string | null
+      phone: string | null
+      email: string | null
+      address: string | null
+    }
+    TenantSettingsDto: {
+      id: string
+      /** @example Inmobiliaria Demo */
+      name: string
+      /** @example demo */
+      slug: string
+      logoUrl: string | null
+      /** @example #1f4e79 */
+      primaryColor: string | null
+      legalName: string | null
+      taxId: string | null
+      address: string | null
+      phone: string | null
+      email: string | null
+      /** @description Sólo dígitos con código de país */
+      whatsapp: string | null
+      bankAccountHolder: string | null
+      bankName: string | null
+      bankCbu: string | null
+      bankAlias: string | null
+      documentFooter: string | null
+      /**
+       * @description Null = sin punitorio por defecto: cada contrato fija el suyo
+       * @example 0.50
+       */
+      dailyLateFeePercentage: string | null
+      /** @example 10 */
+      paymentGraceDays: number
+      /** @description El saldo a favor del inquilino se aplica solo al generar la cuota (si no, a mano) */
+      autoApplyCreditOnGeneration: boolean
+      /**
+       * @description Día del mes desde el que corre el punitorio (gracia + 1)
+       * @example 11
+       */
+      lateFeeStartDay: number
+      /** @description Último número de recibo emitido */
+      receiptSequence: number
+    }
+    UpdateTenantSettingsDto: {
+      /**
+       * @description Color de marca en hex (#rrggbb)
+       * @example #1f4e79
+       */
+      primaryColor?: string | null
+      /** @description Razón social */
+      legalName?: string | null
+      /**
+       * @description CUIT
+       * @example 30-12345678-9
+       */
+      taxId?: string | null
+      /** @description Domicilio comercial */
+      address?: string | null
+      /** @description Teléfono */
+      phone?: string | null
+      /** @description Email de contacto */
+      email?: string | null
+      /**
+       * @description WhatsApp: sólo dígitos con código de país
+       * @example 5491122334455
+       */
+      whatsapp?: string | null
+      /** @description Titular de la cuenta bancaria */
+      bankAccountHolder?: string | null
+      /** @description Banco */
+      bankName?: string | null
+      /**
+       * @description CBU (22 dígitos)
+       * @example 0110599552000000123456
+       */
+      bankCbu?: string | null
+      /** @description Alias */
+      bankAlias?: string | null
+      /** @description Leyenda al pie de los PDFs */
+      documentFooter?: string | null
+      /**
+       * @description Punitorio diario por defecto, en %. Lo heredan los contratos que no fijan el suyo; no puede quedar vacío una vez fijado (0 = sin punitorio).
+       * @example 0.50
+       */
+      dailyLateFeePercentage?: string
+      /**
+       * @description Días del mes sin punitorio por defecto (el punitorio corre desde el día siguiente).
+       * @example 10
+       */
+      paymentGraceDays?: number
+      /** @description Saldo a favor del inquilino: true = se aplica solo al generar la cuota; false (por defecto) = se aplica a mano o al registrar un pago. */
+      autoApplyCreditOnGeneration?: boolean
     }
     AsyncJobStatusDto: {
       /** @example 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d */
@@ -1683,10 +5178,24 @@ export interface components {
       /** @enum {string} */
       status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
       ownerId: string | null
+      /** @description Contrato activo, si lo hay */
+      activeContractId: string | null
       owner: components["schemas"]["OwnerRefDto"] | null
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
       mainPhotoUrl: string | null
+      /**
+       * @description Precio de publicación; null = "Consultar"
+       * @example 150000.00
+       */
+      listingPrice: string | null
+      /** @enum {string} */
+      listingCurrency: "ARS" | "USD"
+      publicDescription: string | null
+      /** @description La migración la dejó para revisar (ej. sin ubicación) */
+      needsReview: boolean
+      /** @enum {string} */
+      listingOperation: "SALE" | "RENT"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
@@ -1711,10 +5220,24 @@ export interface components {
       /** @enum {string} */
       status: "AVAILABLE" | "RENTED" | "MAINTENANCE"
       ownerId: string | null
+      /** @description Contrato activo, si lo hay */
+      activeContractId: string | null
       owner: components["schemas"]["OwnerRefDto"] | null
       location: components["schemas"]["LocationRefDto"] | null
       propertyType: components["schemas"]["MasterDataRefDto"] | null
       mainPhotoUrl: string | null
+      /**
+       * @description Precio de publicación; null = "Consultar"
+       * @example 150000.00
+       */
+      listingPrice: string | null
+      /** @enum {string} */
+      listingCurrency: "ARS" | "USD"
+      publicDescription: string | null
+      /** @description La migración la dejó para revisar (ej. sin ubicación) */
+      needsReview: boolean
+      /** @enum {string} */
+      listingOperation: "SALE" | "RENT"
       /** Format: date-time */
       createdAt: string
       /** Format: date-time */
@@ -1725,6 +5248,14 @@ export interface components {
       amenities: components["schemas"]["AmenityRefDto"][]
       notes: string | null
       photos: components["schemas"]["PropertyPhotoDto"][]
+      bedrooms: number | null
+      bathrooms: number | null
+      rooms: number | null
+      totalAreaM2: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
+      latitude: number | null
+      longitude: number | null
     }
     CreatePropertyDto: {
       /** @example Av. Corrientes 1234, 5° B */
@@ -1739,6 +5270,39 @@ export interface components {
       amenityIds: string[]
       /** @description Notas internas. Nunca se muestran en el portal. */
       notes?: string | null
+      /**
+       * @description Precio de publicación en el portal, como string. Sin precio (o null) se publica como "Consultar".
+       * @example 150000.00
+       */
+      listingPrice?: string | null
+      /**
+       * @description Moneda del precio. Por defecto, la de la inmobiliaria.
+       * @enum {string}
+       */
+      listingCurrency?: "ARS" | "USD"
+      /** @description Texto que ve el público en el portal. */
+      publicDescription?: string | null
+      /**
+       * @description Venta o alquiler. Por defecto, alquiler.
+       * @enum {string}
+       */
+      listingOperation?: "SALE" | "RENT"
+      /** @example 3 */
+      bedrooms?: number | null
+      /** @example 2 */
+      bathrooms?: number | null
+      /** @example 4 */
+      rooms?: number | null
+      /** @example 85.5 */
+      totalAreaM2?: number | null
+      /** @example 70 */
+      coveredAreaM2?: number | null
+      /** @example 12 */
+      ageYears?: number | null
+      /** @example -34.6037 */
+      latitude?: number | null
+      /** @example -58.3816 */
+      longitude?: number | null
     }
     UpdatePropertyDto: {
       /** @example Av. Corrientes 1234, 5° B */
@@ -1753,6 +5317,41 @@ export interface components {
       amenityIds: string[]
       /** @description Notas internas. Nunca se muestran en el portal. */
       notes?: string | null
+      /**
+       * @description Precio de publicación en el portal, como string. Sin precio (o null) se publica como "Consultar".
+       * @example 150000.00
+       */
+      listingPrice?: string | null
+      /**
+       * @description Moneda del precio. Por defecto, la de la inmobiliaria.
+       * @enum {string}
+       */
+      listingCurrency?: "ARS" | "USD"
+      /** @description Texto que ve el público en el portal. */
+      publicDescription?: string | null
+      /**
+       * @description Venta o alquiler. Por defecto, alquiler.
+       * @enum {string}
+       */
+      listingOperation?: "SALE" | "RENT"
+      /** @example 3 */
+      bedrooms?: number | null
+      /** @example 2 */
+      bathrooms?: number | null
+      /** @example 4 */
+      rooms?: number | null
+      /** @example 85.5 */
+      totalAreaM2?: number | null
+      /** @example 70 */
+      coveredAreaM2?: number | null
+      /** @example 12 */
+      ageYears?: number | null
+      /** @example -34.6037 */
+      latitude?: number | null
+      /** @example -58.3816 */
+      longitude?: number | null
+      /** @description Marcar o limpiar la revisión pendiente de una propiedad migrada. Cambiar la ubicación también la limpia. */
+      needsReview?: boolean
     }
     ChangePropertyStatusDto: {
       /**
@@ -1771,7 +5370,7 @@ export interface components {
       email: string | null
       /** @description Propiedades a cargo, en cualquier estado */
       propertyCount: number
-      /** @description Las que cuentan para el honorario reducido. Hasta la Fase 9, las alquiladas. */
+      /** @description Las que cuentan para el honorario reducido: con contrato activo. */
       activePropertyCount: number
       /** @description Honorario reducido (RN-07), calculado */
       reducedFee: boolean
@@ -1791,6 +5390,14 @@ export interface components {
       bankName: string | null
       holder: string | null
     }
+    OwnerFeeSettingsDto: {
+      /** @example 4.50 */
+      feePercentage: string | null
+      feeIncludesLateFees: boolean
+      feeIncludesCharges: boolean
+      /** @enum {string} */
+      statementSendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+    }
     OwnerPropertyDto: {
       id: string
       address: string
@@ -1808,7 +5415,7 @@ export interface components {
       email: string | null
       /** @description Propiedades a cargo, en cualquier estado */
       propertyCount: number
-      /** @description Las que cuentan para el honorario reducido. Hasta la Fase 9, las alquiladas. */
+      /** @description Las que cuentan para el honorario reducido: con contrato activo. */
       activePropertyCount: number
       /** @description Honorario reducido (RN-07), calculado */
       reducedFee: boolean
@@ -1820,6 +5427,7 @@ export interface components {
       address: string | null
       notes: string | null
       bankAccount: components["schemas"]["BankAccountViewDto"]
+      feeSettings: components["schemas"]["OwnerFeeSettingsDto"]
       properties: components["schemas"]["OwnerPropertyDto"][]
     }
     BankAccountDto: {
@@ -1865,6 +5473,19 @@ export interface components {
       address?: string | null
       notes?: string | null
     }
+    UpdateOwnerFeeSettingsDto: {
+      /**
+       * @description Override del % de honorarios. Null vuelve a la regla por umbral de la inmobiliaria.
+       * @example 4.50
+       */
+      feePercentage?: string | null
+      /** @description Los punitorios cobrados entran en la base del honorario. */
+      feeIncludesLateFees?: boolean
+      /** @description Los cargos del propietario (multa, otros) entran en la base. Los cargos SERVICE nunca. */
+      feeIncludesCharges?: boolean
+      /** @enum {string} */
+      statementSendMode?: "SUMMARY" | "RECEIPTS" | "BOTH"
+    }
     PortalCredentialsDto: {
       userId: string
       /** @description Usuario del portal */
@@ -1891,6 +5512,8 @@ export interface components {
       moveInDate: string | null
       guarantor: components["schemas"]["GuarantorRefDto"] | null
       hasPortalAccess: boolean
+      /** @description Contrato activo del que es titular, si lo hay */
+      activeContractId: string | null
       /**
        * @description Estado de pago. Siempre null hasta el motor de cobros (Fase 11).
        * @enum {string|null}
@@ -1918,6 +5541,9 @@ export interface components {
       guaranteeType: "PROPERTY" | "PAYSLIPS"
       guaranteeDetail: string
     }
+    RenterActiveContractDto: {
+      id: string
+    }
     RenterDetailDto: {
       id: string
       firstName: string
@@ -1932,6 +5558,8 @@ export interface components {
        */
       moveInDate: string | null
       hasPortalAccess: boolean
+      /** @description Contrato activo del que es titular, si lo hay */
+      activeContractId: string | null
       /**
        * @description Estado de pago. Siempre null hasta el motor de cobros (Fase 11).
        * @enum {string|null}
@@ -1944,8 +5572,8 @@ export interface components {
       address: string | null
       notes: string | null
       guarantor: components["schemas"]["RenterGuarantorDto"] | null
-      /** @description Contrato activo. Siempre null hasta los contratos (Fase 9). */
-      activeContract: Record<string, never> | null
+      /** @description Contrato activo del que es titular. El detalle se pide a GET /contracts/:id. */
+      activeContract: components["schemas"]["RenterActiveContractDto"] | null
       /** @description Historial de pagos. Siempre vacío hasta el motor de cobros (Fase 11). */
       payments: Record<string, never>[]
     }
@@ -2092,6 +5720,3761 @@ export interface components {
       guaranteeDetail?: string
       notes?: string | null
     }
+    IndexValueDto: {
+      id: string
+      /** @enum {string} */
+      indexType: "ICL" | "IPC"
+      /** @example 2026-03 */
+      period: string
+      /** @example 1234.567890 */
+      value: string
+      /** @example manual */
+      source: string
+      /** Format: date-time */
+      createdAt: string
+    }
+    RegisterIndexValueDto: {
+      /**
+       * @example ICL
+       * @enum {string}
+       */
+      indexType: "ICL" | "IPC"
+      /**
+       * @description Mes, AAAA-MM
+       * @example 2026-03
+       */
+      period: string
+      /**
+       * @description Valor publicado, como string decimal con hasta 6 decimales y punto.
+       * @example 1234.567890
+       */
+      value: string
+    }
+    ContractPropertyRefDto: {
+      id: string
+      address: string
+    }
+    ContractPartyRefDto: {
+      id: string
+      fullName: string
+    }
+    ContractSummaryDto: {
+      id: string
+      property: components["schemas"]["ContractPropertyRefDto"] | null
+      owner: components["schemas"]["ContractPartyRefDto"] | null
+      renter: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date */
+      startDate: string
+      /**
+       * Format: date
+       * @description Último día, inclusive
+       */
+      endDate: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /**
+       * @description Alquiler vigente: el último del historial
+       * @example 150333.33
+       */
+      currentRent: string
+      /** @enum {string} */
+      status: "ACTIVE" | "FINISHED" | "TERMINATED"
+      hasSurety: boolean
+      /** Format: date */
+      policyExpiresAt: string | null
+      /** @description Hay caución y la póliza venció (RN-16) */
+      suretyExpired: boolean
+      /** @description Activo y vence dentro de los días de aviso (RN-12) */
+      expiringSoon: boolean
+      /** @description Activo y con el fin ya pasado, sin renovar */
+      expired: boolean
+      /**
+       * @description En %: el vigente hoy según los términos de cobro
+       * @example 5.00
+       */
+      feePercentage: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    ContractCurrentBillingTermsDto: {
+      id: string
+      /** Format: date */
+      effectiveFrom: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+      /**
+       * @description Null = el de la inmobiliaria
+       * @example 5.00
+       */
+      lateFeePercentage: string | null
+      /**
+       * @description Null = los de la inmobiliaria
+       * @example 10
+       */
+      lateFeeGraceDays: number | null
+      notes: string | null
+      changedBy: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+      /**
+       * @description Día del mes desde el que corre el punitorio (gracia + 1)
+       * @example 11
+       */
+      lateFeeStartDay: number
+      /** @description El % de punitorio es el de la inmobiliaria */
+      inheritedLateFeePercentage: boolean
+      /** @description La gracia es la de la inmobiliaria */
+      inheritedLateFeeGraceDays: boolean
+    }
+    ContractBillingTermsDto: {
+      id: string
+      /** Format: date */
+      effectiveFrom: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+      /** @description Null = el de la inmobiliaria */
+      lateFeePercentage: string | null
+      /** @description Null = los de la inmobiliaria */
+      lateFeeGraceDays: number | null
+      notes: string | null
+      changedBy: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    ContractSuretyDto: {
+      insurerName: string | null
+      insurerAlertEmail: string | null
+      policyNumber: string | null
+      /** Format: date */
+      policyExpiresAt: string | null
+      policyPdfUrl: string | null
+      suretyExpired: boolean
+    }
+    ContractTerminationDto: {
+      /** Format: date */
+      terminatedAt: string
+      /** Format: date */
+      notifiedAt: string
+      /** @example 130000.00 */
+      penalty: string
+      /** @example 1300000.00 */
+      futureRent: string
+    }
+    ContractRentUpdateDto: {
+      id: string
+      /** Format: date */
+      effectiveFrom: string
+      previousRent: string | null
+      newRent: string
+      /** @enum {string} */
+      source: "INITIAL" | "INDEX" | "MANUAL"
+      /** @enum {string|null} */
+      indexType: "ICL" | "IPC" | null
+      /** @example 2026-03 */
+      indexFromPeriod: string | null
+      /** @example 2026-04 */
+      indexToPeriod: string | null
+      indexFromValue: string | null
+      indexToValue: string | null
+      /** @description El % fijo aplicado (FIXED con fixedIncreasePercentage) */
+      fixedPercentage: string | null
+      appliedById: string | null
+      /** @description Ajuste manual: por qué se hizo (D-230) */
+      adjustmentReason: string | null
+      /** @description Ajuste manual: quién lo autorizó (D-230) */
+      authorizedBy: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    ContractTimelineDto: {
+      totalMonths: number
+      elapsedMonths: number
+      progressPercent: number
+    }
+    ContractDetailDto: {
+      id: string
+      property: components["schemas"]["ContractPropertyRefDto"] | null
+      owner: components["schemas"]["ContractPartyRefDto"] | null
+      renter: components["schemas"]["ContractPartyRefDto"] | null
+      /** Format: date */
+      startDate: string
+      /**
+       * Format: date
+       * @description Último día, inclusive
+       */
+      endDate: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /**
+       * @description Alquiler vigente: el último del historial
+       * @example 150333.33
+       */
+      currentRent: string
+      /** @enum {string} */
+      status: "ACTIVE" | "FINISHED" | "TERMINATED"
+      hasSurety: boolean
+      /** Format: date */
+      policyExpiresAt: string | null
+      /** @description Hay caución y la póliza venció (RN-16) */
+      suretyExpired: boolean
+      /** @description Activo y vence dentro de los días de aviso (RN-12) */
+      expiringSoon: boolean
+      /** @description Activo y con el fin ya pasado, sin renovar */
+      expired: boolean
+      /**
+       * @description En %: el vigente hoy según los términos de cobro
+       * @example 5.00
+       */
+      feePercentage: string
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      guarantor: components["schemas"]["ContractPartyRefDto"] | null
+      initialRent: string
+      /** @description Lo recibido, en depositCurrency */
+      deposit: string
+      /** @enum {string} */
+      depositCurrency: "ARS" | "USD"
+      /** @enum {string} */
+      depositReturnMode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /** @example 10.00 */
+      fixedIncreasePercentage: string | null
+      billingTerms: components["schemas"]["ContractCurrentBillingTermsDto"]
+      /** @description Historial de términos de cobro, del más nuevo al más viejo */
+      billingTermsHistory: components["schemas"]["ContractBillingTermsDto"][]
+      /** @enum {string} */
+      rentUpdateType: "ICL" | "IPC" | "FIXED" | "OTHER"
+      /** @enum {string} */
+      rentUpdateFrequency:
+        "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | "SEMIANNUAL" | "ANNUAL"
+      notes: string | null
+      contractPdfUrl: string | null
+      surety: components["schemas"]["ContractSuretyDto"] | null
+      termination: components["schemas"]["ContractTerminationDto"] | null
+      /** @description PDF del cálculo de la rescisión (Fase 15) */
+      terminationPdfUrl: string | null
+      renewedFromId: string | null
+      /** @description Historial del alquiler, del más reciente al más viejo */
+      rentUpdates: components["schemas"]["ContractRentUpdateDto"][]
+      /**
+       * Format: date
+       * @description Null si no está activo o termina antes del próximo aumento
+       */
+      nextRentUpdateOn: string | null
+      timeline: components["schemas"]["ContractTimelineDto"]
+      /** @description Estado de cada mes. Siempre vacío hasta el motor de cobros (Fase 11). */
+      monthlyStatus: Record<string, never>[]
+    }
+    TerminationPreviewDto: {
+      currentRent: string
+      /** @description Meses enteros hasta el fin */
+      remainingMonths: number
+      /** @description Días sueltos después de esos meses */
+      remainingDays: number
+      /** @description Días totales desde la notificación al fin */
+      totalDays: number
+      futureRent: string
+      /** @description 10 % del canon futuro (RN-09) */
+      penalty: string
+    }
+    CreateContractDto: {
+      /** @description Propiedad a alquilar. Tiene que tener propietario (de ahí sale el del contrato) y no tener otro contrato activo. */
+      propertyId: string
+      /** @description Inquilino titular, sin otro contrato activo. */
+      renterId: string
+      /** @description Garante. Si no viene, se toma el garante actual del inquilino; null para dejarlo sin garante. */
+      guarantorId?: string | null
+      /**
+       * Format: date
+       * @example 2026-03-01
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2028-02-29
+       */
+      endDate: string
+      /** @example 150333.33 */
+      initialRent: string
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency: "ARS" | "USD"
+      /**
+       * @example ICL
+       * @enum {string}
+       */
+      rentUpdateType: "ICL" | "IPC" | "FIXED" | "OTHER"
+      /**
+       * @example QUARTERLY
+       * @enum {string}
+       */
+      rentUpdateFrequency:
+        "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | "SEMIANNUAL" | "ANNUAL"
+      /** @example 150333.33 */
+      deposit: string
+      /**
+       * @description Moneda en que se recibió el depósito. Default: la del contrato.
+       * @enum {string}
+       */
+      depositCurrency?: "ARS" | "USD"
+      /**
+       * @description Cómo se devuelve el depósito al terminar. Default FIXED.
+       * @enum {string}
+       */
+      depositReturnMode?: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /**
+       * @description Con rentUpdateType FIXED: el % que se aplica solo en cada aumento. Sin él, el aumento se carga a mano.
+       * @example 10.00
+       */
+      fixedIncreasePercentage?: string | null
+      /** @description Si el contrato exige seguro de caución */
+      hasSurety: boolean
+      insurerName?: string | null
+      /** @description Obligatorio con caución: ahí va la alerta automática (RN-10). */
+      insurerAlertEmail?: string | null
+      policyNumber?: string | null
+      /**
+       * Format: date
+       * @example 2027-03-01
+       */
+      policyExpiresAt?: string | null
+      notes?: string | null
+      /**
+       * @description Quién cobra el alquiler. Default AGENCY.
+       * @enum {string}
+       */
+      collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      /**
+       * @description Cómo cobra sus honorarios la inmobiliaria. Default DEDUCTED.
+       * @enum {string}
+       */
+      feeMode?: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /**
+       * @description Importe fijo de honorarios; si viene, manda sobre el %.
+       * @example 25000.00
+       */
+      feeAmount?: string | null
+      /**
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria; si la inmobiliaria no fijó uno, es obligatorio (422).
+       * @example 5.00
+       */
+      lateFeePercentage?: string | null
+      /**
+       * @description Días del mes sin punitorio. Si no viene, los de la inmobiliaria.
+       * @example 10
+       */
+      lateFeeGraceDays?: number | null
+      /**
+       * @description Día del mes desde el que corre el punitorio (1 a 31). Es la gracia dicha al revés (inicio = gracia + 1): no se combina con lateFeeGraceDays.
+       * @example 11
+       */
+      lateFeeStartDay?: number | null
+    }
+    ChangeBillingTermsDto: {
+      /**
+       * @description Quién cobra el alquiler. Default AGENCY.
+       * @enum {string}
+       */
+      collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      /**
+       * @description Cómo cobra sus honorarios la inmobiliaria. Default DEDUCTED.
+       * @enum {string}
+       */
+      feeMode?: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /**
+       * @description Importe fijo de honorarios; si viene, manda sobre el %.
+       * @example 25000.00
+       */
+      feeAmount?: string | null
+      /**
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria; si la inmobiliaria no fijó uno, es obligatorio (422).
+       * @example 5.00
+       */
+      lateFeePercentage?: string | null
+      /**
+       * @description Días del mes sin punitorio. Si no viene, los de la inmobiliaria.
+       * @example 10
+       */
+      lateFeeGraceDays?: number | null
+      /**
+       * @description Día del mes desde el que corre el punitorio (1 a 31). Es la gracia dicha al revés (inicio = gracia + 1): no se combina con lateFeeGraceDays.
+       * @example 11
+       */
+      lateFeeStartDay?: number | null
+      /**
+       * Format: date
+       * @description Desde cuándo rigen. Default hoy. No anterior a los términos vigentes y dentro del contrato.
+       * @example 2026-11-01
+       */
+      effectiveFrom?: string
+      /**
+       * @description En %
+       * @example 5.00
+       */
+      feePercentage?: string
+      notes?: string | null
+    }
+    PartialSuretyDto: {
+      /** @description Si el contrato exige seguro de caución */
+      hasSurety?: boolean
+      insurerName?: string | null
+      /** @description Obligatorio con caución: ahí va la alerta automática (RN-10). */
+      insurerAlertEmail?: string | null
+      policyNumber?: string | null
+      /**
+       * Format: date
+       * @example 2027-03-01
+       */
+      policyExpiresAt?: string | null
+    }
+    UpdateContractDto: {
+      notes?: string | null
+      /** @description Garante; null para sacarlo. */
+      guarantorId?: string | null
+      /** @description Se mezcla con la caución actual y se valida el resultado. */
+      surety?: components["schemas"]["PartialSuretyDto"]
+      /** @enum {string} */
+      depositReturnMode?: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+    }
+    ApplyRentUpdateDto: {
+      /**
+       * @description El nuevo alquiler a mano. Obligatorio en FIXED sin % fijo y en OTHER. Opcional en FIXED con % fijo (si no viene se calcula) y en ICL/IPC (ajuste manual autorizado; si no viene, sale del índice).
+       * @example 120000.00
+       */
+      newRent?: string
+      /**
+       * @description Obligatorio cuando viene newRent (ajuste manual): por qué se ajusta a mano.
+       * @example Acuerdo con el inquilino por refacciones a su cargo
+       */
+      reason?: string
+      /**
+       * @description Obligatorio cuando viene newRent (ajuste manual): quién lo autorizó.
+       * @example Juan Pérez (propietario)
+       */
+      authorizedBy?: string
+    }
+    TerminateContractDto: {
+      /**
+       * Format: date
+       * @description Fecha en que el inquilino notificó la rescisión.
+       * @example 2026-12-01
+       */
+      notifiedAt: string
+    }
+    TerminationResultDto: {
+      /** Format: date */
+      terminatedAt: string
+      /** Format: date */
+      notifiedAt: string
+      /** @example 130000.00 */
+      penalty: string
+      /** @example 1300000.00 */
+      futureRent: string
+      remainingMonths: number
+      remainingDays: number
+      contract: components["schemas"]["ContractDetailDto"]
+    }
+    RenewContractDto: {
+      /** @description Garante. Si no viene, se toma el garante actual del inquilino; null para dejarlo sin garante. */
+      guarantorId?: string | null
+      /** @example 150333.33 */
+      initialRent?: string
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency?: "ARS" | "USD"
+      /**
+       * @example ICL
+       * @enum {string}
+       */
+      rentUpdateType?: "ICL" | "IPC" | "FIXED" | "OTHER"
+      /**
+       * @example QUARTERLY
+       * @enum {string}
+       */
+      rentUpdateFrequency?:
+        "MONTHLY" | "QUARTERLY" | "FOUR_MONTHLY" | "SEMIANNUAL" | "ANNUAL"
+      /** @example 150333.33 */
+      deposit?: string
+      /**
+       * @description Moneda en que se recibió el depósito. Default: la del contrato.
+       * @enum {string}
+       */
+      depositCurrency?: "ARS" | "USD"
+      /**
+       * @description Cómo se devuelve el depósito al terminar. Default FIXED.
+       * @enum {string}
+       */
+      depositReturnMode?: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /**
+       * @description Con rentUpdateType FIXED: el % que se aplica solo en cada aumento. Sin él, el aumento se carga a mano.
+       * @example 10.00
+       */
+      fixedIncreasePercentage?: string | null
+      /** @description Si el contrato exige seguro de caución */
+      hasSurety?: boolean
+      insurerName?: string | null
+      /** @description Obligatorio con caución: ahí va la alerta automática (RN-10). */
+      insurerAlertEmail?: string | null
+      policyNumber?: string | null
+      /**
+       * Format: date
+       * @example 2027-03-01
+       */
+      policyExpiresAt?: string | null
+      notes?: string | null
+      /**
+       * @description Quién cobra el alquiler. Default AGENCY.
+       * @enum {string}
+       */
+      collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      /**
+       * @description Cómo cobra sus honorarios la inmobiliaria. Default DEDUCTED.
+       * @enum {string}
+       */
+      feeMode?: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /**
+       * @description Importe fijo de honorarios; si viene, manda sobre el %.
+       * @example 25000.00
+       */
+      feeAmount?: string | null
+      /**
+       * @description Punitorio diario en %. Si no viene, el de la inmobiliaria; si la inmobiliaria no fijó uno, es obligatorio (422).
+       * @example 5.00
+       */
+      lateFeePercentage?: string | null
+      /**
+       * @description Días del mes sin punitorio. Si no viene, los de la inmobiliaria.
+       * @example 10
+       */
+      lateFeeGraceDays?: number | null
+      /**
+       * @description Día del mes desde el que corre el punitorio (1 a 31). Es la gracia dicha al revés (inicio = gracia + 1): no se combina con lateFeeGraceDays.
+       * @example 11
+       */
+      lateFeeStartDay?: number | null
+      /** @description Otro inquilino (spec 7). Si no viene, el mismo. */
+      renterId?: string
+      /**
+       * Format: date
+       * @example 2028-03-01
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2030-02-28
+       */
+      endDate: string
+    }
+    ServiceTypeRefDto: {
+      id: string
+      name: string
+      isActive: boolean
+    }
+    PropertyServiceDto: {
+      id: string
+      propertyId: string
+      contractId: string | null
+      serviceType: components["schemas"]["ServiceTypeRefDto"] | null
+      /** @enum {string} */
+      paidBy: "RENTER" | "OWNER"
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      hasDueDate: boolean
+      /** Format: date */
+      dueDate: string | null
+      hasIncrease: boolean
+      /** @enum {string|null} */
+      increaseFrequency:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
+      managedByAgency: boolean
+      notes: string | null
+      /**
+       * @description Calculado al leer: vencido si la fecha de vencimiento ya pasó
+       * @enum {string}
+       */
+      status: "UP_TO_DATE" | "OVERDUE"
+      /** @description Días desde el vencimiento; 0 si está al día */
+      daysOverdue: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+    }
+    CreateServiceDto: {
+      /** @description Contrato al que pertenece. Sin contrato es un servicio de la propiedad, que sus contratos heredan. */
+      contractId?: string | null
+      /** @description Tipo de servicio del maestro (activo). */
+      serviceTypeId: string
+      /**
+       * @example RENTER
+       * @enum {string}
+       */
+      paidBy: "RENTER" | "OWNER"
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency: "ARS" | "USD"
+      /** @description Si tiene fecha de vencimiento (exige `dueDate`). */
+      hasDueDate: boolean
+      /**
+       * Format: date
+       * @example 2026-11-10
+       */
+      dueDate?: string | null
+      /** @description Si tiene aumentos periódicos (exige `increaseFrequency`). */
+      hasIncrease: boolean
+      /**
+       * @example QUARTERLY
+       * @enum {string|null}
+       */
+      increaseFrequency?:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
+      /** @description Si la inmobiliaria gestiona el pago, o es sólo informativo (igual puede tener vencimiento). */
+      managedByAgency: boolean
+      notes?: string | null
+    }
+    ContractServiceDto: {
+      id: string
+      propertyId: string
+      contractId: string | null
+      serviceType: components["schemas"]["ServiceTypeRefDto"] | null
+      /** @enum {string} */
+      paidBy: "RENTER" | "OWNER"
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      hasDueDate: boolean
+      /** Format: date */
+      dueDate: string | null
+      hasIncrease: boolean
+      /** @enum {string|null} */
+      increaseFrequency:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
+      managedByAgency: boolean
+      notes: string | null
+      /**
+       * @description Calculado al leer: vencido si la fecha de vencimiento ya pasó
+       * @enum {string}
+       */
+      status: "UP_TO_DATE" | "OVERDUE"
+      /** @description Días desde el vencimiento; 0 si está al día */
+      daysOverdue: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      /**
+       * @description CONTRACT: cargado para este contrato; PROPERTY: heredado de la propiedad
+       * @enum {string}
+       */
+      scope: "CONTRACT" | "PROPERTY"
+    }
+    ServicePropertyRefDto: {
+      id: string
+      address: string
+    }
+    OverdueServiceDto: {
+      id: string
+      propertyId: string
+      contractId: string | null
+      serviceType: components["schemas"]["ServiceTypeRefDto"] | null
+      /** @enum {string} */
+      paidBy: "RENTER" | "OWNER"
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      hasDueDate: boolean
+      /** Format: date */
+      dueDate: string | null
+      hasIncrease: boolean
+      /** @enum {string|null} */
+      increaseFrequency:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
+      managedByAgency: boolean
+      notes: string | null
+      /**
+       * @description Calculado al leer: vencido si la fecha de vencimiento ya pasó
+       * @enum {string}
+       */
+      status: "UP_TO_DATE" | "OVERDUE"
+      /** @description Días desde el vencimiento; 0 si está al día */
+      daysOverdue: number
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      updatedAt: string
+      property: components["schemas"]["ServicePropertyRefDto"]
+    }
+    UpdateServiceDto: {
+      /** @description Contrato al que pertenece. Sin contrato es un servicio de la propiedad, que sus contratos heredan. */
+      contractId?: string | null
+      /** @description Tipo de servicio del maestro (activo). */
+      serviceTypeId?: string
+      /**
+       * @example RENTER
+       * @enum {string}
+       */
+      paidBy?: "RENTER" | "OWNER"
+      /**
+       * @example ARS
+       * @enum {string}
+       */
+      currency?: "ARS" | "USD"
+      /** @description Si tiene fecha de vencimiento (exige `dueDate`). */
+      hasDueDate?: boolean
+      /**
+       * Format: date
+       * @example 2026-11-10
+       */
+      dueDate?: string | null
+      /** @description Si tiene aumentos periódicos (exige `increaseFrequency`). */
+      hasIncrease?: boolean
+      /**
+       * @example QUARTERLY
+       * @enum {string|null}
+       */
+      increaseFrequency?:
+        | "MONTHLY"
+        | "QUARTERLY"
+        | "FOUR_MONTHLY"
+        | "SEMIANNUAL"
+        | "ANNUAL"
+        | null
+      /** @description Si la inmobiliaria gestiona el pago, o es sólo informativo (igual puede tener vencimiento). */
+      managedByAgency?: boolean
+      notes?: string | null
+    }
+    AdvanceExpenseRegisteredByDto: {
+      id: string
+      fullName: string
+    }
+    AdvanceExpenseDto: {
+      id: string
+      contractId: string
+      /** @description Copiado del contrato al registrarlo */
+      renterId: string
+      /** @example 15000.00 */
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      description: string
+      /** Format: date */
+      expenseDate: string
+      /** @description Comprobante (imagen o PDF) */
+      receiptUrl: string
+      /** @description Ya descontado en una liquidación */
+      settled: boolean
+      settlementId: string | null
+      /** Format: date-time */
+      settledAt: string | null
+      registeredBy:
+        components["schemas"]["AdvanceExpenseRegisteredByDto"] | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    AdvanceExpenseListDto: {
+      items: components["schemas"]["AdvanceExpenseDto"][]
+      /**
+       * @description Suma de los pendientes del contrato, sin importar el filtro
+       * @example 15000.00
+       */
+      pendingTotal: string
+      /**
+       * @description Suma de los ya descontados del contrato, sin importar el filtro
+       * @example 0.00
+       */
+      settledTotal: string
+    }
+    UpdateAdvanceExpenseDto: {
+      /** @example 150333.33 */
+      amount?: string
+      /** @example Arreglo de la canilla del baño */
+      description?: string
+      /**
+       * Format: date
+       * @example 2026-10-05
+       */
+      expenseDate?: string
+    }
+    GenerateInstallmentsDto: {
+      /**
+       * @description Mes `AAAA-MM`. Si no viene, el mes siguiente al actual.
+       * @example 2026-11
+       */
+      period?: string
+    }
+    InstallmentGenerationResultDto: {
+      /** @example 2026-11 */
+      period: string
+      /** @description Contratos activos que cubren el mes */
+      contracts: number
+      created: number
+      /** @description Ya tenían su cuota */
+      skipped: number
+      /** @description Saldos a favor aplicados solos a las cuotas nuevas (sólo si la inmobiliaria eligió el modo automático) */
+      creditsApplied: number
+    }
+    InstallmentContractRefDto: {
+      id: string
+    }
+    PropertyRefDto: {
+      id: string
+      address: string
+    }
+    InstallmentSummaryDto: {
+      id: string
+      /** @example 2026-10 */
+      period: string
+      contract: components["schemas"]["InstallmentContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example 200000.00 */
+      baseAmount: string
+      chargesTotal: string
+      /** @description Punitorio devengado a hoy */
+      lateFeeAccrued: string
+      /** @description Σ reducciones */
+      lateFeeAdjusted: string
+      lateFeeWaived: boolean
+      lateFeeBalance: string
+      /** @description Imputado por los pagos vigentes */
+      paidTotal: string
+      rentBalance: string
+      chargesBalance: string
+      totalDue: string
+      /** @description Informado por el propietario, sin confirmar */
+      pendingConfirmationTotal: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      /** Format: date */
+      graceEndDate: string
+      /** @description Días con punitorio */
+      feeDays: number
+      /** Format: date */
+      paidAt: string | null
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** Format: date-time */
+      createdAt: string
+    }
+    BillingSummaryByCurrencyDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      total: number
+      pending: number
+      partial: number
+      overdue: number
+      paid: number
+      baseTotal: string
+      chargesTotal: string
+      collectedTotal: string
+      collectedByAgency: string
+      collectedByOwner: string
+      pendingConfirmationTotal: string
+      lateFeeAccrued: string
+      lateFeeCollected: string
+      feeAccruedOnBase: string
+      feeAccruedOnCollected: string
+      balanceTotal: string
+    }
+    BillingSummaryDto: {
+      /** @example 2026-10 */
+      period: string
+      byCurrency: components["schemas"]["BillingSummaryByCurrencyDto"][]
+    }
+    UserRefDto: {
+      id: string
+      fullName: string
+    }
+    InstallmentChargeDto: {
+      id: string
+      /** @enum {string} */
+      concept: "SERVICE" | "TERMINATION_PENALTY" | "OTHER"
+      description: string
+      amount: string
+      createdBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      voidedAt: string | null
+      voidReason: string | null
+    }
+    PaymentDto: {
+      id: string
+      installmentId: string
+      contractId: string
+      renterId: string
+      /** @example 2026-10 */
+      period: string
+      /** Format: date */
+      paidAt: string
+      /** @enum {string} */
+      paidCurrency: "ARS" | "USD"
+      /** @description En paidCurrency */
+      amount: string
+      /** @example 1487.5000 */
+      exchangeRate: string | null
+      /** @enum {string|null} */
+      exchangeRateSource: "OFFICIAL" | "MEP" | "OTHER" | null
+      /** Format: date */
+      exchangeRateDate: string | null
+      amountInContractCurrency: string
+      /** @enum {string} */
+      kind: "CASH_IN" | "CREDIT_APPLICATION"
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      /** @enum {string} */
+      receivedBy: "AGENCY" | "OWNER"
+      /** @enum {string} */
+      status: "PENDING_CONFIRMATION" | "CONFIRMED" | "VOIDED"
+      lateFeeApplied: string
+      rentApplied: string
+      chargesApplied: string
+      creditGenerated: string
+      creditId: string | null
+      receiptUrl: string | null
+      /** @example R-00000042 */
+      receiptNumber: string | null
+      /** @description PDF del recibo emitido por la inmobiliaria (Fase 15) */
+      receiptPdfUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      confirmedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+      voidedBy: components["schemas"]["UserRefDto"] | null
+      voidReason: string | null
+      /** @description Liquidación que lo incluyó (Fase 12); null = sin liquidar */
+      settlementId: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    LateFeeAdjustmentDto: {
+      id: string
+      /** @enum {string} */
+      kind: "REDUCE" | "WAIVE"
+      amount: string
+      reason: string
+      createdBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    LateFeeDayDto: {
+      /** Format: date */
+      day: string
+      dayNumber: number
+      outstandingBase: string
+      /** @example 5.00 */
+      dailyPercentage: string
+      amount: string
+    }
+    InstallmentDetailDto: {
+      id: string
+      /** @example 2026-10 */
+      period: string
+      contract: components["schemas"]["InstallmentContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example 200000.00 */
+      baseAmount: string
+      chargesTotal: string
+      /** @description Punitorio devengado a hoy */
+      lateFeeAccrued: string
+      /** @description Σ reducciones */
+      lateFeeAdjusted: string
+      lateFeeWaived: boolean
+      lateFeeBalance: string
+      /** @description Imputado por los pagos vigentes */
+      paidTotal: string
+      rentBalance: string
+      chargesBalance: string
+      totalDue: string
+      /** @description Informado por el propietario, sin confirmar */
+      pendingConfirmationTotal: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      /** Format: date */
+      graceEndDate: string
+      /** @description Días con punitorio */
+      feeDays: number
+      /** Format: date */
+      paidAt: string | null
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** Format: date-time */
+      createdAt: string
+      /** @example 5.00 */
+      lateFeePercentage: string
+      lateFeeGraceDays: number
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+      feeOnBase: string
+      feeOnCollected: string
+      charges: components["schemas"]["InstallmentChargeDto"][]
+      /** @description Más nuevos primero */
+      payments: components["schemas"]["PaymentDto"][]
+      lateFeeAdjustments: components["schemas"]["LateFeeAdjustmentDto"][]
+      lateFeeDays: components["schemas"]["LateFeeDayDto"][]
+      /** @description Disponible del inquilino en la moneda del contrato */
+      creditsAvailable: string
+      notes: string | null
+      /** Format: date-time */
+      updatedAt: string
+    }
+    InstallmentBreakdownDto: {
+      installmentId: string
+      period: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** Format: date */
+      asOf: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      baseAmount: string
+      chargesTotal: string
+      /** Format: date */
+      graceEndDate: string
+      feeDays: number
+      lateFeePercentage: string
+      lateFeeAccrued: string
+      lateFeeAdjusted: string
+      lateFeeWaived: boolean
+      rentPaid: string
+      chargesPaid: string
+      lateFeePaid: string
+      rentBalance: string
+      chargesBalance: string
+      lateFeeBalance: string
+      totalDue: string
+      creditAvailable: string
+      totalDueAfterCredit: string
+      days: components["schemas"]["LateFeeDayDto"][]
+    }
+    ContractAccountContractDto: {
+      id: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      collectionMode: "AGENCY" | "OWNER_DIRECT"
+      /** @enum {string} */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @enum {string} */
+      depositReturnMode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+    }
+    ContractAccountTotalsDto: {
+      accrued: string
+      chargesTotal: string
+      lateFeeAccrued: string
+      lateFeeAdjusted: string
+      collected: string
+      collectedByAgency: string
+      collectedByOwner: string
+      /** @description Por liquidar al propietario: lo cobrado por la inmobiliaria y confirmado que todavía no está en una liquidación confirmada (alquiler + punitorios + cargos del propietario, antes de honorarios y gastos) */
+      pendingSettlement: string
+      pendingConfirmation: string
+      balance: string
+      creditsAvailable: string
+      feeAccruedOnBase: string
+      feeAccruedOnCollected: string
+    }
+    ContractAccountInstallmentDto: {
+      id: string
+      period: string
+      baseAmount: string
+      chargesTotal: string
+      lateFeeAccrued: string
+      lateFeeBalance: string
+      paidTotal: string
+      totalDue: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+      /** Format: date */
+      graceEndDate: string
+      /** Format: date */
+      paidAt: string | null
+    }
+    ContractAccountMovementDto: {
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      type:
+        | "INSTALLMENT"
+        | "CHARGE"
+        | "LATE_FEE_ACCRUED"
+        | "PAYMENT"
+        | "CREDIT_APPLIED"
+        | "CREDIT_GENERATED"
+        | "CREDIT_REFUNDED"
+        | "LATE_FEE_ADJUSTMENT"
+        | "PAYMENT_VOIDED"
+        | "DEPOSIT_RECEIVED"
+        | "DEPOSIT_RETURNED"
+        | "DEPOSIT_DEDUCTION"
+      description: string
+      debit: string | null
+      credit: string | null
+      /** @description Importe informativo de los movimientos del depósito; no entra en el saldo */
+      amount: string | null
+      /** @enum {string|null} */
+      amountCurrency: "ARS" | "USD" | null
+      /** @description Saldo acumulado (deuda positiva) */
+      balance: string
+      installmentId: string | null
+      paymentId: string | null
+    }
+    DepositReturnDeductionDto: {
+      id: string
+      /** @enum {string} */
+      concept: "DEBT" | "DAMAGE" | "OTHER"
+      description: string
+      amount: string
+      installmentId: string | null
+      paymentId: string | null
+    }
+    DepositReturnDto: {
+      id: string
+      contractId: string
+      /** Format: date */
+      returnedAt: string
+      depositAmount: string
+      /** @enum {string} */
+      depositCurrency: "ARS" | "USD"
+      /** @enum {string} */
+      mode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      referenceAmount: string
+      returnedAmount: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      deductions: components["schemas"]["DepositReturnDeductionDto"][]
+      /** Format: date-time */
+      createdAt: string
+    }
+    ContractAccountDepositDto: {
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      returnMode: "FIXED" | "FOLLOWS_RENT" | "MANUAL"
+      /** @description FIXED: el depósito; FOLLOWS_RENT: el alquiler vigente; MANUAL: null */
+      suggestedReturn: string | null
+      returned: components["schemas"]["DepositReturnDto"] | null
+    }
+    ContractAccountDto: {
+      contract: components["schemas"]["ContractAccountContractDto"]
+      totals: components["schemas"]["ContractAccountTotalsDto"]
+      installments: components["schemas"]["ContractAccountInstallmentDto"][]
+      /** @description Cronológico ascendente */
+      movements: components["schemas"]["ContractAccountMovementDto"][]
+      deposit: components["schemas"]["ContractAccountDepositDto"]
+    }
+    DepositDeductionInputDto: {
+      /** @enum {string} */
+      concept: "DEBT" | "DAMAGE" | "OTHER"
+      /** @example Cuota de octubre impaga */
+      description: string
+      /** @example 150333.33 */
+      amount: string
+      /** @description Sólo en DEBT: la cuota a la que se imputa. Crea un pago DEPOSIT sobre ella. */
+      installmentId?: string
+    }
+    RegisterDepositReturnDto: {
+      /**
+       * Format: date
+       * @example 2026-10-31
+       */
+      returnedAt: string
+      /**
+       * @description Monto del que se descuentan las deducciones. FIXED: lo recibido; FOLLOWS_RENT: el alquiler vigente (misma moneda que el depósito). Obligatorio en MANUAL o si el alquiler está en otra moneda; en los automáticos, si viene, tiene que coincidir.
+       * @example 260000.00
+       */
+      referenceAmount?: string
+      /**
+       * @description Lo que se le devuelve al inquilino (puede ser 0). Se calcula como referencia menos deducciones; si se manda, tiene que coincidir.
+       * @example 80000.00
+       */
+      returnedAmount?: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      notes?: string
+      deductions: components["schemas"]["DepositDeductionInputDto"][]
+    }
+    CreateChargeDto: {
+      /** @enum {string} */
+      concept: "SERVICE" | "TERMINATION_PENALTY" | "OTHER"
+      /** @example Expensas de octubre */
+      description: string
+      /** @example 150333.33 */
+      amount: string
+    }
+    VoidDto: {
+      reason: string
+    }
+    RegisterPaymentResultDto: {
+      payment: components["schemas"]["PaymentDto"]
+      /** @description Aplicaciones de saldo a favor hechas en la misma operación */
+      creditApplications: components["schemas"]["PaymentDto"][]
+      installment: components["schemas"]["InstallmentDetailDto"]
+    }
+    ApplyCreditDto: {
+      /** @description Un crédito puntual; si no, los disponibles del más viejo al más nuevo. */
+      creditId?: string
+      /**
+       * @description Hasta este monto; si no, hasta cubrir la deuda.
+       * @example 20000.00
+       */
+      amount?: string
+    }
+    CreateLateFeeAdjustmentDto: {
+      /** @enum {string} */
+      kind: "REDUCE" | "WAIVE"
+      /**
+       * @description Sólo REDUCE: lo que se descuenta del punitorio.
+       * @example 5000.00
+       */
+      amount?: string
+      reason: string
+    }
+    PaymentListItemDto: {
+      id: string
+      installmentId: string
+      contractId: string
+      renterId: string
+      /** @example 2026-10 */
+      period: string
+      /** Format: date */
+      paidAt: string
+      /** @enum {string} */
+      paidCurrency: "ARS" | "USD"
+      /** @description En paidCurrency */
+      amount: string
+      /** @example 1487.5000 */
+      exchangeRate: string | null
+      /** @enum {string|null} */
+      exchangeRateSource: "OFFICIAL" | "MEP" | "OTHER" | null
+      /** Format: date */
+      exchangeRateDate: string | null
+      amountInContractCurrency: string
+      /** @enum {string} */
+      kind: "CASH_IN" | "CREDIT_APPLICATION"
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      /** @enum {string} */
+      receivedBy: "AGENCY" | "OWNER"
+      /** @enum {string} */
+      status: "PENDING_CONFIRMATION" | "CONFIRMED" | "VOIDED"
+      lateFeeApplied: string
+      rentApplied: string
+      chargesApplied: string
+      creditGenerated: string
+      creditId: string | null
+      receiptUrl: string | null
+      /** @example R-00000042 */
+      receiptNumber: string | null
+      /** @description PDF del recibo emitido por la inmobiliaria (Fase 15) */
+      receiptPdfUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      confirmedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+      voidedBy: components["schemas"]["UserRefDto"] | null
+      voidReason: string | null
+      /** @description Liquidación que lo incluyó (Fase 12); null = sin liquidar */
+      settlementId: string | null
+      /** Format: date-time */
+      createdAt: string
+      renter: components["schemas"]["RenterRefDto"] | null
+      property: components["schemas"]["PropertyRefDto"] | null
+      /**
+       * @description La del contrato
+       * @enum {string}
+       */
+      currency: "ARS" | "USD"
+    }
+    CreditTotalDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      available: string
+    }
+    RenterCreditDto: {
+      id: string
+      renterId: string
+      contractId: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      amount: string
+      remaining: string
+      /** @enum {string} */
+      status: "AVAILABLE" | "APPLIED" | "REFUNDED" | "VOIDED"
+      originPaymentId: string
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date */
+      refundedAt: string | null
+      /** @enum {string|null} */
+      refundMethod: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT" | null
+      refundNotes: string | null
+    }
+    RenterCreditsDto: {
+      renterId: string
+      totals: components["schemas"]["CreditTotalDto"][]
+      /** @description Todos, más nuevos primero */
+      credits: components["schemas"]["RenterCreditDto"][]
+    }
+    RefundCreditDto: {
+      /**
+       * Format: date
+       * @example 2026-10-20
+       */
+      refundedAt: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      notes?: string
+    }
+    MoneyByCurrencyDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      amount: string
+    }
+    RenterArrearsDto: {
+      renterId: string
+      /** @enum {string} */
+      status: "UP_TO_DATE" | "PENDING" | "OVERDUE"
+      overdueInstallments: number
+      maxDaysOverdue: number
+      lateFeeAccrued: components["schemas"]["MoneyByCurrencyDto"][]
+      balance: components["schemas"]["MoneyByCurrencyDto"][]
+    }
+    CreateSettlementDto: {
+      contractId: string
+      /**
+       * @description Mes de la liquidación. Si no viene, el mes actual.
+       * @example 2026-10
+       */
+      period?: string
+    }
+    SettlementContractRefDto: {
+      id: string
+    }
+    SettlementPaymentDto: {
+      paymentId: string
+      installmentId: string
+      /** @example 2026-09 */
+      installmentPeriod: string
+      /** Format: date */
+      paidAt: string
+      rentApplied: string
+      lateFeeApplied: string
+      ownerChargesApplied: string
+      serviceChargesApplied: string
+    }
+    SettlementExpenseDto: {
+      expenseId: string
+      description: string
+      /** Format: date */
+      expenseDate: string
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+    }
+    SettlementAdjustmentDto: {
+      id: string
+      /** @enum {string} */
+      concept:
+        "WITHHOLDING" | "OWNER_ADVANCE" | "OTHER_DEDUCTION" | "OTHER_CREDIT"
+      description: string
+      /** @description Siempre positivo; el signo lo da el concepto */
+      amount: string
+      /** @description Null en los automáticos */
+      createdBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      voidedAt: string | null
+      voidReason: string | null
+    }
+    SettlementTransferDto: {
+      id: string
+      /** Format: date */
+      transferredAt: string
+      amount: string
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      receiptUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+    }
+    SettlementDetailDto: {
+      id: string
+      /**
+       * @description Mes en que se liquida
+       * @example 2026-10
+       */
+      period: string
+      /** @description Parcial N del mes */
+      sequence: number
+      /** @enum {string} */
+      status: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      contract: components["schemas"]["SettlementContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      rentTotal: string
+      lateFeeTotal: string
+      /** @description Cargos TERMINATION_PENALTY y OTHER */
+      ownerChargesTotal: string
+      /** @description Cargos SERVICE: no entran al neto */
+      serviceChargesTotal: string
+      feeTotal: string
+      /** @description Los honorarios se descontaron del neto */
+      feeDeducted: boolean
+      expensesTotal: string
+      /** @description Con signo */
+      adjustmentsTotal: string
+      /** @description Retenciones vigentes, con signo (negativo) */
+      withholdingsTotal: string
+      /** @description Adelantos al propietario vigentes, con signo (negativo) */
+      advancesTotal: string
+      /** @description Otras deducciones y créditos vigentes, con signo. Las tres columnas suman `adjustmentsTotal` */
+      otherAdjustmentsTotal: string
+      /** @description Puede ser negativo */
+      netAmount: string
+      transferredTotal: string
+      statementId: string | null
+      hasVoidedPayments: boolean
+      /** Format: date-time */
+      confirmedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
+      /** Format: date-time */
+      createdAt: string
+      /**
+       * @description De la cuota más reciente incluida
+       * @enum {string}
+       */
+      feeMode: "DEDUCTED" | "OWNER_PAYS" | "RENTER_PAYS_ON_BEHALF"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmountFixed: string | null
+      /** @description Sobre qué se calculó el honorario */
+      feeBase: string
+      /** @description Las cuotas incluidas tenían términos distintos */
+      mixedFeeTerms: boolean
+      /** @description El propietario no tiene cuenta bancaria cargada (A-17: se avisa) */
+      ownerBankAccountMissing: boolean
+      payments: components["schemas"]["SettlementPaymentDto"][]
+      expenses: components["schemas"]["SettlementExpenseDto"][]
+      /** @description Gastos pendientes en otra moneda que el contrato: no se descuentan */
+      skippedExpenses: components["schemas"]["SettlementExpenseDto"][]
+      adjustments: components["schemas"]["SettlementAdjustmentDto"][]
+      transfers: components["schemas"]["SettlementTransferDto"][]
+      confirmedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      cancelledAt: string | null
+      cancelReason: string | null
+      notes: string | null
+      /**
+       * Format: date-time
+       * @description Cuándo el propietario acusó recibo de la transferencia desde el portal (A-37)
+       */
+      acknowledgedAt: string | null
+      /** Format: date-time */
+      updatedAt: string
+    }
+    SettlementSummaryDto: {
+      id: string
+      /**
+       * @description Mes en que se liquida
+       * @example 2026-10
+       */
+      period: string
+      /** @description Parcial N del mes */
+      sequence: number
+      /** @enum {string} */
+      status: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      contract: components["schemas"]["SettlementContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      owner: components["schemas"]["OwnerRefDto"] | null
+      renter: components["schemas"]["RenterRefDto"] | null
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      rentTotal: string
+      lateFeeTotal: string
+      /** @description Cargos TERMINATION_PENALTY y OTHER */
+      ownerChargesTotal: string
+      /** @description Cargos SERVICE: no entran al neto */
+      serviceChargesTotal: string
+      feeTotal: string
+      /** @description Los honorarios se descontaron del neto */
+      feeDeducted: boolean
+      expensesTotal: string
+      /** @description Con signo */
+      adjustmentsTotal: string
+      /** @description Retenciones vigentes, con signo (negativo) */
+      withholdingsTotal: string
+      /** @description Adelantos al propietario vigentes, con signo (negativo) */
+      advancesTotal: string
+      /** @description Otras deducciones y créditos vigentes, con signo. Las tres columnas suman `adjustmentsTotal` */
+      otherAdjustmentsTotal: string
+      /** @description Puede ser negativo */
+      netAmount: string
+      transferredTotal: string
+      statementId: string | null
+      hasVoidedPayments: boolean
+      /** Format: date-time */
+      confirmedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    CreateSettlementAdjustmentDto: {
+      /**
+       * @description WITHHOLDING, OWNER_ADVANCE y OTHER_DEDUCTION restan; OTHER_CREDIT suma.
+       * @enum {string}
+       */
+      concept:
+        "WITHHOLDING" | "OWNER_ADVANCE" | "OTHER_DEDUCTION" | "OTHER_CREDIT"
+      /** @example Retención IIBB */
+      description: string
+      /** @example 150333.33 */
+      amount: string
+    }
+    CreateOwnerStatementDto: {
+      ownerId: string
+      /** @example 2026-10 */
+      period: string
+    }
+    OwnerStatementTotalsDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      rentTotal: string
+      lateFeeTotal: string
+      /** @description Cargos del propietario */
+      chargesTotal: string
+      feeTotal: string
+      expensesTotal: string
+      /** @description Con signo */
+      adjustmentsTotal: string
+      /** @description Retenciones, con signo (negativo) */
+      withholdingsTotal: string
+      /** @description Adelantos al propietario, con signo (negativo) */
+      advancesTotal: string
+      /** @description Otras deducciones y créditos, con signo. Las tres columnas suman `adjustmentsTotal` */
+      otherAdjustmentsTotal: string
+      netTotal: string
+      transferredTotal: string
+    }
+    OwnerStatementDetailDto: {
+      id: string
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @example 2026-10 */
+      period: string
+      /** @enum {string} */
+      status: "OPEN" | "CLOSED"
+      /** @enum {string} */
+      sendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+      settlementsCount: number
+      /** @description Por moneda; congelados al cerrar, en vivo mientras está abierto */
+      totals: components["schemas"]["OwnerStatementTotalsDto"][]
+      /** Format: date-time */
+      closedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
+      /** Format: date-time */
+      createdAt: string
+      settlements: components["schemas"]["SettlementSummaryDto"][]
+      closedBy: components["schemas"]["UserRefDto"] | null
+      notes: string | null
+    }
+    OwnerStatementSummaryDto: {
+      id: string
+      owner: components["schemas"]["OwnerRefDto"] | null
+      /** @example 2026-10 */
+      period: string
+      /** @enum {string} */
+      status: "OPEN" | "CLOSED"
+      /** @enum {string} */
+      sendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+      settlementsCount: number
+      /** @description Por moneda; congelados al cerrar, en vivo mientras está abierto */
+      totals: components["schemas"]["OwnerStatementTotalsDto"][]
+      /** Format: date-time */
+      closedAt: string | null
+      /** @description PDF vigente (Fase 15) */
+      pdfUrl: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    AddStatementSettlementsDto: {
+      settlementIds: string[]
+    }
+    CloseOwnerStatementDto: {
+      /**
+       * @description Default: el del consolidado (que nació con el del propietario).
+       * @enum {string}
+       */
+      sendMode?: "SUMMARY" | "RECEIPTS" | "BOTH"
+    }
+    FeeReceivableDto: {
+      id: string
+      owner: components["schemas"]["OwnerRefDto"] | null
+      contract: components["schemas"]["SettlementContractRefDto"]
+      property: components["schemas"]["PropertyRefDto"] | null
+      /** @example 2026-10 */
+      installmentPeriod: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      source: "OWNER_DIRECT_PAYMENT" | "SETTLEMENT_NOT_DEDUCTED"
+      /** @enum {string} */
+      payer: "OWNER" | "RENTER"
+      amount: string
+      paidAmount: string
+      /** @enum {string} */
+      status: "PENDING" | "PARTIAL" | "PAID" | "VOIDED"
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmountFixed: string | null
+      baseAmount: string
+      /** @description Su pago de origen se anuló con cobros imputados */
+      needsReview: boolean
+      /** Format: date-time */
+      createdAt: string
+    }
+    FeeAccountTotalsDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      accrued: string
+      collected: string
+      pending: string
+      unallocated: string
+    }
+    FeePaymentAllocationDto: {
+      feeReceivableId: string
+      amount: string
+    }
+    FeePaymentDto: {
+      id: string
+      ownerId: string
+      contractId: string | null
+      /** Format: date */
+      paidAt: string
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @enum {string} */
+      method: "TRANSFER" | "CASH" | "CREDIT" | "OTHER" | "DEPOSIT"
+      /** @enum {string} */
+      paidBy: "OWNER" | "RENTER"
+      unallocatedAmount: string
+      receiptUrl: string | null
+      notes: string | null
+      registeredBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      voidedAt: string | null
+      voidReason: string | null
+      allocations: components["schemas"]["FeePaymentAllocationDto"][]
+      /** Format: date-time */
+      createdAt: string
+    }
+    FeeMovementDto: {
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      type: "ACCRUED" | "PAYMENT" | "PAYMENT_VOIDED" | "RECEIVABLE_VOIDED"
+      description: string
+      debit: string | null
+      credit: string | null
+      /** @description Saldo acumulado por moneda (deuda positiva) */
+      balance: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+    }
+    OwnerFeeAccountDto: {
+      ownerId: string
+      totals: components["schemas"]["FeeAccountTotalsDto"][]
+      /** @description Más nuevos primero */
+      receivables: components["schemas"]["FeeReceivableDto"][]
+      /** @description Más nuevos primero */
+      payments: components["schemas"]["FeePaymentDto"][]
+      /** @description Cronológicos */
+      movements: components["schemas"]["FeeMovementDto"][]
+    }
+    JobExecutionDto: {
+      id: string
+      /** @example billing.arrears-notice */
+      job: string
+      /** @description Null en los globales */
+      tenantId: string | null
+      /**
+       * Format: date
+       * @description Día (hora local) de la corrida
+       */
+      scheduledFor: string
+      /** Format: date-time */
+      startedAt: string
+      /** Format: date-time */
+      finishedAt: string | null
+      /** @enum {string} */
+      status: "RUNNING" | "SUCCEEDED" | "PARTIAL" | "FAILED" | "SKIPPED"
+      /** @description Cuántas cosas tocó */
+      affected: number
+      /** @example 3 cuotas creadas, 12 ya existían */
+      summary: string | null
+      error: string | null
+      /** @enum {string} */
+      triggeredBy: "SCHEDULE" | "MANUAL"
+      triggeredByUser: components["schemas"]["UserRefDto"] | null
+    }
+    JobDto: {
+      /** @example installments.generate */
+      name: string
+      /** @example Generar cuotas del mes */
+      title: string
+      description: string
+      /** @example 10 0 * * * */
+      cron: string
+      /** @example todos los días a las 00:10 */
+      cronLabel: string
+      /** @enum {string} */
+      scope: "TENANT" | "GLOBAL"
+      /** @description La del tenant, o la global en los jobs globales */
+      lastExecution: components["schemas"]["JobExecutionDto"] | null
+      /** @description ISO. Null si el disparo automático está apagado */
+      nextRunAt: string | null
+    }
+    RunJobDto: {
+      /**
+       * @description Mes a procesar, si el job lo admite (generar cuotas, consolidados). Sin él, el de hoy.
+       * @example 2026-11
+       */
+      period?: string
+    }
+    RunJobResultDto: {
+      /** @description Se consulta en GET /automations/executions */
+      executionId: string
+    }
+    InternalAlertDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "STATEMENT_PENDING"
+        | "DOCUMENT_FAILED"
+        | "JOB_FAILED"
+        | "PUBLIC_INQUIRY"
+        | "NOTIFICATION_FAILED"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+      title: string
+      body: string
+      /** @example CONTRACT */
+      entityType: string | null
+      entityId: string | null
+      /**
+       * @description Ruta relativa del backoffice
+       * @example /contratos/00000000-0000-4000-8000-000000000000
+       */
+      link: string | null
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      readAt: string | null
+    }
+    ReadAllAlertsResultDto: {
+      updated: number
+    }
+    IndexStatusDto: {
+      /** @enum {string} */
+      indexType: "ICL" | "IPC"
+      /** @example 2026-09 */
+      latestPeriod: string | null
+      latestValue: string | null
+      /** @example bcra */
+      source: string | null
+      /** Format: date-time */
+      lastAttemptAt: string | null
+      /** @enum {string|null} */
+      lastAttemptStatus: "SUCCEEDED" | "PARTIAL" | "FAILED" | "SKIPPED" | null
+      lastAttemptError: string | null
+      /**
+       * @description bcra-indec | manual
+       * @example bcra-indec
+       */
+      provider: string
+    }
+    ImportEntityCountsDto: {
+      total: number
+      valid: number
+      errors: number
+      conflicts: number
+      imported: number
+    }
+    StartMigrationResultDto: {
+      batchId: string
+      /** @description Se consulta en GET /jobs/:id/status. */
+      jobId: string
+    }
+    AnalyzeTokkoDto: {
+      /**
+       * @description Tipos de operación a traer. Por defecto sólo alquiler.
+       * @example [
+       *       "Rent"
+       *     ]
+       */
+      operationTypes?: string[]
+      /**
+       * @description Para probar con pocas propiedades.
+       * @example 10
+       */
+      limit?: number
+      /** @description Si también se traen las fotos al confirmar. */
+      includeAssets: boolean
+    }
+    ImportAuthorDto: {
+      id: string
+      fullName: string
+    }
+    ImportCountsDto: {
+      total: number
+      valid: number
+      errors: number
+      conflicts: number
+      alreadyImported: number
+      imported: number
+      skipped: number
+      failed: number
+      needsReview: number
+      /** @description Por entidad: OWNER, RENTER, GUARANTOR, PROPERTY, CONTRACT. */
+      byEntity: {
+        [key: string]: components["schemas"]["ImportEntityCountsDto"]
+      }
+    }
+    ImportBatchSummaryDto: {
+      id: string
+      /** @enum {string} */
+      source: "EXCEL" | "TOKKO"
+      /** @enum {string} */
+      status:
+        | "ANALYZING"
+        | "READY"
+        | "IMPORTING"
+        | "COMPLETED"
+        | "PARTIAL"
+        | "FAILED"
+        | "DISCARDED"
+      fileName: string | null
+      createdBy: components["schemas"]["ImportAuthorDto"]
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      confirmedAt: string | null
+      counts: components["schemas"]["ImportCountsDto"]
+    }
+    ImportMastersCountDto: {
+      locations: number
+      propertyTypes: number
+      amenities: number
+    }
+    ImportAssetsDto: {
+      migrated: number
+      failed: number
+      pending: number
+    }
+    ImportBatchDetailDto: {
+      id: string
+      /** @enum {string} */
+      source: "EXCEL" | "TOKKO"
+      /** @enum {string} */
+      status:
+        | "ANALYZING"
+        | "READY"
+        | "IMPORTING"
+        | "COMPLETED"
+        | "PARTIAL"
+        | "FAILED"
+        | "DISCARDED"
+      fileName: string | null
+      createdBy: components["schemas"]["ImportAuthorDto"]
+      /** Format: date-time */
+      createdAt: string
+      /** Format: date-time */
+      confirmedAt: string | null
+      counts: components["schemas"]["ImportCountsDto"]
+      missingSheets: string[]
+      mastersToCreate: components["schemas"]["ImportMastersCountDto"]
+      mastersCreated: components["schemas"]["ImportMastersCountDto"]
+      assets: components["schemas"]["ImportAssetsDto"]
+      /** @description El lote está listo para revisar y tiene algo para importar. */
+      canConfirm: boolean
+      errorMessage: string | null
+    }
+    ImportRowErrorDto: {
+      field: string
+      code: string
+      message: string
+    }
+    ImportRowConflictDto: {
+      entityId: string
+      reason: string
+      differingFields: string[]
+    }
+    ImportRowDto: {
+      id: string
+      /** @enum {string} */
+      entity: "OWNER" | "RENTER" | "GUARANTOR" | "PROPERTY" | "CONTRACT"
+      rowNumber: number | null
+      externalId: string | null
+      /** @description Texto para identificar la fila. */
+      label: string
+      /** @enum {string} */
+      status:
+        | "VALID"
+        | "ERROR"
+        | "CONFLICT"
+        | "ALREADY_IMPORTED"
+        | "IMPORTED"
+        | "SKIPPED"
+        | "FAILED"
+      errors: components["schemas"]["ImportRowErrorDto"][]
+      conflict: components["schemas"]["ImportRowConflictDto"] | null
+      /** @enum {string|null} */
+      resolution: "SKIP" | "MERGE_EMPTY_FIELDS" | null
+      excluded: boolean
+      needsReview: boolean
+      targetId: string | null
+    }
+    UpdateImportRowDto: {
+      /** @description Excluir la fila de la importación. */
+      excluded?: boolean
+      /**
+       * @description Cómo resolver el conflicto de esta fila.
+       * @enum {string}
+       */
+      resolution?: "SKIP" | "MERGE_EMPTY_FIELDS"
+    }
+    ConfirmImportDto: {
+      /** @description Filas a dejar afuera. */
+      excludeRowIds?: string[]
+      /**
+       * @description Qué hacer con los conflictos sin resolución propia. Nunca se pisa un valor ya cargado.
+       * @enum {string}
+       */
+      defaultConflictResolution: "SKIP" | "MERGE_EMPTY_FIELDS"
+      /** @description Si se traen las fotos de Tokko (por defecto, lo pedido al analizar). */
+      migrateAssets?: boolean
+    }
+    RetryAssetsResultDto: {
+      jobId: string
+    }
+    AppraisePropertyDto: {
+      /**
+       * @description Superficie en m² (decimal como string). Si la ficha no la tiene, se manda desde el formulario; sin ella se compara el precio absoluto.
+       * @example 48.5
+       */
+      areaM2?: string
+      bedrooms?: number
+      /** @description Textos libres; por defecto los de la propiedad. */
+      amenities?: string[]
+      /**
+       * @description Por defecto, la moneda de publicación de la propiedad.
+       * @enum {string}
+       */
+      currency?: "ARS" | "USD"
+    }
+    ValuationRequesterDto: {
+      id: string
+      fullName: string
+    }
+    ValuationResultDto: {
+      id: string
+      propertyId: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example 420000.00 */
+      minPrice: string
+      /** @example 510000.00 */
+      maxPrice: string
+      /** @example 455000.00 */
+      suggestedPrice: string
+      /**
+       * @description A la centena más cercana en pesos y a la decena en dólares.
+       * @example 455000.00
+       */
+      suggestedPriceRounded: string
+      /** @enum {string} */
+      confidence: "LOW" | "MEDIUM" | "HIGH"
+      comparablesUsed: number
+      comparablesDiscarded: number
+      /** @example Palermo, CABA */
+      zoneLabel: string
+      zoneWidened: boolean
+      /** Format: date-time */
+      oldestComparableAt: string | null
+      justification: string
+      /** @enum {string} */
+      engine: "STATISTICAL" | "STATISTICAL_LLM"
+      requestedBy: components["schemas"]["ValuationRequesterDto"]
+      /** Format: date-time */
+      createdAt: string
+      /** @description true si es una tasación idéntica de las últimas 6 horas que se devolvió en vez de crear otra. */
+      reused: boolean
+    }
+    MarketSourceStatusDto: {
+      /** @enum {string} */
+      source: "ZONAPROP" | "ARGENPROP" | "MERCADOLIBRE" | "FAKE"
+      /** Format: date-time */
+      lastIngestAt: string | null
+      /** @enum {string} */
+      status: "OK" | "STALE" | "BLOCKED" | "PARSE_ERROR" | "DISABLED"
+      activeComparables: number
+    }
+    MarketStatusDto: {
+      sources: components["schemas"]["MarketSourceStatusDto"][]
+      maxAgeDays: number
+    }
+    MarketCoverageDto: {
+      /** @example Palermo, CABA */
+      zoneLabel: string
+      activeComparables: number
+      enoughData: boolean
+      /** Format: date-time */
+      lastRefreshedAt: string | null
+    }
+    RefreshZoneDto: {
+      /** Format: uuid */
+      locationId: string
+    }
+    RefreshZoneResultDto: {
+      /** @description Se consulta con GET /jobs/:id/status */
+      jobId: string
+    }
+    InquiryPropertyRefDto: {
+      id: string
+      address: string
+    }
+    InquiryUserRefDto: {
+      id: string
+      fullName: string
+    }
+    InquiryCardDto: {
+      id: string
+      name: string
+      email: string | null
+      phone: string | null
+      /** @description Primeros 140 caracteres */
+      message: string
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      /** @description Decimal para ordenar dentro de la columna */
+      boardPosition: number
+      /** @enum {string} */
+      source:
+        | "PORTAL"
+        | "MERCADOLIBRE"
+        | "ZONAPROP"
+        | "ARGENPROP"
+        | "WHATSAPP"
+        | "PHONE"
+        | "MANUAL"
+      property: components["schemas"]["InquiryPropertyRefDto"] | null
+      assignedTo: components["schemas"]["InquiryUserRefDto"] | null
+      /** @example 2026-11-10 */
+      nextActionAt: string | null
+      /** Format: date-time */
+      lastContactAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      ageHours: number
+      hasWhatsApp: boolean
+    }
+    PipelineColumnDto: {
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      total: number
+      /** @description Hasta 50 */
+      cards: components["schemas"]["InquiryCardDto"][]
+    }
+    PipelineDto: {
+      columns: components["schemas"]["PipelineColumnDto"][]
+    }
+    CreateInquiryDto: {
+      name: string
+      email?: string
+      phone?: string
+      message?: string
+      propertyId?: string
+      /** @enum {string} */
+      source: "WHATSAPP" | "PHONE" | "MANUAL" | "ZONAPROP" | "ARGENPROP"
+      assignedToId?: string
+    }
+    InquiryActivityDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "CREATED"
+        | "STAGE_CHANGED"
+        | "ASSIGNED"
+        | "NOTE"
+        | "CONTACT_ATTEMPT"
+        | "FOLLOW_UP_SET"
+        | "EDITED"
+      author: components["schemas"]["InquiryUserRefDto"] | null
+      payload: {
+        [key: string]: unknown
+      }
+      /** Format: date-time */
+      createdAt: string
+    }
+    InquiryDetailDto: {
+      id: string
+      name: string
+      email: string | null
+      phone: string | null
+      /** @description Primeros 140 caracteres */
+      message: string
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      /** @description Decimal para ordenar dentro de la columna */
+      boardPosition: number
+      /** @enum {string} */
+      source:
+        | "PORTAL"
+        | "MERCADOLIBRE"
+        | "ZONAPROP"
+        | "ARGENPROP"
+        | "WHATSAPP"
+        | "PHONE"
+        | "MANUAL"
+      property: components["schemas"]["InquiryPropertyRefDto"] | null
+      assignedTo: components["schemas"]["InquiryUserRefDto"] | null
+      /** @example 2026-11-10 */
+      nextActionAt: string | null
+      /** Format: date-time */
+      lastContactAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      ageHours: number
+      hasWhatsApp: boolean
+      lostReason: string | null
+      /** Format: date-time */
+      closedAt: string | null
+      contractId: string | null
+      activities: components["schemas"]["InquiryActivityDto"][]
+    }
+    UpdateInquiryDto: {
+      name?: string
+      /** @description Vacío = borrarlo (si queda el teléfono) */
+      email?: string
+      phone?: string
+      propertyId?: string
+      /**
+       * @description Fecha de seguimiento; null la quita
+       * @example 2026-11-10
+       */
+      nextActionAt?: string | null
+    }
+    MoveInquiryDto: {
+      /** @enum {string} */
+      stage:
+        | "NEW"
+        | "CONTACTED"
+        | "VISIT_SCHEDULED"
+        | "PROPOSAL_SENT"
+        | "CLOSED_WON"
+        | "CLOSED_LOST"
+      /** @description Tarjeta que queda arriba */
+      beforeId?: string
+      /** @description Tarjeta que queda abajo */
+      afterId?: string
+      /** @description Obligatorio para CLOSED_LOST */
+      lostReason?: string
+      contractId?: string
+    }
+    AssignInquiryDto: {
+      userId: string | null
+    }
+    AddInquiryNoteDto: {
+      body: string
+    }
+    ContactAttemptDto: {
+      /** @enum {string} */
+      channel: "WHATSAPP" | "PHONE" | "EMAIL"
+    }
+    WhatsAppLinkDto: {
+      url: string | null
+      message: string
+    }
+    CrmAssigneeDto: {
+      id: string
+      fullName: string
+      role: string
+    }
+    CrmTopPropertyDto: {
+      propertyId: string
+      address: string
+      inquiries: number
+      views: number
+    }
+    CrmOverviewDto: {
+      openCount: number
+      byStage: {
+        [key: string]: number
+      }
+      bySource: {
+        [key: string]: number
+      }
+      unassignedCount: number
+      averageFirstContactHours: number | null
+      /** @example 12.5 */
+      conversionRate: string | null
+      topProperties: components["schemas"]["CrmTopPropertyDto"][]
+    }
+    DailyPointDto: {
+      /** @example 2026-11-05 */
+      date: string
+      views: number
+      inquiries: number
+    }
+    PropertyInquiryAnalyticsDto: {
+      views: number
+      inquiries: number
+      byStage: {
+        [key: string]: number
+      }
+      bySource: {
+        [key: string]: number
+      }
+      conversionRate: string | null
+      daily: components["schemas"]["DailyPointDto"][]
+    }
+    ListingChannelDto: {
+      /** @enum {string} */
+      channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      /** @enum {string} */
+      status: "DISCONNECTED" | "CONNECTED" | "ERROR" | "UNAVAILABLE"
+      accountLabel: string | null
+      /** Format: date-time */
+      connectedAt: string | null
+      lastError: string | null
+      unavailableReason: string | null
+    }
+    ConnectChannelResultDto: {
+      authorizeUrl: string
+    }
+    PropertyListingDto: {
+      /** @enum {string} */
+      channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      /** @enum {string} */
+      status:
+        | "NOT_PUBLISHED"
+        | "PUBLISHING"
+        | "PUBLISHED"
+        | "PAUSED"
+        | "ERROR"
+        | "CLOSED"
+      externalUrl: string | null
+      /** Format: date-time */
+      publishedAt: string | null
+      /** Format: date-time */
+      lastSyncedAt: string | null
+      lastError: string | null
+      hasUnpublishedChanges: boolean
+      /** @description Canal disponible, cuenta conectada y la propiedad lista para publicarse */
+      canPublish: boolean
+      missingForPublish: string[]
+    }
+    StartListingResultDto: {
+      jobId: string
+    }
+    NotificationLogItemDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example PAYMENT_REMINDER.EMAIL */
+      templateKey: string | null
+      /** @enum {string} */
+      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+      /** @enum {string} */
+      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+      /** @enum {string|null} */
+      skipReason:
+        | "TYPE_DISABLED"
+        | "CHANNEL_DISABLED"
+        | "USER_OPTED_OUT"
+        | "NO_RECIPIENT_EMAIL"
+        | "NO_PHONE"
+        | null
+      /** @enum {string} */
+      recipientKind:
+        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+      /** @description Nombre o email del destinatario */
+      recipientLabel: string
+      recipientEmail: string | null
+      entityType: string | null
+      entityId: string | null
+      attempts: number
+      /** Format: date-time */
+      nextAttemptAt: string | null
+      lastError: string | null
+      /** Format: date-time */
+      sentAt: string | null
+      /** Format: date-time */
+      deliveredAt: string | null
+      /** Format: date-time */
+      openedAt: string | null
+      /** Format: date-time */
+      bouncedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    ResendFailedDto: {
+      /** @enum {string} */
+      type?:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example 2026-11-01 */
+      from?: string
+      /** @example 2026-11-30 */
+      to?: string
+    }
+    ResendFailedResultDto: {
+      /** @description AsyncJob: GET /jobs/:id/status */
+      jobId: string
+    }
+    NotificationTypeSettingDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      title: string
+      description: string
+      /** @example Inquilino */
+      audience: string
+      enabled: boolean
+      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+      availableChannels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+      mandatory: boolean
+    }
+    NotificationSettingItemDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      enabled: boolean
+      channels: ("EMAIL" | "WHATSAPP_LINK" | "IN_APP")[]
+    }
+    UpdateNotificationSettingsDto: {
+      settings: components["schemas"]["NotificationSettingItemDto"][]
+    }
+    TemplateVariableDto: {
+      name: string
+      label: string
+      example: string
+    }
+    NotificationTemplateDto: {
+      /** @example PAYMENT_REMINDER.EMAIL */
+      key: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @enum {string} */
+      channel: "EMAIL"
+      title: string
+      subject: string
+      bodyText: string
+      variables: components["schemas"]["TemplateVariableDto"][]
+      isCustomized: boolean
+      /** Format: date-time */
+      updatedAt: string | null
+    }
+    TemplateBodyDto: {
+      subject: string
+      bodyText: string
+    }
+    TemplatePreviewDto: {
+      subject: string
+      text: string
+      html: string
+    }
+    TestTemplateResultDto: {
+      sentTo: string
+    }
+    MyPreferenceItemViewDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      title: string
+      emailEnabled: boolean
+      inAppEnabled: boolean
+      mandatory: boolean
+    }
+    MyNotificationPreferencesDto: {
+      items: components["schemas"]["MyPreferenceItemViewDto"][]
+    }
+    MyPreferenceItemDto: {
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      emailEnabled: boolean
+      inAppEnabled: boolean
+    }
+    UpdateMyPreferencesDto: {
+      items: components["schemas"]["MyPreferenceItemDto"][]
+    }
+    WhatsAppVariableDto: {
+      name: string
+      label: string
+    }
+    WhatsAppTemplateDto: {
+      /** @example PAYMENT_REMINDER */
+      key: string
+      title: string
+      body: string
+      variables: components["schemas"]["WhatsAppVariableDto"][]
+      isCustomized: boolean
+    }
+    UpdateWhatsAppTemplateDto: {
+      body: string
+    }
+    DevEventDto: {
+      /** @description Id de la notificación (con providerMessageId) */
+      notificationId: string
+      /** @enum {string} */
+      type:
+        | "SENT"
+        | "DELIVERED"
+        | "OPENED"
+        | "CLICKED"
+        | "BOUNCED"
+        | "COMPLAINED"
+        | "DELAYED"
+    }
+    RecordedEventDto: {
+      recorded: boolean
+    }
+    EmailEventDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "SENT"
+        | "DELIVERED"
+        | "OPENED"
+        | "CLICKED"
+        | "BOUNCED"
+        | "COMPLAINED"
+        | "DELAYED"
+      /** Format: date-time */
+      occurredAt: string
+    }
+    NotificationDetailDto: {
+      id: string
+      /** @enum {string} */
+      type:
+        | "PAYMENT_REMINDER"
+        | "ARREARS_NOTICE"
+        | "INSURER_ALERT"
+        | "CONTRACT_EXPIRING"
+        | "POLICY_EXPIRING"
+        | "POLICY_EXPIRED"
+        | "SERVICE_OVERDUE"
+        | "STATEMENT_PENDING"
+        | "SETTLEMENT_CONFIRMED"
+        | "OWNER_STATEMENT_CLOSED"
+        | "PAYMENT_RECEIVED"
+        | "PUBLIC_INQUIRY"
+        | "INQUIRY_FOLLOW_UP"
+        | "INQUIRY_ASSIGNED"
+        | "LISTING_CHANNEL_ERROR"
+        | "EMAIL_BOUNCED"
+        | "COMPARABLES_SOURCE_STALE"
+        | "NOTIFICATION_FAILED"
+        | "RENT_UPDATE_PENDING"
+        | "INDEX_FETCH_FAILED"
+        | "INSTALLMENT_BASE_OUTDATED"
+        | "JOB_FAILED"
+        | "DOCUMENT_FAILED"
+      /** @example PAYMENT_REMINDER.EMAIL */
+      templateKey: string | null
+      /** @enum {string} */
+      channel: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+      /** @enum {string} */
+      status: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+      /** @enum {string|null} */
+      skipReason:
+        | "TYPE_DISABLED"
+        | "CHANNEL_DISABLED"
+        | "USER_OPTED_OUT"
+        | "NO_RECIPIENT_EMAIL"
+        | "NO_PHONE"
+        | null
+      /** @enum {string} */
+      recipientKind:
+        "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+      /** @description Nombre o email del destinatario */
+      recipientLabel: string
+      recipientEmail: string | null
+      entityType: string | null
+      entityId: string | null
+      attempts: number
+      /** Format: date-time */
+      nextAttemptAt: string | null
+      lastError: string | null
+      /** Format: date-time */
+      sentAt: string | null
+      /** Format: date-time */
+      deliveredAt: string | null
+      /** Format: date-time */
+      openedAt: string | null
+      /** Format: date-time */
+      bouncedAt: string | null
+      /** Format: date-time */
+      createdAt: string
+      subject: string | null
+      bodyText: string | null
+      events: components["schemas"]["EmailEventDto"][]
+      canResend: boolean
+    }
+    /** @enum {string} */
+    DocumentKind:
+      | "SETTLEMENT"
+      | "OWNER_STATEMENT"
+      | "PAYMENT_RECEIPT"
+      | "TERMINATION_NOTICE"
+    /** @enum {string} */
+    DocumentStatus: "PENDING" | "READY" | "FAILED"
+    GeneratedDocumentDto: {
+      id: string
+      kind: components["schemas"]["DocumentKind"]
+      /** @description La liquidación, el consolidado, el pago o el contrato */
+      entityId: string
+      /** @description Incremental: regenerar suma una versión */
+      version: number
+      status: components["schemas"]["DocumentStatus"]
+      url: string | null
+      sizeBytes: number | null
+      /** @description Sólo para el personal */
+      error: string | null
+      /** Format: date-time */
+      generatedAt: string | null
+      requestedBy: components["schemas"]["UserRefDto"] | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    PortalPdfUrlDto: {
+      /** @description URL del PDF vigente */
+      url: string
+    }
+    PortalBankAccountDto: {
+      holder: string | null
+      bank: string | null
+      cbu: string | null
+      alias: string | null
+    }
+    PortalAgencyDto: {
+      name: string
+      slug: string
+      logoUrl: string | null
+      /** @example #c2410c */
+      primaryColor: string | null
+      phone: string | null
+      email: string | null
+      /**
+       * @description Sólo dígitos, con código de país
+       * @example 5492215550000
+       */
+      whatsapp: string | null
+      address: string | null
+      /** @description Null hasta que la inmobiliaria cargue sus datos bancarios */
+      bankAccount: components["schemas"]["PortalBankAccountDto"] | null
+    }
+    PortalRenterMeDto: {
+      id: string
+      fullName: string
+      email: string | null
+      phone: string | null
+      agency: components["schemas"]["PortalAgencyDto"]
+    }
+    PortalContractPropertyDto: {
+      id: string
+      address: string
+      propertyType: string | null
+    }
+    PortalGuarantorDto: {
+      fullName: string
+    }
+    PortalSuretyDto: {
+      hasSurety: boolean
+      policyExpiresAt: string | null
+    }
+    PortalFeePaidByRenterDto: {
+      /** @example 5.00 */
+      feePercentage: string
+      feeAmount: string | null
+    }
+    PortalRenterContractDto: {
+      id: string
+      /** @example ACTIVE */
+      status: string
+      property: components["schemas"]["PortalContractPropertyDto"]
+      /** @example 2026-01-01 */
+      startDate: string
+      /** @example 2027-12-31 */
+      endDate: string
+      /** @example 350000.00 */
+      currentRent: string
+      /** @example ARS */
+      currency: string
+      /** @example ICL */
+      rentUpdateType: string
+      /** @example QUARTERLY */
+      rentUpdateFrequency: string
+      nextRentUpdateOn: string | null
+      /** @example 350000.00 */
+      deposit: string
+      /** @example ARS */
+      depositCurrency: string
+      /** @example NOMINAL */
+      depositReturnMode: string
+      guarantor: components["schemas"]["PortalGuarantorDto"] | null
+      surety: components["schemas"]["PortalSuretyDto"]
+      /** @description Sin las notas internas */
+      services: components["schemas"]["ContractServiceDto"][]
+      /** @example AGENCY */
+      collectionMode: string
+      /** @description Sólo con honorarios a cargo del inquilino por cuenta del propietario (A-38); en otro caso es null */
+      feePaidByRenter: components["schemas"]["PortalFeePaidByRenterDto"] | null
+      timeline: components["schemas"]["ContractTimelineDto"]
+    }
+    PortalContractRefDto: {
+      id: string
+      /** @example ACTIVE */
+      status: string
+    }
+    PortalPaymentInstructionsDto: {
+      /**
+       * @description AGENCY: se paga a la inmobiliaria (con sus datos bancarios); OWNER_DIRECT: se paga directamente al propietario
+       * @enum {string}
+       */
+      kind: "AGENCY" | "OWNER_DIRECT"
+      bankAccount: components["schemas"]["PortalBankAccountDto"] | null
+    }
+    PortalRenterAccountDto: {
+      contract: components["schemas"]["PortalContractRefDto"] | null
+      /** @description La cuota del mes (o la última si el contrato terminó). Sin quién registró, confirmó o anuló, ni notas internas ni la liquidación al propietario */
+      currentInstallment: components["schemas"]["InstallmentDetailDto"] | null
+      creditsAvailable: components["schemas"]["MoneyByCurrencyDto"][]
+      arrears: components["schemas"]["RenterArrearsDto"]
+      paymentInstructions: components["schemas"]["PortalPaymentInstructionsDto"]
+    }
+    PortalOwnerBankAccountDto: {
+      cbu: string | null
+      alias: string | null
+      bankName: string | null
+      holder: string | null
+    }
+    PortalOwnerMeDto: {
+      id: string
+      fullName: string
+      email: string | null
+      /** @description Su cuenta registrada, para que confirme que es correcta */
+      bankAccount: components["schemas"]["PortalOwnerBankAccountDto"] | null
+      /** @enum {string} */
+      statementSendMode: "SUMMARY" | "RECEIPTS" | "BOTH"
+      agency: components["schemas"]["PortalAgencyDto"]
+    }
+    PortalOwnerPropertyContractDto: {
+      id: string
+      renter: components["schemas"]["PortalGuarantorDto"]
+      /** @example 2026-01-01 */
+      startDate: string
+      /** @example 2027-12-31 */
+      endDate: string
+      /** @example 350000.00 */
+      currentRent: string
+      /** @example ARS */
+      currency: string
+      /** @example AGENCY */
+      collectionMode: string
+    }
+    PortalOwnerPropertyInstallmentDto: {
+      id: string
+      /** @example 2026-10 */
+      period: string
+      /** @example PENDING */
+      status: string
+      /** @example 350000.00 */
+      totalDue: string
+      /** @example 0.00 */
+      paidTotal: string
+    }
+    PortalOwnerPropertyDto: {
+      id: string
+      address: string
+      /** @example RENTED */
+      status: string
+      contract: components["schemas"]["PortalOwnerPropertyContractDto"] | null
+      /** @description La cuota del mes en curso */
+      currentInstallment:
+        components["schemas"]["PortalOwnerPropertyInstallmentDto"] | null
+    }
+    PortalAccountPropertyRefDto: {
+      id: string
+      address: string
+    }
+    PortalOwnerAccountPropertyDto: {
+      property: components["schemas"]["PortalAccountPropertyRefDto"]
+      /** @example ARS */
+      currency: string
+      /**
+       * @description Alquiler del mes
+       * @example 350000.00
+       */
+      accrued: string
+      /**
+       * @description Alquiler cobrado
+       * @example 350000.00
+       */
+      collected: string
+      /**
+       * @description Alquiler pendiente
+       * @example 0.00
+       */
+      pending: string
+      /**
+       * @description Punitorio vigente
+       * @example 0.00
+       */
+      lateFee: string
+      /** @description Liquidaciones del mes (sólo confirmadas o transferidas) */
+      settlements: components["schemas"]["SettlementSummaryDto"][]
+    }
+    PortalOwnerFeesDto: {
+      /** @example ARS */
+      currency: string
+      /** @example 17500.00 */
+      accrued: string
+      /** @example 17500.00 */
+      collected: string
+      /** @example 0.00 */
+      pending: string
+    }
+    PortalOwnerTotalsDto: {
+      /** @example ARS */
+      currency: string
+      /** @example 350000.00 */
+      accrued: string
+      /** @example 350000.00 */
+      collected: string
+      /** @example 0.00 */
+      pending: string
+      /**
+       * @description Neto de las liquidaciones del mes
+       * @example 332500.00
+       */
+      netSettled: string
+      /**
+       * @description Lo transferido de esas liquidaciones
+       * @example 332500.00
+       */
+      transferred: string
+    }
+    PortalOwnerAccountDto: {
+      /** @example 2026-10 */
+      period: string
+      properties: components["schemas"]["PortalOwnerAccountPropertyDto"][]
+      /** @description Su cuenta de honorarios con la inmobiliaria, acumulada (no sólo el mes) */
+      fees: components["schemas"]["PortalOwnerFeesDto"][]
+      totals: components["schemas"]["PortalOwnerTotalsDto"][]
+    }
+    AuditEntryDto: {
+      /** Format: uuid */
+      id: string
+      /** @example Contract */
+      entity: string
+      entityId: string | null
+      /** @enum {string} */
+      action:
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "RESTORE"
+        | "LOGIN"
+        | "LOGIN_FAILED"
+        | "LOGOUT"
+        | "NOTIFICATION_SENT"
+        | "JOB_RUN"
+        | "EXPORT"
+      /**
+       * @description Frase legible; la arma el servidor al leer
+       * @example Registró un pago de $ 100.000,00
+       */
+      summary: string
+      /** @enum {string} */
+      actorKind: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+      /** Format: uuid */
+      userId: string | null
+      userEmail: string | null
+      userName: string | null
+      ip: string | null
+      /** Format: date-time */
+      createdAt: string
+    }
+    AuditCatalogDto: {
+      entities: string[]
+      actions: (
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "RESTORE"
+        | "LOGIN"
+        | "LOGIN_FAILED"
+        | "LOGOUT"
+        | "NOTIFICATION_SENT"
+        | "JOB_RUN"
+        | "EXPORT"
+      )[]
+    }
+    AuditChangeDto: {
+      /** @example status */
+      field: string
+      /** @description Valor anterior (cualquier tipo JSON) */
+      before: Record<string, never> | null
+      /** @description Valor nuevo (cualquier tipo JSON) */
+      after: Record<string, never> | null
+      /** @description Nombre legible cuando el valor es un id */
+      beforeLabel?: string | null
+      afterLabel?: string | null
+    }
+    AuditEntryDetailDto: {
+      /** Format: uuid */
+      id: string
+      /** @example Contract */
+      entity: string
+      entityId: string | null
+      /** @enum {string} */
+      action:
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "RESTORE"
+        | "LOGIN"
+        | "LOGIN_FAILED"
+        | "LOGOUT"
+        | "NOTIFICATION_SENT"
+        | "JOB_RUN"
+        | "EXPORT"
+      /**
+       * @description Frase legible; la arma el servidor al leer
+       * @example Registró un pago de $ 100.000,00
+       */
+      summary: string
+      /** @enum {string} */
+      actorKind: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+      /** Format: uuid */
+      userId: string | null
+      userEmail: string | null
+      userName: string | null
+      ip: string | null
+      /** Format: date-time */
+      createdAt: string
+      changes: components["schemas"]["AuditChangeDto"][]
+    }
+    CurrencyAmountDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /**
+       * @description Decimal como string
+       * @example 100000.00
+       */
+      amount: string
+    }
+    InstallmentBucketDto: {
+      count: number
+      amounts: components["schemas"]["CurrencyAmountDto"][]
+    }
+    DashboardInstallmentsDto: {
+      paid: components["schemas"]["InstallmentBucketDto"]
+      partial: components["schemas"]["InstallmentBucketDto"]
+      pending: components["schemas"]["InstallmentBucketDto"]
+      overdue: components["schemas"]["InstallmentBucketDto"]
+    }
+    DashboardTodoDto: {
+      paymentsToConfirm: number
+      settlementsToConfirm: number
+      settlementsToTransfer: number
+      openStatements: number
+      pendingIncreases: number
+      unreadAlerts: number
+    }
+    ExpiringContractRowDto: {
+      /** Format: uuid */
+      contractId: string
+      propertyAddress: string
+      renterName: string
+      /** Format: date */
+      endDate: string
+      daysLeft: number
+      renewalInProgress: boolean
+    }
+    DashboardHistoryDto: {
+      /** @example 2026-10 */
+      period: string
+      accrued: components["schemas"]["CurrencyAmountDto"][]
+      collected: components["schemas"]["CurrencyAmountDto"][]
+    }
+    DashboardReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      /** @example 2026-11 */
+      period: string
+      installments: components["schemas"]["DashboardInstallmentsDto"]
+      lateFeesAccrued: components["schemas"]["CurrencyAmountDto"][]
+      lateFeesCollected: components["schemas"]["CurrencyAmountDto"][]
+      feesAccrued: components["schemas"]["CurrencyAmountDto"][]
+      todo: components["schemas"]["DashboardTodoDto"]
+      expiringContracts: components["schemas"]["ExpiringContractRowDto"][]
+      /** @description Últimos 6 meses, el más viejo primero */
+      history: components["schemas"]["DashboardHistoryDto"][]
+    }
+    CollectedBreakdownDto: {
+      /** @description Alquiler cobrado */
+      rent: string
+      /** @description Punitorios cobrados */
+      lateFees: string
+      /** @description Cargos cobrados */
+      charges: string
+      /** @description Alquiler + punitorios + cargos */
+      total: string
+    }
+    CollectedByReceiverDto: {
+      /** @description Lo que cobró la inmobiliaria (fondos que administra) */
+      agency: components["schemas"]["CollectedBreakdownDto"]
+      /** @description Lo que percibió directamente el propietario (nunca pasó por la inmobiliaria) */
+      owner: components["schemas"]["CollectedBreakdownDto"]
+    }
+    IncomeReportRowDto: {
+      /** @example 2026-10 */
+      period: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @description Suma de lo cobrado por la inmobiliaria y lo percibido por el propietario; para separarlos, `collectedByReceiver` */
+      rentCollected: string
+      lateFeesCollected: string
+      chargesCollected: string
+      collectedByReceiver: components["schemas"]["CollectedByReceiverDto"]
+      feesAccrued: string
+      feesCollected: string
+      netSettled: string
+      netTransferred: string
+    }
+    IncomeReportTotalDto: {
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @description Todo lo cobrado, sin distinguir quién lo recibió */
+      collected: components["schemas"]["CollectedBreakdownDto"]
+      collectedByReceiver: components["schemas"]["CollectedByReceiverDto"]
+    }
+    IncomeReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["IncomeReportRowDto"][]
+      /** @description Un total por moneda del rango (ARS, USD), con lo cobrado por tipo y por quién lo recibió */
+      totals: components["schemas"]["IncomeReportTotalDto"][]
+    }
+    PaymentReportRowDto: {
+      /** Format: uuid */
+      paymentId: string
+      /** Format: date */
+      paidAt: string
+      /** @example 2026-10 */
+      period: string
+      renterName: string
+      propertyAddress: string
+      ownerName: string
+      /** @description Lo entregado, en la moneda del pago */
+      amount: string
+      /** @enum {string} */
+      currency: "ARS" | "USD"
+      /** @example TRANSFER */
+      method: string
+      /** @enum {string} */
+      receivedBy: "AGENCY" | "OWNER"
+    }
+    ArrearsReportRowDto: {
+      /** Format: uuid */
+      renterId: string
+      renterName: string
+      renterPhone: string | null
+      propertyAddress: string
+      ownerName: string
+      overdueInstallments: number
+      maxDaysOverdue: number
+      balance: components["schemas"]["CurrencyAmountDto"][]
+      lateFee: components["schemas"]["CurrencyAmountDto"][]
+    }
+    ArrearsReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["ArrearsReportRowDto"][]
+      totals: components["schemas"]["CurrencyAmountDto"][]
+    }
+    PropertyReportRowDto: {
+      /** Format: uuid */
+      propertyId: string
+      address: string
+      /** @enum {string} */
+      status: "RENTED" | "AVAILABLE" | "OTHER"
+      renterName: string | null
+      rent: components["schemas"]["CurrencyAmountDto"] | null
+      /** Format: date */
+      contractEndDate: string | null
+      daysVacant: number | null
+    }
+    PropertiesReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["PropertyReportRowDto"][]
+    }
+    ExpiringContractsReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["ExpiringContractRowDto"][]
+    }
+    ServiceReportRowDto: {
+      /** Format: uuid */
+      serviceId: string
+      /** Format: uuid */
+      propertyId: string
+      propertyAddress: string
+      serviceName: string
+      daysOverdue: number
+    }
+    ServicesReportDto: {
+      /** Format: date-time */
+      generatedAt: string
+      /** @description Eco de los filtros pedidos */
+      filters: {
+        [key: string]: string | null
+      }
+      rows: components["schemas"]["ServiceReportRowDto"][]
+    }
+    InventoryPerformedByDto: {
+      id: string
+      fullName: string
+    }
+    InventorySummaryDto: {
+      id: string
+      contractId: string
+      /** @enum {string} */
+      type: "DELIVERY" | "RETURN"
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      status: "DRAFT" | "CONFIRMED"
+      tenantAcknowledged: boolean
+      itemCount: number
+      /** @description Ítems en mal estado */
+      poorCount: number
+      photoCount: number
+      performedBy: components["schemas"]["InventoryPerformedByDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      correctsInventoryId: string | null
+    }
+    ContractInventoriesDto: {
+      inventories: components["schemas"]["InventorySummaryDto"][]
+      canCreateDelivery: boolean
+      canCreateReturn: boolean
+    }
+    InventoryPhotoDto: {
+      id: string
+      url: string
+    }
+    InventoryComparisonRowDto: {
+      category: string
+      description: string
+      /** @enum {string|null} */
+      deliveryCondition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE" | null
+      /** @enum {string|null} */
+      returnCondition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE" | null
+      /** @enum {string} */
+      change: "WORSE" | "BETTER" | "SAME" | "ONLY_DELIVERY" | "ONLY_RETURN"
+      deliveryNotes: string | null
+      returnNotes: string | null
+      deliveryPhotos: components["schemas"]["InventoryPhotoDto"][]
+      returnPhotos: components["schemas"]["InventoryPhotoDto"][]
+    }
+    InventoryComparisonDto: {
+      hasDelivery: boolean
+      hasReturn: boolean
+      /** Format: date */
+      deliveryDate: string | null
+      /** Format: date */
+      returnDate: string | null
+      rows: components["schemas"]["InventoryComparisonRowDto"][]
+      worsenedCount: number
+    }
+    InventoryItemInputDto: {
+      /** @description Ausente en un ítem nuevo. Los ítems que falten se borran. */
+      id?: string
+      /** @example Cocina */
+      category: string
+      /** @example Mesada y bacha */
+      description: string
+      /** @enum {string} */
+      condition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE"
+      notes: string | null
+    }
+    CreateInventoryDto: {
+      /** @enum {string} */
+      type: "DELIVERY" | "RETURN"
+      /**
+       * Format: date
+       * @description Por defecto, hoy.
+       */
+      date?: string
+      generalNotes?: string | null
+      /** @description Sin ítems se precarga la plantilla estándar. */
+      items?: components["schemas"]["InventoryItemInputDto"][]
+    }
+    InventoryItemDto: {
+      id: string
+      category: string
+      description: string
+      /** @enum {string} */
+      condition: "GOOD" | "FAIR" | "POOR" | "NOT_APPLICABLE"
+      notes: string | null
+      photos: components["schemas"]["InventoryPhotoDto"][]
+    }
+    InventoryDetailDto: {
+      id: string
+      contractId: string
+      /** @enum {string} */
+      type: "DELIVERY" | "RETURN"
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      status: "DRAFT" | "CONFIRMED"
+      tenantAcknowledged: boolean
+      itemCount: number
+      /** @description Ítems en mal estado */
+      poorCount: number
+      photoCount: number
+      performedBy: components["schemas"]["InventoryPerformedByDto"] | null
+      /** Format: date-time */
+      confirmedAt: string | null
+      correctsInventoryId: string | null
+      generalNotes: string | null
+      correctionReason: string | null
+      items: components["schemas"]["InventoryItemDto"][]
+      /** @description Ítems en mal estado sin fotos */
+      warnings: string[]
+    }
+    UpdateInventoryDto: {
+      /** Format: date */
+      date?: string
+      generalNotes?: string | null
+      /** @description El inquilino estuvo presente y de acuerdo. */
+      tenantAcknowledged?: boolean
+      /** @description Reemplaza la lista: sin `id` es nuevo, con `id` se actualiza, los que faltan se borran junto a sus fotos. */
+      items?: components["schemas"]["InventoryItemInputDto"][]
+    }
+    CorrectInventoryDto: {
+      /** @example El estado del piso estaba mal cargado */
+      reason: string
+    }
+    PublicPropertySummaryDto: {
+      id: string
+      /** @description Dirección corta */
+      title: string
+      address: string
+      propertyType: string
+      neighborhood: string | null
+      bedrooms: number | null
+      bathrooms: number | null
+      /** @description Superficie total */
+      areaM2: number | null
+      /** @enum {string} */
+      operation: "SALE" | "RENT"
+      rooms: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
+      /**
+       * @description Null = "Consultar"
+       * @example 150000.00
+       */
+      price: string | null
+      /** @enum {string|null} */
+      currency: "ARS" | "USD" | null
+      coverPhotoUrl: string | null
+      amenities: string[]
+    }
+    PublicPhotoDto: {
+      id: string
+      url: string
+    }
+    PublicFeatureDto: {
+      label: string
+      value: string
+    }
+    PublicPropertyDetailDto: {
+      id: string
+      /** @description Dirección corta */
+      title: string
+      address: string
+      propertyType: string
+      neighborhood: string | null
+      bedrooms: number | null
+      bathrooms: number | null
+      /** @description Superficie total */
+      areaM2: number | null
+      /** @enum {string} */
+      operation: "SALE" | "RENT"
+      rooms: number | null
+      coveredAreaM2: number | null
+      ageYears: number | null
+      /**
+       * @description Null = "Consultar"
+       * @example 150000.00
+       */
+      price: string | null
+      /** @enum {string|null} */
+      currency: "ARS" | "USD" | null
+      coverPhotoUrl: string | null
+      amenities: string[]
+      publicDescription: string | null
+      photos: components["schemas"]["PublicPhotoDto"][]
+      /** @description Barrio, ciudad */
+      location: string
+      features: components["schemas"]["PublicFeatureDto"][]
+      /**
+       * @description Aproximada (3 decimales, ~100 m) para mostrar la zona en un mapa. Null si la propiedad no tiene coordenadas.
+       * @example -34.604
+       */
+      latitude: number | null
+      /** @example -58.382 */
+      longitude: number | null
+    }
+    PublicFilterOptionDto: {
+      id: string
+      name: string
+    }
+    PublicFiltersDto: {
+      propertyTypes: components["schemas"]["PublicFilterOptionDto"][]
+      locations: components["schemas"]["PublicFilterOptionDto"][]
+    }
+    PublicContactDto: {
+      name: string
+      email: string
+      /** @description Puede ir vacío */
+      phone?: string
+      message: string
+      /** @description Propiedad sobre la que se consulta; tiene que seguir disponible */
+      propertyId?: string | null
+      /** @description Honeypot: tiene que ir vacío. Con texto la consulta se descarta sin avisar. */
+      website?: string
+    }
+    PublicContactResultDto: {
+      id: string
+    }
+    SiteThemeDto: {
+      /** @example #B6A28E */
+      primary: string
+      secondary: string
+      background: string
+      surface: string
+      text: string
+      /** @example system */
+      fontKey: string
+      /** @enum {number} */
+      radius: 0 | 8 | 16 | 24
+    }
+    SiteFontOptionDto: {
+      key: string
+      label: string
+    }
+    SiteTemplateInfoDto: {
+      /** @enum {string} */
+      key: "CLASSIC" | "MODERN" | "LUXURY"
+      name: string
+      description: string
+      previewImageUrl: string | null
+      defaultTheme: components["schemas"]["SiteThemeDto"]
+      supportedSections: (
+        | "hero"
+        | "steps"
+        | "featured"
+        | "metrics"
+        | "services"
+        | "testimonials"
+        | "faqs"
+        | "about"
+        | "contact"
+      )[]
+      fontOptions: components["schemas"]["SiteFontOptionDto"][]
+    }
+    SiteBrandDto: {
+      displayName: string
+      tagline: string | null
+      logoUrl: string | null
+      faviconUrl: string | null
+    }
+    SiteSocialDto: {
+      /** @enum {string} */
+      network:
+        "FACEBOOK" | "INSTAGRAM" | "LINKEDIN" | "YOUTUBE" | "TIKTOK" | "X"
+      url: string
+    }
+    SiteContactDto: {
+      address: string | null
+      hours: string | null
+      phone: string | null
+      /** @description Solo dígitos con código de país */
+      whatsapp: string | null
+      whatsappMessage: string | null
+      email: string | null
+      socials: components["schemas"]["SiteSocialDto"][]
+    }
+    SiteHeroDto: {
+      title: string
+      subtitle: string | null
+      ctaLabel: string | null
+      backgroundImageUrl: string | null
+      showSearch: boolean
+    }
+    SiteStepDto: {
+      title: string
+      description: string
+      /** @enum {string} */
+      icon:
+        | "search"
+        | "home"
+        | "key"
+        | "handshake"
+        | "file-text"
+        | "calendar"
+        | "phone"
+        | "map-pin"
+        | "shield"
+        | "star"
+        | "camera"
+        | "smile"
+    }
+    SiteFeaturedDto: {
+      title: string
+      subtitle: string | null
+      count: number
+      /** @enum {string} */
+      mode: "LATEST" | "MANUAL"
+      propertyIds: string[]
+    }
+    SiteMetricDto: {
+      value: string
+      label: string
+    }
+    SiteServiceDto: {
+      title: string
+      description: string
+      imageUrl: string | null
+    }
+    SiteTestimonialDto: {
+      name: string
+      text: string
+      role: string | null
+      photoUrl: string | null
+    }
+    SiteFaqDto: {
+      question: string
+      answer: string
+    }
+    SiteAboutDto: {
+      title: string
+      body: string | null
+      imageUrl: string | null
+    }
+    SiteSeoDto: {
+      title: string
+      description: string
+      ogImageUrl: string | null
+    }
+    SiteSectionDto: {
+      /** @enum {string} */
+      key:
+        | "hero"
+        | "steps"
+        | "featured"
+        | "metrics"
+        | "services"
+        | "testimonials"
+        | "faqs"
+        | "about"
+        | "contact"
+      visible: boolean
+    }
+    SiteContentDto: {
+      brand: components["schemas"]["SiteBrandDto"]
+      contact: components["schemas"]["SiteContactDto"]
+      hero: components["schemas"]["SiteHeroDto"]
+      steps: components["schemas"]["SiteStepDto"][]
+      featured: components["schemas"]["SiteFeaturedDto"]
+      metrics: components["schemas"]["SiteMetricDto"][]
+      services: components["schemas"]["SiteServiceDto"][]
+      testimonials: components["schemas"]["SiteTestimonialDto"][]
+      faqs: components["schemas"]["SiteFaqDto"][]
+      about: components["schemas"]["SiteAboutDto"]
+      seo: components["schemas"]["SiteSeoDto"]
+      sections: components["schemas"]["SiteSectionDto"][]
+    }
+    SiteSettingsDraftDto: {
+      /** @enum {string} */
+      template: "CLASSIC" | "MODERN" | "LUXURY"
+      theme: components["schemas"]["SiteThemeDto"]
+      content: components["schemas"]["SiteContentDto"]
+    }
+    SiteSettingsDto: {
+      enabled: boolean
+      subdomain: string | null
+      customDomain: string | null
+      draft: components["schemas"]["SiteSettingsDraftDto"]
+      /** @description null = nunca publicado */
+      publishedAt: string | null
+      /** @description El borrador difiere de lo publicado (o nunca se publicó) */
+      hasUnpublishedChanges: boolean
+      publicUrl: string | null
+    }
+    UpdateSiteSettingsDto: {
+      /** @enum {string} */
+      template?: "CLASSIC" | "MODERN" | "LUXURY"
+      /** @description Parcial: solo los campos que se mandan cambian. */
+      theme?: components["schemas"]["SiteThemeDto"]
+      /** @description Parcial por bloque: cada bloque que se manda (brand, hero, steps…) reemplaza al anterior entero. */
+      content?: components["schemas"]["SiteContentDto"]
+      /**
+       * @description Único en todo el sistema. `null` lo quita. Se aplica al instante.
+       * @example mi-inmobiliaria
+       */
+      subdomain?: string | null
+      /**
+       * @description Dominio propio, sin https://. Hay que apuntar el DNS a mano. `null` lo quita.
+       * @example www.mi-inmobiliaria.com.ar
+       */
+      customDomain?: string | null
+    }
+    ResetSiteTemplateDto: {
+      /** @description true: conserva textos e imágenes y restaura solo el tema. */
+      keepContent: boolean
+    }
+    SiteAssetDto: {
+      id: string
+      url: string
+      width: number | null
+      height: number | null
+    }
+    SitePreviewTokenDto: {
+      /** @description JWT corto; se manda como ?preview= al sitio */
+      token: string
+      expiresAt: string
+    }
+    DomainRecordDto: {
+      /** @enum {string} */
+      type: "TXT"
+      /** @example _adminprop-verify.www.mi-inmobiliaria.com.ar */
+      host: string
+      /** @example adminprop-verify=0123456789abcdef0123456789abcdef */
+      value: string
+    }
+    SiteDomainDto: {
+      customDomain: string | null
+      /** @description Solo un dominio verificado resuelve el sitio */
+      verified: boolean
+      verifiedAt: string | null
+      /** @description false en desarrollo: el dominio se activa al cargarlo */
+      verificationRequired: boolean
+      record: components["schemas"]["DomainRecordDto"] | null
+    }
+    SubdomainAvailabilityDto: {
+      value: string
+      available: boolean
+      reason: string | null
+    }
+    SiteHostDto: {
+      slug: string
+    }
+    PublicSiteTenantDto: {
+      slug: string
+      name: string
+      logoUrl: string | null
+    }
+    PublicSiteDto: {
+      /** @enum {string} */
+      template: "CLASSIC" | "MODERN" | "LUXURY"
+      theme: components["schemas"]["SiteThemeDto"]
+      content: components["schemas"]["SiteContentDto"]
+      tenant: components["schemas"]["PublicSiteTenantDto"]
+      publishedAt: string
+    }
     CreateExampleItemDto: {
       /** @example Ítem de prueba */
       name: string
@@ -2166,7 +9549,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AuthResultDto"]
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
+            data: components["schemas"]["AuthResultDto"]
+          }
         }
       }
       /** @description Credenciales inválidas, o cuenta/inmobiliaria deshabilitada (mismo mensaje) */
@@ -2217,7 +9602,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AuthResultDto"]
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
+            data: components["schemas"]["AuthResultDto"]
+          }
         }
       }
       /** @description Credenciales inválidas */
@@ -2259,7 +9646,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AuthTokensDto"]
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
+            data: components["schemas"]["AuthTokensDto"]
+          }
         }
       }
       /** @description Refresh token inválido, vencido o reusado */
@@ -2328,7 +9717,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["RevokedSessionsDto"]
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
+            data: components["schemas"]["RevokedSessionsDto"]
+          }
         }
       }
       /** @description Demasiadas solicitudes. Mirá el header Retry-After. */
@@ -2361,7 +9752,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["RevokedSessionsDto"]
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
+            data: components["schemas"]["RevokedSessionsDto"]
+          }
         }
       }
       /** @description La contraseña actual es incorrecta o la nueva es igual a la vigente */
@@ -2399,7 +9792,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["PublicUserDto"]
+          "application/json": components["schemas"]["ApiSuccessDto"] & {
+            data: components["schemas"]["PublicUserDto"]
+          }
         }
       }
       /** @description No autenticado */
@@ -2721,6 +10116,150 @@ export interface operations {
       }
     }
   }
+  "TenantsController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "TenantsController_updateSettings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTenantSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description Datos inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "TenantsController_uploadLogo_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /**
+           * Format: binary
+           * @description PNG, JPG, WebP o SVG de hasta 2 MB
+           */
+          file: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description No es PNG, JPG, WebP o SVG, o pesa más de 2 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "TenantsController_deleteLogo_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TenantSettingsDto"]
+        }
+      }
+      /** @description No es admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
   "TenantsController_bySlug_api/v1": {
     parameters: {
       query?: never
@@ -2769,14 +10308,6 @@ export interface operations {
           "application/json": {
             /** @example ok */
             status?: string
-            /** @example 2023-12-01T10:00:00Z */
-            timestamp?: string
-            /** @example 12345 */
-            uptime?: number
-            /** @example 1.0.0 */
-            version?: string
-            /** @example development */
-            environment?: string
           }
         }
       }
@@ -4254,6 +11785,8 @@ export interface operations {
         propertyTypeId?: string
         /** @description Parte de la dirección, sin distinguir mayúsculas */
         search?: string
+        /** @description Sólo las propiedades que la migración dejó para revisar (true) o sin esa marca (false) */
+        needsReview?: boolean
       }
       header?: never
       path?: never
@@ -4470,7 +12003,7 @@ export interface operations {
           "application/json": components["schemas"]["ApiErrorDto"]
         }
       }
-      /** @description Tiene un contrato activo */
+      /** @description Tiene un contrato activo: el estado lo maneja el contrato */
       409: {
         headers: {
           [name: string]: unknown
@@ -4852,6 +12385,57 @@ export interface operations {
       }
     }
   }
+  "OwnersController_updateFeeSettings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOwnerFeeSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerDetailDto"]
+        }
+      }
+      /** @description % inválido */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
   "OwnersController_issuePortalCredentials_api/v1": {
     parameters: {
       query?: never
@@ -4911,7 +12495,7 @@ export interface operations {
         search?: string
         /** @description Se valida pero todavía no filtra: el estado de pago llega con el motor de cobros (Fase 11). */
         paymentStatus?: "UP_TO_DATE" | "OVERDUE"
-        /** @description Se valida pero todavía no filtra: la propiedad del inquilino sale de su contrato (Fase 9). */
+        /** @description Se valida pero todavía no filtra: inquilinos no conoce la propiedad de cada contrato (D-51). */
         propertyId?: string
       }
       header?: never
@@ -5452,6 +13036,8072 @@ export interface operations {
         }
       }
       409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "IndicesController_list_api/v1": {
+    parameters: {
+      query: {
+        type: "ICL" | "IPC"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IndexValueDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "IndicesController_register_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterIndexValueDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IndexValueDto"]
+        }
+      }
+      /** @description Período o valor inválido */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ese mes ya está cargado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        status?: "ACTIVE" | "FINISHED" | "TERMINATED"
+        propertyId?: string
+        renterId?: string
+        ownerId?: string
+        /** @description Sólo los activos que vencen dentro de los días de aviso de la inmobiliaria (hoy inclusive). */
+        expiringSoon?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Contratos de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ContractSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateContractDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Fechas inválidas, o caución sin email de alerta */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description La propiedad ya tiene un contrato activo, o el inquilino ya es titular de otro */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Propiedad, inquilino o garante inexistente, o propiedad sin propietario */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateContractDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_terminationPreview_api/v1": {
+    parameters: {
+      query: {
+        /** @description Fecha en que el inquilino notificó la rescisión. */
+        notifiedAt: string
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TerminationPreviewDto"]
+        }
+      }
+      /** @description Fecha de notificación fuera del contrato */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_changeBillingTerms_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangeBillingTermsDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Fecha fuera del contrato o valores inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description La fecha es anterior a los términos vigentes, o el contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_uploadContractPdf_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description No es un PDF o pesa más de 10 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_uploadPolicyPdf_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description No es un PDF o pesa más de 10 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_applyRentUpdate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApplyRentUpdateDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Falta `newRent` en un contrato FIXED/OTHER */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Un empleado intentó un ajuste manual (`CONTRACT_MANUAL_RENT_ADJUSTMENT_ADMIN_ONLY`) */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Todavía no corresponde, no quedan aumentos, o el contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Falta el valor del índice de algún período */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_terminate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TerminateContractDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TerminationResultDto"]
+        }
+      }
+      /** @description Fecha de notificación fuera del contrato */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no está activo */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ContractsController_renew_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RenewContractDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractDetailDto"]
+        }
+      }
+      /** @description Fechas inválidas o inicio anterior al original */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El original no está activo, o el inquilino nuevo ya tiene contrato */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_listByProperty_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Sólo los de ese contrato. */
+        contractId?: string
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyServiceDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateServiceDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyServiceDto"]
+        }
+      }
+      /** @description Falta la fecha de vencimiento o la frecuencia de aumento */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Propiedad inexistente, contrato de otra propiedad, o tipo de servicio inexistente o desactivado */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_listByContract_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractServiceDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_listOverdue_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        propertyId?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Servicios vencidos */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["OverdueServiceDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ServicesController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateServiceDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyServiceDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description true: sólo los descontados en una liquidación; false: sólo los pendientes. */
+        settled?: boolean
+      }
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AdvanceExpenseListDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** @example 15000.00 */
+          amount: string
+          description: string
+          /** Format: date */
+          expenseDate: string
+          /** @enum {string} */
+          currency?: "ARS" | "USD"
+          /** Format: binary */
+          file: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AdvanceExpenseDto"]
+        }
+      }
+      /** @description Sin comprobante, comprobante inválido, monto no positivo o fecha inválida */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_remove_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya descontado en una liquidación */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AdvanceExpensesController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAdvanceExpenseDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AdvanceExpenseDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya descontado en una liquidación */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_generate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateInstallmentsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentGenerationResultDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        period?: string
+        /** @description OVERDUE: con saldo y la gracia vencida. PENDING y PARTIAL excluyen las vencidas. */
+        status?: "PENDING" | "PARTIAL" | "OVERDUE" | "PAID"
+        contractId?: string
+        renterId?: string
+        propertyId?: string
+        ownerId?: string
+        collectionMode?: "AGENCY" | "OWNER_DIRECT"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Cuotas de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InstallmentSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_summary_api/v1": {
+    parameters: {
+      query: {
+        period: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["BillingSummaryDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_breakdown_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Fecha del desglose. Default hoy. */
+        asOf?: string
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentBreakdownDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_account_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractAccountDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InstallmentsController_returnDeposit_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterDepositReturnDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["DepositReturnDto"]
+        }
+      }
+      /** @description No cierra con el depósito, fecha o deducción inválidas */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Contrato vigente o depósito ya devuelto */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_createCharge_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateChargeDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cuota saldada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_voidCharge_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado, o con pagos imputados */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_registerPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: {
+        /** @description Opcional, hasta 128 caracteres sin espacios. Repetir el pedido con la misma clave y el mismo cuerpo (reintento de red, doble click) devuelve el pago ya registrado en vez de crear otro; con otro cuerpo es 409 `IDEMPOTENCY_KEY_REUSED`. Vale 24 horas. */
+        "Idempotency-Key"?: string
+      }
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: date */
+          paidAt: string
+          /** @example 150000.00 */
+          amount: string
+          /** @enum {string} */
+          paidCurrency: "ARS" | "USD"
+          /** @example 1487.5000 */
+          exchangeRate?: string
+          /** @enum {string} */
+          exchangeRateSource?: "OFFICIAL" | "MEP" | "OTHER"
+          /** Format: date */
+          exchangeRateDate?: string
+          /** @enum {string} */
+          method: "TRANSFER" | "CASH" | "OTHER"
+          /** @enum {string} */
+          receivedBy?: "AGENCY" | "OWNER"
+          /** @example {"lateFee":"0.00","rent":"100000.00","charges":"0.00"} */
+          allocation?: string
+          /** @enum {string} */
+          applyCredit?: "true" | "false"
+          notes?: string
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RegisterPaymentResultDto"]
+        }
+      }
+      /** @description Monto, fecha, cotización, imputación o comprobante inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cuota saldada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_applyCredit_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApplyCreditDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RegisterPaymentResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Sin saldo a favor disponible, otra moneda, o cuota saldada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_adjustLateFee_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateLateFeeAdjustmentDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_listPayments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        contractId?: string
+        renterId?: string
+        status?: "PENDING_CONFIRMATION" | "CONFIRMED" | "VOIDED"
+        receivedBy?: "AGENCY" | "OWNER"
+        /** @description Fecha de pago desde */
+        from?: string
+        /** @description Fecha de pago hasta */
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Pagos de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentListItemDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_confirmPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PaymentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya confirmado o anulado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_voidPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InstallmentDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado, o el crédito que generó ya se usó */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_listCredits_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        renterId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterCreditsDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_refundCredit_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RefundCreditDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterCreditDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El crédito no está disponible */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PaymentsController_arrears_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Repetible: `?renterId=a&renterId=b`. */
+        renterId?: string[]
+        /** @description Alternativa: ids separados por coma. */
+        renterIds?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RenterArrearsDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        ownerId?: string
+        propertyId?: string
+        contractId?: string
+        period?: string
+        status?: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Liquidaciones de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["SettlementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSettlementDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay una pendiente, o no hay nada que liquidar */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El contrato no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_listByOwner_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        period?: string
+        status?: "PENDING" | "CONFIRMED" | "TRANSFERRED" | "CANCELLED"
+      }
+      header?: never
+      path: {
+        ownerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Liquidaciones del propietario */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["SettlementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_recalculate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_addAdjustment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSettlementAdjustmentDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_voidAdjustment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado o liquidación no pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_confirm_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_cancel_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está pendiente */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_registerTransfer_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: date */
+          transferredAt: string
+          /** @example 95000.00 */
+          amount: string
+          /** @enum {string} */
+          method: "TRANSFER" | "CASH" | "OTHER"
+          notes?: string
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Monto, fecha o comprobante inválidos, o supera el neto */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No está confirmada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SettlementsController_voidTransfer_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        ownerId?: string
+        period?: string
+        status?: "OPEN" | "CLOSED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Consolidados de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["OwnerStatementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateOwnerStatementDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay uno para ese mes */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El propietario no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_candidates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SettlementSummaryDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_addSettlements_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddStatementSettlementsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cerrado, no confirmada o ya consolidada */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description De otro propietario */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_removeSettlement_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        settlementId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Cerrado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_close_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CloseOwnerStatementDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya cerrado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "StatementsController_reopen_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerStatementDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya abierto */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_listReceivables_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        ownerId?: string
+        contractId?: string
+        status?: "PENDING" | "PARTIAL" | "PAID" | "VOIDED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Honorarios devengados */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["FeeReceivableDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_account_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ownerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["OwnerFeeAccountDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El propietario no existe */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_registerPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: uuid */
+          ownerId: string
+          /** Format: uuid */
+          contractId?: string
+          /** Format: date */
+          paidAt: string
+          /** @example 5000.00 */
+          amount: string
+          /** @enum {string} */
+          currency: "ARS" | "USD"
+          /** @enum {string} */
+          method: "TRANSFER" | "CASH" | "OTHER"
+          /** @enum {string} */
+          paidBy: "OWNER" | "RENTER"
+          notes?: string
+          /** Format: binary */
+          file?: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FeePaymentDto"]
+        }
+      }
+      /** @description Monto, fecha o comprobante inválidos */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Propietario o contrato inválidos */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_voidPayment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoidDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FeePaymentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya anulado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "FeesController_allocate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FeePaymentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Anulado */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_jobs_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["JobDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_executions_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        job?: string
+        status?: "RUNNING" | "SUCCEEDED" | "PARTIAL" | "FAILED" | "SKIPPED"
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Ejecuciones de jobs */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["JobExecutionDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_run_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        job: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RunJobDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RunJobResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El job no existe */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Ya hay una corrida en curso de ese job */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_alerts_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        /** @description Sólo los no leídos */
+        unreadOnly?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Avisos internos */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InternalAlertDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_readAll_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ReadAllAlertsResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AutomationsController_read_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InternalAlertDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El aviso no existe */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "IndexStatusController_status_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IndexStatusDto"][]
+        }
+      }
+    }
+  }
+  "MigrationController_template_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description El .xlsx */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_analyzeExcel_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string
+        }
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartMigrationResultDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description INVALID_XLSX, TEMPLATE_VERSION_MISMATCH o IMPORT_TOO_MANY_ROWS */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_analyzeTokko_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AnalyzeTokkoDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartMigrationResultDto"]
+        }
+      }
+      /** @description TOKKO_NOT_ENABLED: con la API real, la inmobiliaria no es la dueña de la key */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        source?: "EXCEL" | "TOKKO"
+        status?:
+          | "ANALYZING"
+          | "READY"
+          | "IMPORTING"
+          | "COMPLETED"
+          | "PARTIAL"
+          | "FAILED"
+          | "DISCARDED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Lotes de la inmobiliaria */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ImportBatchSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ImportBatchDetailDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_rows_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        entity?: "OWNER" | "RENTER" | "GUARANTOR" | "PROPERTY" | "CONTRACT"
+        status?:
+          | "VALID"
+          | "ERROR"
+          | "CONFLICT"
+          | "ALREADY_IMPORTED"
+          | "IMPORTED"
+          | "SKIPPED"
+          | "FAILED"
+        /** @description Sólo las marcadas para revisar. */
+        needsReview?: boolean
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Filas del lote */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ImportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_updateRow_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        rowId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateImportRowDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ImportRowDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_READY */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_confirm_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConfirmImportDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartMigrationResultDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_READY o BATCH_ALREADY_CONFIRMED */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_discard_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ImportBatchDetailDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_READY */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_retryAssets_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RetryAssetsResultDto"]
+        }
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description BATCH_NOT_IMPORTED */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "MigrationController_report_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description El .xlsx */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Sólo el administrador migra datos */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_appraise_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppraisePropertyDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ValuationResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_history_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Tasaciones de la propiedad */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["ValuationResultDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_marketStatus_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MarketStatusDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_marketCoverage_api/v1": {
+    parameters: {
+      query: {
+        locationId: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MarketCoverageDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ValuationController_refreshZone_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RefreshZoneDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RefreshZoneResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_pipeline_api/v1": {
+    parameters: {
+      query?: {
+        assignedToId?: string
+        propertyId?: string
+        source?:
+          | "PORTAL"
+          | "MERCADOLIBRE"
+          | "ZONAPROP"
+          | "ARGENPROP"
+          | "WHATSAPP"
+          | "PHONE"
+          | "MANUAL"
+        /** @description Busca en nombre, contacto y mensaje */
+        q?: string
+        /** @description Sólo las sin asignar */
+        unassigned?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PipelineDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        stage?:
+          | "NEW"
+          | "CONTACTED"
+          | "VISIT_SCHEDULED"
+          | "PROPOSAL_SENT"
+          | "CLOSED_WON"
+          | "CLOSED_LOST"
+        assignedToId?: string
+        propertyId?: string
+        source?:
+          | "PORTAL"
+          | "MERCADOLIBRE"
+          | "ZONAPROP"
+          | "ARGENPROP"
+          | "WHATSAPP"
+          | "PHONE"
+          | "MANUAL"
+        q?: string
+        unassigned?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Consultas */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InquiryCardDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateInquiryDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description ASSIGNEE_INVALID o INQUIRY_CONTACT_REQUIRED */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_detail_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description INQUIRY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateInquiryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_move_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MoveInquiryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryCardDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_assign_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignInquiryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryCardDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description ASSIGNEE_INVALID */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_addNote_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddInquiryNoteDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryActivityDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_contactAttempt_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContactAttemptDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InquiryCardDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_whatsapp_api/v1": {
+    parameters: {
+      query: {
+        templateKey: string
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppLinkDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_assignees_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CrmAssigneeDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_overview_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Default: hace 30 días */
+        from?: string
+        /** @description Default: hoy */
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CrmOverviewDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description ANALYTICS_RANGE_INVALID */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "CrmController_propertyAnalytics_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Default: hace 30 días */
+        from?: string
+        /** @description Default: hoy */
+        to?: string
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyInquiryAnalyticsDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelsController_list_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ListingChannelDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelsController_connect_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ConnectChannelResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelsController_disconnect_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ListingChannelDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ChannelOAuthController_callback_api/v1": {
+    parameters: {
+      query: {
+        /** @description Código de autorización del portal */
+        code?: string
+        /** @description State firmado que devolvió `connect` */
+        state: string
+        /** @description El portal avisa que el usuario no autorizó */
+        error?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Redirección al backoffice */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_list_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_publish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartListingResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_retry_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StartListingResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_pause_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_resume_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PropertyListingsController_close_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        propertyId: string
+        channel: "MERCADOLIBRE" | "ZONAPROP" | "ARGENPROP"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertyListingDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        type?:
+          | "PAYMENT_REMINDER"
+          | "ARREARS_NOTICE"
+          | "INSURER_ALERT"
+          | "CONTRACT_EXPIRING"
+          | "POLICY_EXPIRING"
+          | "POLICY_EXPIRED"
+          | "SERVICE_OVERDUE"
+          | "STATEMENT_PENDING"
+          | "SETTLEMENT_CONFIRMED"
+          | "OWNER_STATEMENT_CLOSED"
+          | "PAYMENT_RECEIVED"
+          | "PUBLIC_INQUIRY"
+          | "INQUIRY_FOLLOW_UP"
+          | "INQUIRY_ASSIGNED"
+          | "LISTING_CHANNEL_ERROR"
+          | "EMAIL_BOUNCED"
+          | "COMPARABLES_SOURCE_STALE"
+          | "NOTIFICATION_FAILED"
+          | "RENT_UPDATE_PENDING"
+          | "INDEX_FETCH_FAILED"
+          | "INSTALLMENT_BASE_OUTDATED"
+          | "JOB_FAILED"
+          | "DOCUMENT_FAILED"
+        status?: "QUEUED" | "SENT" | "FAILED" | "SKIPPED"
+        channel?: "EMAIL" | "WHATSAPP_LINK" | "IN_APP"
+        recipientKind?:
+          "TENANT_STAFF" | "RENTER" | "OWNER" | "INSURER" | "EXTERNAL"
+        /** @description Id de la entidad a la que cuelga */
+        entityId?: string
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Historial de notificaciones */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["NotificationLogItemDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resendFailed_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResendFailedDto"]
+      }
+    }
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ResendFailedResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateSettings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateNotificationSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTypeSettingDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_templates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateTemplate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateBodyDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resetTemplate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_preview_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateBodyDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TemplatePreviewDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_test_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TestTemplateResultDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_myPreferences_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateMyPreferences_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMyPreferencesDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MyNotificationPreferencesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_whatsapp_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplateDto"][]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_updateWhatsapp_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        key: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateWhatsAppTemplateDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplateDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_devEvent_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DevEventDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RecordedEventDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_detail_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No existe, o es de otra inmobiliaria */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "NotificationsController_resend_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["NotificationLogItemDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description La notificación no está fallida (`NOTIFICATION_NOT_RESENDABLE`) */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "WebhooksController_resendEvent_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "DocumentsController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        kind?: components["schemas"]["DocumentKind"]
+        entityId?: string
+        status?: components["schemas"]["DocumentStatus"]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Documentos generados */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["GeneratedDocumentDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "DocumentsController_get_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        kind: components["schemas"]["DocumentKind"]
+        entityId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GeneratedDocumentDto"]
+        }
+      }
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GeneratedDocumentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "DocumentsController_regenerate_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        kind: components["schemas"]["DocumentKind"]
+        entityId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GeneratedDocumentDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_me_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalRenterMeDto"]
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_contract_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalRenterContractDto"]
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_account_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalRenterAccountDto"]
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_installments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Cuotas del inquilino */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InstallmentSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_installment_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Detalle de la cuota */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["InstallmentDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalRenterController_receipt_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con `json` devuelve `{ url }` en vez de redirigir (302): sirve para pedirlo con el token en el header y abrir la URL después */
+        format?: "json"
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description La URL del PDF (con ?format=json) */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["PortalPdfUrlDto"]
+          }
+        }
+      }
+      /** @description Redirige al PDF */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description No es un usuario inquilino */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_me_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalOwnerMeDto"]
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_properties_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalOwnerPropertyDto"][]
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_propertyInstallments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path: {
+        propertyId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Cuotas de la propiedad */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["InstallmentSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_account_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Mes del estado de cuenta; sin él, el mes en curso */
+        period?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PortalOwnerAccountDto"]
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_settlements_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        propertyId?: string
+        period?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Liquidaciones del propietario */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["SettlementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_settlement_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Detalle de la liquidación */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["SettlementDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_settlementPdf_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con `json` devuelve `{ url }` en vez de redirigir (302): sirve para pedirlo con el token en el header y abrir la URL después */
+        format?: "json"
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Redirige al PDF */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_acknowledge_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description La liquidación con `acknowledgedAt` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["SettlementDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_statements_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Resúmenes del propietario */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["OwnerStatementSummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_statement_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Detalle del resumen */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: components["schemas"]["OwnerStatementDetailDto"]
+          }
+        }
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PortalOwnerController_statementPdf_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con `json` devuelve `{ url }` en vez de redirigir (302): sirve para pedirlo con el token en el header y abrir la URL después */
+        format?: "json"
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Redirige al PDF */
+      302: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description No es un usuario propietario */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_list_api/v1": {
+    parameters: {
+      query?: {
+        entity?: string
+        entityId?: string
+        action?:
+          | "CREATE"
+          | "UPDATE"
+          | "DELETE"
+          | "RESTORE"
+          | "LOGIN"
+          | "LOGIN_FAILED"
+          | "LOGOUT"
+          | "NOTIFICATION_SENT"
+          | "JOB_RUN"
+          | "EXPORT"
+        userId?: string
+        actorKind?: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+        /** @description Desde el inicio de ese día (hora de Buenos Aires) */
+        from?: string
+        /** @description Hasta el fin de ese día (hora de Buenos Aires) */
+        to?: string
+        /** @description Texto a buscar en el detalle, la entidad, su id y el email */
+        search?: string
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Movimientos de la página */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["AuditEntryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_catalog_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AuditCatalogDto"]
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_export_api/v1": {
+    parameters: {
+      query: {
+        entity?: string
+        entityId?: string
+        action?:
+          | "CREATE"
+          | "UPDATE"
+          | "DELETE"
+          | "RESTORE"
+          | "LOGIN"
+          | "LOGIN_FAILED"
+          | "LOGOUT"
+          | "NOTIFICATION_SENT"
+          | "JOB_RUN"
+          | "EXPORT"
+        userId?: string
+        actorKind?: "USER" | "SYSTEM" | "PORTAL_OWNER" | "PORTAL_RENTER"
+        /** @description Desde el inicio de ese día (hora de Buenos Aires) */
+        from?: string
+        /** @description Hasta el fin de ese día (hora de Buenos Aires) */
+        to?: string
+        /** @description Texto a buscar en el detalle, la entidad, su id y el email */
+        search?: string
+        format: "xlsx" | "csv"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Archivo XLSX o CSV */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_history_api/v1": {
+    parameters: {
+      query?: {
+        limit?: number
+      }
+      header?: never
+      path: {
+        entity: string
+        entityId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AuditEntryDto"][]
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "AuditController_detail_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AuditEntryDetailDto"]
+        }
+      }
+      /** @description Sólo el admin */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_dashboard_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Default: el mes en curso */
+        period?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["DashboardReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_income_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Mes (AAAA-MM, desde su primer día) o día (AAAA-MM-DD). Default: 6 meses atrás. */
+        from?: string
+        /** @description Mes (AAAA-MM, hasta su último día) o día (AAAA-MM-DD). Default: el mes en curso. */
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IncomeReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["IncomeReportDto"]
+          "text/csv": components["schemas"]["IncomeReportDto"]
+          "application/pdf": components["schemas"]["IncomeReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_payments_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Mes (AAAA-MM, desde su primer día) o día (AAAA-MM-DD). Default: 6 meses atrás. */
+        from?: string
+        /** @description Mes (AAAA-MM, hasta su último día) o día (AAAA-MM-DD). Default: el mes en curso. */
+        to?: string
+        ownerId?: string
+        propertyId?: string
+        renterId?: string
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+          "text/csv": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+          "application/pdf": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PaymentReportRowDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_arrears_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Default: hoy */
+        asOf?: string
+        /** @description Sólo las cuotas con al menos esos días de atraso */
+        minDays?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ArrearsReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ArrearsReportDto"]
+          "text/csv": components["schemas"]["ArrearsReportDto"]
+          "application/pdf": components["schemas"]["ArrearsReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_properties_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        status?: "RENTED" | "AVAILABLE"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PropertiesReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["PropertiesReportDto"]
+          "text/csv": components["schemas"]["PropertiesReportDto"]
+          "application/pdf": components["schemas"]["PropertiesReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_expiring_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        /** @description Default: los días de aviso de la inmobiliaria */
+        withinDays?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ExpiringContractsReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ExpiringContractsReportDto"]
+          "text/csv": components["schemas"]["ExpiringContractsReportDto"]
+          "application/pdf": components["schemas"]["ExpiringContractsReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "ReportsController_services_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Con formato, la respuesta es el archivo (Content-Disposition) en vez de JSON. Sin paginar. */
+        format?: "xlsx" | "csv" | "pdf"
+        status?: "overdue" | "all"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Con `?format=`, el archivo (Content-Disposition) en vez de JSON */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServicesReportDto"]
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ServicesReportDto"]
+          "text/csv": components["schemas"]["ServicesReportDto"]
+          "application/pdf": components["schemas"]["ServicesReportDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_list_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ContractInventoriesDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_create_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateInventoryDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_compare_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contractId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryComparisonDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_get_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateInventoryDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_addPhotos_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        itemId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[]
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_deletePhoto_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        photoId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_confirm_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "InventoryController_correct_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CorrectInventoryDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["InventoryDetailDto"]
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Rol insuficiente */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_list_api/v1": {
+    parameters: {
+      query?: {
+        /** @description Número de página, empezando en 1 */
+        page?: number
+        /** @description Resultados por página (máximo 100) */
+        limit?: number
+        /** @description Ubicación (de `GET /filters`) */
+        locationId?: string
+        /** @description Tipo de propiedad (de `GET /filters`) */
+        propertyTypeId?: string
+        /** @description Precio desde, string */
+        priceFrom?: string
+        /** @description Precio hasta, string */
+        priceTo?: string
+        /** @description Moneda del rango; por defecto, la de la inmobiliaria */
+        currency?: "ARS" | "USD"
+        /** @description Venta (SALE) o alquiler (RENT) */
+        operation?: "SALE" | "RENT"
+        /** @description Dormitorios: este número o más */
+        bedrooms?: number
+        /** @description Baños: este número o más */
+        bathrooms?: number
+        /** @description Sólo estas propiedades (hasta 12, separadas por coma). Las no disponibles no vuelven. Lo usa el sitio web para las destacadas a mano. */
+        ids?: string[]
+        /** @description Orden: `recent` (más nuevas primero), `price_asc` (menor precio primero) o `price_desc` (mayor primero). Las que no tienen precio ("Consultar") van siempre al final. El orden por precio compara montos nominales: combinarlo con `currency` para no mezclar ARS y USD. */
+        sort?: "recent" | "price_asc" | "price_desc"
+      }
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Propiedades disponibles, más nuevas primero */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            /** @example true */
+            success?: boolean
+            message?: string | null
+            data?: {
+              data?: components["schemas"]["PublicPropertySummaryDto"][]
+              pagination?: components["schemas"]["PaginationMetaDto"]
+            }
+          }
+        }
+      }
+      /** @description La inmobiliaria no existe o está deshabilitada */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_findOne_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        slug: string
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicPropertyDetailDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_AVAILABLE: no existe o ya no está disponible */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_filters_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicFiltersDto"]
+        }
+      }
+      /** @description La inmobiliaria no existe o está deshabilitada */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicController_contact_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicContactDto"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicContactResultDto"]
+        }
+      }
+      /** @description La inmobiliaria no existe o está deshabilitada */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description PROPERTY_NOT_AVAILABLE: la propiedad ya no está disponible */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Demasiadas solicitudes */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_templates_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteTemplateInfoDto"][]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_settings_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_update_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSiteSettingsDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description SUBDOMAIN_TAKEN o DOMAIN_TAKEN */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description Errores por campo en `errors` */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_reset_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetSiteTemplateDto"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_publish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description El borrador está incompleto o inválido */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_unpublish_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_upload_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string
+        }
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteAssetDto"]
+        }
+      }
+      /** @description No es una imagen válida o pesa más de 5 MB */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_previewToken_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SitePreviewTokenDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_domain_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteDomainDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_verifyDomain_api/v1": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteSettingsDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description DOMAIN_TAKEN: otra inmobiliaria lo verificó primero */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+      /** @description DOMAIN_NOT_VERIFIED o NO_CUSTOM_DOMAIN */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "SiteController_subdomainAvailability_api/v1": {
+    parameters: {
+      query: {
+        value: unknown
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SubdomainAvailabilityDto"]
+        }
+      }
+      /** @description No es administrador */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicSiteController_byHost_api/v1": {
+    parameters: {
+      query: {
+        host: unknown
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SiteHostDto"]
+        }
+      }
+      /** @description SITE_NOT_FOUND */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ApiErrorDto"]
+        }
+      }
+    }
+  }
+  "PublicSiteController_site_api/v1": {
+    parameters: {
+      query?: {
+        preview?: unknown
+      }
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PublicSiteDto"]
+        }
+      }
+      /** @description SITE_NOT_FOUND: no existe, no está publicado o el token no corresponde */
+      404: {
         headers: {
           [name: string]: unknown
         }

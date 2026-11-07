@@ -10,7 +10,26 @@
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": [".next/**", "!.next/cache/**"],
       "cache": false,
-      "env": ["NEXT_PUBLIC_*", "PORTAL_TENANT_SLUG"]
+      "env": [
+        "NEXT_PUBLIC_*",
+        "PORTAL_TENANT_SLUG",
+        "API_URL",
+        "API_TIMEOUT_MS",
+        "SITES_PREVIEW_ANCESTORS",
+        "SITES_ALLOW_SLUG_PATH",
+        "SITES_TRUST_FORWARDED_HOST",
+        "SITES_IMAGE_SOURCES",
+        "SITES_REVALIDATE_SECRET",
+        "SITES_SERVER_SECRET",
+        "SITES_BASE_DOMAIN",
+        "SITES_PROTOCOL",
+        "SITES_CLIENT_IP_HEADER",
+        "SITES_TRUSTED_PROXY_HOPS",
+        "APP_ORIGINS",
+        "API_SERVER_SECRET",
+        "CLIENT_IP_HEADER",
+        "TRUSTED_PROXY_HOPS"
+      ]
     },
     "lint": {
       "dependsOn": ["transit"]
@@ -27,7 +46,9 @@
     },
     "test": {
       "dependsOn": ["transit"],
-      "outputs": []
+      "outputs": [],
+      "env": ["VITEST_MAX_WORKERS"],
+      "cache": false
     }
   },
   "globalEnv": ["NODE_ENV"]

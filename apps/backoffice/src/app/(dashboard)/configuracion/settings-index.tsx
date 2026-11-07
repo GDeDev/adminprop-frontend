@@ -1,7 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronRight, ListTree, SlidersHorizontal, Users } from "lucide-react"
+import {
+  ChevronRight,
+  Bell,
+  DatabaseZap,
+  Megaphone,
+  Building2,
+  History,
+  ListTree,
+  SlidersHorizontal,
+  Timer,
+  TrendingUp,
+  Users,
+} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { useSession } from "@adminprop/session/client"
@@ -20,7 +32,7 @@ function SettingsLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift items-center gap-4 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <Icon aria-hidden className="size-5 text-primary" />
       <div className="flex-1">
@@ -32,13 +44,13 @@ function SettingsLink({
   )
 }
 
-/** Secciones de configuración. Usuarios sólo la ven los administradores. */
+/** Secciones de configuración. Usuarios e Índices solo las ven los administradores. */
 export function SettingsIndex() {
   const { user } = useSession()
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">
+      <h1 className="font-display text-title-lg font-semibold md:text-display-md">
         Configuración
       </h1>
       <ul className="grid gap-3 sm:grid-cols-2">
@@ -51,24 +63,81 @@ export function SettingsIndex() {
           />
         </li>
         {user?.role === "ADMIN" && (
-          <li>
-            <SettingsLink
-              href="/configuracion/usuarios"
-              icon={Users}
-              title="Usuarios"
-              description="Administradores y empleados, roles y accesos."
-            />
-          </li>
+          <>
+            <li>
+              <SettingsLink
+                href="/configuracion/inmobiliaria"
+                icon={Building2}
+                title="Inmobiliaria"
+                description="Razón social, CUIT, datos bancarios, logo y color que salen en los PDF."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/parametros"
+                icon={SlidersHorizontal}
+                title="Parámetros de cobro"
+                description="Punitorio diario y días de gracia por defecto de la inmobiliaria."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/usuarios"
+                icon={Users}
+                title="Usuarios"
+                description="Administradores y empleados, roles y accesos."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/automatizaciones"
+                icon={Timer}
+                title="Automatizaciones"
+                description="Cuotas, aumentos, índices y avisos que corren solos; historial y ejecución manual."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/notificaciones"
+                icon={Bell}
+                title="Notificaciones"
+                description="Avisos por email y WhatsApp: eventos, plantillas, historial de envíos."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/canales"
+                icon={Megaphone}
+                title="Canales de publicación"
+                description="Conectá Mercado Libre para publicar propiedades y recibir consultas."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/auditoria"
+                icon={History}
+                title="Auditoría"
+                description="Quién hizo qué y cuándo: altas, cambios, ingresos y envíos."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/migracion"
+                icon={DatabaseZap}
+                title="Migración de datos"
+                description="Importá propietarios, inquilinos, propiedades y contratos desde Excel o Tokko."
+              />
+            </li>
+            <li>
+              <SettingsLink
+                href="/configuracion/indices"
+                icon={TrendingUp}
+                title="Índices"
+                description="Valores mensuales de ICL e IPC para los aumentos de alquiler."
+              />
+            </li>
+          </>
         )}
-        <li className="flex items-center gap-4 rounded-xl border border-dashed p-4 text-muted-foreground">
-          <SlidersHorizontal aria-hidden className="size-5" />
-          <div>
-            <p className="font-medium">Parámetros de la inmobiliaria</p>
-            <p className="text-sm">
-              Honorarios, punitorios y días de corte. Más adelante.
-            </p>
-          </div>
-        </li>
       </ul>
     </div>
   )

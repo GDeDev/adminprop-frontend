@@ -19,7 +19,13 @@ const inOneWeek = () => Math.floor(Date.now() / 1000) + 7 * 24 * 3600
 
 function request(
   path: string,
-  init: { method: string; body?: unknown; cookie?: string; origin?: string }
+  init: {
+    method: string
+    body?: unknown
+    cookie?: string
+    origin?: string
+    headers?: Record<string, string>
+  }
 ) {
   return new NextRequest(`${ORIGIN}${path}`, {
     method: init.method,
@@ -27,6 +33,7 @@ function request(
       origin: init.origin ?? ORIGIN,
       ...(init.cookie ? { cookie: init.cookie } : {}),
       "content-type": "application/json",
+      ...init.headers,
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   })
@@ -59,7 +66,8 @@ afterEach(() => {
 describe("POST /api/session (guardar la sesión del login)", () => {
   it("guarda el refresh token en una cookie httpOnly y la marca de la inmobiliaria", async () => {
     const refreshToken = fakeJwt(inOneWeek())
-    fetchMock.mockResolvedValue(
+    fetchMock.mockResolvedValueOnce(apiResponds(200, { id: "u1" }))
+    fetchMock.mockResolvedValueOnce(
       apiResponds(200, {
         id: "t1",
         name: "Inmobiliaria Demo",
@@ -88,10 +96,52 @@ describe("POST /api/session (guardar la sesión del login)", () => {
       primaryColor: "#1f4e79",
     })
     // La marca se pide con el access token recién emitido.
-    const [url, init] = fetchMock.mock.calls[0]!
+    const [url, init] = fetchMock.mock.calls[1]!
     expect(url).toBe(`${API}/tenants/current`)
     expect((init?.headers as Record<string, string>).Authorization).toBe(
       "Bearer access"
+    )
+  })
+
+  it("no escribe cookies si la API no reconoce el access token", async () => {
+    fetchMock.mockResolvedValue(apiResponds(401, null))
+    const response = await routes.start(
+      request("/api/session", {
+        method: "POST",
+        body: { accessToken: "inventado", refreshToken: fakeJwt(inOneWeek()) },
+      })
+    )
+
+    expect(response.status).toBe(401)
+    expect(response.cookies.get("bo_rt")).toBeUndefined()
+    expect(response.cookies.get("bo_brand")).toBeUndefined()
+  })
+
+  it("si la API no responde, no guarda la sesión (503)", async () => {
+    fetchMock.mockRejectedValue(new Error("down"))
+    const response = await routes.start(
+      request("/api/session", {
+        method: "POST",
+        body: { accessToken: "a", refreshToken: fakeJwt(inOneWeek()) },
+      })
+    )
+
+    expect(response.status).toBe(503)
+    expect(response.cookies.get("bo_rt")).toBeUndefined()
+  })
+
+  it("la cookie no dura más de 30 días aunque el exp sea lejano", async () => {
+    fetchMock.mockImplementation(async () => apiResponds(200, {}))
+    const farFuture = Math.floor(Date.now() / 1000) + 365 * 24 * 3600
+    const response = await routes.start(
+      request("/api/session", {
+        method: "POST",
+        body: { accessToken: "a", refreshToken: fakeJwt(farFuture) },
+      })
+    )
+
+    expect(response.cookies.get("bo_rt")?.maxAge).toBeLessThanOrEqual(
+      30 * 24 * 3600
     )
   })
 
@@ -106,6 +156,71 @@ describe("POST /api/session (guardar la sesión del login)", () => {
 
     expect(response.status).toBe(403)
     expect(response.cookies.get("bo_rt")).toBeUndefined()
+  })
+
+  describe("detrás de un proxy reverso", () => {
+    const body = { accessToken: "a", refreshToken: "r" }
+    const PUBLIC = "https://app.ejemplo.com"
+
+    it("acepta el origen público que declara el proxy (X-Forwarded-*)", async () => {
+      fetchMock.mockImplementation(async () => apiResponds(200, {}))
+      const response = await routes.start(
+        request("/api/session", {
+          method: "POST",
+          origin: PUBLIC,
+          headers: {
+            "x-forwarded-host": "app.ejemplo.com",
+            "x-forwarded-proto": "https",
+          },
+          body,
+        })
+      )
+      expect(response.status).toBe(200)
+    })
+
+    it("sigue rechazando un Origin ajeno aunque haya X-Forwarded-*", async () => {
+      const response = await routes.start(
+        request("/api/session", {
+          method: "POST",
+          origin: "https://evil.example",
+          headers: {
+            "x-forwarded-host": "app.ejemplo.com",
+            "x-forwarded-proto": "https",
+          },
+          body,
+        })
+      )
+      expect(response.status).toBe(403)
+    })
+
+    it("acepta los orígenes configurados y descarta valores inválidos", async () => {
+      fetchMock.mockImplementation(async () => apiResponds(200, {}))
+      const configured = createSessionRoutes({
+        cookiePrefix: "bo",
+        apiUrl: API,
+        allowedOrigins: [PUBLIC, "no-es-una-url", "javascript:alert(1)"],
+      })
+      const ok = await configured.start(
+        request("/api/session", { method: "POST", origin: PUBLIC, body })
+      )
+      expect(ok.status).toBe(200)
+
+      const other = await configured.start(
+        request("/api/session", {
+          method: "POST",
+          origin: "https://evil.example",
+          body,
+        })
+      )
+      expect(other.status).toBe(403)
+    })
+
+    it("sin Origin (o con Origin null) se rechaza", async () => {
+      const response = await routes.start(
+        request("/api/session", { method: "POST", origin: "null", body })
+      )
+      expect(response.status).toBe(403)
+    })
   })
 
   it("rechaza un cuerpo sin tokens", async () => {
@@ -145,6 +260,75 @@ describe("POST /api/session/refresh", () => {
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toBe(`${API}/auth/refresh`)
     expect(JSON.parse(init?.body as string)).toEqual({ refreshToken: "viejo" })
+  })
+
+  it("la cookie rotada tampoco dura más de 30 días aunque el exp sea lejano", async () => {
+    const farFuture = Math.floor(Date.now() / 1000) + 365 * 24 * 3600
+    fetchMock.mockResolvedValue(
+      apiResponds(200, {
+        accessToken: "a",
+        refreshToken: fakeJwt(farFuture),
+        tokenType: "Bearer",
+        expiresIn: 900,
+      })
+    )
+    const response = await routes.refresh(
+      request("/api/session/refresh", {
+        method: "POST",
+        cookie: "bo_rt=viejo; bo_brand=marca",
+      })
+    )
+    expect(response.cookies.get("bo_rt")?.maxAge).toBe(30 * 24 * 3600)
+    expect(response.cookies.get("bo_brand")?.maxAge).toBe(30 * 24 * 3600)
+  })
+
+  it("pasa la IP del usuario en X-Client-IP con el secreto de servidor", async () => {
+    const withSecret = createSessionRoutes({
+      cookiePrefix: "bo",
+      apiUrl: API,
+      serverSecret: "s3cret",
+    })
+    fetchMock.mockResolvedValue(
+      apiResponds(200, {
+        accessToken: "a",
+        refreshToken: fakeJwt(inOneWeek()),
+        tokenType: "Bearer",
+        expiresIn: 900,
+      })
+    )
+    await withSecret.refresh(
+      request("/api/session/refresh", {
+        method: "POST",
+        cookie: "bo_rt=viejo",
+        headers: { "x-forwarded-for": "6.6.6.6, 203.0.113.9" },
+      })
+    )
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers
+    expect(headers).toMatchObject({
+      "X-Client-IP": "203.0.113.9",
+      "X-Sites-Secret": "s3cret",
+    })
+  })
+
+  it("sin secreto de servidor no manda la IP (la API no la creería)", async () => {
+    fetchMock.mockResolvedValue(
+      apiResponds(200, {
+        accessToken: "a",
+        refreshToken: fakeJwt(inOneWeek()),
+        tokenType: "Bearer",
+        expiresIn: 900,
+      })
+    )
+    await routes.refresh(
+      request("/api/session/refresh", {
+        method: "POST",
+        cookie: "bo_rt=viejo",
+        headers: { "x-forwarded-for": "203.0.113.9" },
+      })
+    )
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers
+    expect(headers).not.toHaveProperty("X-Client-IP")
+    expect(headers).not.toHaveProperty("X-Sites-Secret")
   })
 
   it("sin cookie responde 401 sin llamar a la API", async () => {

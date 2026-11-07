@@ -22,6 +22,7 @@ import { apiClient } from "./api-client"
 export interface PropertyFilters {
   status?: PropertyStatus
   propertyTypeId?: string
+  ownerId?: string
   search?: string
 }
 
@@ -32,9 +33,13 @@ const propertiesKey = ["properties"] as const
  * Listado con scroll infinito (spec 5.1: "mobile-first → infinite scroll").
  * Cada página son 20; la siguiente se pide al llegar al final.
  */
-export function useInfiniteProperties(filters: PropertyFilters) {
+export function useInfiniteProperties(
+  filters: PropertyFilters,
+  { enabled = true }: { enabled?: boolean } = {}
+) {
   return useInfiniteQuery({
     queryKey: [...propertiesKey, "list", filters],
+    enabled,
     queryFn: async ({ pageParam }) => {
       const { data } = await apiClient.get<
         ApiSuccess<Paginated<PropertySummary>>
@@ -44,6 +49,7 @@ export function useInfiniteProperties(filters: PropertyFilters) {
           limit: PAGE_SIZE,
           status: filters.status,
           propertyTypeId: filters.propertyTypeId,
+          ownerId: filters.ownerId,
           search: filters.search || undefined,
         },
       })
@@ -55,9 +61,10 @@ export function useInfiniteProperties(filters: PropertyFilters) {
   })
 }
 
-export function useProperty(id: string) {
+export function useProperty(id: string, enabled = true) {
   return useQuery({
     queryKey: [...propertiesKey, "detail", id],
+    enabled: enabled && id !== "",
     queryFn: async () => {
       const { data } = await apiClient.get<ApiSuccess<PropertyDetail>>(
         `/properties/${id}`

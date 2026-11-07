@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
@@ -78,19 +79,95 @@ const fieldVariants = cva(
   }
 )
 
+type FieldContextValue = {
+  /** Ids de los `FieldDescription` / `FieldError` que hoy se están mostrando. */
+  descriptionIds: string[]
+  errorIds: string[]
+  /** El Field está marcado `data-invalid` o muestra un `FieldError`. */
+  invalid: boolean
+  register: (kind: "description" | "error", id: string) => () => void
+}
+
+const FieldContext = React.createContext<FieldContextValue | null>(null)
+
+/**
+ * Vincula los controles con su descripción y su error: `FieldDescription` y
+ * `FieldError` se registran en el `Field` más cercano con un id propio, y
+ * `Input`, `Textarea` y `SelectTrigger` (o cualquier control propio) toman de
+ * acá `aria-describedby` y `aria-invalid`. Lo explícito gana: un
+ * `aria-invalid` pasado a mano no se pisa y un `aria-describedby` pasado a
+ * mano se conserva y se le suman los ids del Field.
+ */
+function useFieldControlProps<
+  T extends { "aria-describedby"?: string; "aria-invalid"?: unknown },
+>(props: T): T {
+  const ctx = React.useContext(FieldContext)
+  if (!ctx) return props
+  const describedBy =
+    [props["aria-describedby"], ...ctx.descriptionIds, ...ctx.errorIds]
+      .filter(Boolean)
+      .join(" ") || undefined
+  return {
+    ...props,
+    "aria-describedby": describedBy,
+    "aria-invalid":
+      props["aria-invalid"] !== undefined
+        ? props["aria-invalid"]
+        : ctx.invalid
+          ? true
+          : undefined,
+  }
+}
+
 function Field({
   className,
   orientation = "vertical",
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
+  const [ids, setIds] = React.useState<{
+    description: string[]
+    error: string[]
+  }>({ description: [], error: [] })
+
+  const register = React.useCallback(
+    (kind: "description" | "error", id: string) => {
+      setIds((prev) => ({ ...prev, [kind]: [...prev[kind], id] }))
+      return () =>
+        setIds((prev) => ({
+          ...prev,
+          [kind]: prev[kind].filter((value) => value !== id),
+        }))
+    },
+    []
+  )
+
+  const dataInvalid = props["data-invalid" as keyof typeof props] as unknown
+  const invalid =
+    (dataInvalid !== undefined &&
+      dataInvalid !== false &&
+      String(dataInvalid) !== "false") ||
+    ids.error.length > 0
+
+  const value = React.useMemo<FieldContextValue>(
+    () => ({
+      descriptionIds: ids.description,
+      errorIds: ids.error,
+      invalid,
+      register,
+    }),
+    [ids, invalid, register]
+  )
+
   return (
-    <div
-      role="group"
-      data-slot="field"
-      data-orientation={orientation}
-      className={cn(fieldVariants({ orientation }), className)}
-      {...props}
-    />
+    <FieldContext.Provider value={value}>
+      <div
+        role="group"
+        data-slot="field"
+        data-orientation={orientation}
+        className={cn(fieldVariants({ orientation }), className)}
+        {...props}
+      />
+    </FieldContext.Provider>
   )
 }
 
@@ -138,9 +215,19 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
+function FieldDescription({
+  className,
+  id: idProp,
+  ...props
+}: React.ComponentProps<"p">) {
+  const generatedId = React.useId()
+  const id = idProp ?? generatedId
+  const register = React.useContext(FieldContext)?.register
+  React.useEffect(() => register?.("description", id), [register, id])
+
   return (
     <p
+      id={id}
       data-slot="field-description"
       className={cn(
         "text-sm leading-normal font-normal text-muted-foreground group-has-[[data-orientation=horizontal]]/field:text-balance",
@@ -187,6 +274,7 @@ function FieldError({
   className,
   children,
   errors,
+  id: idProp,
   ...props
 }: React.ComponentProps<"div"> & {
   errors?: Array<{ message?: string } | undefined>
@@ -218,12 +306,22 @@ function FieldError({
     )
   }, [children, errors])
 
+  const generatedId = React.useId()
+  const id = idProp ?? generatedId
+  const register = React.useContext(FieldContext)?.register
+  const hasContent = Boolean(content)
+  React.useEffect(
+    () => (hasContent ? register?.("error", id) : undefined),
+    [register, id, hasContent]
+  )
+
   if (!content) {
     return null
   }
 
   return (
     <div
+      id={id}
       role="alert"
       data-slot="field-error"
       className={cn("text-sm font-normal text-destructive", className)}
@@ -235,6 +333,7 @@ function FieldError({
 }
 
 export {
+  useFieldControlProps,
   Field,
   FieldLabel,
   FieldDescription,

@@ -9,6 +9,7 @@ import type { GuarantorSummary } from "@adminprop/shared-types"
 import { Badge } from "@adminprop/ui/components/badge"
 import { Button } from "@adminprop/ui/components/button"
 import { EmptyState } from "@adminprop/ui/components/empty-state"
+import { ErrorState } from "@adminprop/ui/components/error-state"
 import { Input } from "@adminprop/ui/components/input"
 import { PageSkeleton } from "@adminprop/ui/components/page-skeleton"
 import {
@@ -49,7 +50,7 @@ export function GuarantorList() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-title-lg font-semibold md:text-display-md">
             Garantes
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -80,15 +81,13 @@ export function GuarantorList() {
       {query.isPending ? (
         <PageSkeleton cards={3} />
       ) : query.isError ? (
-        <EmptyState
+        <ErrorState
           title="No se pudieron cargar los garantes"
           description={apiErrorMessage(
             query.error,
             "Probá de nuevo en un rato."
           )}
-          action={
-            <Button onClick={() => void query.refetch()}>Reintentar</Button>
-          }
+          onRetry={() => void query.refetch()}
         />
       ) : guarantors.length === 0 ? (
         <EmptyState
@@ -109,7 +108,7 @@ export function GuarantorList() {
         />
       ) : (
         <>
-          <ul className="flex flex-col gap-3 md:hidden">
+          <ul className="flex flex-col gap-3 lg:hidden">
             {guarantors.map((guarantor) => (
               <li key={guarantor.id}>
                 <GuarantorCard guarantor={guarantor} />
@@ -138,7 +137,7 @@ export function GuarantorList() {
                         {guarantor.fullName}
                       </Link>
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="num">
                       {formatNationalId(guarantor.nationalId)}
                     </TableCell>
                     <TableCell>
@@ -184,7 +183,7 @@ function GuarantorCard({ guarantor }: { guarantor: GuarantorSummary }) {
   return (
     <Link
       href={`/garantes/${guarantor.id}`}
-      className="flex flex-col gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex lift flex-col gap-1 rounded-xl border bg-card p-4 shadow-raised focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-medium">{guarantor.fullName}</p>
@@ -192,7 +191,7 @@ function GuarantorCard({ guarantor }: { guarantor: GuarantorSummary }) {
           {GUARANTEE_TYPE_LABELS[guarantor.guaranteeType]}
         </Badge>
       </div>
-      <p className="text-sm text-muted-foreground tabular-nums">
+      <p className="num text-sm text-muted-foreground">
         {formatNationalId(guarantor.nationalId)}
         {guarantor.phone && ` · ${guarantor.phone}`}
       </p>
